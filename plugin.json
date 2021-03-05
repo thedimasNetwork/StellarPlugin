@@ -1,0 +1,7 @@
+{
+  "name": "thedimasMindustryPlugin",
+  "author": "thedimas",
+  "main": "main.ThedimasPlugin",
+  "description": "Plugin for thedimas' servers.",
+  "version": 0.1
+}
