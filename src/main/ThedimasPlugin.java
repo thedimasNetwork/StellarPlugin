@@ -73,6 +73,9 @@ public class ThedimasPlugin extends Plugin{
                 player.sendMessage(rules_en);
             } 
         });
+        handler.<Player>register("hub", "Connect to HUB.", (args, player) -> {
+            Call.connect(player.con, "95.217.226.152", 26160);
+        });
         handler.<Player>register("mods", "Get list of mods.", (args, player) -> {
             if(player.locale.startsWith("ru") || player.locale.startsWith("uk")) {
                 player.sendMessage(mods_ru);
