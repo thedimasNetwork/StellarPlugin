@@ -57,7 +57,7 @@ public class ThedimasPlugin extends Plugin{
             Log.info(event.player.name + " has joined the server");
             Log.info("\tLocale: " + event.player.locale);
             Log.info("\tIP: " + event.player.con.address);
-            if(player.locale.startsWith("ru") || player.locale.startsWith("uk")) {
+            if(event.player.locale.startsWith("ru") || event.player.locale.startsWith("uk")) {
                 Call.infoMessage(event.player.con, welcome_ru);
             } else {
                 Call.infoMessage(event.player.con, welcome_en);
