@@ -6,6 +6,8 @@ import mindustry.game.*;
 import mindustry.mod.*;
 import arc.util.*;
 
+import static mindustry.Vars.netServer;
+
 public class ThedimasPlugin extends Plugin{
     String rules_ru = new String("1. Не спамить/флудить в чат\n"
                             + "2. Не оскорблять других участников сервера\n"
@@ -16,7 +18,7 @@ public class ThedimasPlugin extends Plugin{
                                  + "Добро пожаловать на сеть серверов от thedimas!\n"
                                  + "Вот правила:\n"
                                  + "[accent]" + rules_ru + "[white]\n"
-                                 + "\nЕсли ты их забыл, то можешь ввести комманду [accent]/rules\n"
+                                 + "\nЕсли ты их забыл, то можешь ввести комманду [accent]/rules[]\n"
                                  + "Подробные правла ты можешь на нашем Discord сервере");
 
     String rules_en = new String("1. Don't spam/flood in the chat\n"
@@ -40,29 +42,40 @@ public class ThedimasPlugin extends Plugin{
             Log.info("\tLocale: " + event.player.locale);
             Log.info("\tIP: " + event.player.con.address);
             Call.sendMessage("[lime]+ [accent]" + event.player.name + "[lime] присоединился");
-            if(event.player.locale.startsWith("ru") || event.player.locale.startsWith("uk")) {
+            if (event.player.locale.startsWith("ru") || event.player.locale.startsWith("uk")) {
                 Call.infoMessage(event.player.con, welcome_ru);
             } else {
                 Call.infoMessage(event.player.con, welcome_en);
             }
+            netServer.admins.addChatFilter((player, text) -> null);
         });
         Events.on(EventType.PlayerLeave.class, event -> { // called when player leave
             Call.sendMessage("[scarlet]- [accent]" + event.player.name + "[scarlet] вышел");
             Log.info(event.player.name + " has disconnected from the server");
 
         });
+        Events.on(EventType.PlayerChatEvent.class, event -> {
+            if (event.player.admin()) {
+                Call.sendMessage("<\uE82C> " + event.player.name + "[white]: " + event.message);
+            } else {
+                Call.sendMessage("<\uE872> " + event.player.name + "[white]: " + event.message);
+            }
+        });
     }
     @Override
     public void registerClientCommands(CommandHandler handler) {
-        handler.<Player>register("rules", "Get list of rules.", (args, player) -> {
+        handler.<Player>register("rules", "Посмотреть список правил.", (args, player) -> {
             if(player.locale.startsWith("ru") || player.locale.startsWith("uk")) {
                 player.sendMessage(rules_ru);
             } else {
                 player.sendMessage(rules_en);
             } 
         });
-        handler.<Player>register("hub", "Connect to HUB.", (args, player) -> {
+        handler.<Player>register("hub", "Подключиться к Хабу.", (args, player) -> {
             Call.connect(player.con, "95.217.226.152", 26160);
+        });
+        handler.<Player>register("discord", "Получить ссылку на Discord cервер.", (args, player) -> {
+            player.sendMessage("https://discord.gg/RkbFYXFU9E");
         });
     }
 }
