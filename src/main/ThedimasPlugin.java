@@ -10,7 +10,7 @@ import static mindustry.Vars.netServer;
 
 public class ThedimasPlugin extends Plugin {
 
-    final String RULES_UK = new String("1. Не спамити/флуди в чат\n"
+    final String RULES_UK = new String("1. Не спамити/флудити в чат\n"
             + "2. Не ображати інших учасників сервера\n"
             + "3. Не бути гріфером\n"
             + "[scarlet]4. Не будувати NSFW (18+) схеми[]\n");
