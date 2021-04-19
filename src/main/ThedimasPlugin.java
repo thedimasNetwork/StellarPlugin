@@ -81,9 +81,9 @@ public class ThedimasPlugin extends Plugin {
     @Override
     public void registerClientCommands(CommandHandler handler) {
         handler.<Player>register("rules", "Посмотреть список правил.", (args, player) -> {
-            if (event.player.locale.startsWith("uk")) {
+            if (player.locale.startsWith("uk")) {
                 player.sendMessage(RULES_UK);
-            } else if (event.player.locale.startsWith("ru")) {
+            } else if (player.locale.startsWith("ru")) {
                 player.sendMessage(RULES_RU);
             } else {
                 player.sendMessage(RULES_EN);
