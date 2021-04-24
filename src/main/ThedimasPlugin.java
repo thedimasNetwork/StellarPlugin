@@ -97,6 +97,9 @@ public class ThedimasPlugin extends Plugin {
 
         });
         Events.on(EventType.PlayerChatEvent.class, event -> {
+            Log.info("%0: %1 | %2".replace("%0", event.player.name)
+                    .replace("%1", event.message)
+                    .replace("%2", event.player.locale));
             String prefix = event.player.admin() ? "\uE82C" : "\uE872";
             Groups.player.each(player -> {
                 String translated;
