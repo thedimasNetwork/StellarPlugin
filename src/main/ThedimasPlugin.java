@@ -6,9 +6,16 @@ import mindustry.game.*;
 import mindustry.mod.*;
 import arc.util.*;
 
+import java.io.*;
+import java.net.*;
+import org.json.*;
+
+
 import static mindustry.Vars.netServer;
+import static mindustry.Vars.player;
 
 public class ThedimasPlugin extends Plugin {
+    private final String FORMAT = "<%0> %1[white]: %2";
 
     final String RULES_UK = new String("1. Не спамити/флудити в чат\n"
             + "2. Не ображати інших учасників сервера\n"
@@ -17,7 +24,7 @@ public class ThedimasPlugin extends Plugin {
 
     final String WELCOME_UK = new String("[white]Привіт, подорожній!\n"
             + "Ласкаво просимо на мережу серверів від thedimas!\n"
-            + "Jсь правила:\n"
+            + "Ось правила:\n"
             + "[accent]" + RULES_UK + "[white]\n"
             + "\nЯкщо ти їх забув, то можеш ввести комманду [accent]/rules[]\n"
             + "Докладні правила ти можеш знайти на нашому Discord сервері");
@@ -46,6 +53,26 @@ public class ThedimasPlugin extends Plugin {
             + "\nIf you forgot them, you can type [accent]/rules[] command\n"
             + "Detailed rules you can get in our Discord server");
 
+    private static String translate(String text, String langTo, String langFrom) throws IOException {
+        String urlStr = "https://clients5.google.com/translate_a/t?client=dict-chrome-ex&dt=t&ie=UTF-8&oe=UTF-8" +
+                "&q=" + URLEncoder.encode(text, "UTF-8") +
+                "&tl=" + langTo +
+                "&sl=" + langFrom; // use "&sl=auto" for automatic translations
+        URL url = new URL(urlStr);
+        StringBuilder response = new StringBuilder();
+        HttpURLConnection con = (HttpURLConnection) url.openConnection();
+        con.setRequestProperty("User-Agent", "Mozilla/5.0");
+        BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream(),  "UTF-8"));
+        String inputLine;
+        while ((inputLine = in.readLine()) != null) {
+            response.append(inputLine);
+        }
+        in.close();
+        JSONObject json = new JSONObject(response.toString());
+        JSONArray sentences = json.getJSONArray("sentences");
+        JSONObject transl = sentences.getJSONObject(0);
+        return transl.getString("trans");
+    }
     //called when game initializes
     @Override
     public void init() {
@@ -70,11 +97,20 @@ public class ThedimasPlugin extends Plugin {
 
         });
         Events.on(EventType.PlayerChatEvent.class, event -> {
-            if (event.player.admin()) {
-                Call.sendMessage("<\uE82C> " + event.player.name + "[white]: " + event.message);
-            } else {
-                Call.sendMessage("<\uE872> " + event.player.name + "[white]: " + event.message);
-            }
+            String prefix = event.player.admin() ? "\uE82C" : "\uE872";
+            Groups.player.each(player -> {
+                String translated;
+                try {
+                    translated = translate(event.message, player.locale, "auto");
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    translated = event.message;
+                }
+                String msg = FORMAT.replace("%0", prefix)
+                                   .replace("%1", event.player.name)
+                                   .replace("%2", translated);
+                player.sendMessage(msg);
+            });
         });
     }
 
