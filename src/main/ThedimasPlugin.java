@@ -8,8 +8,9 @@ import arc.util.*;
 
 import java.io.*;
 import java.net.*;
-import org.json.*;
+import java.nio.charset.StandardCharsets;
 
+import org.json.*;
 
 import static mindustry.Vars.netServer;
 import static mindustry.Vars.player;
@@ -53,26 +54,6 @@ public class ThedimasPlugin extends Plugin {
             + "\nIf you forgot them, you can type [accent]/rules[] command\n"
             + "Detailed rules you can get in our Discord server");
 
-    private static String translate(String text, String langTo, String langFrom) throws IOException {
-        String urlStr = "https://clients5.google.com/translate_a/t?client=dict-chrome-ex&dt=t&ie=UTF-8&oe=UTF-8" +
-                "&q=" + URLEncoder.encode(text, "UTF-8") +
-                "&tl=" + langTo +
-                "&sl=" + langFrom; // use "&sl=auto" for automatic translations
-        URL url = new URL(urlStr);
-        StringBuilder response = new StringBuilder();
-        HttpURLConnection con = (HttpURLConnection) url.openConnection();
-        con.setRequestProperty("User-Agent", "Mozilla/5.0");
-        BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream(),  "UTF-8"));
-        String inputLine;
-        while ((inputLine = in.readLine()) != null) {
-            response.append(inputLine);
-        }
-        in.close();
-        JSONObject json = new JSONObject(response.toString());
-        JSONArray sentences = json.getJSONArray("sentences");
-        JSONObject transl = sentences.getJSONObject(0);
-        return transl.getString("trans");
-    }
     //called when game initializes
     @Override
     public void init() {
@@ -102,17 +83,17 @@ public class ThedimasPlugin extends Plugin {
                     .replace("%2", event.player.locale));
             String prefix = event.player.admin() ? "\uE82C" : "\uE872";
             Groups.player.each(player -> {
-                String translated;
+                String translated = event.message;
                 try {
                     translated = translate(event.message, player.locale, "auto");
                 } catch (IOException e) {
-                    e.printStackTrace();
-                    translated = event.message;
+                    Log.info(e.getMessage());
+                } finally {
+                    String msg = FORMAT.replace("%0", prefix)
+                            .replace("%1", event.player.name)
+                            .replace("%2", translated);
+                    player.sendMessage(msg);
                 }
-                String msg = FORMAT.replace("%0", prefix)
-                                   .replace("%1", event.player.name)
-                                   .replace("%2", translated);
-                player.sendMessage(msg);
             });
         });
     }
@@ -134,5 +115,26 @@ public class ThedimasPlugin extends Plugin {
         handler.<Player>register("discord", "Получить ссылку на Discord cервер.", (args, player) -> {
             player.sendMessage("https://discord.gg/RkbFYXFU9E");
         });
+    }
+
+    private static String translate(String text, String langTo, String langFrom) throws IOException {
+        String urlStr = "https://clients5.google.com/translate_a/t?client=dict-chrome-ex&dt=t&ie=UTF-8&oe=UTF-8" +
+                "&q=" + URLEncoder.encode(text, StandardCharsets.UTF_8) +
+                "&tl=" + langTo +
+                "&sl=" + langFrom; // use "&sl=auto" for automatic translations
+        URL url = new URL(urlStr);
+        StringBuilder response = new StringBuilder();
+        HttpURLConnection con = (HttpURLConnection) url.openConnection();
+        con.setRequestProperty("User-Agent", "Mozilla/5.0");
+        BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream(), StandardCharsets.UTF_8));
+        String inputLine;
+        while ((inputLine = in.readLine()) != null) {
+            response.append(inputLine);
+        }
+        in.close();
+        JSONObject json = new JSONObject(response.toString());
+        JSONArray sentences = json.getJSONArray("sentences");
+        JSONObject transl = sentences.getJSONObject(0);
+        return transl.getString("trans");
     }
 }
