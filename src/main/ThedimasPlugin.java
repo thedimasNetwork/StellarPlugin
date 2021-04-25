@@ -6,11 +6,7 @@ import mindustry.game.*;
 import mindustry.mod.*;
 import arc.util.*;
 
-import org.json.*;
-
 import java.io.*;
-import java.net.*;
-import java.nio.charset.StandardCharsets;
 
 import static mindustry.Vars.netServer;
 import static mindustry.Vars.player;
@@ -38,7 +34,6 @@ public class ThedimasPlugin extends Plugin {
         Events.on(EventType.PlayerLeave.class, event -> { // called when player leave
             Call.sendMessage("[scarlet]- [accent]" + event.player.name + "[scarlet] вышел");
             Log.info(event.player.name + " has disconnected from the server");
-
         });
         Events.on(EventType.PlayerChatEvent.class, event -> {
             Log.info("%0: %1 | %2".replace("%0", event.player.name)
@@ -48,7 +43,7 @@ public class ThedimasPlugin extends Plugin {
             Groups.player.each(player -> {
                 String translated = event.message;
                 try {
-                    translated = translate(event.message, player.locale, "auto");
+                    translated = Translator.translate(event.message, player.locale, "auto");
                 } catch (IOException e) {
                     Log.info(e.getMessage());
                 } finally {
@@ -83,7 +78,7 @@ public class ThedimasPlugin extends Plugin {
             //find player by name
             Player other = Groups.player.find(p -> p.name.equalsIgnoreCase(args[0]));
             //give error message with scarlet-colored text if player isn't found
-            if(other == null){
+            if (other == null) {
                 player.sendMessage("[scarlet]No player by that name found!");
                 return;
             }
@@ -96,26 +91,5 @@ public class ThedimasPlugin extends Plugin {
                 other.sendMessage("[lightgray](whisper) " + player.name + ":[] " + args[1]);
             }
         });
-    }
-
-    private static String translate(String text, String langTo, String langFrom) throws IOException {
-        String urlStr = "https://clients5.google.com/translate_a/t?client=dict-chrome-ex&dt=t&ie=UTF-8&oe=UTF-8" +
-                "&q=" + URLEncoder.encode(text, StandardCharsets.UTF_8) +
-                "&tl=" + langTo +
-                "&sl=" + langFrom; // use "&sl=auto" for automatic translations
-        URL url = new URL(urlStr);
-        StringBuilder response = new StringBuilder();
-        HttpURLConnection con = (HttpURLConnection) url.openConnection();
-        con.setRequestProperty("User-Agent", "Mozilla/5.0");
-        BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream(), StandardCharsets.UTF_8));
-        String inputLine;
-        while ((inputLine = in.readLine()) != null) {
-            response.append(inputLine);
-        }
-        in.close();
-        JSONObject json = new JSONObject(response.toString());
-        JSONArray sentences = json.getJSONArray("sentences");
-        JSONObject transl = sentences.getJSONObject(0);
-        return transl.getString("trans");
     }
 }
