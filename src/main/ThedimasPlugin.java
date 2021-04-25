@@ -6,53 +6,16 @@ import mindustry.game.*;
 import mindustry.mod.*;
 import arc.util.*;
 
+import org.json.*;
+
 import java.io.*;
 import java.net.*;
 import java.nio.charset.StandardCharsets;
-
-import org.json.*;
 
 import static mindustry.Vars.netServer;
 import static mindustry.Vars.player;
 
 public class ThedimasPlugin extends Plugin {
-    private final String FORMAT = "<%0> %1[white]: %2";
-
-    final String RULES_UK = new String("1. Не спамити/флудити в чат\n"
-            + "2. Не ображати інших учасників сервера\n"
-            + "3. Не бути гріфером\n"
-            + "[scarlet]4. Не будувати NSFW (18+) схеми[]\n");
-
-    final String WELCOME_UK = new String("[white]Привіт, подорожній!\n"
-            + "Ласкаво просимо на мережу серверів від thedimas!\n"
-            + "Ось правила:\n"
-            + "[accent]" + RULES_UK + "[white]\n"
-            + "\nЯкщо ти їх забув, то можеш ввести комманду [accent]/rules[]\n"
-            + "Докладні правила ти можеш знайти на нашому Discord сервері");
-
-    final String RULES_RU = new String("1. Не спамить/флудить в чат\n"
-            + "2. Не оскорблять других участников сервера\n"
-            + "3. Не быть грифером\n"
-            + "[scarlet]4. Не строить NSFW (18+) схемы[]\n");
-
-    final String WELCOME_RU = new String("[white]Привет, путник!\n"
-            + "Добро пожаловать на сеть серверов от thedimas!\n"
-            + "Вот правила:\n"
-            + "[accent]" + RULES_RU + "[white]\n"
-            + "\nЕсли ты их забыл, то можешь ввести комманду [accent]/rules[]\n"
-            + "Подробные правила ты можешь найти на нашем Discord сервере");
-
-    final String RULES_EN = new String("1. Don't spam/flood in the chat\n"
-            + "2. Don't insult another players\n"
-            + "3. Don't grief\n"
-            + "[scarlet]4. Don't build NSFW (18+) schemes[]\n");
-
-    final String WELCOME_EN = new String("[white]Hi, traveller!\n"
-            + "Welcome to thedimas' servers!\n"
-            + "Here are the rules:\n"
-            + "[accent]" + RULES_EN + "[]\n"
-            + "\nIf you forgot them, you can type [accent]/rules[] command\n"
-            + "Detailed rules you can get in our Discord server");
 
     //called when game initializes
     @Override
@@ -64,11 +27,11 @@ public class ThedimasPlugin extends Plugin {
             Log.info("\tIP: " + event.player.con.address);
             Call.sendMessage("[lime]+ [accent]" + event.player.name + "[lime] присоединился");
             if (event.player.locale.startsWith("uk")) {
-                Call.infoMessage(event.player.con, WELCOME_UK);
+                Call.infoMessage(event.player.con, Const.WELCOME_UK);
             } else if (event.player.locale.startsWith("ru")) {
-                Call.infoMessage(event.player.con, WELCOME_RU);
+                Call.infoMessage(event.player.con, Const.WELCOME_RU);
             } else {
-                Call.infoMessage(event.player.con, WELCOME_EN);
+                Call.infoMessage(event.player.con, Const.WELCOME_EN);
             }
             netServer.admins.addChatFilter((player, text) -> null);
         });
@@ -89,7 +52,7 @@ public class ThedimasPlugin extends Plugin {
                 } catch (IOException e) {
                     Log.info(e.getMessage());
                 } finally {
-                    String msg = FORMAT.replace("%0", prefix)
+                    String msg = Const.FORMAT.replace("%0", prefix)
                             .replace("%1", event.player.name)
                             .replace("%2", translated);
                     player.sendMessage(msg);
@@ -102,11 +65,11 @@ public class ThedimasPlugin extends Plugin {
     public void registerClientCommands(CommandHandler handler) {
         handler.<Player>register("rules", "Посмотреть список правил.", (args, player) -> {
             if (player.locale.startsWith("uk")) {
-                player.sendMessage(RULES_UK);
+                player.sendMessage(Const.RULES_UK);
             } else if (player.locale.startsWith("ru")) {
-                player.sendMessage(RULES_RU);
+                player.sendMessage(Const.RULES_RU);
             } else {
-                player.sendMessage(RULES_EN);
+                player.sendMessage(Const.RULES_EN);
             }
         });
         handler.<Player>register("hub", "Подключиться к Хабу.", (args, player) -> {
