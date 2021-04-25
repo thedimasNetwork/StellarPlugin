@@ -115,6 +115,24 @@ public class ThedimasPlugin extends Plugin {
         handler.<Player>register("discord", "Получить ссылку на Discord cервер.", (args, player) -> {
             player.sendMessage("https://discord.gg/RkbFYXFU9E");
         });
+        //register a whisper command which can be used to send other players messages
+        handler.<Player>register("whisper", "<player> <text...>", "Whisper text to another player.", (args, player) -> {
+            //find player by name
+            Player other = Groups.player.find(p -> p.name.equalsIgnoreCase(args[0]));
+            //give error message with scarlet-colored text if player isn't found
+            if(other == null){
+                player.sendMessage("[scarlet]No player by that name found!");
+                return;
+            }
+            //send the other player a message, using [lightgray] for gray text color and [] to reset color
+            if (other.locale.startsWith("uk")) {
+                other.sendMessage("[lightgray](шепіт) " + player.name + ":[] " + args[1]);
+            } else if (other.locale.startsWith("ru")) {
+                other.sendMessage("[lightgray](шепот) " + player.name + ":[] " + args[1]);
+            } else {
+                other.sendMessage("[lightgray](whisper) " + player.name + ":[] " + args[1]);
+            }
+        });
     }
 
     private static String translate(String text, String langTo, String langFrom) throws IOException {
