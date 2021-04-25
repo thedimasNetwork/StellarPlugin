@@ -39,6 +39,7 @@ public class ThedimasPlugin extends Plugin {
                     .replace("%1", event.message)
                     .replace("%2", event.player.locale));
             String prefix = event.player.admin() ? "\uE82C" : "\uE872";
+            String type = event.message.split("\\s")[0];
             Groups.player.each(player -> {
                 String translated = event.message;
                 try {
@@ -49,7 +50,13 @@ public class ThedimasPlugin extends Plugin {
                     String msg = Const.FORMAT.replace("%0", prefix)
                             .replace("%1", event.player.name)
                             .replace("%2", translated);
-                    player.sendMessage(msg);
+                    if (type.equals("/t") && player.team() == event.player.team()) {
+                        player.sendMessage(msg);
+                    } else if (type.equals("/a") && player.admin()) {
+                        player.sendMessage(msg);
+                    } else {
+                        player.sendMessage(msg);
+                    }
                 }
             });
         });
