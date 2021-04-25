@@ -6,10 +6,9 @@ import mindustry.game.*;
 import mindustry.mod.*;
 import arc.util.*;
 
-import java.io.*;
+import java.io.IOException;
 
 import static mindustry.Vars.netServer;
-import static mindustry.Vars.player;
 
 public class ThedimasPlugin extends Plugin {
 
@@ -67,13 +66,8 @@ public class ThedimasPlugin extends Plugin {
                 player.sendMessage(Const.RULES_EN);
             }
         });
-        handler.<Player>register("hub", "Подключиться к Хабу.", (args, player) -> {
-            Call.connect(player.con, "95.217.226.152", 26160);
-        });
-        handler.<Player>register("discord", "Получить ссылку на Discord cервер.", (args, player) -> {
-            player.sendMessage("https://discord.gg/RkbFYXFU9E");
-        });
-        //register a whisper command which can be used to send other players messages
+        handler.<Player>register("hub", "Подключиться к Хабу.", (args, player) -> Call.connect(player.con, "95.217.226.152", 26160));
+        handler.<Player>register("discord", "Получить ссылку на Discord cервер.", (args, player) -> player.sendMessage("https://discord.gg/RkbFYXFU9E"));
         handler.<Player>register("whisper", "<player> <text...>", "Нашептать текст другому игроку.", (args, player) -> {
             //find player by name
             Player other = Groups.player.find(p -> p.name.equalsIgnoreCase(args[0]));
