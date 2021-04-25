@@ -74,7 +74,7 @@ public class ThedimasPlugin extends Plugin {
             player.sendMessage("https://discord.gg/RkbFYXFU9E");
         });
         //register a whisper command which can be used to send other players messages
-        handler.<Player>register("whisper", "<player> <text...>", "Whisper text to another player.", (args, player) -> {
+        handler.<Player>register("whisper", "<player> <text...>", "Нашептать текст другому игроку.", (args, player) -> {
             //find player by name
             Player other = Groups.player.find(p -> p.name.equalsIgnoreCase(args[0]));
             //give error message with scarlet-colored text if player isn't found
