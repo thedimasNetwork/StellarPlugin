@@ -1,7 +1,7 @@
 {
   "name": "thedimasMindustryPlugin",
-  "author": "thedimas & MrGamer2k17",
+  "author": "thedimas & Ahsoka-501",
   "main": "main.ThedimasPlugin",
   "description": "Plugin for thedimas' servers.",
-  "version": 1
+  "version": 1.0
 }
