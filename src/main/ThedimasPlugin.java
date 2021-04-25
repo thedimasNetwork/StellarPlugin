@@ -50,10 +50,14 @@ public class ThedimasPlugin extends Plugin {
                     String msg = Const.FORMAT.replace("%0", prefix)
                             .replace("%1", event.player.name)
                             .replace("%2", translated);
-                    if (type.equals("/t") && player.team() == event.player.team()) {
-                        player.sendMessage(msg);
-                    } else if (type.equals("/a") && player.admin()) {
-                        player.sendMessage(msg);
+                    if (type.equals("/t")) {
+                        if (player.team() == event.player.team()) {
+                            player.sendMessage(msg);
+                        }
+                    } else if (type.equals("/a")) {
+                        if (player.admin()) {
+                            player.sendMessage(msg);
+                        }
                     } else {
                         player.sendMessage(msg);
                     }
