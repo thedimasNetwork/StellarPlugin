@@ -40,10 +40,16 @@ public class ThedimasPlugin extends Plugin {
                     .replace("%2", event.player.locale));
             String prefix = event.player.admin() ? "\uE82C" : "\uE872";
             String type = event.message.split("\\s")[0];
+            String originalMsg;
+            if (type.equals("/t") || type.equals("/a")) {
+                originalMsg = event.message.substring(event.message.indexOf(" ") + 1);
+            } else {
+                originalMsg = event.message;
+            }
             Groups.player.each(player -> {
-                String translated = event.message;
+                String translated = originalMsg;
                 try {
-                    translated = Translator.translate(event.message, player.locale, "auto");
+                    translated = Translator.translate(originalMsg, player.locale, "auto");
                 } catch (IOException e) {
                     Log.info(e.getMessage());
                 } finally {
@@ -52,11 +58,11 @@ public class ThedimasPlugin extends Plugin {
                             .replace("%2", translated);
                     if (type.equals("/t")) {
                         if (player.team() == event.player.team()) {
-                            player.sendMessage(msg);
+                            player.sendMessage("[" + player.team().color.toString() + "]" + "<T>[]" + msg);
                         }
                     } else if (type.equals("/a")) {
                         if (player.admin()) {
-                            player.sendMessage(msg);
+                            player.sendMessage("[scarlet]<A>[]" + msg);
                         }
                     } else {
                         player.sendMessage(msg);
