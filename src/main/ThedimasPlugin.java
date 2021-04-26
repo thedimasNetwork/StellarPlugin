@@ -1,10 +1,12 @@
 package main;
 
 import arc.*;
+import mindustry.Vars;
 import mindustry.gen.*;
 import mindustry.game.*;
 import mindustry.mod.*;
 import arc.util.*;
+import mindustry.type.UnitType;
 
 import java.io.IOException;
 
@@ -101,6 +103,45 @@ public class ThedimasPlugin extends Plugin {
             } else {
                 other.sendMessage("[lightgray](whisper) " + player.name + ":[] " + args[1]);
             }
+        });
+        handler.<Player>register("spawn", "<unit> <count> <team>", "Заспавнить юнитов", (args, player) -> {
+            if (!player.admin) {
+                player.sendMessage("[red]Только админы могут использовать эту команду!");
+                return;
+            }
+            UnitType unit = Vars.content.units().find(b -> b.name.equals(args[0]));
+            if (unit == null) {
+                player.sendMessage("[red]Юнит не найден! Доступные юниты:\n" + Const.UNIT_LIST);
+                return;
+            }
+            int count;
+            try {
+                count = Integer.parseInt(args[1]);
+            } catch (NumberFormatException e) {
+                player.sendMessage("[red]Неверный формат числа!");
+                return;
+            }
+            if (count > 24) {
+                player.sendMessage("[red]Нельзя заспавнить больше 24 юнитов!");
+                return;
+            }
+            Team team;
+            switch (args[2]) {
+                case "sharded" -> team = Team.sharded;
+                case "blue" -> team = Team.blue;
+                case "crux" -> team = Team.crux;
+                case "derelict" -> team = Team.derelict;
+                case "green" -> team = Team.green;
+                case "purple" -> team = Team.purple;
+                default -> {
+                    player.sendMessage("[accent]Неверная команда. Возможные варианты:\n" + Const.TEAM_LIST);
+                    return;
+                }
+            }
+            for (int i = 0; count > i; i++) {
+                unit.spawn(team, player.x, player.y);
+            }
+            player.sendMessage("[green]Ты заспавнил " + "[accent]" + count + " " + unit + " " + "[green]для команды" + " " + "[accent]" + team);
         });
     }
 }

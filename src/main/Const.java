@@ -3,6 +3,22 @@ package main;
 public class Const {
     public static final String FORMAT = "<%0> %1[white]: %2";
 
+    public static final String UNIT_LIST = "[accent]dagger, mace, fortress, scepter, reign\n"
+            + "[purple]crawler, atrax, spiroct, arkyid, toxopid\n"
+            + "[lime]nova, pulsar, quasar, vela, corvus\n"
+            + "\n"
+            + "[accent]flare, horizon, zenith, antumbra, eclipse\n"
+            + "[lime]mono, poly, mega, quad, oct\n"
+            + "\n"
+            + "[accent]risso, minke, bryde, sei, omura\n";
+
+    public static final String TEAM_LIST = "[yellow]sharded\n"
+            + "[red]crux\n"
+            + "[green]green\n"
+            + "[purple]purple\n"
+            + "[blue]blue\n"
+            + "[gray]derelict[]";
+
     public static final String RULES_UK = "1. Не спамити/флудити в чат\n"
             + "2. Не ображати інших учасників сервера\n"
             + "3. Не бути гріфером\n"
