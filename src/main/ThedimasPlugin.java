@@ -138,5 +138,37 @@ public class ThedimasPlugin extends Plugin {
             }
             player.sendMessage("[green]Ты заспавнил " + "[accent]" + count + " " + unit + " " + "[green]для команды" + " " + "[accent]" + team);
         });
+        handler.<Player>register("team", "<team>", "Изменить команду", (args, player) -> {
+            if (!player.admin()) {
+                player.sendMessage("[red]Только админы могут использовать эту команду![]");
+                return;
+            }
+            Team team;
+            switch (args[0]) {
+                case "sharded":
+                    team = Team.sharded;
+                    break;
+                case "blue":
+                    team = Team.blue;
+                    break;
+                case "crux":
+                    team = Team.crux;
+                    break;
+                case "derelict":
+                    team = Team.derelict;
+                    break;
+                case "green":
+                    team = Team.green;
+                    break;
+                case "purple":
+                    team = Team.purple;
+                    break;
+                default:
+                    player.sendMessage("[red]Неверная команда. Возможные варианты:\n" + Const.TEAM_LIST);
+                    return;
+            }
+            player.team(team);
+            player.sendMessage("Команда изменена. Новая команда - " + team);
+        });
     }
 }
