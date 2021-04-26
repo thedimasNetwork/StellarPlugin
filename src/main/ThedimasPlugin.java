@@ -60,7 +60,8 @@ public class ThedimasPlugin extends Plugin {
                             .replace("%2", translated);
                     if (type.equals("/t")) {
                         if (player.team() == event.player.team()) {
-                            player.sendMessage("[" + player.team().color.toString() + "]" + "<T>[]" + msg);
+                            String color = player.team().color.toString();
+                            player.sendMessage("[" + color.substring(0, color.length() - 2) + "]" + "<T>[]" + msg);
                         }
                     } else if (type.equals("/a")) {
                         if (player.admin()) {
