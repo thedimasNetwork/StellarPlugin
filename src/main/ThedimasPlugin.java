@@ -146,7 +146,7 @@ public class ThedimasPlugin extends Plugin {
                     team = Team.purple;
                     break;
                 default:
-                    player.sendMessage("[accent]Неверная команда. Возможные варианты:\n" + Const.TEAM_LIST);
+                    player.sendMessage("[red]Неверная команда. Возможные варианты:\n" + Const.TEAM_LIST);
                     return;
             }
             for (int i = 0; count > i; i++) {
