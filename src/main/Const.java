@@ -3,14 +3,17 @@ package main;
 public class Const {
     public static final String FORMAT = "<%0> %1[white]: %2";
 
-    public static final String UNIT_LIST = "[accent]dagger (\uF800), mace (\uF7FF), fortress (\uF7FE), scepter (\uF7DB), reign (\uF7DA)\n"
+    public static final String UNIT_LIST = "[]Ground:\n"
+            + "[accent]dagger (\uF800), mace (\uF7FF), fortress (\uF7FE), scepter (\uF7DB), reign (\uF7DA)\n"
             + "[purple]crawler (\uF7FA), atrax (\uF7F9), spiroct (\uF7F8), arkyid (\uF7F7), toxopid (\uF7DE)\n"
             + "[lime]nova (\uF7FD), pulsar (\uF7FC), quasar (\uF7FB), vela (\uF7C1), corvus (\uF7C0)\n"
-            + "\n"
+            + "[]Air:\n"
             + "[accent]flare (\uF7F6), horizon (\uF7F5), zenith (\uF7F4), antumbra (\uF7F3), eclipse (\uF7F2)\n"
             + "[lime]mono (\uF7F1), poly (\uF7F0), mega (\uF7EF), quad (\uF7C3), oct (\uF7C2)\n"
-            + "\n"
-            + "[accent]risso (\uF7E7), minke (\uF7ED), bryde (\uF7EC), sei (\uF7C4), omura (\uF7C6)\n";
+            + "[]Naval:\n"
+            + "[accent]risso (\uF7E7), minke (\uF7ED), bryde (\uF7EC), sei (\uF7C4), omura (\uF7C6)\n"
+            + "[]Core:\n"
+            + "[accent]alpha (\uF7EB), beta (\uF7EA), gamma (\uF7E9)\n";
 
     public static final String TEAM_LIST = "[yellow]sharded\n"
             + "[red]crux\n"
