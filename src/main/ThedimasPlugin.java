@@ -127,16 +127,27 @@ public class ThedimasPlugin extends Plugin {
             }
             Team team;
             switch (args[2]) {
-                case "sharded" -> team = Team.sharded;
-                case "blue" -> team = Team.blue;
-                case "crux" -> team = Team.crux;
-                case "derelict" -> team = Team.derelict;
-                case "green" -> team = Team.green;
-                case "purple" -> team = Team.purple;
-                default -> {
+                case "sharded":
+                    team = Team.sharded;
+                    break;
+                case "blue":
+                    team = Team.blue;
+                    break;
+                case "crux":
+                    team = Team.crux;
+                    break;
+                case "derelict":
+                    team = Team.derelict;
+                    break;
+                case "green":
+                    team = Team.green;
+                    break;
+                case "purple":
+                    team = Team.purple;
+                    break;
+                default:
                     player.sendMessage("[accent]Неверная команда. Возможные варианты:\n" + Const.TEAM_LIST);
                     return;
-                }
             }
             for (int i = 0; count > i; i++) {
                 unit.spawn(team, player.x, player.y);
