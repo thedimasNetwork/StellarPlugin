@@ -93,9 +93,9 @@ public class ThedimasPlugin extends Plugin {
                 player.sendMessage("[red]Только админы могут использовать эту команду!");
                 return;
             }
-            UnitType unit = Vars.content.units().find(b -> b.name.equals(args[0]));
+            UnitType unit = Vars.content.units().find(b -> b.name.equalsIgnoreCase(args[0]));
             if (unit == null) {
-                player.sendMessage("[red]Юнит не найден! Доступные юниты:\n" + Const.UNIT_LIST);
+                player.sendMessage("[red]Юнит не найден! Доступные юниты:\n\n" + Const.UNIT_LIST + "\n");
                 return;
             }
             int count;
@@ -130,7 +130,7 @@ public class ThedimasPlugin extends Plugin {
                     team = Team.purple;
                     break;
                 default:
-                    player.sendMessage("[red]Неверная команда. Возможные варианты:\n" + Const.TEAM_LIST);
+                    player.sendMessage("[red]Неверная команда. Возможные варианты:\n\n" + Const.TEAM_LIST + "\n");
                     return;
             }
             for (int i = 0; count > i; i++) {
