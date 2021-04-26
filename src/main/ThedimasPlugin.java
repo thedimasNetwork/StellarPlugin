@@ -88,23 +88,6 @@ public class ThedimasPlugin extends Plugin {
         });
         handler.<Player>register("hub", "Подключиться к Хабу.", (args, player) -> Call.connect(player.con, "95.217.226.152", 26160));
         handler.<Player>register("discord", "Получить ссылку на Discord cервер.", (args, player) -> player.sendMessage("https://discord.gg/RkbFYXFU9E"));
-        handler.<Player>register("whisper", "<player> <text...>", "Нашептать текст другому игроку.", (args, player) -> {
-            //find player by name
-            Player other = Groups.player.find(p -> p.name.equalsIgnoreCase(args[0]));
-            //give error message with scarlet-colored text if player isn't found
-            if (other == null) {
-                player.sendMessage("[scarlet]No player by that name found!");
-                return;
-            }
-            //send the other player a message, using [lightgray] for gray text color and [] to reset color
-            if (other.locale.startsWith("uk")) {
-                other.sendMessage("[lightgray](шепіт) " + player.name + ":[] " + args[1]);
-            } else if (other.locale.startsWith("ru")) {
-                other.sendMessage("[lightgray](шепот) " + player.name + ":[] " + args[1]);
-            } else {
-                other.sendMessage("[lightgray](whisper) " + player.name + ":[] " + args[1]);
-            }
-        });
         handler.<Player>register("spawn", "<unit> <count> <team>", "Заспавнить юнитов", (args, player) -> {
             if (!player.admin) {
                 player.sendMessage("[red]Только админы могут использовать эту команду!");
