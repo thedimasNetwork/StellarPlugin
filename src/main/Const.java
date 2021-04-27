@@ -20,12 +20,7 @@ public class Const {
             + "[white]Core:\n"
             + "[accent]alpha [](\uF7EB), [accent]beta [](\uF7EA), [accent]gamma [](\uF7E9)[]";
 
-    public static final String TEAM_LIST = "[yellow]sharded\n"
-            + "[red]crux\n"
-            + "[green]green\n"
-            + "[purple]purple\n"
-            + "[blue]blue\n"
-            + "[gray]derelict[]";
+    public static final String TEAM_LIST = "[white][yellow]sharded[], [red]crux[], [green]green[], [purple]purple[], [blue]blue[], [gray]derelict[]";
 
     public static final String SERVER_LIST = "[]Hub\n"
             + "PvP\n"
