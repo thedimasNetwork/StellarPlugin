@@ -153,30 +153,11 @@ public class ThedimasPlugin extends Plugin {
                 player.sendMessage("[scarlet]Нельзя заспавнить больше 24 юнитов!");
                 return;
             }
-            Team team;
-            switch (args[2]) {
-                case "sharded":
-                    team = Team.sharded;
-                    break;
-                case "blue":
-                    team = Team.blue;
-                    break;
-                case "crux":
-                    team = Team.crux;
-                    break;
-                case "derelict":
-                    team = Team.derelict;
-                    break;
-                case "green":
-                    team = Team.green;
-                    break;
-                case "purple":
-                    team = Team.purple;
-                    break;
-                default:
-                    player.sendMessage("[scarlet]Неверная команда. Возможные варианты:\n\n" + Const.TEAM_LIST + "\n");
-                    return;
+            if (!Const.TEAM_MAP.containsKey(args[2].toLowerCase())) {
+                player.sendMessage("[scarlet]Неверная команда. Возможные варианты:\n\n" + Const.TEAM_LIST + "\n");
+                return;
             }
+            Team team = Const.TEAM_MAP.get(args[2]);
             for (int i = 0; count > i; i++) {
                 unit.spawn(team, player.x, player.y);
             }
