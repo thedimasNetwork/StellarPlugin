@@ -37,9 +37,6 @@ public class ThedimasPlugin extends Plugin {
             Log.info(event.player.name + " has disconnected from the server");
         });
         Events.on(EventType.PlayerChatEvent.class, event -> {
-            Log.info("%0: %1 | %2".replace("%0", event.player.name)
-                                  .replace("%1", event.message)
-                                  .replace("%2", event.player.locale));
             String prefix = event.player.admin() ? "\uE82C" : "\uE872";
             Groups.player.each(player -> {
                 String translated = event.message;
@@ -68,11 +65,11 @@ public class ThedimasPlugin extends Plugin {
         handler.<Player>register("a", "<text...>", "Отправить сообщение администрации.", (args, player) -> {
             String message = args[0];
             if (player.admin()) {
-                Groups.player.each(player1 -> {
-                    if (player1.admin()) {
+                Groups.player.each(otherPlayer -> {
+                    if (otherPlayer.admin()) {
                         String translated = message;
                         try {
-                            translated = Translator.translate(message, player1.locale, "auto");
+                            translated = Translator.translate(message, otherPlayer.locale, "auto");
                         } catch (IOException e) {
                             Log.err(e.getMessage());
                         } finally {
@@ -80,7 +77,7 @@ public class ThedimasPlugin extends Plugin {
                             String msg = Const.FORMAT.replace("%0", prefix)
                                                      .replace("%1", player.name)
                                                      .replace("%2", translated);
-                            player1.sendMessage("<[scarlet]A[]>" + msg);
+                            otherPlayer.sendMessage("<[scarlet]A[]>" + msg);
                         }
                     }
                 });
@@ -161,7 +158,7 @@ public class ThedimasPlugin extends Plugin {
             for (int i = 0; count > i; i++) {
                 unit.spawn(team, player.x, player.y);
             }
-            player.sendMessage("[green]Ты заспавнил " + "[accent]" + count + " " + unit + " " + "[green]для команды" + " " + "[accent]" + team);
+            player.sendMessage("[green]Ты заспавнил " + "[accent]" + count + " " + unit + " " + "[green]для команды " + "[#" + team.color.toString().substring(0, 6) + "]" + team);
         });
         handler.<Player>register("team", "<team>", "Изменить команду", (args, player) -> {
             if (!player.admin()) {
@@ -174,7 +171,7 @@ public class ThedimasPlugin extends Plugin {
                 return;
             }
             player.team(team);
-            player.sendMessage("Команда изменена. Новая команда - " + team);
+            player.sendMessage("Команда изменена. Новая команда - [#" + team.color.toString().substring(0, 6) + "]" + team);
         });
     }
 }
