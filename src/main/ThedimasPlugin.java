@@ -41,12 +41,11 @@ public class ThedimasPlugin extends Plugin {
                     .replace("%1", event.message)
                     .replace("%2", event.player.locale));
             String prefix = event.player.admin() ? "\uE82C" : "\uE872";
-            String type = event.message.split("\\s")[0];
             Groups.player.each(player -> {
                 String translated = event.message;
                 if (!event.message.startsWith("/")) {
                     try {
-                        if(!player.locale.equals(event.player.locale())) {
+                        if (!player.locale.equals(event.player.locale())) {
                             translated = Translator.translate(event.message, player.locale, "auto");
                         }
                     } catch (IOException e) {
@@ -66,7 +65,7 @@ public class ThedimasPlugin extends Plugin {
     public void registerClientCommands(CommandHandler handler) {
         handler.removeCommand("a");
         handler.removeCommand("t");
-        handler.<Player>register("a", "<text...>", "Отправить сообщение администрации", (args, player) -> {
+        handler.<Player>register("a", "<text...>", "Отправить сообщение администрации.", (args, player) -> {
             String message = args[0];
             if (player.admin()) {
                 Groups.player.each(player1 -> {
@@ -79,8 +78,8 @@ public class ThedimasPlugin extends Plugin {
                         } finally {
                             String prefix = player.admin() ? "\uE82C" : "\uE872";
                             String msg = Const.FORMAT.replace("%0", prefix)
-                                                     .replace("%1", player.name)
-                                                     .replace("%2", translated);
+                                    .replace("%1", player.name)
+                                    .replace("%2", translated);
                             player1.sendMessage("<[scarlet]A[]>" + msg);
                         }
                     }
@@ -89,8 +88,8 @@ public class ThedimasPlugin extends Plugin {
                 player.sendMessage("[scarlet]Только админы могут использовать эту команду!");
             }
         });
-        handler.<Player>register("t", "<text...>", "Отправить сообщение команде", (args, player) -> {
-        String message = args[0];
+        handler.<Player>register("t", "<text...>", "Отправить сообщение команде.", (args, player) -> {
+            String message = args[0];
             Groups.player.each(player1 -> {
                 if (player1.team() == player.team()) {
                     String translated = message;
@@ -103,7 +102,7 @@ public class ThedimasPlugin extends Plugin {
                         String msg = Const.FORMAT.replace("%0", prefix)
                                                  .replace("%1", player.name)
                                                  .replace("%2", translated);
-                        player1.sendMessage("<[#"+ player.team().color.toString().substring(0, 6) +"]T[]>" + msg);
+                        player1.sendMessage("<[#" + player.team().color.toString().substring(0, 6) + "]T[]>" + msg);
                     }
                 }
             });
@@ -118,6 +117,68 @@ public class ThedimasPlugin extends Plugin {
             }
         });
         handler.<Player>register("hub", "Подключиться к Хабу.", (args, player) -> Call.connect(player.con, "95.217.226.152", 26160));
+        handler.<Player>register("connect", "[name]", "Подключиться к другому серверу.", (args, player) -> {
+            if (args.length == 0 || args[0].equalsIgnoreCase("list")) {
+                player.sendMessage("[sky]Список доступных серверов" + Const.SERVER_LIST);
+                return;
+            }
+            String ip;
+            int port;
+            switch (args[0].toLowerCase()) {
+                case "hub":
+                    ip = "95.217.226.152";
+                    port = 26160;
+                    break;
+                case "pvp":
+                    ip = "178.170.47.34";
+                    port = 20566;
+                    break;
+                case "sandbox":
+                    ip = "178.170.47.34";
+                    port = 20594;
+                    break;
+                case "survival":
+                    ip = "178.170.47.34";
+                    port = 20745;
+                    break;
+                case "attack":
+                    ip = "178.170.47.34";
+                    port = 20752;
+                    break;
+                case "hex PvP":
+                    ip = "178.170.47.34";
+                    port = 20636;
+                    break;
+                case "annexation":
+                    ip = "178.170.47.34";
+                    port = 20664;
+                    break;
+                case "campaign maps":
+                    ip = "178.170.47.34";
+                    port = 20981;
+                    break;
+                case "anarchy":
+                    ip = "95.217.226.152";
+                    port = 26233;
+                    break;
+                case "castle wars":
+                    ip = "95.217.226.152";
+                    port = 26194;
+                    break;
+                case "crawler arena":
+                    ip = "95.217.226.152";
+                    port = 26004;
+                    break;
+                case "ms:go":
+                    ip = "95.217.226.152";
+                    port = 26021;
+                    break;
+                default:
+                    player.sendMessage("[red]Такого сервера не существует. Доступные сервера:\n" + Const.SERVER_LIST);
+                    return;
+            }
+            Call.connect(player.con, ip, port);
+        });
         handler.<Player>register("discord", "Получить ссылку на Discord сервер.", (args, player) -> player.sendMessage("https://discord.gg/RkbFYXFU9E"));
         handler.<Player>register("spawn", "<unit> <count> <team>", "Заспавнить юнитов", (args, player) -> {
             if (!player.admin) {
