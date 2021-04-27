@@ -1,5 +1,7 @@
 package main;
 
+import mindustry.game.Team;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -19,24 +21,6 @@ public class Const {
             + "Crawler arena\n"
             + "MS:GO";
 
-    public static final Map<String, String> SERVER_ADDRESS = new HashMap<>();
-
-    static {
-        SERVER_ADDRESS.put("hub", "95.217.226.152:26160");
-        SERVER_ADDRESS.put("pvp", "178.170.47.34:20566");
-        SERVER_ADDRESS.put("sandbox", "178.170.47.34:20594");
-        SERVER_ADDRESS.put("survival", "178.170.47.34:20745");
-        SERVER_ADDRESS.put("attack", "178.170.47.34:20752");
-        SERVER_ADDRESS.put("hex pvp", "178.170.47.34:20636");
-        SERVER_ADDRESS.put("annexation", "178.170.47.34:20664");
-        SERVER_ADDRESS.put("campaign maps", "178.170.47.34:20981");
-        SERVER_ADDRESS.put("anarchy", "95.217.226.152:26233");
-        SERVER_ADDRESS.put("castle wars", "95.217.226.152:26194");
-        SERVER_ADDRESS.put("crawler arena", "95.217.226.152:26004");
-        SERVER_ADDRESS.put("ms:go", "95.217.226.152:26021");
-
-    }
-
     public static final String UNIT_LIST = "[white]Ground:\n"
             + "[accent]dagger [](\uF800), [accent]mace [](\uF7FF), [accent]fortress [](\uF7FE), [accent]scepter [](\uF7DB), [accent]reign [](\uF7DA)\n"
             + "[purple]crawler [](\uF7FA), [purple]atrax [](\uF7F9), [purple]spiroct [](\uF7F8), [purple]arkyid [](\uF7F7), [purple]toxopid [](\uF7DE)\n"
@@ -55,6 +39,32 @@ public class Const {
             + "[purple]purple\n"
             + "[blue]blue\n"
             + "[gray]derelict[]";
+
+    public static final Map<String, String> SERVER_ADDRESS = new HashMap<>();
+
+    public static final Map<String, Team> TEAM_MAP = new HashMap<>();
+
+    static {
+        SERVER_ADDRESS.put("hub", "95.217.226.152:26160");
+        SERVER_ADDRESS.put("pvp", "178.170.47.34:20566");
+        SERVER_ADDRESS.put("sandbox", "178.170.47.34:20594");
+        SERVER_ADDRESS.put("survival", "178.170.47.34:20745");
+        SERVER_ADDRESS.put("attack", "178.170.47.34:20752");
+        SERVER_ADDRESS.put("hex pvp", "178.170.47.34:20636");
+        SERVER_ADDRESS.put("annexation", "178.170.47.34:20664");
+        SERVER_ADDRESS.put("campaign maps", "178.170.47.34:20981");
+        SERVER_ADDRESS.put("anarchy", "95.217.226.152:26233");
+        SERVER_ADDRESS.put("castle wars", "95.217.226.152:26194");
+        SERVER_ADDRESS.put("crawler arena", "95.217.226.152:26004");
+        SERVER_ADDRESS.put("ms:go", "95.217.226.152:26021");
+
+        TEAM_MAP.put("sharded", Team.sharded);
+        TEAM_MAP.put("crux", Team.crux);
+        TEAM_MAP.put("green", Team.green);
+        TEAM_MAP.put("purple", Team.purple);
+        TEAM_MAP.put("blue", Team.blue);
+        TEAM_MAP.put("derelict", Team.derelict);
+    }
 
     public static final String RULES_UK = "1. Не спамити/флудити в чат\n"
             + "2. Не ображати інших учасників сервера\n"
