@@ -16,17 +16,17 @@ public class Const {
             + "Crawler arena\n"
             + "MS:GO";
 
-    public static final String UNIT_LIST = "[]Ground:\n"
-            + "[accent]dagger (\uF800), mace (\uF7FF), fortress (\uF7FE), scepter (\uF7DB), reign (\uF7DA)\n"
-            + "[purple]crawler (\uF7FA), atrax (\uF7F9), spiroct (\uF7F8), arkyid (\uF7F7), toxopid (\uF7DE)\n"
-            + "[lime]nova (\uF7FD), pulsar (\uF7FC), quasar (\uF7FB), vela (\uF7C1), corvus (\uF7C0)\n"
-            + "[]Air:\n"
-            + "[accent]flare (\uF7F6), horizon (\uF7F5), zenith (\uF7F4), antumbra (\uF7F3), eclipse (\uF7F2)\n"
-            + "[lime]mono (\uF7F1), poly (\uF7F0), mega (\uF7EF), quad (\uF7C3), oct (\uF7C2)\n"
-            + "[]Naval:\n"
-            + "[accent]risso (\uF7E7), minke (\uF7ED), bryde (\uF7EC), sei (\uF7C4), omura (\uF7C6)\n"
-            + "[]Core:\n"
-            + "[accent]alpha (\uF7EB), beta (\uF7EA), gamma (\uF7E9)[]";
+    public static final String UNIT_LIST = "[white]Ground:\n"
+            + "[accent]dagger [](\uF800), [accent]mace [](\uF7FF), [accent]fortress [](\uF7FE), [accent]scepter [](\uF7DB), [accent]reign [](\uF7DA)\n"
+            + "[purple]crawler [](\uF7FA), [purple]atrax [](\uF7F9), [purple]spiroct [](\uF7F8), [purple]arkyid [](\uF7F7), [purple]toxopid [](\uF7DE)\n"
+            + "[lime]nova [](\uF7FD), [lime]pulsar [](\uF7FC), [lime]quasar [](\uF7FB), [lime]vela [](\uF7C1), [lime]corvus [](\uF7C0)\n"
+            + "[white]Air:\n"
+            + "[accent]flare [](\uF7F6), [accent]horizon [](\uF7F5), [accent]zenith [](\uF7F4), [accent]antumbra [](\uF7F3), [accent]eclipse [](\uF7F2)\n"
+            + "[lime]mono [](\uF7F1), [lime]poly [](\uF7F0), [lime]mega [](\uF7EF), [lime]quad [](\uF7C3), [lime]oct [](\uF7C2)\n"
+            + "[white]Naval:\n"
+            + "[accent]risso [](\uF7E7), [accent]minke [](\uF7ED), [accent]bryde [](\uF7EC), [accent]sei [](\uF7C4), [accent]omura [](\uF7C6)\n"
+            + "[white]Core:\n"
+            + "[accent]alpha [](\uF7EB), [accent]beta [](\uF7EA), [accent]gamma [](\uF7E9)[]";
 
     public static final String TEAM_LIST = "[yellow]sharded\n"
             + "[red]crux\n"
