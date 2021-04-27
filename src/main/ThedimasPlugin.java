@@ -38,8 +38,8 @@ public class ThedimasPlugin extends Plugin {
         });
         Events.on(EventType.PlayerChatEvent.class, event -> {
             Log.info("%0: %1 | %2".replace("%0", event.player.name)
-                    .replace("%1", event.message)
-                    .replace("%2", event.player.locale));
+                                  .replace("%1", event.message)
+                                  .replace("%2", event.player.locale));
             String prefix = event.player.admin() ? "\uE82C" : "\uE872";
             Groups.player.each(player -> {
                 String translated = event.message;
@@ -52,8 +52,8 @@ public class ThedimasPlugin extends Plugin {
                         Log.err(e.getMessage());
                     } finally {
                         String msg = Const.FORMAT.replace("%0", prefix)
-                                .replace("%1", event.player.name)
-                                .replace("%2", translated);
+                                                 .replace("%1", event.player.name)
+                                                 .replace("%2", translated);
                         player.sendMessage(msg);
                     }
                 }
@@ -78,8 +78,8 @@ public class ThedimasPlugin extends Plugin {
                         } finally {
                             String prefix = player.admin() ? "\uE82C" : "\uE872";
                             String msg = Const.FORMAT.replace("%0", prefix)
-                                    .replace("%1", player.name)
-                                    .replace("%2", translated);
+                                                     .replace("%1", player.name)
+                                                     .replace("%2", translated);
                             player1.sendMessage("<[scarlet]A[]>" + msg);
                         }
                     }
@@ -122,61 +122,13 @@ public class ThedimasPlugin extends Plugin {
                 player.sendMessage("[sky]Список доступных серверов" + Const.SERVER_LIST);
                 return;
             }
-            String ip;
-            int port;
-            switch (args[0].toLowerCase()) {
-                case "hub":
-                    ip = "95.217.226.152";
-                    port = 26160;
-                    break;
-                case "pvp":
-                    ip = "178.170.47.34";
-                    port = 20566;
-                    break;
-                case "sandbox":
-                    ip = "178.170.47.34";
-                    port = 20594;
-                    break;
-                case "survival":
-                    ip = "178.170.47.34";
-                    port = 20745;
-                    break;
-                case "attack":
-                    ip = "178.170.47.34";
-                    port = 20752;
-                    break;
-                case "hex PvP":
-                    ip = "178.170.47.34";
-                    port = 20636;
-                    break;
-                case "annexation":
-                    ip = "178.170.47.34";
-                    port = 20664;
-                    break;
-                case "campaign maps":
-                    ip = "178.170.47.34";
-                    port = 20981;
-                    break;
-                case "anarchy":
-                    ip = "95.217.226.152";
-                    port = 26233;
-                    break;
-                case "castle wars":
-                    ip = "95.217.226.152";
-                    port = 26194;
-                    break;
-                case "crawler arena":
-                    ip = "95.217.226.152";
-                    port = 26004;
-                    break;
-                case "ms:go":
-                    ip = "95.217.226.152";
-                    port = 26021;
-                    break;
-                default:
-                    player.sendMessage("[red]Такого сервера не существует. Доступные сервера:\n" + Const.SERVER_LIST);
-                    return;
+            if (!Const.SERVER_ADDRESS.containsKey(args[0].toLowerCase())) {
+                player.sendMessage("[red]Такого сервера не существует. Доступные сервера:\n" + Const.SERVER_LIST);
+                return;
             }
+            String address = Const.SERVER_ADDRESS.get(args[0].toLowerCase());
+            String ip = address.split(":")[0];
+            int port = Integer.parseInt(address.split(":")[1]);
             Call.connect(player.con, ip, port);
         });
         handler.<Player>register("discord", "Получить ссылку на Discord сервер.", (args, player) -> player.sendMessage("https://discord.gg/RkbFYXFU9E"));
