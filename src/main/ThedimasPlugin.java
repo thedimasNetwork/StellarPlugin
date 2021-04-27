@@ -123,7 +123,7 @@ public class ThedimasPlugin extends Plugin {
                 return;
             }
             if (!Const.SERVER_ADDRESS.containsKey(args[0].toLowerCase())) {
-                player.sendMessage("[red]Такого сервера не существует. Доступные сервера:\n" + Const.SERVER_LIST);
+                player.sendMessage("[scarlet]Такого сервера не существует. Доступные сервера:\n" + Const.SERVER_LIST);
                 return;
             }
             String address = Const.SERVER_ADDRESS.get(args[0].toLowerCase());
@@ -153,11 +153,11 @@ public class ThedimasPlugin extends Plugin {
                 player.sendMessage("[scarlet]Нельзя заспавнить больше 24 юнитов!");
                 return;
             }
-            if (!Const.TEAM_MAP.containsKey(args[2].toLowerCase())) {
-                player.sendMessage("[scarlet]Неверная команда. Возможные варианты:\n\n" + Const.TEAM_LIST + "\n");
+            Team team = Structs.find(Team.baseTeams, t -> t.name.equalsIgnoreCase(args[2]));
+            if (team == null) {
+                player.sendMessage("[scarlet]Неверная команда. Возможные варианты:\n" + Const.TEAM_LIST);
                 return;
             }
-            Team team = Const.TEAM_MAP.get(args[2]);
             for (int i = 0; count > i; i++) {
                 unit.spawn(team, player.x, player.y);
             }
@@ -168,29 +168,10 @@ public class ThedimasPlugin extends Plugin {
                 player.sendMessage("[scarlet]Только админы могут использовать эту команду![]");
                 return;
             }
-            Team team;
-            switch (args[0]) {
-                case "sharded":
-                    team = Team.sharded;
-                    break;
-                case "blue":
-                    team = Team.blue;
-                    break;
-                case "crux":
-                    team = Team.crux;
-                    break;
-                case "derelict":
-                    team = Team.derelict;
-                    break;
-                case "green":
-                    team = Team.green;
-                    break;
-                case "purple":
-                    team = Team.purple;
-                    break;
-                default:
-                    player.sendMessage("[scarlet]Неверная команда. Возможные варианты:\n" + Const.TEAM_LIST);
-                    return;
+            Team team = Structs.find(Team.baseTeams, t -> t.name.equalsIgnoreCase(args[0]));
+            if (team == null) {
+                player.sendMessage("[scarlet]Неверная команда. Возможные варианты:\n" + Const.TEAM_LIST);
+                return;
             }
             player.team(team);
             player.sendMessage("Команда изменена. Новая команда - " + team);
