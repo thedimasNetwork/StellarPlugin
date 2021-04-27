@@ -3,6 +3,19 @@ package main;
 public class Const {
     public static final String FORMAT = "<%0> %1[white]: %2";
 
+    public static final String SERVER_LIST = "[]Hub\n"
+            + "PvP\n"
+            + "Sandbox\n"
+            + "Survival\n"
+            + "Attack\n"
+            + "Hex PvP\n"
+            + "Annexation\n"
+            + "Campaign maps\n"
+            + "Anarchy\n"
+            + "Castle wars\n"
+            + "Crawler arena\n"
+            + "MS:GO";
+
     public static final String UNIT_LIST = "[]Ground:\n"
             + "[accent]dagger (\uF800), mace (\uF7FF), fortress (\uF7FE), scepter (\uF7DB), reign (\uF7DA)\n"
             + "[purple]crawler (\uF7FA), atrax (\uF7F9), spiroct (\uF7F8), arkyid (\uF7F7), toxopid (\uF7DE)\n"
@@ -13,7 +26,7 @@ public class Const {
             + "[]Naval:\n"
             + "[accent]risso (\uF7E7), minke (\uF7ED), bryde (\uF7EC), sei (\uF7C4), omura (\uF7C6)\n"
             + "[]Core:\n"
-            + "[accent]alpha (\uF7EB), beta (\uF7EA), gamma (\uF7E9)\n";
+            + "[accent]alpha (\uF7EB), beta (\uF7EA), gamma (\uF7E9)[]";
 
     public static final String TEAM_LIST = "[yellow]sharded\n"
             + "[red]crux\n"
