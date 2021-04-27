@@ -8,19 +8,6 @@ import java.util.Map;
 public class Const {
     public static final String FORMAT = "<%0> %1[white]: %2";
 
-    public static final String SERVER_LIST = "[]Hub\n"
-            + "PvP\n"
-            + "Sandbox\n"
-            + "Survival\n"
-            + "Attack\n"
-            + "Hex PvP\n"
-            + "Annexation\n"
-            + "Campaign maps\n"
-            + "Anarchy\n"
-            + "Castle wars\n"
-            + "Crawler arena\n"
-            + "MS:GO";
-
     public static final String UNIT_LIST = "[white]Ground:\n"
             + "[accent]dagger [](\uF800), [accent]mace [](\uF7FF), [accent]fortress [](\uF7FE), [accent]scepter [](\uF7DB), [accent]reign [](\uF7DA)\n"
             + "[purple]crawler [](\uF7FA), [purple]atrax [](\uF7F9), [purple]spiroct [](\uF7F8), [purple]arkyid [](\uF7F7), [purple]toxopid [](\uF7DE)\n"
@@ -40,9 +27,20 @@ public class Const {
             + "[blue]blue\n"
             + "[gray]derelict[]";
 
-    public static final Map<String, String> SERVER_ADDRESS = new HashMap<>();
+    public static final String SERVER_LIST = "[]Hub\n"
+            + "PvP\n"
+            + "Sandbox\n"
+            + "Survival\n"
+            + "Attack\n"
+            + "Hex PvP\n"
+            + "Annexation\n"
+            + "Campaign maps\n"
+            + "Anarchy\n"
+            + "Castle wars\n"
+            + "Crawler arena\n"
+            + "MS:GO";
 
-    public static final Map<String, Team> TEAM_MAP = new HashMap<>();
+    public static final Map<String, String> SERVER_ADDRESS = new HashMap<>();
 
     static {
         SERVER_ADDRESS.put("hub", "95.217.226.152:26160");
@@ -57,13 +55,6 @@ public class Const {
         SERVER_ADDRESS.put("castle wars", "95.217.226.152:26194");
         SERVER_ADDRESS.put("crawler arena", "95.217.226.152:26004");
         SERVER_ADDRESS.put("ms:go", "95.217.226.152:26021");
-
-        TEAM_MAP.put("sharded", Team.sharded);
-        TEAM_MAP.put("crux", Team.crux);
-        TEAM_MAP.put("green", Team.green);
-        TEAM_MAP.put("purple", Team.purple);
-        TEAM_MAP.put("blue", Team.blue);
-        TEAM_MAP.put("derelict", Team.derelict);
     }
 
     public static final String RULES_UK = "1. Не спамити/флудити в чат\n"
