@@ -42,32 +42,19 @@ public class ThedimasPlugin extends Plugin {
                     .replace("%2", event.player.locale));
             String prefix = event.player.admin() ? "\uE82C" : "\uE872";
             String type = event.message.split("\\s")[0];
-            String originalMsg;
-            if (type.equals("/t") || type.equals("/a")) {
-                originalMsg = event.message.substring(event.message.indexOf(" ") + 1);
-            } else {
-                originalMsg = event.message;
-            }
             Groups.player.each(player -> {
-                String translated = originalMsg;
-                try {
-                    translated = Translator.translate(originalMsg, player.locale, "auto");
-                } catch (IOException e) {
-                    Log.info(e.getMessage());
-                } finally {
-                    String msg = Const.FORMAT.replace("%0", prefix)
-                            .replace("%1", event.player.name)
-                            .replace("%2", translated);
-                    if (type.equals("/t")) {
-                        if (player.team() == event.player.team()) {
-                            String color = player.team().color.toString();
-                            player.sendMessage("[" + color.substring(0, color.length() - 2) + "]" + "<T>[]" + msg);
+                String translated = event.message;
+                if (!event.message.startsWith("/")) {
+                    try {
+                        if(!player.locale.equals(event.player.locale())) {
+                            translated = Translator.translate(event.message, player.locale, "auto");
                         }
-                    } else if (type.equals("/a")) {
-                        if (player.admin()) {
-                            player.sendMessage("[scarlet]<A>[]" + msg);
-                        }
-                    } else {
+                    } catch (IOException e) {
+                        Log.err(e.getMessage());
+                    } finally {
+                        String msg = Const.FORMAT.replace("%0", prefix)
+                                .replace("%1", event.player.name)
+                                .replace("%2", translated);
                         player.sendMessage(msg);
                     }
                 }
@@ -77,6 +64,50 @@ public class ThedimasPlugin extends Plugin {
 
     @Override
     public void registerClientCommands(CommandHandler handler) {
+        handler.removeCommand("a");
+        handler.removeCommand("t");
+        handler.<Player>register("a", "<text...>", "Отправить сообщение администрации", (args, player) -> {
+            String message = args[0];
+            if (player.admin()) {
+                Groups.player.each(player1 -> {
+                    if (player1.admin()) {
+                        String translated = message;
+                        try {
+                            translated = Translator.translate(message, player1.locale, "auto");
+                        } catch (IOException e) {
+                            Log.err(e.getMessage());
+                        } finally {
+                            String prefix = player.admin() ? "\uE82C" : "\uE872";
+                            String msg = Const.FORMAT.replace("%0", prefix)
+                                                     .replace("%1", player.name)
+                                                     .replace("%2", translated);
+                            player1.sendMessage("<[scarlet]A[]>" + msg);
+                        }
+                    }
+                });
+            } else {
+                player.sendMessage("[scarlet]Только админы могут использовать эту команду!");
+            }
+        });
+        handler.<Player>register("t", "<text...>", "Отправить сообщение команде", (args, player) -> {
+        String message = args[0];
+            Groups.player.each(player1 -> {
+                if (player1.team() == player.team()) {
+                    String translated = message;
+                    try {
+                        translated = Translator.translate(message, player1.locale, "auto");
+                    } catch (IOException e) {
+                        Log.err(e.getMessage());
+                    } finally {
+                        String prefix = player.admin() ? "\uE82C" : "\uE872";
+                        String msg = Const.FORMAT.replace("%0", prefix)
+                                                 .replace("%1", player.name)
+                                                 .replace("%2", translated);
+                        player1.sendMessage("<[#"+ player.team().color.toString().substring(0, 6) +"]T[]>" + msg);
+                    }
+                }
+            });
+        });
         handler.<Player>register("rules", "Посмотреть список правил.", (args, player) -> {
             if (player.locale.startsWith("uk")) {
                 player.sendMessage(Const.RULES_UK);
@@ -87,26 +118,26 @@ public class ThedimasPlugin extends Plugin {
             }
         });
         handler.<Player>register("hub", "Подключиться к Хабу.", (args, player) -> Call.connect(player.con, "95.217.226.152", 26160));
-        handler.<Player>register("discord", "Получить ссылку на Discord cервер.", (args, player) -> player.sendMessage("https://discord.gg/RkbFYXFU9E"));
+        handler.<Player>register("discord", "Получить ссылку на Discord сервер.", (args, player) -> player.sendMessage("https://discord.gg/RkbFYXFU9E"));
         handler.<Player>register("spawn", "<unit> <count> <team>", "Заспавнить юнитов", (args, player) -> {
             if (!player.admin) {
-                player.sendMessage("[red]Только админы могут использовать эту команду!");
+                player.sendMessage("[scarlet]Только админы могут использовать эту команду!");
                 return;
             }
             UnitType unit = Vars.content.units().find(b -> b.name.equalsIgnoreCase(args[0]));
             if (unit == null) {
-                player.sendMessage("[red]Юнит не найден! Доступные юниты:\n\n" + Const.UNIT_LIST + "\n");
+                player.sendMessage("[scarlet]Юнит не найден! Доступные юниты:\n\n" + Const.UNIT_LIST + "\n");
                 return;
             }
             int count;
             try {
                 count = Integer.parseInt(args[1]);
             } catch (NumberFormatException e) {
-                player.sendMessage("[red]Неверный формат числа!");
+                player.sendMessage("[scarlet]Неверный формат числа!");
                 return;
             }
             if (count > 24) {
-                player.sendMessage("[red]Нельзя заспавнить больше 24 юнитов!");
+                player.sendMessage("[scarlet]Нельзя заспавнить больше 24 юнитов!");
                 return;
             }
             Team team;
@@ -130,7 +161,7 @@ public class ThedimasPlugin extends Plugin {
                     team = Team.purple;
                     break;
                 default:
-                    player.sendMessage("[red]Неверная команда. Возможные варианты:\n\n" + Const.TEAM_LIST + "\n");
+                    player.sendMessage("[scarlet]Неверная команда. Возможные варианты:\n\n" + Const.TEAM_LIST + "\n");
                     return;
             }
             for (int i = 0; count > i; i++) {
@@ -140,7 +171,7 @@ public class ThedimasPlugin extends Plugin {
         });
         handler.<Player>register("team", "<team>", "Изменить команду", (args, player) -> {
             if (!player.admin()) {
-                player.sendMessage("[red]Только админы могут использовать эту команду![]");
+                player.sendMessage("[scarlet]Только админы могут использовать эту команду![]");
                 return;
             }
             Team team;
@@ -164,7 +195,7 @@ public class ThedimasPlugin extends Plugin {
                     team = Team.purple;
                     break;
                 default:
-                    player.sendMessage("[red]Неверная команда. Возможные варианты:\n" + Const.TEAM_LIST);
+                    player.sendMessage("[scarlet]Неверная команда. Возможные варианты:\n" + Const.TEAM_LIST);
                     return;
             }
             player.team(team);
