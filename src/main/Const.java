@@ -33,7 +33,8 @@ public class Const {
             + "Anarchy\n"
             + "Castle wars\n"
             + "Crawler arena\n"
-            + "MS:GO";
+            + "MS:GO\n"
+            + "Zone capture";
 
     public static final Map<String, String> SERVER_ADDRESS = new HashMap<>();
 
@@ -50,6 +51,7 @@ public class Const {
         SERVER_ADDRESS.put("castle wars", "95.217.226.152:26194");
         SERVER_ADDRESS.put("crawler arena", "95.217.226.152:26004");
         SERVER_ADDRESS.put("ms:go", "95.217.226.152:26021");
+        SERVER_ADDRESS.put("zone capture", "135.181.22.149:26073");
     }
 
     public static final String RULES_UK = "1. Не спамити/флудити в чат\n"
