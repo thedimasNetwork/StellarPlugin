@@ -114,19 +114,28 @@ public class ThedimasPlugin extends Plugin {
             }
         });
         handler.<Player>register("hub", "Подключиться к Хабу.", (args, player) -> Call.connect(player.con, "95.217.226.152", 26160));
-        handler.<Player>register("connect", "[сервер]", "Подключиться к другому серверу.", (args, player) -> {
-            if (args.length == 0 || args[0].equalsIgnoreCase("list")) {
-                player.sendMessage("[sky]Список доступных серверов" + Const.SERVER_LIST);
+        handler.<Player>register("connect", "[сервер...]", "Подключиться к другому серверу.", (args, player) -> {
+            if (args.length == 0) {
+                player.sendMessage("[sky]Список доступных серверов:\n" + Const.SERVER_LIST);
                 return;
             }
-            if (!Const.SERVER_ADDRESS.containsKey(args[0].toLowerCase())) {
+            if (args[0].equalsIgnoreCase("list")) {
+                player.sendMessage("[sky]Список доступных серверов:\n" + Const.SERVER_LIST);
+                return;
+            }
+            String serverName = args[0] + (args.length == 2 ? args[1] : "");
+            if (!Const.SERVER_ADDRESS.containsKey(serverName.toLowerCase())) {
                 player.sendMessage("[scarlet]Такого сервера не существует. Доступные сервера:\n" + Const.SERVER_LIST);
                 return;
             }
-            String address = Const.SERVER_ADDRESS.get(args[0].toLowerCase());
+            String address = Const.SERVER_ADDRESS.get(serverName.toLowerCase());
             String ip = address.split(":")[0];
             int port = Integer.parseInt(address.split(":")[1]);
-            Call.connect(player.con, ip, port);
+            Vars.net.pingHost(ip, port, host -> {
+                Call.connect(player.con, ip, port);
+            }, e -> {
+                player.sendMessage("[scarlet]Сервер оффлайн");
+            });
         });
         handler.<Player>register("discord", "Получить ссылку на Discord сервер.", (args, player) -> player.sendMessage("https://discord.gg/RkbFYXFU9E"));
         handler.<Player>register("spawn", "<юнит> [количество] [команда]", "Заспавнить юнитов", (args, player) -> {
