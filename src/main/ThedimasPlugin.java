@@ -62,7 +62,7 @@ public class ThedimasPlugin extends Plugin {
     public void registerClientCommands(CommandHandler handler) {
         handler.removeCommand("a");
         handler.removeCommand("t");
-        handler.<Player>register("a", "<text...>", "Отправить сообщение администрации.", (args, player) -> {
+        handler.<Player>register("a", "<текст...>", "Отправить сообщение администрации.", (args, player) -> {
             String message = args[0];
             if (player.admin()) {
                 Groups.player.each(otherPlayer -> {
@@ -85,7 +85,7 @@ public class ThedimasPlugin extends Plugin {
                 player.sendMessage("[scarlet]Только админы могут использовать эту команду!");
             }
         });
-        handler.<Player>register("t", "<text...>", "Отправить сообщение команде.", (args, player) -> {
+        handler.<Player>register("t", "<текст...>", "Отправить сообщение команде.", (args, player) -> {
             String message = args[0];
             Groups.player.each(player1 -> {
                 if (player1.team() == player.team()) {
@@ -114,7 +114,7 @@ public class ThedimasPlugin extends Plugin {
             }
         });
         handler.<Player>register("hub", "Подключиться к Хабу.", (args, player) -> Call.connect(player.con, "95.217.226.152", 26160));
-        handler.<Player>register("connect", "[name]", "Подключиться к другому серверу.", (args, player) -> {
+        handler.<Player>register("connect", "[сервер]", "Подключиться к другому серверу.", (args, player) -> {
             if (args.length == 0 || args[0].equalsIgnoreCase("list")) {
                 player.sendMessage("[sky]Список доступных серверов" + Const.SERVER_LIST);
                 return;
@@ -129,7 +129,7 @@ public class ThedimasPlugin extends Plugin {
             Call.connect(player.con, ip, port);
         });
         handler.<Player>register("discord", "Получить ссылку на Discord сервер.", (args, player) -> player.sendMessage("https://discord.gg/RkbFYXFU9E"));
-        handler.<Player>register("spawn", "<Юнит> [Количество] [Команда]", "Заспавнить юнитов", (args, player) -> {
+        handler.<Player>register("spawn", "<юнит> [количество] [команда]", "Заспавнить юнитов", (args, player) -> {
             if (!player.admin) {
                 player.sendMessage("[scarlet]Только админы могут использовать эту команду!");
                 return;
@@ -158,7 +158,7 @@ public class ThedimasPlugin extends Plugin {
             }
             player.sendMessage("[green]Ты заспавнил " + "[accent]" + count + " " + unit + " " + "[green]для команды " + "[#" + team.color.toString().substring(0, 6) + "]" + team);
         });
-        handler.<Player>register("team", "<team>", "Изменить команду", (args, player) -> {
+        handler.<Player>register("team", "<команда>", "Изменить команду", (args, player) -> {
             if (!player.admin()) {
                 player.sendMessage("[scarlet]Только админы могут использовать эту команду![]");
                 return;
