@@ -129,7 +129,7 @@ public class ThedimasPlugin extends Plugin {
             Call.connect(player.con, ip, port);
         });
         handler.<Player>register("discord", "Получить ссылку на Discord сервер.", (args, player) -> player.sendMessage("https://discord.gg/RkbFYXFU9E"));
-        handler.<Player>register("spawn", "<unit> <count> <team>", "Заспавнить юнитов", (args, player) -> {
+        handler.<Player>register("spawn", "<Юнит> [Количество] [Команда]", "Заспавнить юнитов", (args, player) -> {
             if (!player.admin) {
                 player.sendMessage("[scarlet]Только админы могут использовать эту команду!");
                 return;
@@ -139,18 +139,16 @@ public class ThedimasPlugin extends Plugin {
                 player.sendMessage("[scarlet]Юнит не найден! Доступные юниты:\n\n" + Const.UNIT_LIST + "\n");
                 return;
             }
-            int count;
-            try {
-                count = Integer.parseInt(args[1]);
-            } catch (NumberFormatException e) {
-                player.sendMessage("[scarlet]Неверный формат числа!");
-                return;
-            }
+            int count = (args.length > 1 && Strings.canParseInt(args[1])) ? Strings.parseInt(args[1]) : 1;
             if (count > 24) {
                 player.sendMessage("[scarlet]Нельзя заспавнить больше 24 юнитов!");
                 return;
             }
-            Team team = Structs.find(Team.baseTeams, t -> t.name.equalsIgnoreCase(args[2]));
+            if (count < 1) {
+                player.sendMessage("[scarlet]Нельзя заспавнить меньше 1 юнита!");
+                return;
+            }
+            Team team = args.length > 2 ? Structs.find(Team.baseTeams, t -> t.name.equalsIgnoreCase(args[2])) : player.team();
             if (team == null) {
                 player.sendMessage("[scarlet]Неверная команда. Возможные варианты:\n" + Const.TEAM_LIST);
                 return;
