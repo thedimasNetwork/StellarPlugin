@@ -61,7 +61,9 @@ public class ThedimasPlugin extends Plugin {
     @Override
     public void registerClientCommands(CommandHandler handler) {
         handler.removeCommand("a");
+
         handler.removeCommand("t");
+
         handler.<Player>register("a", "<текст...>", "Отправить сообщение администрации.", (args, player) -> {
             String message = args[0];
             if (player.admin()) {
@@ -85,6 +87,7 @@ public class ThedimasPlugin extends Plugin {
                 player.sendMessage("[scarlet]Только админы могут использовать эту команду!");
             }
         });
+
         handler.<Player>register("t", "<текст...>", "Отправить сообщение команде.", (args, player) -> {
             String message = args[0];
             Groups.player.each(player1 -> {
@@ -104,6 +107,7 @@ public class ThedimasPlugin extends Plugin {
                 }
             });
         });
+
         handler.<Player>register("rules", "Посмотреть список правил.", (args, player) -> {
             if (player.locale.startsWith("uk")) {
                 player.sendMessage(Const.RULES_UK);
@@ -113,7 +117,11 @@ public class ThedimasPlugin extends Plugin {
                 player.sendMessage(Const.RULES_EN);
             }
         });
+
         handler.<Player>register("hub", "Подключиться к Хабу.", (args, player) -> Call.connect(player.con, "95.217.226.152", 26160));
+
+        handler.<Player>register("discord", "Получить ссылку на Discord сервер.", (args, player) -> player.sendMessage("https://discord.gg/RkbFYXFU9E"));
+
         handler.<Player>register("connect", "[сервер...]", "Подключиться к другому серверу.", (args, player) -> {
             if (args.length == 0) {
                 player.sendMessage("[sky]Список доступных серверов:\n" + Const.SERVER_LIST);
@@ -131,13 +139,9 @@ public class ThedimasPlugin extends Plugin {
             String address = Const.SERVER_ADDRESS.get(serverName.toLowerCase());
             String ip = address.split(":")[0];
             int port = Integer.parseInt(address.split(":")[1]);
-            Vars.net.pingHost(ip, port, host -> {
-                Call.connect(player.con, ip, port);
-            }, e -> {
-                player.sendMessage("[scarlet]Сервер оффлайн");
-            });
+            Vars.net.pingHost(ip, port, host -> Call.connect(player.con, ip, port), e -> player.sendMessage("[scarlet]Сервер оффлайн"));
         });
-        handler.<Player>register("discord", "Получить ссылку на Discord сервер.", (args, player) -> player.sendMessage("https://discord.gg/RkbFYXFU9E"));
+
         handler.<Player>register("spawn", "<юнит> [количество] [команда]", "Заспавнить юнитов", (args, player) -> {
             if (!player.admin) {
                 player.sendMessage("[scarlet]Только админы могут использовать эту команду!");
@@ -167,6 +171,7 @@ public class ThedimasPlugin extends Plugin {
             }
             player.sendMessage("[green]Ты заспавнил " + "[accent]" + count + " " + unit + " " + "[green]для команды " + "[#" + team.color.toString().substring(0, 6) + "]" + team);
         });
+
         handler.<Player>register("team", "<команда>", "Изменить команду", (args, player) -> {
             if (!player.admin()) {
                 player.sendMessage("[scarlet]Только админы могут использовать эту команду![]");
@@ -179,6 +184,14 @@ public class ThedimasPlugin extends Plugin {
             }
             player.team(team);
             player.sendMessage("Команда изменена. Новая команда - [#" + team.color.toString().substring(0, 6) + "]" + team);
+        });
+
+        handler.<Player>register("end", "Принудительно сменить карту", (args, player) -> {
+            if (!player.admin) {
+                player.sendMessage("[scarlet]Только админы могут использовать эту команду![]");
+            } else {
+                Events.fire(new EventType.GameOverEvent(Team.crux));
+            }
         });
     }
 }
