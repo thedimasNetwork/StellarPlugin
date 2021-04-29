@@ -12,6 +12,7 @@ import java.io.IOException;
 
 import static mindustry.Vars.netServer;
 
+@SuppressWarnings("unused")
 public class ThedimasPlugin extends Plugin {
 
     //called when game initializes
