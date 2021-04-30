@@ -1,24 +1,41 @@
 package main;
 
 import arc.*;
+import arc.struct.Seq;
+import main.history.entry.BlockEntry;
+import main.history.entry.ConfigEntry;
+import main.history.entry.RotateEntry;
+import main.history.struct.Seqs;
 import mindustry.Vars;
 import mindustry.gen.*;
 import mindustry.game.*;
 import mindustry.mod.*;
 import arc.util.*;
+import mindustry.net.Administration;
 import mindustry.type.UnitType;
 
+import main.history.struct.CacheSeq;
+import main.history.entry.HistoryEntry;
+import mindustry.world.Tile;
+import mindustry.world.blocks.logic.LogicBlock;
+
 import java.io.IOException;
+import java.text.MessageFormat;
+import java.time.Duration;
 
 import static mindustry.Vars.netServer;
+import static mindustry.Vars.world;
 
-@SuppressWarnings("unused")
+@SuppressWarnings({"unused", "unchecked"})
 public class ThedimasPlugin extends Plugin {
+
+    private CacheSeq<HistoryEntry>[][] history;
 
     //called when game initializes
     @Override
     public void init() {
         Log.info("thedimasPlugin launched!");
+
         Events.on(EventType.PlayerJoin.class, event -> { // called when player join
             Log.info(event.player.name + " has joined the server");
             Log.info("\tLocale: " + event.player.locale);
@@ -33,10 +50,12 @@ public class ThedimasPlugin extends Plugin {
             }
             netServer.admins.addChatFilter((player, text) -> null);
         });
+
         Events.on(EventType.PlayerLeave.class, event -> { // called when player leave
             Call.sendMessage("[scarlet]- [accent]" + event.player.name + "[scarlet] вышел");
             Log.info(event.player.name + " has disconnected from the server");
         });
+
         Events.on(EventType.PlayerChatEvent.class, event -> {
             String prefix = event.player.admin() ? "\uE82C" : "\uE872";
             Groups.player.each(player -> {
@@ -57,6 +76,59 @@ public class ThedimasPlugin extends Plugin {
                 }
             });
         });
+
+        // История
+        Events.on(EventType.WorldLoadEvent.class, event -> {
+            history = new CacheSeq[world.width()][world.height()];
+            for (Tile tile : world.tiles) {
+                history[tile.x][tile.y] = Seqs.newBuilder()
+                                              .maximumSize(15)
+                                              .expireAfterWrite(Duration.ofMillis(1800000))
+                                              .build();
+            }
+        });
+
+        netServer.admins.addActionFilter(action -> {
+            if (action.type == Administration.ActionType.rotate) {
+                HistoryEntry entry = new RotateEntry(action.player, action.tile.build.block, action.rotation);
+                history[action.tile.x][action.tile.y].add(entry);
+            }
+            return true;
+        });
+
+        Events.on(EventType.BlockBuildEndEvent.class, event -> {
+            HistoryEntry historyEntry = new BlockEntry(event);
+            Seq<Tile> linkedTile = event.tile.getLinkedTiles(new Seq<>());
+            for (Tile tile : linkedTile) {
+                history[tile.x][tile.y].add(historyEntry);
+            }
+        });
+
+        Events.on(EventType.ConfigEvent.class, event -> {
+            if (event.tile.block instanceof LogicBlock || event.player == null || event.tile.tileX() > world.width() || event.tile.tileY() > world.height()) {
+                return;
+            }
+
+            CacheSeq<HistoryEntry> entries = history[event.tile.tileX()][event.tile.tileY()];
+            boolean connect = true;
+
+            HistoryEntry last = entries.peek();
+            if (!entries.isEmpty() && last instanceof ConfigEntry) {
+                ConfigEntry lastConfigEntry = (ConfigEntry) last;
+
+                connect = !event.tile.getPowerConnections(new Seq<>()).isEmpty() &&
+                        !(lastConfigEntry.value instanceof Integer && event.value instanceof Integer &&
+                                (int) lastConfigEntry.value == (int) event.value && lastConfigEntry.connect);
+            }
+
+            HistoryEntry entry = new ConfigEntry(event, connect);
+
+            Seq<Tile> linkedTile = event.tile.tile.getLinkedTiles(new Seq<>());
+            for (Tile tile : linkedTile) {
+                history[tile.x][tile.y].add(entry);
+            }
+        });
+        // конец истории
     }
 
     @Override
@@ -65,7 +137,7 @@ public class ThedimasPlugin extends Plugin {
 
         handler.removeCommand("t");
 
-        handler.<Player>register("a", "<текст...>", "Отправить сообщение администрации.", (args, player) -> {
+        handler.<Player>register("a", "<текст...>", "Отправить сообщение администрации", (args, player) -> {
             String message = args[0];
             if (player.admin()) {
                 Groups.player.each(otherPlayer -> {
@@ -89,7 +161,7 @@ public class ThedimasPlugin extends Plugin {
             }
         });
 
-        handler.<Player>register("t", "<текст...>", "Отправить сообщение команде.", (args, player) -> {
+        handler.<Player>register("t", "<текст...>", "Отправить сообщение команде", (args, player) -> {
             String message = args[0];
             Groups.player.each(player1 -> {
                 if (player1.team() == player.team()) {
@@ -109,7 +181,7 @@ public class ThedimasPlugin extends Plugin {
             });
         });
 
-        handler.<Player>register("rules", "Посмотреть список правил.", (args, player) -> {
+        handler.<Player>register("rules", "Посмотреть список правил", (args, player) -> {
             if (player.locale.startsWith("uk")) {
                 player.sendMessage(Const.RULES_UK);
             } else if (player.locale.startsWith("ru")) {
@@ -119,11 +191,11 @@ public class ThedimasPlugin extends Plugin {
             }
         });
 
-        handler.<Player>register("hub", "Подключиться к Хабу.", (args, player) -> Call.connect(player.con, "95.217.224.159", 26788));
+        handler.<Player>register("hub", "Подключиться к Хабу", (args, player) -> Call.connect(player.con, "95.217.224.159", 26788));
 
-        handler.<Player>register("discord", "Получить ссылку на Discord сервер.", (args, player) -> player.sendMessage("https://discord.gg/RkbFYXFU9E"));
+        handler.<Player>register("discord", "Получить ссылку на Discord сервер", (args, player) -> player.sendMessage("https://discord.gg/RkbFYXFU9E"));
 
-        handler.<Player>register("connect", "[сервер...]", "Подключиться к другому серверу.", (args, player) -> {
+        handler.<Player>register("connect", "[сервер...]", "Подключиться к другому серверу", (args, player) -> {
             if (args.length == 0) {
                 player.sendMessage("[sky]Список доступных серверов:\n" + Const.SERVER_LIST);
                 return;
@@ -141,6 +213,29 @@ public class ThedimasPlugin extends Plugin {
             String ip = address.split(":")[0];
             int port = Integer.parseInt(address.split(":")[1]);
             Vars.net.pingHost(ip, port, host -> Call.connect(player.con, ip, port), e -> player.sendMessage("[scarlet]Сервер оффлайн"));
+        });
+
+        handler.<Player>register("h", "<x> <y>", "Посмотреть историю блока", (args, player) -> {
+            if (!Strings.canParseInt(args[0]) || !Strings.canParseInt(args[1])) {
+                player.sendMessage("Неверный формат координат");
+                return;
+            }
+            int x = Integer.parseInt(args[0]), y = Integer.parseInt(args[1]);
+            StringBuilder message = new StringBuilder(MessageFormat.format("[orange]История блока ([lightgray]{0}[gray],[lightgray]{1}[orange])", x, y));
+
+            CacheSeq<HistoryEntry> entries = history[x][y];
+            entries.cleanUp();
+            if (entries.isOverflown()) {
+                message.append("\n[lightgray]... очень много записей");
+            }
+            if (entries.isEmpty()) {
+                message.append("\\n[royal]* [lightgray]записи отсутствуют");
+            } else {
+                for (HistoryEntry entry : entries) {
+                    message.append("\n").append(entry.getMessage());
+                }
+            }
+            player.sendMessage(message.toString());
         });
 
         handler.<Player>register("spawn", "<юнит> [количество] [команда]", "Заспавнить юнитов", (args, player) -> {
