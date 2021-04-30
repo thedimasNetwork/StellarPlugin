@@ -39,7 +39,7 @@ public class Const {
             + "Zone capture";
 
     public static final StringMap SERVER_ADDRESS = StringMap.of(
-            "hub", "95.217.226.152:26160",
+            "hub", "95.217.224.159:26788",
             "pvp", "178.170.47.34:20566",
             "sandbox", "178.170.47.34:20594",
             "survival", "178.170.47.34:20745",
