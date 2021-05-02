@@ -9,6 +9,7 @@ import main.history.struct.Seqs;
 import mindustry.Vars;
 import mindustry.content.Blocks;
 import mindustry.content.Items;
+import mindustry.core.NetClient;
 import mindustry.gen.*;
 import mindustry.game.*;
 import mindustry.mod.*;
@@ -346,6 +347,24 @@ public class ThedimasPlugin extends Plugin {
             }
             player.team(team);
             player.sendMessage("Команда изменена. Новая команда - [#" + team.color.toString().substring(0, 6) + "]" + team);
+        });
+
+        handler.<Player>register("kill", "[username...]", "Убить игрока", (arg, player) -> {
+            if (!player.admin()) {
+                player.sendMessage("[scarlet]Только админы могут использовать эту команду![]");
+                return;
+            }
+
+            if (arg.length == 0) {
+                player.unit().kill();
+            } else {
+                Player other = Groups.player.find(p -> Strings.stripColors(p.name()).equalsIgnoreCase(arg[0]));
+                if (other != null) {
+                    other.unit().kill();
+                } else {
+                    player.sendMessage("[scarlet]Такого игрока нет");
+                }
+            }
         });
 
         handler.<Player>register("end", "Принудительно сменить карту", (args, player) -> {
