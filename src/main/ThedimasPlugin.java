@@ -40,7 +40,11 @@ public class ThedimasPlugin extends Plugin {
     public void init() {
         Log.info("thedimasPlugin launched!");
 
+        Vars.state.serverPaused = true;
+
         Events.on(EventType.PlayerJoin.class, event -> {
+            Vars.state.serverPaused = false;
+
             Log.info(MessageFormat.format(Const.JOIN_LOG_FORMAT, event.player.name, event.player.locale, event.player.con.address));
             Call.sendMessage("[lime]+ [accent]" + event.player.name + "[lime] присоединился");
 
@@ -54,6 +58,10 @@ public class ThedimasPlugin extends Plugin {
         });
 
         Events.on(EventType.PlayerLeave.class, event -> {
+            if (Groups.player.size() < 1) {
+                Vars.state.serverPaused = true;
+            }
+
             Log.info(event.player.name + " has disconnected from the server");
             Call.sendMessage("[scarlet]- [accent]" + event.player.name + "[scarlet] вышел");
         });
