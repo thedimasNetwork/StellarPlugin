@@ -7,6 +7,8 @@ import main.history.entry.ConfigEntry;
 import main.history.entry.RotateEntry;
 import main.history.struct.Seqs;
 import mindustry.Vars;
+import mindustry.content.Blocks;
+import mindustry.content.Items;
 import mindustry.gen.*;
 import mindustry.game.*;
 import mindustry.mod.*;
@@ -29,6 +31,8 @@ import static mindustry.Vars.world;
 @SuppressWarnings({"unused", "unchecked"})
 public class ThedimasPlugin extends Plugin {
 
+    private final Interval interval = new Interval();
+
     private CacheSeq<HistoryEntry>[][] history;
 
     //called when game initializes
@@ -36,11 +40,10 @@ public class ThedimasPlugin extends Plugin {
     public void init() {
         Log.info("thedimasPlugin launched!");
 
-        Events.on(EventType.PlayerJoin.class, event -> { // called when player join
-            Log.info(event.player.name + " has joined the server");
-            Log.info("\tLocale: " + event.player.locale);
-            Log.info("\tIP: " + event.player.con.address);
+        Events.on(EventType.PlayerJoin.class, event -> {
+            Log.info(MessageFormat.format(Const.JOIN_LOG_FORMAT, event.player.name, event.player.locale, event.player.con.address));
             Call.sendMessage("[lime]+ [accent]" + event.player.name + "[lime] присоединился");
+
             if (event.player.locale.startsWith("uk")) {
                 Call.infoMessage(event.player.con, Const.WELCOME_UK);
             } else if (event.player.locale.startsWith("ru")) {
@@ -48,14 +51,35 @@ public class ThedimasPlugin extends Plugin {
             } else {
                 Call.infoMessage(event.player.con, Const.WELCOME_EN);
             }
-            netServer.admins.addChatFilter((player, text) -> null);
         });
 
-        Events.on(EventType.PlayerLeave.class, event -> { // called when player leave
-            Call.sendMessage("[scarlet]- [accent]" + event.player.name + "[scarlet] вышел");
+        Events.on(EventType.PlayerLeave.class, event -> {
             Log.info(event.player.name + " has disconnected from the server");
+            Call.sendMessage("[scarlet]- [accent]" + event.player.name + "[scarlet] вышел");
         });
 
+        // блок "торийки"
+        Events.on(EventType.DepositEvent.class, event -> {
+            Building building = event.tile;
+            Player player = event.player;
+            if (building.block() == Blocks.thoriumReactor && event.item == Items.thorium && player.team().cores().contains(c -> event.tile.dst(c.x, c.y) < 300)) {
+                Groups.player.each(p -> p.sendMessage(MessageFormat.format("[scarlet]ВНИМАНИЕ! [accent]{0} положил торий в реактор!\n x: [lightgray]{1}[accent], y: [lightgray]{2}", player, building.tileX(), building.tileY())));
+            }
+        });
+
+        Events.on(EventType.BuildSelectEvent.class, event -> {
+            if (!event.breaking && event.builder != null && event.builder.buildPlan() != null &&
+                    event.builder.buildPlan().block == Blocks.thoriumReactor && event.builder.isPlayer() &&
+                    event.team.cores().contains(c -> event.tile.dst(c.x, c.y) < 300)) {
+                Player player = event.builder.getPlayer();
+                if (interval.get(300)) {
+                    Groups.player.each(p -> p.sendMessage(MessageFormat.format("[scarlet]ВНИМАНИЕ! [accent]{0} строит ториевый реактор возле ядра!\nx: [lightgray]{1}[accent], y: [lightgray]{2}", player.name, event.tile.x, event.tile.y)));
+                }
+            }
+        });
+        // конец блока
+
+        // блок "чат"
         Events.on(EventType.PlayerChatEvent.class, event -> {
             String prefix = event.player.admin() ? "\uE82C" : "\uE872";
             Groups.player.each(player -> {
@@ -68,23 +92,22 @@ public class ThedimasPlugin extends Plugin {
                     } catch (IOException e) {
                         Log.err(e.getMessage());
                     } finally {
-                        String msg = Const.FORMAT.replace("%0", prefix)
-                                                 .replace("%1", event.player.name)
-                                                 .replace("%2", translated);
+                        String msg = MessageFormat.format(Const.CHAT_FORMAT, prefix, event.player.name, translated);
                         player.sendMessage(msg);
                     }
                 }
             });
         });
+        // конец блока
 
-        // История
+        // блок "история"
         Events.on(EventType.WorldLoadEvent.class, event -> {
             history = new CacheSeq[world.width()][world.height()];
             for (Tile tile : world.tiles) {
                 history[tile.x][tile.y] = Seqs.newBuilder()
-                                              .maximumSize(15)
-                                              .expireAfterWrite(Duration.ofMillis(1800000))
-                                              .build();
+                        .maximumSize(15)
+                        .expireAfterWrite(Duration.ofMillis(1800000))
+                        .build();
             }
         });
 
@@ -128,7 +151,7 @@ public class ThedimasPlugin extends Plugin {
                 history[tile.x][tile.y].add(entry);
             }
         });
-        // конец истории
+        // конец блока
     }
 
     @Override
@@ -149,9 +172,7 @@ public class ThedimasPlugin extends Plugin {
                             Log.err(e.getMessage());
                         } finally {
                             String prefix = player.admin() ? "\uE82C" : "\uE872";
-                            String msg = Const.FORMAT.replace("%0", prefix)
-                                                     .replace("%1", player.name)
-                                                     .replace("%2", translated);
+                            String msg = MessageFormat.format(Const.CHAT_FORMAT, prefix, player.name, translated);
                             otherPlayer.sendMessage("<[scarlet]A[]>" + msg);
                         }
                     }
@@ -163,19 +184,17 @@ public class ThedimasPlugin extends Plugin {
 
         handler.<Player>register("t", "<текст...>", "Отправить сообщение команде", (args, player) -> {
             String message = args[0];
-            Groups.player.each(player1 -> {
-                if (player1.team() == player.team()) {
+            Groups.player.each(otherPlayer -> {
+                if (otherPlayer.team() == player.team()) {
                     String translated = message;
                     try {
-                        translated = Translator.translate(message, player1.locale, "auto");
+                        translated = Translator.translate(message, otherPlayer.locale, "auto");
                     } catch (IOException e) {
                         Log.err(e.getMessage());
                     } finally {
                         String prefix = player.admin() ? "\uE82C" : "\uE872";
-                        String msg = Const.FORMAT.replace("%0", prefix)
-                                                 .replace("%1", player.name)
-                                                 .replace("%2", translated);
-                        player1.sendMessage("<[#" + player.team().color.toString().substring(0, 6) + "]T[]>" + msg);
+                        String msg = MessageFormat.format(Const.CHAT_FORMAT, prefix, player.name, translated);
+                        otherPlayer.sendMessage("<[#" + player.team().color.toString().substring(0, 6) + "]T[]>" + msg);
                     }
                 }
             });
@@ -220,21 +239,24 @@ public class ThedimasPlugin extends Plugin {
                 player.sendMessage("Неверный формат координат");
                 return;
             }
-            int x = Integer.parseInt(args[0]), y = Integer.parseInt(args[1]);
-            StringBuilder message = new StringBuilder(MessageFormat.format("[orange]История блока ([lightgray]{0}[gray],[lightgray]{1}[orange])", x, y));
+
+            int x = Integer.parseInt(args[0]);
+            int y = Integer.parseInt(args[1]);
 
             CacheSeq<HistoryEntry> entries = history[x][y];
             entries.cleanUp();
-            if (entries.isOverflown()) {
-                message.append("\n[lightgray]... очень много записей");
-            }
+
+            StringBuilder message = new StringBuilder(MessageFormat.format("[orange]История блока ([lightgray]{0}[gray],[lightgray]{1}[orange])", x, y));
             if (entries.isEmpty()) {
                 message.append("\\n[royal]* [lightgray]записи отсутствуют");
+            } else if (entries.isOverflown()) {
+                message.append("\n[lightgray]... слишком много записей");
             } else {
                 for (HistoryEntry entry : entries) {
                     message.append("\n").append(entry.getMessage());
                 }
             }
+
             player.sendMessage(message.toString());
         });
 
