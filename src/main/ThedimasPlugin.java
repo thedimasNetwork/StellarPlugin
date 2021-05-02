@@ -42,6 +42,8 @@ public class ThedimasPlugin extends Plugin {
 
         Vars.state.serverPaused = true;
 
+        netServer.admins.addChatFilter((player, message) -> null);
+
         Events.on(EventType.PlayerJoin.class, event -> {
             Vars.state.serverPaused = false;
 
