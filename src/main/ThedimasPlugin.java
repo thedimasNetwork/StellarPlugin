@@ -1,7 +1,6 @@
 package main;
 
 import arc.*;
-import arc.struct.ObjectSet;
 import arc.struct.Seq;
 import main.history.entry.BlockEntry;
 import main.history.entry.ConfigEntry;
@@ -15,7 +14,6 @@ import mindustry.game.*;
 import mindustry.mod.*;
 import arc.util.*;
 import mindustry.net.Administration;
-import mindustry.net.NetConnection;
 import mindustry.type.UnitType;
 
 import main.history.struct.CacheSeq;
@@ -358,11 +356,51 @@ public class ThedimasPlugin extends Plugin {
                 if (otherPlayer != null) {
                     otherPlayer.team(team);
                     otherPlayer.sendMessage("Вашу команду изменили на [#" + team.color.toString().substring(0, 6) + "]" + team);
-                    player.sendMessage("Вы изменили команду игрока " + otherPlayer.name + " на [#" + team.color.toString().substring(0, 6) + "]" + team);
+                    player.sendMessage("Вы изменили команду игрока " + otherPlayer.name + " []на [#" + team.color.toString().substring(0, 6) + "]" + team);
                 } else {
                     player.sendMessage("[scarlet]Игрока с таким ником нет на сервере");
                 }
             }
+        });
+
+        handler.<Player>register("tp", "<x> <y> [name...]", "Teleport to position or player (replace all spaces with '_' in the name)", (args, player) -> {
+            if (!player.admin()) {
+                player.sendMessage("[scarlet]Только админы могут использовать эту команду![]");
+                return;
+            }
+
+            if (!Strings.canParseInt(args[0]) || !Strings.canParseInt(args[1])) {
+                player.sendMessage("[scarlet]Неверный формат координат!");
+                return;
+            }
+
+            int x = Integer.parseInt(args[0]);
+            int y = Integer.parseInt(args[1]);
+
+            if (x > world.width() || x < 0 || y > world.height() || y < 0) {
+                player.sendMessage("[scarlet]Неверные координаты. Максимум: [orange]" + world.width() + "[], [orange]" + world.height() + "[]. Минимум : [orange]0[], [orange]0[].");
+                return;
+            }
+
+            if (args.length == 2) {
+                Player otherPlayer = Groups.player.find(p -> Strings.stripGlyphs(Strings.stripColors(p.name())).equalsIgnoreCase(args[0]));
+                if (otherPlayer == null) {
+                    player.sendMessage("[scarlet]Игрока с таким ником нет на сервере");
+                } else {
+                    otherPlayer.unit().set(x * 8, y * 8);
+                    Call.setPosition(otherPlayer.con, x * 8, y * 8);
+                    otherPlayer.snapSync();
+
+                    otherPlayer.sendMessage("Вас телепортировали на координаты [accent]" + x + "[], [accent]" + y);
+                    player.sendMessage("Вы телепортировали " + player.name + " []на координаты [accent]" + x + "[], [accent]" + y);
+                }
+            }
+
+            player.unit().set(x * 8, y * 8);
+            Call.setPosition(player.con, x * 8, y * 8);
+            player.snapSync();
+
+            player.sendMessage("Вы телепортированы на координаты [accent]" + x + "[], [accent]" + y);
         });
 
         handler.<Player>register("kill", "[username...]", "Убить игрока", (args, player) -> {
@@ -374,9 +412,9 @@ public class ThedimasPlugin extends Plugin {
             if (args.length == 0) {
                 player.unit().kill();
             } else {
-                Player other = Groups.player.find(p -> Strings.stripGlyphs(Strings.stripColors(p.name())).equalsIgnoreCase(args[0]));
-                if (other != null) {
-                    other.unit().kill();
+                Player otherPlayer = Groups.player.find(p -> Strings.stripGlyphs(Strings.stripColors(p.name())).equalsIgnoreCase(args[0]));
+                if (otherPlayer != null) {
+                    otherPlayer.unit().kill();
                 } else {
                     player.sendMessage("[scarlet]Игрока с таким ником нет на сервере");
                 }
