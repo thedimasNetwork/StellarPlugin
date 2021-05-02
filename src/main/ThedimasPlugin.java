@@ -31,6 +31,8 @@ import static mindustry.Vars.world;
 @SuppressWarnings({"unused", "unchecked"})
 public class ThedimasPlugin extends Plugin {
 
+    private boolean autoPause = true;
+
     private final Interval interval = new Interval();
 
     private CacheSeq<HistoryEntry>[][] history;
@@ -45,7 +47,10 @@ public class ThedimasPlugin extends Plugin {
         netServer.admins.addChatFilter((player, message) -> null);
 
         Events.on(EventType.PlayerJoin.class, event -> {
-            Vars.state.serverPaused = false;
+            if (Groups.player.size() >= 1 && autoPause && Vars.state.serverPaused) {
+                Vars.state.serverPaused = false;
+                Log.info("auto-pause: " + Groups.player.size() + " player(s) connected -> Game unpaused...");
+            }
 
             Log.info(MessageFormat.format(Const.JOIN_LOG_FORMAT, event.player.name, event.player.locale, event.player.con.address));
             Call.sendMessage("[lime]+ [accent]" + event.player.name + "[lime] присоединился");
@@ -60,8 +65,9 @@ public class ThedimasPlugin extends Plugin {
         });
 
         Events.on(EventType.PlayerLeave.class, event -> {
-            if (Groups.player.size() < 1) {
+            if (Groups.player.size() - 1 < 1 && autoPause) {
                 Vars.state.serverPaused = true;
+                Log.info("auto-pause: " + (Groups.player.size() - 1) + " player connected -> Game paused...");
             }
 
             Log.info(event.player.name + " has disconnected from the server");
@@ -91,10 +97,10 @@ public class ThedimasPlugin extends Plugin {
 
         // блок "чат"
         Events.on(EventType.PlayerChatEvent.class, event -> {
-            String prefix = event.player.admin() ? "\uE82C" : "\uE872";
-            Groups.player.each(player -> {
-                String translated = event.message;
-                if (!event.message.startsWith("/")) {
+            if (!event.message.startsWith("/")) {
+                String prefix = event.player.admin() ? "\uE82C" : "\uE872";
+                Groups.player.each(player -> {
+                    String translated = event.message;
                     try {
                         if (!player.locale.equals(event.player.locale())) {
                             translated = Translator.translate(event.message, player.locale, "auto");
@@ -105,8 +111,8 @@ public class ThedimasPlugin extends Plugin {
                         String msg = MessageFormat.format(Const.CHAT_FORMAT, prefix, event.player.name, translated);
                         player.sendMessage(msg);
                     }
-                }
-            });
+                });
+            }
         });
         // конец блока
 
@@ -162,6 +168,34 @@ public class ThedimasPlugin extends Plugin {
             }
         });
         // конец блока
+    }
+
+    @Override
+    public void registerServerCommands(CommandHandler handler) {
+        handler.register("auto-pause", "[on|off]", "Pause the game if there is no one connected", arg -> {
+            if (arg.length == 0) {
+                if (autoPause) {
+                    Log.info("Auto pause is enabled");
+                } else {
+                    Log.info("Auto pause disabled");
+                }
+            }
+            if (arg[0].equalsIgnoreCase("off")) {
+                autoPause = false;
+                Log.info("Auto pause is disabled");
+
+                Vars.state.serverPaused = false;
+                Log.info("auto-pause: " + Groups.player.size() + " player(s) connected -> Game unpaused...");
+            } else if (arg[0].equalsIgnoreCase("on")) {
+                autoPause = true;
+                Log.info("Auto pause is enabled");
+
+                if (Groups.player.size() < 1 && autoPause) {
+                    Vars.state.serverPaused = true;
+                    Log.info("auto-pause: " + Groups.player.size() + " player connected -> Game paused...");
+                }
+            }
+        });
     }
 
     @Override
