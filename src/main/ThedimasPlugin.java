@@ -1,6 +1,7 @@
 package main;
 
 import arc.*;
+import arc.struct.ObjectSet;
 import arc.struct.Seq;
 import main.history.entry.BlockEntry;
 import main.history.entry.ConfigEntry;
@@ -9,12 +10,12 @@ import main.history.struct.Seqs;
 import mindustry.Vars;
 import mindustry.content.Blocks;
 import mindustry.content.Items;
-import mindustry.core.NetClient;
 import mindustry.gen.*;
 import mindustry.game.*;
 import mindustry.mod.*;
 import arc.util.*;
 import mindustry.net.Administration;
+import mindustry.net.NetConnection;
 import mindustry.type.UnitType;
 
 import main.history.struct.CacheSeq;
@@ -173,21 +174,21 @@ public class ThedimasPlugin extends Plugin {
 
     @Override
     public void registerServerCommands(CommandHandler handler) {
-        handler.register("auto-pause", "[on|off]", "Pause the game if there is no one connected", arg -> {
-            if (arg.length == 0) {
+        handler.register("auto-pause", "[on|off]", "Pause the game if there is no one connected", args -> {
+            if (args.length == 0) {
                 if (autoPause) {
                     Log.info("Auto pause is enabled");
                 } else {
                     Log.info("Auto pause disabled");
                 }
             }
-            if (arg[0].equalsIgnoreCase("off")) {
+            if (args[0].equalsIgnoreCase("off")) {
                 autoPause = false;
                 Log.info("Auto pause is disabled");
 
                 Vars.state.serverPaused = false;
                 Log.info("auto-pause: " + Groups.player.size() + " player(s) connected -> Game unpaused...");
-            } else if (arg[0].equalsIgnoreCase("on")) {
+            } else if (args[0].equalsIgnoreCase("on")) {
                 autoPause = true;
                 Log.info("Auto pause is enabled");
 
@@ -310,11 +311,13 @@ public class ThedimasPlugin extends Plugin {
                 player.sendMessage("[scarlet]Только админы могут использовать эту команду!");
                 return;
             }
+
             UnitType unit = Vars.content.units().find(b -> b.name.equalsIgnoreCase(args[0]));
             if (unit == null) {
                 player.sendMessage("[scarlet]Юнит не найден! Доступные юниты:\n\n" + Const.UNIT_LIST + "\n");
                 return;
             }
+
             int count = (args.length > 1 && Strings.canParseInt(args[1])) ? Strings.parseInt(args[1]) : 1;
             if (count > 24) {
                 player.sendMessage("[scarlet]Нельзя заспавнить больше 24 юнитов!");
@@ -324,18 +327,20 @@ public class ThedimasPlugin extends Plugin {
                 player.sendMessage("[scarlet]Нельзя заспавнить меньше 1 юнита!");
                 return;
             }
+
             Team team = args.length > 2 ? Structs.find(Team.baseTeams, t -> t.name.equalsIgnoreCase(args[2])) : player.team();
             if (team == null) {
                 player.sendMessage("[scarlet]Неверная команда. Возможные варианты:\n" + Const.TEAM_LIST);
                 return;
             }
+
             for (int i = 0; count > i; i++) {
                 unit.spawn(team, player.x, player.y);
             }
             player.sendMessage("[green]Ты заспавнил " + "[accent]" + count + " " + unit + " " + "[green]для команды " + "[#" + team.color.toString().substring(0, 6) + "]" + team);
         });
 
-        handler.<Player>register("team", "<команда>", "Изменить команду", (args, player) -> {
+        handler.<Player>register("team", "<команда> [username...]", "Изменить команду", (args, player) -> {
             if (!player.admin()) {
                 player.sendMessage("[scarlet]Только админы могут использовать эту команду![]");
                 return;
@@ -345,24 +350,35 @@ public class ThedimasPlugin extends Plugin {
                 player.sendMessage("[scarlet]Неверная команда. Возможные варианты:\n" + Const.TEAM_LIST);
                 return;
             }
-            player.team(team);
-            player.sendMessage("Команда изменена. Новая команда - [#" + team.color.toString().substring(0, 6) + "]" + team);
+            if (args.length == 1) {
+                player.team(team);
+                player.sendMessage("Ваша команда изменена. Новая команда - [#" + team.color.toString().substring(0, 6) + "]" + team);
+            } else {
+                Player otherPlayer = Groups.player.find(p -> Strings.stripGlyphs(Strings.stripColors(p.name())).equalsIgnoreCase(args[1]));
+                if (otherPlayer != null) {
+                    otherPlayer.team(team);
+                    otherPlayer.sendMessage("Вашу команду изменили на [#" + team.color.toString().substring(0, 6) + "]" + team);
+                    player.sendMessage("Вы изменили команду игрока " + otherPlayer.name + " на [#" + team.color.toString().substring(0, 6) + "]" + team);
+                } else {
+                    player.sendMessage("[scarlet]Игрока с таким ником нет на сервере");
+                }
+            }
         });
 
-        handler.<Player>register("kill", "[username...]", "Убить игрока", (arg, player) -> {
+        handler.<Player>register("kill", "[username...]", "Убить игрока", (args, player) -> {
             if (!player.admin()) {
                 player.sendMessage("[scarlet]Только админы могут использовать эту команду![]");
                 return;
             }
 
-            if (arg.length == 0) {
+            if (args.length == 0) {
                 player.unit().kill();
             } else {
-                Player other = Groups.player.find(p -> Strings.stripColors(p.name()).equalsIgnoreCase(arg[0]));
+                Player other = Groups.player.find(p -> Strings.stripGlyphs(Strings.stripColors(p.name())).equalsIgnoreCase(args[0]));
                 if (other != null) {
                     other.unit().kill();
                 } else {
-                    player.sendMessage("[scarlet]Такого игрока нет");
+                    player.sendMessage("[scarlet]Игрока с таким ником нет на сервере");
                 }
             }
         });
