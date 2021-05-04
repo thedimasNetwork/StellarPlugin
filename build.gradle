@@ -13,8 +13,8 @@ repositories{
 }
 
 dependencies{
-    compileOnly "com.github.Anuken.Arc:arc-core:v126.1"
-    compileOnly "com.github.Anuken.Mindustry:core:v126.1"
+    compileOnly "com.github.Anuken.Arc:arc-core:v126.2"
+    compileOnly "com.github.Anuken.Mindustry:core:v126.2"
     implementation "com.github.stleary:JSON-java:20210307"
     runtime "mysql:mysql-connector-java:8.0.15"
 }
