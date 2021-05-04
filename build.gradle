@@ -2,8 +2,6 @@ apply plugin: "java"
 
 version '1.0'
 
-sourceCompatibility = 1.8
-
 sourceSets.main.java.srcDirs = ["src"]
 
 compileJava.options.encoding = "UTF-8"
@@ -14,15 +12,11 @@ repositories{
     maven{ url 'https://www.jitpack.io' }
 }
 
-ext{
-    //the build number that this plugin is made for
-    mindustryVersion = 'v126.2'
-}
-
 dependencies{
-    compileOnly "com.github.Anuken.Arc:arc-core:$mindustryVersion"
-    compileOnly "com.github.Anuken.Mindustry:core:$mindustryVersion"
+    compileOnly "com.github.Anuken.Arc:arc-core:v126.1"
+    compileOnly "com.github.Anuken.Mindustry:core:v126.1"
     implementation "com.github.stleary:JSON-java:20210307"
+    runtime "mysql:mysql-connector-java:8.0.15"
 }
 
 jar{
