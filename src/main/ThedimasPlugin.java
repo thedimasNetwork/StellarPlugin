@@ -421,6 +421,14 @@ public class ThedimasPlugin extends Plugin {
             }
         });
 
+        handler.<Player>register("pause", "Поставить игру на паузу", (args, player) -> {
+            if (!player.admin) {
+                player.sendMessage("[scarlet]Только админы могут использовать эту команду![]");
+                return;
+            }
+            Vars.state.serverPaused = !Vars.state.serverPaused;
+        });
+
         handler.<Player>register("end", "Принудительно сменить карту", (args, player) -> {
             if (!player.admin) {
                 player.sendMessage("[scarlet]Только админы могут использовать эту команду![]");
