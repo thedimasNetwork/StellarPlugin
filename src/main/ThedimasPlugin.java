@@ -305,9 +305,9 @@ public class ThedimasPlugin extends Plugin {
             Vars.net.pingHost(ip, port, host -> Call.connect(player.con, ip, port), e -> player.sendMessage("[scarlet]Сервер оффлайн"));
         });
 
-        handler.<Player>register("h", "<x> <y>", "Посмотреть историю блока", (args, player) -> {
+        handler.<Player>register("history", "<x> <y>", "Посмотреть историю блока", (args, player) -> {
             if (!Strings.canParseInt(args[0]) || !Strings.canParseInt(args[1])) {
-                player.sendMessage("Неверный формат координат");
+                player.sendMessage("[scarlet]Неверный формат координат");
                 return;
             }
 
@@ -319,7 +319,7 @@ public class ThedimasPlugin extends Plugin {
 
             StringBuilder message = new StringBuilder(MessageFormat.format("[orange]История блока ([lightgray]{0}[gray],[lightgray]{1}[orange])", x, y));
             if (entries.isEmpty()) {
-                message.append("\\n[royal]* [lightgray]записи отсутствуют");
+                message.append("\n[royal]* [lightgray]записи отсутствуют");
             } else if (entries.isOverflown()) {
                 message.append("\n[lightgray]... слишком много записей");
             } else {
