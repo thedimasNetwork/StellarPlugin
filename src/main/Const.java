@@ -41,7 +41,7 @@ public class Const {
             + "Zone capture";
 
     public static final StringMap SERVER_ADDRESS = StringMap.of(
-            "hub", "34.118.63.37:6567",
+            "hub", "play.thedimas.pp.ua:6567",
             "survival", "play.thedimas.pp.ua:6501",
             "attack", "play.thedimas.pp.ua:6502",
             "sandbox", "play.thedimas.pp.ua:6503",
