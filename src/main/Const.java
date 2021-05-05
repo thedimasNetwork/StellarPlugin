@@ -42,18 +42,18 @@ public class Const {
 
     public static final StringMap SERVER_ADDRESS = StringMap.of(
             "hub", "34.118.63.37:6567",
-            "pvp", "34.118.63.37:6504",
-            "sandbox", "34.118.63.37:6503",
-            "survival", "34.118.63.37:6501",
-            "attack", "34.118.63.37:6502",
-            "hex pvp", "34.118.63.37:6509",
-            "annexation", "34.118.63.37:6505",
-            "campaign maps", "34.118.63.37:6507",
-            "anarchy", "34.118.63.37:6506",
-            "castle wars", "34.118.63.37:6510",
-            "crawler arena", "34.118.63.37:6511",
-            "ms:go", "34.118.63.37:6508",
-            "zone capture", "34.118.63.37:6512");
+            "survival", "play.thedimas.pp.ua:6501",
+            "attack", "play.thedimas.pp.ua:6502",
+            "sandbox", "play.thedimas.pp.ua:6503",
+            "pvp", "play.thedimas.pp.ua:6504",
+            "annexation", "play.thedimas.pp.ua:6505",
+            "anarchy", "play.thedimas.pp.ua:6506",
+            "campaign maps", "play.thedimas.pp.ua:6507",
+            "ms:go", "play.thedimas.pp.ua:6508",
+            "hex pvp", "play.thedimas.pp.ua:6509",
+            "castle wars", "play.thedimas.pp.ua:6510",
+            "crawler arena", "play.thedimas.pp.ua:6511",
+            "zone capture", "play.thedimas.pp.ua:6512");
 
     public static final String RULES_UK
             = "1. Не спамити/флудити в чат\n"
