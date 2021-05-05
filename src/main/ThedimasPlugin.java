@@ -275,7 +275,13 @@ public class ThedimasPlugin extends Plugin {
             }
         });
 
-        handler.<Player>register("hub", "Подключиться к Хабу", (args, player) -> Call.connect(player.con, "play.thedimas.pp.ua", 6567));
+        handler.<Player>register("hub", "Подключиться к Хабу", (args, player) -> {
+            String[] address = Const.SERVER_ADDRESS.get("hub").split(":");
+            String ip = address[0];
+            int port = Integer.parseInt(address[1]);
+
+            Call.connect(player.con, ip, port);
+        });
 
         handler.<Player>register("discord", "Получить ссылку на Discord сервер", (args, player) -> player.sendMessage("https://discord.gg/RkbFYXFU9E"));
 
@@ -288,14 +294,14 @@ public class ThedimasPlugin extends Plugin {
                 player.sendMessage("[sky]Список доступных серверов:\n" + Const.SERVER_LIST);
                 return;
             }
-            String serverName = args[0] + (args.length == 2 ? args[1] : "");
+            String serverName = args[0];
             if (!Const.SERVER_ADDRESS.containsKey(serverName.toLowerCase())) {
                 player.sendMessage("[scarlet]Такого сервера не существует. Доступные сервера:\n" + Const.SERVER_LIST);
                 return;
             }
-            String address = Const.SERVER_ADDRESS.get(serverName.toLowerCase());
-            String ip = address.split(":")[0];
-            int port = Integer.parseInt(address.split(":")[1]);
+            String[] address = Const.SERVER_ADDRESS.get(serverName.toLowerCase()).split(":");
+            String ip = address[0];
+            int port = Integer.parseInt(address[1]);
             Vars.net.pingHost(ip, port, host -> Call.connect(player.con, ip, port), e -> player.sendMessage("[scarlet]Сервер оффлайн"));
         });
 
