@@ -1,7 +1,6 @@
 package main;
 
 import arc.*;
-import arc.struct.ObjectSet;
 import arc.struct.Seq;
 import main.history.entry.BlockEntry;
 import main.history.entry.ConfigEntry;
@@ -26,8 +25,8 @@ import mindustry.world.blocks.logic.LogicBlock;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.time.Duration;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 
 import static mindustry.Vars.*;
 
@@ -40,7 +39,7 @@ public class ThedimasPlugin extends Plugin {
 
     private CacheSeq<HistoryEntry>[][] history;
 
-    private final Set<String> admins = new HashSet<>();
+    private final Map<String, String> admins = new HashMap<>();
 
     //called when game initializes
     @Override
@@ -58,7 +57,7 @@ public class ThedimasPlugin extends Plugin {
             }
 
             if (event.player.admin) {
-                admins.add(event.player.uuid());
+                admins.put(event.player.uuid(), event.player.name);
             }
 
             String playerName = NetClient.colorizeName(event.player.id, event.player.name);
@@ -80,7 +79,7 @@ public class ThedimasPlugin extends Plugin {
                 Log.info("auto-pause: " + (Groups.player.size() - 1) + " player connected -> Game paused...");
             }
 
-            if (admins.contains(event.player.uuid())) {
+            if (admins.containsKey(event.player.uuid())) {
                 event.player.admin = true;
             }
 
@@ -222,7 +221,7 @@ public class ThedimasPlugin extends Plugin {
         handler.removeCommand("t");
 
         handler.<Player>register("a", "<текст...>", "Отправить сообщение администрации", (args, player) -> {
-            if (!admins.contains(player.uuid())) {
+            if (!admins.containsKey(player.uuid())) {
                 player.sendMessage("[scarlet]Только админы могут использовать эту команду!");
                 return;
             }
@@ -326,16 +325,34 @@ public class ThedimasPlugin extends Plugin {
             player.sendMessage(message.toString());
         });
 
+        // блок "для админов"
         handler.<Player>register("admin", "Изменить свой статус", (args, player) -> {
-            if (!admins.contains(player.uuid())) {
+            if (!admins.containsKey(player.uuid())) {
                 player.sendMessage("[scarlet]Только админы могут использовать эту команду!");
             } else {
                 player.admin = !player.admin;
             }
         });
 
+        handler.<Player>register("name", "[name...]","Изменить свое имя", (args, player) -> {
+            if (!admins.containsKey(player.uuid())) {
+                player.sendMessage("[scarlet]Только админы могут использовать эту команду!");
+                return;
+            }
+
+            if (args.length == 0) {
+                player.name = admins.get(player.uuid());
+                String playerName = NetClient.colorizeName(player.id, player.name);
+                player.sendMessage("[green]Ваше имя сброшено. Текущее имя - []" + playerName);
+            } else {
+                player.name = args[1];
+                String playerName = NetClient.colorizeName(player.id, player.name);
+                player.sendMessage("[green]Ваше имя изменено. Текущее имя - []" + playerName);
+            }
+        });
+
         handler.<Player>register("spawn", "<юнит> [количество] [команда]", "Заспавнить юнитов", (args, player) -> {
-            if (!admins.contains(player.uuid())) {
+            if (!admins.containsKey(player.uuid())) {
                 player.sendMessage("[scarlet]Только админы могут использовать эту команду!");
                 return;
             }
@@ -369,7 +386,7 @@ public class ThedimasPlugin extends Plugin {
         });
 
         handler.<Player>register("team", "<команда> [username...]", "Изменить команду", (args, player) -> {
-            if (!admins.contains(player.uuid())) {
+            if (!admins.containsKey(player.uuid())) {
                 player.sendMessage("[scarlet]Только админы могут использовать эту команду![]");
                 return;
             }
@@ -396,7 +413,7 @@ public class ThedimasPlugin extends Plugin {
         });
 
         handler.<Player>register("tp", "<x> <y> [name...]", "Teleport to position or player (replace all spaces with '_' in the name)", (args, player) -> {
-            if (!admins.contains(player.uuid())) {
+            if (!admins.containsKey(player.uuid())) {
                 player.sendMessage("[scarlet]Только админы могут использовать эту команду![]");
                 return;
             }
@@ -437,7 +454,7 @@ public class ThedimasPlugin extends Plugin {
         });
 
         handler.<Player>register("kill", "[username...]", "Убить игрока", (args, player) -> {
-            if (!admins.contains(player.uuid())) {
+            if (!admins.containsKey(player.uuid())) {
                 player.sendMessage("[scarlet]Только админы могут использовать эту команду![]");
                 return;
             }
@@ -459,7 +476,7 @@ public class ThedimasPlugin extends Plugin {
         });
 
         handler.<Player>register("pause", "Поставить игру на паузу", (args, player) -> {
-            if (!admins.contains(player.uuid())) {
+            if (!admins.containsKey(player.uuid())) {
                 player.sendMessage("[scarlet]Только админы могут использовать эту команду![]");
                 return;
             }
@@ -467,11 +484,12 @@ public class ThedimasPlugin extends Plugin {
         });
 
         handler.<Player>register("end", "Принудительно сменить карту", (args, player) -> {
-            if (!admins.contains(player.uuid())) {
+            if (!admins.containsKey(player.uuid())) {
                 player.sendMessage("[scarlet]Только админы могут использовать эту команду![]");
             } else {
                 Events.fire(new EventType.GameOverEvent(Team.crux));
             }
         });
+        // конец блока
     }
 }
