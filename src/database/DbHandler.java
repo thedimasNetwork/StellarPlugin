@@ -1,4 +1,4 @@
-package main.database;
+package database;
 
 import java.sql.*;
 
@@ -10,7 +10,7 @@ public class DbHandler {
     }
 
     public static void addUser(String[] data) throws SQLException {
-        String insert = "INSERT INTO " + Const.U_TABLE + " (" + Const.ALL + ")" + "VALUES(?,?,?,?,?,?,?,?)";
+        String insert = "INSERT INTO " + Const.U_TABLE + " (" + Const.U_ALL + ")" + "VALUES(?,?,?,?,?,?,?,?)";
         PreparedStatement prSt = getDbConnection().prepareStatement(insert);
         prSt.setString(1, data[0]);
         prSt.setString(2, data[1]);

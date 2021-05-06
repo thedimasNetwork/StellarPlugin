@@ -2,10 +2,10 @@ package main;
 
 import arc.*;
 import arc.struct.Seq;
-import main.history.entry.BlockEntry;
-import main.history.entry.ConfigEntry;
-import main.history.entry.RotateEntry;
-import main.history.struct.Seqs;
+import history.entry.BlockEntry;
+import history.entry.ConfigEntry;
+import history.entry.RotateEntry;
+import history.struct.Seqs;
 import mindustry.Vars;
 import mindustry.content.Blocks;
 import mindustry.content.Items;
@@ -17,8 +17,8 @@ import arc.util.*;
 import mindustry.net.Administration;
 import mindustry.type.UnitType;
 
-import main.history.struct.CacheSeq;
-import main.history.entry.HistoryEntry;
+import history.struct.CacheSeq;
+import history.entry.HistoryEntry;
 import mindustry.world.Tile;
 import mindustry.world.blocks.logic.LogicBlock;
 

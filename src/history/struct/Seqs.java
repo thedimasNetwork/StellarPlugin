@@ -1,4 +1,4 @@
-package main.history.struct;
+package history.struct;
 
 import arc.struct.Queue;
 import arc.util.Nullable;

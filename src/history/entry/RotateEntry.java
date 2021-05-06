@@ -1,4 +1,4 @@
-package main.history.entry;
+package history.entry;
 
 import arc.util.Time;
 import mindustry.gen.Player;

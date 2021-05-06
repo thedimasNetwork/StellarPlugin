@@ -1,4 +1,4 @@
-package main.history.entry;
+package history.entry;
 
 import java.util.concurrent.TimeUnit;
 

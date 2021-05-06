@@ -1,4 +1,4 @@
-package main.history.entry;
+package history.entry;
 
 import arc.util.Nullable;
 import arc.util.Time;
