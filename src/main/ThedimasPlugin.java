@@ -2,6 +2,7 @@ package main;
 
 import arc.*;
 import arc.struct.Seq;
+import database.DbHandler;
 import history.entry.BlockEntry;
 import history.entry.ConfigEntry;
 import history.entry.RotateEntry;
@@ -23,9 +24,11 @@ import mindustry.world.Tile;
 import mindustry.world.blocks.logic.LogicBlock;
 
 import java.io.IOException;
+import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.time.Duration;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
 
 import static mindustry.Vars.*;
@@ -56,10 +59,6 @@ public class ThedimasPlugin extends Plugin {
                 Log.info("auto-pause: " + Groups.player.size() + " player(s) connected -> Game unpaused...");
             }
 
-            if (event.player.admin) {
-                admins.put(event.player.uuid(), event.player.name);
-            }
-
             String playerName = NetClient.colorizeName(event.player.id, event.player.name);
             Log.info(MessageFormat.format(Const.JOIN_LOG_FORMAT, playerName, event.player.locale, event.player.con.address));
             Call.sendMessage("[lime]+ [accent]" + playerName + "[lime] присоединился");
@@ -71,16 +70,34 @@ public class ThedimasPlugin extends Plugin {
             } else {
                 Call.infoMessage(event.player.con, Const.WELCOME_EN);
             }
+
+            try {
+                if (!DbHandler.userExist(event.player.uuid())) {
+                    LinkedList<String> data = new LinkedList<>();
+
+                    data.add(event.player.uuid());
+                    data.add(Integer.toString(event.player.id));
+                    data.add(event.player.name);
+                    data.add(event.player.locale);
+                    data.add(Boolean.toString(event.player.admin));
+
+                    DbHandler.add((String[]) data.toArray());
+                } else {
+                    DbHandler.update(event.player.uuid(), database.Const.U_NAME, event.player.name);
+                }
+                if (DbHandler.get(event.player.uuid(), database.Const.U_ADMIN).equals("1")) {
+                    admins.put(event.player.uuid(), event.player.name);
+                    event.player.admin = true;
+                }
+            } catch (SQLException e) {
+                Log.err(e);
+            }
         });
 
         Events.on(EventType.PlayerLeave.class, event -> {
             if (Groups.player.size() - 1 < 1 && autoPause) {
                 Vars.state.serverPaused = true;
                 Log.info("auto-pause: " + (Groups.player.size() - 1) + " player connected -> Game paused...");
-            }
-
-            if (admins.containsKey(event.player.uuid())) {
-                event.player.admin = true;
             }
 
             String playerName = NetClient.colorizeName(event.player.id, event.player.name);
