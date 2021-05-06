@@ -1,7 +1,5 @@
 package main.database;
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.sql.*;
 
 public class DbHandler {
@@ -39,7 +37,7 @@ public class DbHandler {
         return prSt.executeQuery().getString(1);
     }
 
-    public static String[] getAll(String uuid) throws SQLException {
+    public static String[] get(String uuid) throws SQLException {
         String select = "SELECT * FROM " + Const.U_UUID + " WHERE " + Const.U_UUID + "=?";
         PreparedStatement prSt = getDbConnection().prepareStatement(select);
         prSt.setString(1, uuid);
@@ -49,15 +47,5 @@ public class DbHandler {
             dataArray[i] = data.getString(i);
         }
         return dataArray;
-    }
-
-    public static String getHashCode(String password) throws NoSuchAlgorithmException {
-        StringBuilder encryptedPassword = new StringBuilder();
-        MessageDigest md5 = MessageDigest.getInstance("MD5");
-        byte[] passwordBytes = md5.digest(password.getBytes());
-        for (byte b : passwordBytes) {
-            encryptedPassword.append(String.format("%02X", b));
-        }
-        return encryptedPassword.toString().toLowerCase();
     }
 }
