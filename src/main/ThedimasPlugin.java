@@ -337,13 +337,13 @@ public class ThedimasPlugin extends Plugin {
         });
 
         // блок "для админов"
-        /*handler.<Player>register("admin", "Изменить свой статус", (args, player) -> {
+        handler.<Player>register("admin", "Изменить свой статус", (args, player) -> {
             if (!admins.containsKey(player.uuid())) {
                 player.sendMessage("[scarlet]Только админы могут использовать эту команду!");
             } else {
                 player.admin = !player.admin;
             }
-        });*/
+        });
 
         handler.<Player>register("name", "[name...]","Изменить свое имя", (args, player) -> {
             if (!admins.containsKey(player.uuid())) {
