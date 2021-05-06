@@ -6,12 +6,12 @@ import java.sql.*;
 
 public class DbHandler {
 
-    public Connection getDbConnection() throws SQLException {
+    public static Connection getDbConnection() throws SQLException {
         String connectionURL = "jdbc:mariadb://" + Config.DB_HOST + ":" + Config.DB_PORT + "/" + Config.DB_NAME;
         return DriverManager.getConnection(connectionURL, Config.DB_USER, Config.DB_PASS);
     }
 
-    public void addUser(String[] data) throws SQLException {
+    public static void addUser(String[] data) throws SQLException {
         String insert = "INSERT INTO " + Const.U_TABLE + " (" + Const.ALL + ")" + "VALUES(?,?,?,?,?,?,?,?)";
         PreparedStatement prSt = getDbConnection().prepareStatement(insert);
         prSt.setString(1, data[0]);
@@ -25,21 +25,21 @@ public class DbHandler {
         prSt.executeUpdate();
     }
 
-    public boolean userExist(String uuid) throws SQLException {
+    public static boolean userExist(String uuid) throws SQLException {
         String select = "SELECT * FROM " + Const.U_TABLE + " WHERE " + Const.U_UUID + "=?";
         PreparedStatement prSt = getDbConnection().prepareStatement(select);
         prSt.setString(1, uuid);
         return prSt.executeQuery().next();
     }
 
-    public String get(String uuid, String column) throws SQLException {
+    public static String get(String uuid, String column) throws SQLException {
         String select = "SELECT " + column + " FROM " + Const.U_TABLE + " WHERE " + Const.U_UUID + "=?";
         PreparedStatement prSt = getDbConnection().prepareStatement(select);
         prSt.setString(1, uuid);
         return prSt.executeQuery().getString(1);
     }
 
-    public String[] getAll(String uuid) throws SQLException {
+    public static String[] getAll(String uuid) throws SQLException {
         String select = "SELECT * FROM " + Const.U_UUID + " WHERE " + Const.U_UUID + "=?";
         PreparedStatement prSt = getDbConnection().prepareStatement(select);
         prSt.setString(1, uuid);
@@ -51,7 +51,7 @@ public class DbHandler {
         return dataArray;
     }
 
-    public String getHashCode(String password) throws NoSuchAlgorithmException {
+    public static String getHashCode(String password) throws NoSuchAlgorithmException {
         StringBuilder encryptedPassword = new StringBuilder();
         MessageDigest md5 = MessageDigest.getInstance("MD5");
         byte[] passwordBytes = md5.digest(password.getBytes());
