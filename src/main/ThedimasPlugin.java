@@ -94,6 +94,7 @@ public class ThedimasPlugin extends Plugin {
             Player player = event.player;
             if (building.block() == Blocks.thoriumReactor && event.item == Items.thorium && player.team().cores().contains(c -> event.tile.dst(c.x, c.y) < 300)) {
                 Groups.player.each(p -> p.sendMessage(MessageFormat.format("[scarlet]ВНИМАНИЕ! [accent]{0} положил торий в реактор!\n x: [lightgray]{1}[accent], y: [lightgray]{2}", player, building.tileX(), building.tileY())));
+                Log.info(MessageFormat.format("{0} put thorium into reactor ({1}, {2})", player, building.tileX(), building.tileY()));
             }
         });
 
@@ -105,6 +106,7 @@ public class ThedimasPlugin extends Plugin {
                 String playerName = NetClient.colorizeName(player.id, player.name);
                 if (interval.get(300)) {
                     Groups.player.each(p -> p.sendMessage(MessageFormat.format("[scarlet]ВНИМАНИЕ! [accent]{0} строит ториевый реактор возле ядра!\nx: [lightgray]{1}[accent], y: [lightgray]{2}", playerName, event.tile.x, event.tile.y)));
+                    Log.info(MessageFormat.format("{0} began building thorium reactor next to the core ({1}, {2})", playerName, event.tile.x, event.tile.y));
                 }
             }
         });
@@ -128,6 +130,7 @@ public class ThedimasPlugin extends Plugin {
                         player.sendMessage(msg);
                     }
                 });
+                Log.info(MessageFormat.format(Const.CHAT_LOG_FORMAT, Strings.stripColors(event.player.name),  Strings.stripColors(event.message), event.player.locale));
             }
         });
         // конец блока
