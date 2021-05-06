@@ -38,7 +38,7 @@ public class DbHandler {
     }
 
     public static String[] get(String uuid) throws SQLException {
-        String select = "SELECT * FROM " + Const.U_UUID + " WHERE " + Const.U_UUID + "=?";
+        String select = "SELECT * FROM " + Const.U_TABLE + " WHERE " + Const.U_UUID + "=?";
         PreparedStatement prSt = getDbConnection().prepareStatement(select);
         prSt.setString(1, uuid);
         ResultSet data = prSt.executeQuery();
@@ -47,5 +47,13 @@ public class DbHandler {
             dataArray[i] = data.getString(i);
         }
         return dataArray;
+    }
+
+    public static void update(String uuid, String column, String value) throws SQLException {
+        String update = "UPDATE " + Const.U_TABLE + " SET " + column + "=? WHERE " + Const.U_UUID + "=?";
+        PreparedStatement prSt = getDbConnection().prepareStatement(update);
+        prSt.setString(1, value);
+        prSt.setString(2, uuid);
+        prSt.executeUpdate();
     }
 }
