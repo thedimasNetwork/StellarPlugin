@@ -94,7 +94,7 @@ public class ThedimasPlugin extends Plugin {
             Player player = event.player;
             if (building.block() == Blocks.thoriumReactor && event.item == Items.thorium && player.team().cores().contains(c -> event.tile.dst(c.x, c.y) < 300)) {
                 Groups.player.each(p -> p.sendMessage(MessageFormat.format("[scarlet]ВНИМАНИЕ! [accent]{0} положил торий в реактор!\n x: [lightgray]{1}[accent], y: [lightgray]{2}", player, building.tileX(), building.tileY())));
-                Log.info(MessageFormat.format("{0} put thorium into reactor ({1}, {2})", player, building.tileX(), building.tileY()));
+                Log.info(MessageFormat.format("{0} положил торий в реактор ({1}, {2})", player, building.tileX(), building.tileY()));
             }
         });
 
@@ -106,7 +106,7 @@ public class ThedimasPlugin extends Plugin {
                 String playerName = NetClient.colorizeName(player.id, player.name);
                 if (interval.get(300)) {
                     Groups.player.each(p -> p.sendMessage(MessageFormat.format("[scarlet]ВНИМАНИЕ! [accent]{0} строит ториевый реактор возле ядра!\nx: [lightgray]{1}[accent], y: [lightgray]{2}", playerName, event.tile.x, event.tile.y)));
-                    Log.info(MessageFormat.format("{0} began building thorium reactor next to the core ({1}, {2})", playerName, event.tile.x, event.tile.y));
+                    Log.info(MessageFormat.format("{0} начал строить ториевый реактор близко к ядру ({1}, {2})", playerName, event.tile.x, event.tile.y));
                 }
             }
         });
@@ -191,27 +191,27 @@ public class ThedimasPlugin extends Plugin {
 
     @Override
     public void registerServerCommands(CommandHandler handler) {
-        handler.register("auto-pause", "[on|off]", "Pause the game if there is no one connected", args -> {
+        handler.register("auto-pause", "[on|off]", "Поставить игру на паузу, когда никого нет", args -> {
             if (args.length == 0) {
                 if (autoPause) {
-                    Log.info("Auto pause is enabled");
+                    Log.info("Авто-пауза включена");
                 } else {
-                    Log.info("Auto pause disabled");
+                    Log.info("Авто-пауза выключена");
                 }
             }
             if (args[0].equalsIgnoreCase("off")) {
                 autoPause = false;
-                Log.info("Auto pause is disabled");
+                Log.info("Авто-пауза выключена");
 
                 Vars.state.serverPaused = false;
-                Log.info("auto-pause: " + Groups.player.size() + " player(s) connected -> Game unpaused...");
+                Log.info("auto-pause: " + Groups.player.size() + " игрок(ов) онлайн -> Игра снята с паузы...");
             } else if (args[0].equalsIgnoreCase("on")) {
                 autoPause = true;
-                Log.info("Auto pause is enabled");
+                Log.info("Авто-пауза включена");
 
                 if (Groups.player.size() < 1 && autoPause) {
                     Vars.state.serverPaused = true;
-                    Log.info("auto-pause: " + Groups.player.size() + " player connected -> Game paused...");
+                    Log.info("auto-pause: " + Groups.player.size() + " игроков онлайн -> Игра поставлена на паузу...");
                 }
             }
         });
@@ -226,13 +226,14 @@ public class ThedimasPlugin extends Plugin {
         handler.<Player>register("a", "<текст...>", "Отправить сообщение администрации", (args, player) -> {
             if (!admins.containsKey(player.uuid())) {
                 player.sendMessage("[scarlet]Только админы могут использовать эту команду!");
+                Log.info(MessageFormat.format("{0} попытался отправить сообщение админам не будучи админом", Strings.stripColors(player.name)));
                 return;
             }
 
             String message = args[0];
             String prefix = "\uE82C";
             String playerName = NetClient.colorizeName(player.id, player.name);
-
+            Log.info("<A>" + MessageFormat.format(Const.CHAT_LOG_FORMAT, Strings.stripColors(player.name),  Strings.stripColors(message), player.locale));
             Groups.player.each(otherPlayer -> {
                 if (otherPlayer.admin()) {
                     String translated = message;
@@ -252,7 +253,7 @@ public class ThedimasPlugin extends Plugin {
             String message = args[0];
             String playerName = NetClient.colorizeName(player.id, player.name);
             String prefix = player.admin() ? "\uE82C" : "\uE872";
-
+            Log.info("<T>" + MessageFormat.format(Const.CHAT_LOG_FORMAT, Strings.stripColors(player.name),  Strings.stripColors(message), player.locale));
             Groups.player.each(otherPlayer -> {
                 if (otherPlayer.team() == player.team()) {
                     String translated = message;
@@ -421,7 +422,7 @@ public class ThedimasPlugin extends Plugin {
             }
         });
 
-        handler.<Player>register("tp", "<x> <y> [name...]", "Teleport to position or player (replace all spaces with '_' in the name)", (args, player) -> {
+        handler.<Player>register("tp", "<x> <y> [name...]", "Телепортироваться по координатам/к игроку", (args, player) -> {
             if (!admins.containsKey(player.uuid())) {
                 player.sendMessage("[scarlet]Только админы могут использовать эту команду![]");
                 return;
