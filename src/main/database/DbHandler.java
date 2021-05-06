@@ -26,14 +26,14 @@ public class DbHandler {
     }
 
     public boolean userExist(String uuid) throws SQLException {
-        String select = "SELECT * FROM " + Const.U_UUID + " WHERE " + Const.U_UUID + "=?";
+        String select = "SELECT * FROM " + Const.U_TABLE + " WHERE " + Const.U_UUID + "=?";
         PreparedStatement prSt = getDbConnection().prepareStatement(select);
         prSt.setString(1, uuid);
         return prSt.executeQuery().next();
     }
 
     public String get(String uuid, String column) throws SQLException {
-        String select = "SELECT " + column + " FROM " + Const.U_UUID + " WHERE " + Const.U_UUID + "=?";
+        String select = "SELECT " + column + " FROM " + Const.U_TABLE + " WHERE " + Const.U_UUID + "=?";
         PreparedStatement prSt = getDbConnection().prepareStatement(select);
         prSt.setString(1, uuid);
         return prSt.executeQuery().getString(1);
@@ -46,7 +46,7 @@ public class DbHandler {
         ResultSet data = prSt.executeQuery();
         String[] dataArray = new String[data.getMetaData().getColumnCount()];
         for (int i = 0; data.next(); i++) {
-            dataArray[i] = data.getString(1);
+            dataArray[i] = data.getString(i);
         }
         return dataArray;
     }
