@@ -23,6 +23,7 @@ import mindustry.world.Tile;
 import mindustry.world.blocks.logic.LogicBlock;
 
 import java.io.IOException;
+import java.nio.file.attribute.GroupPrincipal;
 import java.text.MessageFormat;
 import java.time.Duration;
 import java.util.HashMap;
@@ -471,6 +472,7 @@ public class ThedimasPlugin extends Plugin {
 
             if (args.length == 0) {
                 player.unit().kill();
+                Log.info(MessageFormat.format("{0} убил сам себя", Strings.stripColors(player.name)));
             } else {
                 Player otherPlayer = Groups.player.find(p -> Strings.stripGlyphs(Strings.stripColors(p.name())).equalsIgnoreCase(args[0]));
                 if (otherPlayer != null) {
@@ -479,6 +481,7 @@ public class ThedimasPlugin extends Plugin {
                     String otherPlayerName = NetClient.colorizeName(otherPlayer.id, otherPlayer.name);
                     player.sendMessage("[accent]Вы успешно убили игрока " + otherPlayerName +
                             "\n[orange]Дьявол доволен Вами. =)");
+                    Log.info(MessageFormat.format("{0} убил {1}", Strings.stripColors(player.name), Strings.stripColors(otherPlayerName)));
                 } else {
                     player.sendMessage("[scarlet]Игрока с таким ником нет на сервере");
                 }
@@ -491,6 +494,7 @@ public class ThedimasPlugin extends Plugin {
                 return;
             }
             Vars.state.serverPaused = !Vars.state.serverPaused;
+            Log.info(MessageFormat.format("{0} поставил игру на паузу", Strings.stripColors(player.name)));
         });
 
         handler.<Player>register("end", "Принудительно сменить карту", (args, player) -> {
@@ -499,6 +503,17 @@ public class ThedimasPlugin extends Plugin {
             } else {
                 Events.fire(new EventType.GameOverEvent(Team.crux));
             }
+            Log.info(MessageFormat.format("{0} сменил карту принудительно", Strings.stripColors(player.name)));
+        });
+
+        handler.<Player>register("killall", "Убить ВСЕХ", (args, player) -> {
+            if (!admins.containsKey(player.uuid())) {
+                player.sendMessage("[scarlet]Только админы могут использовать эту команду![]");
+                return;
+            }
+            Groups.unit.each(unit -> unit.kill());
+            player.sendMessage("[scarlet]Вы убили всех");
+            Log.info(MessageFormat.format("{0} убил всех", Strings.stripColors(player.name)));
         });
         // конец блока
     }
