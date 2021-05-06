@@ -23,7 +23,6 @@ import mindustry.world.Tile;
 import mindustry.world.blocks.logic.LogicBlock;
 
 import java.io.IOException;
-import java.nio.file.attribute.GroupPrincipal;
 import java.text.MessageFormat;
 import java.time.Duration;
 import java.util.HashMap;
@@ -117,6 +116,7 @@ public class ThedimasPlugin extends Plugin {
         Events.on(EventType.PlayerChatEvent.class, event -> {
             if (!event.message.startsWith("/")) {
                 String prefix = event.player.admin() ? "\uE82C" : "\uE872";
+                Log.info(MessageFormat.format(Const.CHAT_LOG_FORMAT, Strings.stripColors(player.name),  Strings.stripColors(event.message), player.locale));
                 Groups.player.each(player -> {
                     String translated = event.message;
                     try {
@@ -227,7 +227,7 @@ public class ThedimasPlugin extends Plugin {
         handler.<Player>register("a", "<текст...>", "Отправить сообщение администрации", (args, player) -> {
             if (!admins.containsKey(player.uuid())) {
                 player.sendMessage("[scarlet]Только админы могут использовать эту команду!");
-                Log.info(MessageFormat.format("{0} попытался отправить сообщение админам не будучи админом", Strings.stripColors(player.name)));
+                Log.info(MessageFormat.format("{0} попытался отправить сообщение админам", Strings.stripColors(player.name)));
                 return;
             }
 
@@ -511,7 +511,7 @@ public class ThedimasPlugin extends Plugin {
                 player.sendMessage("[scarlet]Только админы могут использовать эту команду![]");
                 return;
             }
-            Groups.unit.each(unit -> unit.kill());
+            Groups.unit.each(Unitc::kill);
             player.sendMessage("[scarlet]Вы убили всех");
             Log.info(MessageFormat.format("{0} убил всех", Strings.stripColors(player.name)));
         });
