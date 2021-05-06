@@ -3,7 +3,6 @@ package main.database;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.*;
-import java.util.LinkedList;
 
 public class DbHandler {
 
@@ -13,7 +12,7 @@ public class DbHandler {
     }
 
     public void addUser(String[] data) throws SQLException {
-        String insert = "INSERT INTO " + Const.U_TABLE + " (" + Const.ALL + ")" + "VALUES(?,?)";
+        String insert = "INSERT INTO " + Const.U_TABLE + " (" + Const.ALL + ")" + "VALUES(?,?,?,?,?,?,?,?)";
         PreparedStatement prSt = getDbConnection().prepareStatement(insert);
         prSt.setString(1, data[0]);
         prSt.setString(2, data[1]);
@@ -45,11 +44,11 @@ public class DbHandler {
         PreparedStatement prSt = getDbConnection().prepareStatement(select);
         prSt.setString(1, uuid);
         ResultSet data = prSt.executeQuery();
-        LinkedList<String> dataList = new LinkedList<>();
+        String[] dataArray = new String[data.getMetaData().getColumnCount()];
         for (int i = 0; data.next(); i++) {
-            dataList.add(data.getString(i));
+            dataArray[i] = data.getString(1);
         }
-        return (String[]) dataList.toArray();
+        return dataArray;
     }
 
     public String getHashCode(String password) throws NoSuchAlgorithmException {
