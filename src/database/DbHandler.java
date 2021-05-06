@@ -9,17 +9,14 @@ public class DbHandler {
         return DriverManager.getConnection(connectionURL, Config.DB_USER, Config.DB_PASS);
     }
 
-    public static void addUser(String[] data) throws SQLException {
-        String insert = "INSERT INTO " + Const.U_TABLE + " (" + Const.U_ALL + ")" + "VALUES(?,?,?,?,?,?,?,?)";
+    public static void add(String[] data) throws SQLException {
+        String insert = "INSERT INTO " + Const.U_TABLE + " (" + Const.U_ALL + ")" + "VALUES(?,?,?,?,?)";
         PreparedStatement prSt = getDbConnection().prepareStatement(insert);
         prSt.setString(1, data[0]);
         prSt.setString(2, data[1]);
         prSt.setString(3, data[2]);
         prSt.setString(4, data[3]);
         prSt.setString(5, data[4]);
-        prSt.setString(6, data[5]);
-        prSt.setString(7, data[6]);
-        prSt.setString(8, data[7]);
         prSt.executeUpdate();
     }
 
