@@ -40,7 +40,9 @@ public class DBHandler {
         String select = "SELECT " + column + " FROM " + Const.U_TABLE + " WHERE " + Const.U_UUID + "=?";
         PreparedStatement prSt = getDbConnection().prepareStatement(select);
         prSt.setString(1, uuid);
-        return prSt.executeQuery().getString(1);
+        ResultSet res = prSt.executeQuery();
+        res.next();
+        return res.getString(1);
     }
 
     public static String[] get(String uuid) throws SQLException {
