@@ -3,7 +3,7 @@ package main;
 import arc.*;
 import arc.struct.ObjectMap;
 import arc.struct.Seq;
-import database.DBHandler;
+import database.*;
 import history.entry.BlockEntry;
 import history.entry.ConfigEntry;
 import history.entry.RotateEntry;
@@ -29,7 +29,6 @@ import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.time.Duration;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.Map;
 
 import static mindustry.Vars.*;
@@ -74,16 +73,14 @@ public class ThedimasPlugin extends Plugin {
 
             try {
                 if (!DBHandler.userExist(event.player.uuid())) {
-                    LinkedList<String> data = new LinkedList<>();
+                    PlayerData data = new PlayerData();
+                    data.uuid = event.player.uuid();
+                    data.ip = event.player.ip();
+                    data.name = event.player.name();
+                    data.admin = event.player.admin;
+                    data.banned = false; //banned
 
-                    data.add(event.player.uuid());
-                    data.add(event.player.ip());
-                    data.add(event.player.name);
-                    data.add(event.player.locale);
-                    data.add(Boolean.toString(event.player.admin));
-                    data.add(Boolean.toString(false)); //banned
-
-                    DBHandler.add((String[]) data.toArray());
+                    DBHandler.save(data);
                 } else {
                     DBHandler.update(event.player.uuid(), database.Const.U_NAME, event.player.name);
                 }
@@ -161,7 +158,7 @@ public class ThedimasPlugin extends Plugin {
             for (Tile tile : world.tiles) {
                 history[tile.x][tile.y] = Seqs.newBuilder()
                         .maximumSize(15)
-                        .expireAfterWrite(Duration.ofMillis(1800000))
+                        .expireAfterWrite(Duration.ofMillis(1800000L))
                         .build();
             }
         });
@@ -215,21 +212,21 @@ public class ThedimasPlugin extends Plugin {
             ObjectMap<String, Administration.PlayerInfo> playerList = Reflect.get(netServer.admins, "playerInfo");
             int exported = 0;
             for (Administration.PlayerInfo info : playerList.values()) {
-                    LinkedList<String> data = new LinkedList<>();
-                    data.add(info.id);
-                    data.add(info.lastIP);
-                    data.add(info.lastName);
-                    data.add("undefined");
-                    data.add(Boolean.toString(info.admin));
-                    data.add(Boolean.toString(info.banned));
+                PlayerData data = new PlayerData();
+                data.uuid = info.id;
+                data.ip = info.lastIP;
+                data.name = info.lastName;
+                data.locale = "undefined";
+                data.admin = info.admin;
+                data.banned = info.banned;
 
-                    try {
-                        DBHandler.add((String[]) data.toArray(new String[data.size()]));
-                        exported++;
-                    } catch (SQLException e) {
-                        Log.err(e.getMessage());
-                        Log.err(MessageFormat.format("Unable to export data of player {0} ({1})", Strings.stripColors(info.lastName), Strings.stripColors(info.id)));
-                    }
+                try {
+                    DBHandler.save(data);
+                    exported++;
+                } catch (SQLException e) {
+                    Log.err(e.getMessage());
+                    Log.err(MessageFormat.format("Unable to export data of player {0} ({1})", Strings.stripColors(info.lastName), Strings.stripColors(info.id)));
+                }
             }
             Log.info(MessageFormat.format("Successfully exported {0} players", exported));
         });
