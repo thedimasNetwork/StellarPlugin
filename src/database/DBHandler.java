@@ -2,7 +2,7 @@ package database;
 
 import java.sql.*;
 
-public class DbHandler {
+public class DBHandler {
 
     public static Connection getDbConnection() throws SQLException {
         String connectionURL = "jdbc:mariadb://" + Config.DB_HOST + ":" + Config.DB_PORT + "/" + Config.DB_NAME;

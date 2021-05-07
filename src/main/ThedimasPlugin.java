@@ -2,7 +2,7 @@ package main;
 
 import arc.*;
 import arc.struct.Seq;
-import database.DbHandler;
+import database.DBHandler;
 import history.entry.BlockEntry;
 import history.entry.ConfigEntry;
 import history.entry.RotateEntry;
@@ -72,7 +72,7 @@ public class ThedimasPlugin extends Plugin {
             }
 
             try {
-                if (!DbHandler.userExist(event.player.uuid())) {
+                if (!DBHandler.userExist(event.player.uuid())) {
                     LinkedList<String> data = new LinkedList<>();
 
                     data.add(event.player.uuid());
@@ -81,11 +81,11 @@ public class ThedimasPlugin extends Plugin {
                     data.add(event.player.locale);
                     data.add(Boolean.toString(event.player.admin));
 
-                    DbHandler.add((String[]) data.toArray());
+                    DBHandler.add((String[]) data.toArray());
                 } else {
-                    DbHandler.update(event.player.uuid(), database.Const.U_NAME, event.player.name);
+                    DBHandler.update(event.player.uuid(), database.Const.U_NAME, event.player.name);
                 }
-                if (DbHandler.get(event.player.uuid(), database.Const.U_ADMIN).equals("1")) {
+                if (DBHandler.get(event.player.uuid(), database.Const.U_ADMIN).equals("1")) {
                     admins.put(event.player.uuid(), event.player.name);
                     event.player.admin = true;
                 }
