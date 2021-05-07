@@ -359,6 +359,10 @@ public class ThedimasPlugin extends Plugin {
 
             int x = Integer.parseInt(args[0]);
             int y = Integer.parseInt(args[1]);
+            if (!Structs.inBounds(x, y, history)) {
+                player.sendMessage("[scarlet]Неверные координаты. Максимум: [orange]" + history.length + "[], [orange]" + history[0].length + "[]. Минимум : [orange]0[], [orange]0[].");
+                return;
+            }
 
             CacheSeq<HistoryEntry> entries = history[x][y];
             entries.cleanUp();
@@ -543,8 +547,8 @@ public class ThedimasPlugin extends Plugin {
                 player.sendMessage("[scarlet]Только админы могут использовать эту команду![]");
             } else {
                 Events.fire(new EventType.GameOverEvent(Team.crux));
+                Log.info(MessageFormat.format("{0} сменил карту принудительно", Strings.stripColors(player.name)));
             }
-            Log.info(MessageFormat.format("{0} сменил карту принудительно", Strings.stripColors(player.name)));
         });
 
         handler.<Player>register("killall", "Убить ВСЕХ", (args, player) -> {
