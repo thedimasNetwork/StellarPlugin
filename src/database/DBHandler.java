@@ -1,17 +1,25 @@
 package database;
 
+import arc.util.Log;
+
 import java.sql.*;
 
 public class DBHandler {
 
-    public static Connection getDbConnection() throws SQLException {
-        try {
-            Class.forName("com.mysql.jdbc.Driver");
-        } catch (java.lang.ClassNotFoundException e) {
-            e.printStackTrace();
+    private static Connection connection;
+
+    public static Connection getDbConnection() {
+        if (connection == null) {
+            try {
+                Class.forName("com.mysql.jdbc.Driver");
+                String connectionURL = "jdbc:mysql://" + Config.DB_HOST + ":" + Config.DB_PORT + "/" + Config.DB_NAME;
+                connection = DriverManager.getConnection(connectionURL, Config.DB_USER, Config.DB_PASS);
+            } catch (Throwable t) {
+                Log.err(t);
+            }
         }
-        String connectionURL = "jdbc:mysql://" + Config.DB_HOST + ":" + Config.DB_PORT + "/" + Config.DB_NAME;
-        return DriverManager.getConnection(connectionURL, Config.DB_USER, Config.DB_PASS);
+
+        return connection;
     }
 
     public static void add(String[] data) throws SQLException {
