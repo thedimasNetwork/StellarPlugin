@@ -1,6 +1,7 @@
 package main;
 
 import arc.*;
+import arc.struct.ObjectMap;
 import arc.struct.Seq;
 import database.DBHandler;
 import history.entry.BlockEntry;
@@ -76,10 +77,11 @@ public class ThedimasPlugin extends Plugin {
                     LinkedList<String> data = new LinkedList<>();
 
                     data.add(event.player.uuid());
-                    data.add(Integer.toString(event.player.id));
+                    data.add(event.player.ip());
                     data.add(event.player.name);
                     data.add(event.player.locale);
                     data.add(Boolean.toString(event.player.admin));
+                    data.add(Boolean.toString(false)); //banned
 
                     DBHandler.add((String[]) data.toArray());
                 } else {

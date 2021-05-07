@@ -10,13 +10,17 @@ public class DBHandler {
     }
 
     public static void add(String[] data) throws SQLException {
-        String insert = "INSERT INTO " + Const.U_TABLE + " (" + Const.U_ALL + ")" + "VALUES(?,?,?,?,?)";
+        String insert = "INSERT INTO " + Const.U_TABLE + " (" + Const.U_ALL + ")" + "VALUES(?,?,?,?,?,?,?)";
         PreparedStatement prSt = getDbConnection().prepareStatement(insert);
-        prSt.setString(1, data[0]);
-        prSt.setString(2, data[1]);
-        prSt.setString(3, data[2]);
-        prSt.setString(4, data[3]);
-        prSt.setString(5, data[4]);
+        data[2] = data[2].replace("&", "&amp").replace("\"","&quot").replace("'","&apos");
+        prSt.setString(1, data[0]); //uuid
+        prSt.setString(2, data[1]); //ip
+        //prSt.setString(3, data[2]); //id
+        prSt.setString(3, data[2]); //name
+        prSt.setString(4, data[3]); //locale
+        prSt.setString(5, data[4]); //admin
+        prSt.setString(6, data[5]); //banned
+
         prSt.executeUpdate();
     }
 
@@ -47,6 +51,7 @@ public class DBHandler {
     }
 
     public static void update(String uuid, String column, String value) throws SQLException {
+        value = value.replace("&", "&amp").replace("\"","&quot").replace("'","&apos");
         String update = "UPDATE " + Const.U_TABLE + " SET " + column + "=? WHERE " + Const.U_UUID + "=?";
         PreparedStatement prSt = getDbConnection().prepareStatement(update);
         prSt.setString(1, value);
