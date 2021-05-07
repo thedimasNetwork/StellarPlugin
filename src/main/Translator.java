@@ -1,7 +1,6 @@
 package main;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
+import arc.util.serialization.Jval;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -21,15 +20,13 @@ public class Translator {
         StringBuilder response = new StringBuilder();
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
         con.setRequestProperty("User-Agent", "Mozilla/5.0");
-        BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream(), StandardCharsets.UTF_8));
-        String inputLine;
-        while ((inputLine = in.readLine()) != null) {
-            response.append(inputLine);
+        try (BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream(), StandardCharsets.UTF_8))) {
+            String inputLine;
+            while ((inputLine = in.readLine()) != null) {
+                response.append(inputLine);
+            }
         }
-        in.close();
-        JSONObject json = new JSONObject(response.toString());
-        JSONArray sentences = json.getJSONArray("sentences");
-        JSONObject transl = sentences.getJSONObject(0);
-        return transl.getString("trans");
+        return Jval.read(response.toString()).get("sentences").asArray()
+                .firstOpt().getString("trans");
     }
 }
