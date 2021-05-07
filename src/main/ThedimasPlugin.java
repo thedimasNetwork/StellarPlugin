@@ -276,17 +276,15 @@ public class ThedimasPlugin extends Plugin {
             String prefix = "\uE82C";
             String playerName = NetClient.colorizeName(player.id, player.name);
             Log.info("<A>" + MessageFormat.format(Const.CHAT_LOG_FORMAT, Strings.stripColors(player.name),  Strings.stripColors(message), player.locale));
-            Groups.player.each(otherPlayer -> {
-                if (otherPlayer.admin()) {
-                    String translated = message;
-                    try {
-                        translated = Translator.translate(message, otherPlayer.locale, "auto");
-                    } catch (IOException e) {
-                        Log.err(e.getMessage());
-                    } finally {
-                        String msg = MessageFormat.format(Const.CHAT_FORMAT, prefix, playerName, translated);
-                        otherPlayer.sendMessage("<[scarlet]A[]>" + msg);
-                    }
+            Groups.player.each(Player::admin, otherPlayer -> {
+                String translated = message;
+                try {
+                    translated = Translator.translate(message, otherPlayer.locale, "auto");
+                } catch (IOException e) {
+                    Log.err(e.getMessage());
+                } finally {
+                    String msg = MessageFormat.format(Const.CHAT_FORMAT, prefix, playerName, translated);
+                    otherPlayer.sendMessage("<[scarlet]A[]>" + msg);
                 }
             });
         });
@@ -296,17 +294,15 @@ public class ThedimasPlugin extends Plugin {
             String playerName = NetClient.colorizeName(player.id, player.name);
             String prefix = player.admin() ? "\uE82C" : "\uE872";
             Log.info("<T>" + MessageFormat.format(Const.CHAT_LOG_FORMAT, Strings.stripColors(player.name),  Strings.stripColors(message), player.locale));
-            Groups.player.each(otherPlayer -> {
-                if (otherPlayer.team() == player.team()) {
-                    String translated = message;
-                    try {
-                        translated = Translator.translate(message, otherPlayer.locale, "auto");
-                    } catch (IOException e) {
-                        Log.err(e.getMessage());
-                    } finally {
-                        String msg = MessageFormat.format(Const.CHAT_FORMAT, prefix, playerName, translated);
-                        otherPlayer.sendMessage("<[#" + player.team().color + "]T[]>" + msg);
-                    }
+            Groups.player.each(o -> o.team() == player.team(), otherPlayer -> {
+                String translated = message;
+                try {
+                    translated = Translator.translate(message, otherPlayer.locale, "auto");
+                } catch (IOException e) {
+                    Log.err(e.getMessage());
+                } finally {
+                    String msg = MessageFormat.format(Const.CHAT_FORMAT, prefix, playerName, translated);
+                    otherPlayer.sendMessage("<[#" + player.team().color + "]T[]>" + msg);
                 }
             });
         });
@@ -438,7 +434,7 @@ public class ThedimasPlugin extends Plugin {
             for (int i = 0; count > i; i++) {
                 unit.spawn(team, player.x, player.y);
             }
-            player.sendMessage("[green]Ты заспавнил " + "[accent]" + count + " " + unit + " " + "[green]для команды " + "[#" + team.color.toString().substring(0, 6) + "]" + team);
+            player.sendMessage("[green]Ты заспавнил [accent]" + count + " " + unit + " [green]для команды [#" + team.color.toString().substring(0, 6) + "]" + team);
         });
 
         handler.<Player>register("team", "<команда> [username...]", "Изменить команду", (args, player) -> {
