@@ -211,6 +211,28 @@ public class ThedimasPlugin extends Plugin {
 
     @Override
     public void registerServerCommands(CommandHandler handler) {
+        handler.register("export-players", "Экспорт всех игроков, которые когда-либо заходили на сервер в БД", args -> {
+            ObjectMap<String, Administration.PlayerInfo> playerList = Reflect.get(netServer.admins, "playerInfo");
+            int exported = 0;
+            for (Administration.PlayerInfo info : playerList.values()) {
+                    LinkedList<String> data = new LinkedList<>();
+                    data.add(info.id);
+                    data.add(info.lastIP);
+                    data.add(info.lastName);
+                    data.add("undefined");
+                    data.add(Boolean.toString(info.admin));
+                    data.add(Boolean.toString(info.banned));
+
+                    try {
+                        DBHandler.add((String[]) data.toArray(new String[data.size()]));
+                        exported++;
+                    } catch (SQLException e) {
+                        Log.err(e.getMessage());
+                        Log.err(MessageFormat.format("Unable to export data of player {0} ({1})", Strings.stripColors(info.lastName), Strings.stripColors(info.id)));
+                    }
+            }
+            Log.info(MessageFormat.format("Successfully exported {0} players", exported));
+        });
         handler.register("auto-pause", "[on|off]", "Поставить игру на паузу, когда никого нет", args -> {
             if (args.length == 0) {
                 if (autoPause) {

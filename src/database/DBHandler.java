@@ -5,12 +5,17 @@ import java.sql.*;
 public class DBHandler {
 
     public static Connection getDbConnection() throws SQLException {
-        String connectionURL = "jdbc:mariadb://" + Config.DB_HOST + ":" + Config.DB_PORT + "/" + Config.DB_NAME;
+        try {
+            Class.forName("com.mysql.jdbc.Driver");
+        } catch (java.lang.ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        String connectionURL = "jdbc:mysql://" + Config.DB_HOST + ":" + Config.DB_PORT + "/" + Config.DB_NAME;
         return DriverManager.getConnection(connectionURL, Config.DB_USER, Config.DB_PASS);
     }
 
     public static void add(String[] data) throws SQLException {
-        String insert = "INSERT INTO " + Const.U_TABLE + " (" + Const.U_ALL + ")" + "VALUES(?,?,?,?,?,?,?)";
+        String insert = "INSERT INTO " + Const.U_TABLE + " (" + Const.U_ALL + ")" + "VALUES(?,?,?,?,?,?)";
         PreparedStatement prSt = getDbConnection().prepareStatement(insert);
         data[2] = data[2].replace("&", "&amp").replace("\"","&quot").replace("'","&apos");
         prSt.setString(1, data[0]); //uuid
@@ -18,8 +23,8 @@ public class DBHandler {
         //prSt.setString(3, data[2]); //id
         prSt.setString(3, data[2]); //name
         prSt.setString(4, data[3]); //locale
-        prSt.setString(5, data[4]); //admin
-        prSt.setString(6, data[5]); //banned
+        prSt.setString(5, (data[4].equals("true") ? "1" : "0")); //admin
+        prSt.setString(6, (data[5].equals("true") ? "1" : "0")); //banned
 
         prSt.executeUpdate();
     }
