@@ -9,7 +9,7 @@ import java.util.concurrent.TimeUnit;
 
 public class RotateEntry implements HistoryEntry {
 
-    protected static final String[] sides = {"", "", "", ""};
+    protected static final String[] sides = {"\uE803", "\uE804", "\uE802", "\uE805"};
 
     public final Player player;
     public final Block block;

@@ -16,6 +16,7 @@ import mindustry.gen.*;
 import mindustry.game.*;
 import mindustry.mod.*;
 import arc.util.*;
+import arc.struct.*;
 import mindustry.net.Administration;
 import mindustry.type.UnitType;
 
@@ -28,8 +29,6 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.time.Duration;
-import java.util.HashMap;
-import java.util.Map;
 
 import static mindustry.Vars.*;
 
@@ -42,7 +41,7 @@ public class ThedimasPlugin extends Plugin {
 
     private CacheSeq<HistoryEntry>[][] history;
 
-    private final Map<String, String> admins = new HashMap<>();
+    private final StringMap admins = new StringMap();
 
     //called when game initializes
     @Override
