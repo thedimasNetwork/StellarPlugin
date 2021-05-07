@@ -50,8 +50,9 @@ public class DBHandler {
         PreparedStatement prSt = getDbConnection().prepareStatement(select);
         prSt.setString(1, uuid);
         ResultSet data = prSt.executeQuery();
+        data.next();
         String[] dataArray = new String[data.getMetaData().getColumnCount()];
-        for (int i = 0; data.next(); i++) {
+        for (int i = 0; i < dataArray.length; i++) {
             dataArray[i] = data.getString(i);
         }
         return dataArray;
