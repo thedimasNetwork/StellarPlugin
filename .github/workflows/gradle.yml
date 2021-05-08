@@ -26,5 +26,5 @@ jobs:
       uses: svenstaro/upload-release-action@v2
       with:
         repo_token: ${{ secrets.GITHUB_TOKEN }}
-        file: build/libs/*.jar
-        tag: ${{ github.ref }}
+        file: build/libs/thedimasPlugin.jar
+        tag: lastest
