@@ -217,7 +217,7 @@ public class ThedimasPlugin extends Plugin {
 
                 CacheSeq<HistoryEntry> entries = history[x][y];
 
-                boolean detailed = activeHistoryPlayers.get(player.uuid());
+                boolean detailed = activeHistoryPlayers.get(event.player.uuid());
 
                 StringBuilder result = new StringBuilder();
                 result.append(MessageFormat.format("[orange]-- История Блока ([lightgray]{0}[gray],[lightgray]{1}[orange]) --", x, y)).append("\n");
