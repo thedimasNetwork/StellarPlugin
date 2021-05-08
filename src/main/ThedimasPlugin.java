@@ -1,6 +1,7 @@
 package main;
 
 import arc.*;
+import arc.math.Mathf;
 import arc.struct.ObjectMap;
 import arc.struct.Seq;
 import database.*;
@@ -30,6 +31,7 @@ import java.text.MessageFormat;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import static mindustry.Vars.*;
 
@@ -41,8 +43,10 @@ public class ThedimasPlugin extends Plugin {
     private final Interval interval = new Interval();
 
     private CacheSeq<HistoryEntry>[][] history;
+    private final Map<String, Boolean> activeHistoryPlayers = new HashMap<>();
 
     private final Map<String, String> admins = new HashMap<>();
+
 
     //called when game initializes
     @Override
@@ -98,6 +102,8 @@ public class ThedimasPlugin extends Plugin {
                 Vars.state.serverPaused = true;
                 Log.info("auto-pause: " + (Groups.player.size() - 1) + " player connected -> Game paused...");
             }
+
+            activeHistoryPlayers.remove(event.player.uuid());
 
             String playerName = NetClient.colorizeName(event.player.id, event.player.name);
             Log.info(playerName + " has disconnected from the server");
@@ -203,12 +209,44 @@ public class ThedimasPlugin extends Plugin {
                 history[tile.x][tile.y].add(entry);
             }
         });
+
+        Events.on(EventType.TapEvent.class, event -> {
+            if (activeHistoryPlayers.containsKey(event.player.uuid())) {
+                int x = event.tile.x;
+                int y = event.tile.y;
+
+                CacheSeq<HistoryEntry> entries = history[x][y];
+
+                boolean detailed = activeHistoryPlayers.get(player.uuid());
+
+                StringBuilder result = new StringBuilder();
+                result.append(MessageFormat.format("[orange]-- История Блока ([lightgray]{0}[gray],[lightgray]{1}[orange]) --", x, y)).append("\n");
+
+                entries.cleanUp();
+                if (entries.isEmpty()) {
+                    result.append("\n[royal]* [lightgray]записи отсутствуют");
+                }
+
+                for (int i = 0; i < entries.size && i < Const.HISTORY_PAGE_SIZE; i++) {
+                    HistoryEntry entry = entries.get(i);
+
+                    result.append(entry.getMessage());
+                    if (detailed) {
+                        result.append(" ").append(entry.getLastAccessTime(TimeUnit.MINUTES)).append(" минут назад");
+                    }
+
+                    result.append("\n");
+                }
+
+                event.player.sendMessage(result.toString());
+            }
+        });
         // конец блока
     }
 
     @Override
     public void registerServerCommands(CommandHandler handler) {
-        handler.register("export-players", "Экспорт всех игроков, которые когда-либо заходили на сервер в БД", args -> {
+        handler.register("export-players", "Экспорт всех игроков, которые когда-либо заходили на сервер, в БД", args -> {
             ObjectMap<String, Administration.PlayerInfo> playerList = Reflect.get(netServer.admins, "playerInfo");
             int exported = 0;
             for (Administration.PlayerInfo info : playerList.values()) {
@@ -230,6 +268,7 @@ public class ThedimasPlugin extends Plugin {
             }
             Log.info(MessageFormat.format("Successfully exported {0} players", exported));
         });
+
         handler.register("auto-pause", "[on|off]", "Поставить игру на паузу, когда никого нет", args -> {
             if (args.length == 0) {
                 if (autoPause) {
@@ -344,34 +383,56 @@ public class ThedimasPlugin extends Plugin {
             Vars.net.pingHost(ip, port, host -> Call.connect(player.con, ip, port), e -> player.sendMessage("[scarlet]Сервер оффлайн"));
         });
 
-        handler.<Player>register("history", "<x> <y>", "Посмотреть историю блока", (args, player) -> {
-            if (!Strings.canParseInt(args[0]) || !Strings.canParseInt(args[1])) {
-                player.sendMessage("[scarlet]Неверный формат координат");
-                return;
-            }
+        handler.<Player>register("history", "[страница] [подробно]", "Посмотреть историю блока", (args, player) -> {
+            boolean detailed = args.length == 2 && Seq.with(Const.BOOL_VALUES.split(", ")).contains(args[1].toLowerCase());
 
-            int x = Integer.parseInt(args[0]);
-            int y = Integer.parseInt(args[1]);
-            if (!Structs.inBounds(x, y, history)) {
-                player.sendMessage("[scarlet]Неверные координаты. Максимум: [orange]" + history.length + "[], [orange]" + history[0].length + "[]. Минимум : [orange]0[], [orange]0[].");
-                return;
-            }
-
-            CacheSeq<HistoryEntry> entries = history[x][y];
-            entries.cleanUp();
-
-            StringBuilder message = new StringBuilder(MessageFormat.format("[orange]История блока ([lightgray]{0}[gray],[lightgray]{1}[orange])", x, y));
-            if (entries.isEmpty()) {
-                message.append("\n[royal]* [lightgray]записи отсутствуют");
-            } else if (entries.isOverflown()) {
-                message.append("\n[lightgray]... слишком много записей");
-            } else {
-                for (HistoryEntry entry : entries) {
-                    message.append("\n").append(entry.getMessage());
+            if (args.length > 0 && activeHistoryPlayers.containsKey(player.uuid())) {
+                if (!Strings.canParseInt(args[0])) {
+                    player.sendMessage("[scarlet]Страница должна быть числом!");
+                    return;
                 }
-            }
 
-            player.sendMessage(message.toString());
+                int mouseX = Mathf.clamp(Mathf.round(player.mouseX / 8), 1, world.width());
+                int mouseY = Mathf.clamp(Mathf.round(player.mouseY / 8), 1, world.height());
+
+                CacheSeq<HistoryEntry> entries = history[mouseX][mouseY];
+
+                int page = Integer.parseInt(args[0]) - 1;
+                int pages = Mathf.ceil(entries.size / 6.0f);
+
+                if ((page >= pages || page < 0) && !entries.isEmpty()) {
+                    player.sendMessage(MessageFormat.format("[scarlet]'Страница' должна быть между [orange]1 []и [orange]{0}[scarlet]", pages));
+                    return;
+                }
+
+                StringBuilder result = new StringBuilder();
+                result.append(MessageFormat.format("[orange]-- История Блока ([lightgray]{0}[gray],[lightgray]{1}[orange]) Страница [lightgray]{2}[gray]/[lightgray]{3}[orange] --", mouseX, mouseY, page + 1, pages)).append("\n");
+
+                if (entries.isEmpty()) {
+                    result.append("\n[royal]* [lightgray]записи отсутствуют");
+                }
+
+                for (int i = 6 * page; i < Math.min(6 * (page + 1), entries.size); i++) {
+                    HistoryEntry entry = entries.get(i);
+                    result.append(entry.getMessage());
+                    if (detailed) {
+                        result.append(" ").append(entry.getLastAccessTime(TimeUnit.MINUTES)).append(" минут назад");
+                    }
+                    result.append("\n");
+                }
+
+                player.sendMessage(result.toString());
+            } else if (activeHistoryPlayers.containsKey(player.uuid())) {
+                activeHistoryPlayers.remove(player.uuid());
+                player.sendMessage("[lightgray]История [orange]выключена");
+            } else if (args.length == 2) {
+                activeHistoryPlayers.put(player.uuid(), detailed);
+                String msg = detailed ? "[lightgray]Подробная история" : "[lightgray]История";
+                player.sendMessage(msg + " [orange]включена[]. Нажмите на тайл для просмотра информации");
+            } else {
+                activeHistoryPlayers.put(player.uuid(), false);
+                player.sendMessage("[lightgray]История [orange]включена[]. Нажмите на тайл для просмотра информации");
+            }
         });
 
         // блок "для админов"

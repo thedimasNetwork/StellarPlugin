@@ -7,6 +7,10 @@ public class Const {
     public static final String CHAT_LOG_FORMAT = "{0}: {1} | {2}";
     public static final String CHAT_FORMAT = "<{0}> {1}[white]: {2}";
 
+    public static final int HISTORY_PAGE_SIZE = 6;
+
+    public static final String BOOL_VALUES = "1, on, yes, true, вкл, да";
+
     public static final String TEAM_LIST = "[white][yellow]sharded[], [red]crux[], [green]green[], [purple]purple[], [blue]blue[], [gray]derelict[]";
 
     public static final String UNIT_LIST
