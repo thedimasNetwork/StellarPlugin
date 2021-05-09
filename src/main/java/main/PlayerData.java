@@ -1,4 +1,4 @@
-package java.main;
+package main;
 
 public class PlayerData {
     public String uuid;

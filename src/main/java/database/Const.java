@@ -1,4 +1,4 @@
-package java.database;
+package database;
 
 public class Const {
     public static final String U_TABLE = "users";

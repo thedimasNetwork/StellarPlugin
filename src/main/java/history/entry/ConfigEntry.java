@@ -1,4 +1,4 @@
-package java.history.entry;
+package history.entry;
 
 import arc.struct.StringMap;
 import arc.util.Time;
