@@ -1,4 +1,4 @@
-package history.entry;
+package java.history.entry;
 
 import arc.util.Nullable;
 import arc.util.Time;

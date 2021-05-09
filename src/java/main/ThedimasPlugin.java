@@ -1,14 +1,10 @@
-package main;
+package java.main;
 
 import arc.*;
+import arc.util.*;
 import arc.math.Mathf;
 import arc.struct.ObjectMap;
 import arc.struct.Seq;
-import database.*;
-import history.entry.BlockEntry;
-import history.entry.ConfigEntry;
-import history.entry.RotateEntry;
-import history.struct.Seqs;
 import mindustry.Vars;
 import mindustry.content.Blocks;
 import mindustry.content.Items;
@@ -16,14 +12,18 @@ import mindustry.core.NetClient;
 import mindustry.gen.*;
 import mindustry.game.*;
 import mindustry.mod.*;
-import arc.util.*;
 import mindustry.net.Administration;
 import mindustry.type.UnitType;
-
-import history.struct.CacheSeq;
-import history.entry.HistoryEntry;
 import mindustry.world.Tile;
 import mindustry.world.blocks.logic.LogicBlock;
+
+import java.database.*;
+import java.history.entry.BlockEntry;
+import java.history.entry.ConfigEntry;
+import java.history.entry.HistoryEntry;
+import java.history.entry.RotateEntry;
+import java.history.struct.CacheSeq;
+import java.history.struct.Seqs;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -86,9 +86,9 @@ public class ThedimasPlugin extends Plugin {
 
                     DBHandler.save(data);
                 } else { 
-                    DBHandler.update(event.player.uuid(), database.Const.U_NAME, event.player.name);
+                    DBHandler.update(event.player.uuid(), java.database.Const.U_NAME, event.player.name);
                 }
-                if (DBHandler.get(event.player.uuid(), database.Const.U_ADMIN).equals("1")) {
+                if (DBHandler.get(event.player.uuid(), java.database.Const.U_ADMIN).equals("1")) {
                     admins.put(event.player.uuid(), event.player.name);
                     event.player.admin = true;
                 }

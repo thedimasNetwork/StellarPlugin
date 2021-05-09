@@ -1,7 +1,7 @@
-package database;
+package java.database;
 
 import arc.util.Log;
-import main.PlayerData;
+import java.main.PlayerData;
 
 import java.sql.*;
 

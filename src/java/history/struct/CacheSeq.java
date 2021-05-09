@@ -1,4 +1,4 @@
-package history.struct;
+package java.history.struct;
 
 import arc.struct.Queue;
 import arc.struct.Seq;
