@@ -63,8 +63,8 @@ public class ThedimasPlugin extends Plugin {
                 Log.info("auto-pause: " + Groups.player.size() + " player(s) connected -> Game unpaused...");
             }
 
+            Log.info(MessageFormat.format(Const.JOIN_LOG_FORMAT, event.player.name, event.player.locale, event.player.con.address));
             String playerName = NetClient.colorizeName(event.player.id, event.player.name);
-            Log.info(MessageFormat.format(Const.JOIN_LOG_FORMAT, playerName, event.player.locale, event.player.con.address));
             Call.sendMessage("[lime]+ [accent]" + playerName + "[lime] присоединился");
 
             if (event.player.locale.startsWith("uk")) {
@@ -105,18 +105,18 @@ public class ThedimasPlugin extends Plugin {
 
             activeHistoryPlayers.remove(event.player.uuid());
 
+            Log.info(event.player.name + " has disconnected from the server");
             String playerName = NetClient.colorizeName(event.player.id, event.player.name);
-            Log.info(playerName + " has disconnected from the server");
             Call.sendMessage("[scarlet]- [accent]" + playerName + "[scarlet] вышел");
         });
 
         // блок "торийки"
         Events.on(EventType.DepositEvent.class, event -> {
             Building building = event.tile;
-            Player player = event.player;
             if (building.block() == Blocks.thoriumReactor && event.item == Items.thorium && player.team().cores().contains(c -> event.tile.dst(c.x, c.y) < 300)) {
-                Groups.player.each(p -> p.sendMessage(MessageFormat.format("[scarlet]ВНИМАНИЕ! [accent]{0} положил торий в реактор!\n x: [lightgray]{1}[accent], y: [lightgray]{2}", player, building.tileX(), building.tileY())));
-                Log.info(MessageFormat.format("{0} положил торий в реактор ({1}, {2})", player, building.tileX(), building.tileY()));
+                String playerName = NetClient.colorizeName(event.player.id, event.player.name);
+                Groups.player.each(p -> p.sendMessage(MessageFormat.format("[scarlet]ВНИМАНИЕ! [accent]{0[accent]} положил торий в реактор!\n x: [lightgray]{1}[accent], y: [lightgray]{2}", playerName, building.tileX(), building.tileY())));
+                Log.info(MessageFormat.format("{0} положил торий в реактор ({1}, {2})", event.player.name, building.tileX(), building.tileY()));
             }
         });
 
@@ -127,8 +127,8 @@ public class ThedimasPlugin extends Plugin {
                 Player player = event.builder.getPlayer();
                 String playerName = NetClient.colorizeName(player.id, player.name);
                 if (interval.get(300)) {
-                    Groups.player.each(p -> p.sendMessage(MessageFormat.format("[scarlet]ВНИМАНИЕ! [accent]{0} строит ториевый реактор возле ядра!\nx: [lightgray]{1}[accent], y: [lightgray]{2}", playerName, event.tile.x, event.tile.y)));
-                    Log.info(MessageFormat.format("{0} начал строить ториевый реактор близко к ядру ({1}, {2})", playerName, event.tile.x, event.tile.y));
+                    Groups.player.each(p -> p.sendMessage(MessageFormat.format("[scarlet]ВНИМАНИЕ! [accent]{0[accent]} строит ториевый реактор возле ядра!\nx: [lightgray]{1}[accent], y: [lightgray]{2}", playerName, event.tile.x, event.tile.y)));
+                    Log.info(MessageFormat.format("{0} начал строить ториевый реактор близко к ядру ({1}, {2})", player.name, event.tile.x, event.tile.y));
                 }
             }
         });
@@ -138,21 +138,21 @@ public class ThedimasPlugin extends Plugin {
         Events.on(EventType.PlayerChatEvent.class, event -> {
             if (!event.message.startsWith("/")) {
                 String prefix = event.player.admin() ? "\uE82C" : "\uE872";
-                Log.info(MessageFormat.format(Const.CHAT_LOG_FORMAT, Strings.stripColors(player.name),  Strings.stripColors(event.message), player.locale));
-                Groups.player.each(player -> {
+                String playerName = NetClient.colorizeName(event.player.id, event.player.name);
+
+                Groups.player.each(otherPlayer -> {
                     String translated = event.message;
-                    try {
-                        if (!player.locale.equals(event.player.locale())) {
-                            translated = Translator.translate(event.message, player.locale, "auto");
+                    if (!otherPlayer.locale.equals(event.player.locale())) {
+                        try {
+                            translated = Translator.translate(event.message, otherPlayer.locale, "auto");
+                        } catch (IOException e) {
+                            Log.err(e.getMessage());
+                            otherPlayer.sendMessage(MessageFormat.format(Const.CHAT_FORMAT, prefix, playerName, translated));
                         }
-                    } catch (IOException e) {
-                        Log.err(e.getMessage());
-                    } finally {
-                        String playerName = NetClient.colorizeName(event.player.id, event.player.name);
-                        String msg = MessageFormat.format(Const.CHAT_FORMAT, prefix, playerName, translated);
-                        player.sendMessage(msg);
                     }
+                    otherPlayer.sendMessage(MessageFormat.format(Const.CHAT_FORMAT, prefix, playerName, translated));
                 });
+
                 Log.info(MessageFormat.format(Const.CHAT_LOG_FORMAT, Strings.stripColors(event.player.name),  Strings.stripColors(event.message), event.player.locale));
             }
         });
@@ -311,36 +311,48 @@ public class ThedimasPlugin extends Plugin {
             String message = args[0];
             String prefix = "\uE82C";
             String playerName = NetClient.colorizeName(player.id, player.name);
-            Log.info("<A>" + MessageFormat.format(Const.CHAT_LOG_FORMAT, Strings.stripColors(player.name),  Strings.stripColors(message), player.locale));
+
             Groups.player.each(Player::admin, otherPlayer -> {
                 String translated = message;
-                try {
-                    translated = Translator.translate(message, otherPlayer.locale, "auto");
-                } catch (IOException e) {
-                    Log.err(e.getMessage());
-                } finally {
-                    String msg = MessageFormat.format(Const.CHAT_FORMAT, prefix, playerName, translated);
-                    otherPlayer.sendMessage("<[scarlet]A[]>" + msg);
+                if (!player.locale.equals(otherPlayer.locale)) {
+                    try {
+                        translated = Translator.translate(message, otherPlayer.locale, "auto");
+                    } catch (IOException e) {
+                        Log.err(e.getMessage());
+
+                        String msg = MessageFormat.format(Const.CHAT_FORMAT, prefix, playerName, translated);
+                        otherPlayer.sendMessage("<[scarlet]A[]>" + msg);
+                    }
                 }
+                String msg = MessageFormat.format(Const.CHAT_FORMAT, prefix, playerName, translated);
+                otherPlayer.sendMessage("<[scarlet]A[]>" + msg);
             });
+
+            Log.info("<A>" + MessageFormat.format(Const.CHAT_LOG_FORMAT, Strings.stripColors(player.name),  Strings.stripColors(message), player.locale));
         });
 
         handler.<Player>register("t", "<текст...>", "Отправить сообщение команде", (args, player) -> {
             String message = args[0];
             String playerName = NetClient.colorizeName(player.id, player.name);
             String prefix = player.admin() ? "\uE82C" : "\uE872";
-            Log.info("<T>" + MessageFormat.format(Const.CHAT_LOG_FORMAT, Strings.stripColors(player.name),  Strings.stripColors(message), player.locale));
+
             Groups.player.each(o -> o.team() == player.team(), otherPlayer -> {
                 String translated = message;
-                try {
-                    translated = Translator.translate(message, otherPlayer.locale, "auto");
-                } catch (IOException e) {
-                    Log.err(e.getMessage());
-                } finally {
-                    String msg = MessageFormat.format(Const.CHAT_FORMAT, prefix, playerName, translated);
-                    otherPlayer.sendMessage("<[#" + player.team().color + "]T[]>" + msg);
+                if (!player.locale.equals(otherPlayer.locale)) {
+                    try {
+                        translated = Translator.translate(message, otherPlayer.locale, "auto");
+                    } catch (IOException e) {
+                        Log.err(e.getMessage());
+
+                        String msg = MessageFormat.format(Const.CHAT_FORMAT, prefix, playerName, translated);
+                        otherPlayer.sendMessage("<[#" + player.team().color + "]T[]>" + msg);
+                    }
                 }
+                String msg = MessageFormat.format(Const.CHAT_FORMAT, prefix, playerName, translated);
+                otherPlayer.sendMessage("<[#" + player.team().color + "]T[]>" + msg);
             });
+
+            Log.info("<T>" + MessageFormat.format(Const.CHAT_LOG_FORMAT, Strings.stripColors(player.name),  Strings.stripColors(message), player.locale));
         });
 
         handler.<Player>register("rules", "Посмотреть список правил", (args, player) -> {
@@ -451,11 +463,11 @@ public class ThedimasPlugin extends Plugin {
             }
 
             if (args.length == 0) {
-                player.name = admins.get(player.uuid());
+                player.name(admins.get(player.uuid()));
                 String playerName = NetClient.colorizeName(player.id, player.name);
                 player.sendMessage("[green]Ваше имя сброшено. Текущее имя - []" + playerName);
             } else {
-                player.name = args[1];
+                player.name(args[1]);
                 String playerName = NetClient.colorizeName(player.id, player.name);
                 player.sendMessage("[green]Ваше имя изменено. Текущее имя - []" + playerName);
             }
@@ -541,7 +553,7 @@ public class ThedimasPlugin extends Plugin {
                 return;
             }
 
-            if (args.length == 2) {
+            if (args.length == 3) {
                 Player otherPlayer = Groups.player.find(p -> Strings.stripGlyphs(Strings.stripColors(p.name())).equalsIgnoreCase(args[0]));
                 if (otherPlayer == null) {
                     player.sendMessage("[scarlet]Игрока с таким ником нет на сервере");
@@ -558,7 +570,6 @@ public class ThedimasPlugin extends Plugin {
 
             player.unit().set(x * 8, y * 8);
             Call.setPosition(player.con, x * 8, y * 8);
-            player.snapSync();
 
             player.sendMessage("Вы телепортированы на координаты [accent]" + x + "[], [accent]" + y);
         });
