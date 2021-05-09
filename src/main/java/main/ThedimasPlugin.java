@@ -561,7 +561,7 @@ public class ThedimasPlugin extends Plugin {
             }
         });
 
-        handler.<Player>register("tp", "<x> <y> [name...]", "Телепортироваться по координатам/к игроку", (args, player) -> {
+        handler.<Player>register("tp", "<x> <y> [name...]", "Телепортировать игрока по координатам", (args, player) -> {
             if (!admins.containsKey(player.uuid())) {
                 player.sendMessage("[scarlet]Только админы могут использовать эту команду![]");
                 return;
