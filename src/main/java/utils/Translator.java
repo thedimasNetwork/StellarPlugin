@@ -1,4 +1,4 @@
-package main;
+package utils;
 
 import arc.util.serialization.Jval;
 

@@ -1,7 +1,6 @@
 package main;
 
 import arc.*;
-import arc.files.Fi;
 import arc.math.Mathf;
 import arc.struct.ObjectMap;
 import arc.struct.Seq;
@@ -26,6 +25,8 @@ import history.struct.CacheSeq;
 import history.entry.HistoryEntry;
 import mindustry.world.Tile;
 import mindustry.world.blocks.logic.LogicBlock;
+import utils.Bundle;
+import utils.Translator;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -52,6 +53,7 @@ public class ThedimasPlugin extends Plugin {
     //called when game initializes
     @Override
     public void init() {
+        Bundle bundle = new Bundle();
         Log.info("thedimasPlugin launched!");
 
         Vars.state.serverPaused = true;
@@ -87,7 +89,7 @@ public class ThedimasPlugin extends Plugin {
 
             Log.info(MessageFormat.format(Const.JOIN_LOG_FORMAT, event.player.name, event.player.locale, event.player.con.address));
             String playerName = NetClient.colorizeName(event.player.id, event.player.name);
-            Call.sendMessage("[lime]+ [accent]" + playerName + "[lime] присоединился");
+            Call.sendMessage(Bundle.get("player.onJoin", playerName));
 
             if (event.player.locale.startsWith("uk")) {
                 Call.infoMessage(event.player.con, Const.WELCOME_UK);
@@ -129,7 +131,7 @@ public class ThedimasPlugin extends Plugin {
 
             Log.info(event.player.name + " has disconnected from the server");
             String playerName = NetClient.colorizeName(event.player.id, event.player.name);
-            Call.sendMessage("[scarlet]- [accent]" + playerName + "[scarlet] вышел");
+            Call.sendMessage(Bundle.get("player.onLeave", playerName));
         });
 
         // блок "торийки"
