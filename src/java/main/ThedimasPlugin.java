@@ -85,7 +85,7 @@ public class ThedimasPlugin extends Plugin {
                     data.banned = false; //banned
 
                     DBHandler.save(data);
-                } else {
+                } else { 
                     DBHandler.update(event.player.uuid(), database.Const.U_NAME, event.player.name);
                 }
                 if (DBHandler.get(event.player.uuid(), database.Const.U_ADMIN).equals("1")) {

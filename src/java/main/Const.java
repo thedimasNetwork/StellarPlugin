@@ -3,7 +3,7 @@ package main;
 import arc.struct.StringMap;
 
 public class Const {
-    public static final String JOIN_LOG_FORMAT = "{0} has joined the server\tLocale: {1}\tIP: {2}";
+    public static final String JOIN_LOG_FORMAT = "{0} has joined the server | locale: {1} | IP: {2}";
     public static final String CHAT_LOG_FORMAT = "{0}: {1} | {2}";
     public static final String CHAT_FORMAT = "<{0}> {1}[white]: {2}";
 
