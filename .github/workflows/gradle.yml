@@ -22,9 +22,9 @@ jobs:
       run: chmod +x gradlew
     - name: Build with Gradle
       run: ./gradlew jar
-    - name: Upload artifacts
-      uses: svenstaro/upload-release-action@v2
-      with:
-        repo_token: ${{ secrets.GITHUB_TOKEN }}
-        file: build/libs/thedimasPlugin.jar
-        tag: ${{ env.GITHUB_RUN_NUMBER }}
+#    - name: Upload artifacts
+#      uses: svenstaro/upload-release-action@v2
+#      with:
+#        repo_token: ${{ secrets.GITHUB_TOKEN }}
+#        file: build/libs/thedimasPlugin.jar
+#        tag: ${{ env.GITHUB_RUN_NUMBER }}
