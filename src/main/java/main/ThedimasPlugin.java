@@ -85,7 +85,7 @@ public class ThedimasPlugin extends Plugin {
                     data.banned = false; //banned
 
                     DBHandler.save(data);
-                } else { 
+                } else {
                     DBHandler.update(event.player.uuid(), database.Const.U_NAME, event.player.name);
                 }
                 if (DBHandler.get(event.player.uuid(), database.Const.U_ADMIN).equals("1")) {
@@ -389,19 +389,19 @@ public class ThedimasPlugin extends Plugin {
                 player.sendMessage("[sky]Список доступных серверов:\n" + Const.SERVER_LIST);
                 return;
             }
-            String serverName = args[0];
-            if (!Const.SERVER_ADDRESS.containsKey(serverName.toLowerCase())) {
+            String serverName = args[0].toLowerCase();
+            if (!Const.SERVER_ADDRESS.containsKey(serverName)) {
                 player.sendMessage("[scarlet]Такого сервера не существует. Доступные сервера:\n" + Const.SERVER_LIST);
                 return;
             }
-            String[] address = Const.SERVER_ADDRESS.get(serverName.toLowerCase()).split(":");
+            String[] address = Const.SERVER_ADDRESS.get(serverName).split(":");
             String ip = address[0];
             int port = Integer.parseInt(address[1]);
             Vars.net.pingHost(ip, port, host -> Call.connect(player.con, ip, port), e -> player.sendMessage("[scarlet]Сервер оффлайн"));
         });
 
         handler.<Player>register("history", "[страница] [подробно]", "Посмотреть историю блока", (args, player) -> {
-            boolean detailed = args.length == 2 && Seq.with(Const.BOOL_VALUES.split(", ")).contains(args[1].toLowerCase());
+            boolean detailed = args.length == 2 && Structs.contains(Const.BOOL_VALUES.split(", "), args[1].toLowerCase());
 
             if (args.length > 0 && activeHistoryPlayers.containsKey(player.uuid())) {
                 if (!Strings.canParseInt(args[0])) {
