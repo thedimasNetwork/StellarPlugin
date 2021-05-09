@@ -160,6 +160,11 @@ public class ThedimasPlugin extends Plugin {
 
         // блок "история"
         Events.on(EventType.WorldLoadEvent.class, event -> {
+            if (Groups.player.size() > 0 && autoPause) {
+                Vars.state.serverPaused = false;
+                Log.info("auto-pause: " + Groups.player.size() + " player(s) connected -> Game unpaused...");
+            }
+
             history = new CacheSeq[world.width()][world.height()];
             for (Tile tile : world.tiles) {
                 history[tile.x][tile.y] = Seqs.newBuilder()
