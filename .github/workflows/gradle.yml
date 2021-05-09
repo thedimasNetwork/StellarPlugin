@@ -3,8 +3,7 @@
 
 name: Java CI with Gradle
 
-on:
-  push
+on: [push, workflow_dispatch]
 
 jobs:
   build:
@@ -22,9 +21,8 @@ jobs:
       run: chmod +x gradlew
     - name: Build with Gradle
       run: ./gradlew jar
-#    - name: Upload artifacts
-#      uses: svenstaro/upload-release-action@v2
-#      with:
-#        repo_token: ${{ secrets.GITHUB_TOKEN }}
-#        file: build/libs/thedimasPlugin.jar
-#        tag: ${{ env.GITHUB_RUN_NUMBER }}
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: ${{ github.event.repository.name }}
+        path: build/libs/${{ github.event.repository.name }}.jar
