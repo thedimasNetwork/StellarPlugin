@@ -27,4 +27,4 @@ jobs:
       with:
         repo_token: ${{ secrets.GITHUB_TOKEN }}
         file: build/libs/thedimasPlugin.jar
-        tag: lastest
+        tag: $GITHUB_RUN_NUMBER
