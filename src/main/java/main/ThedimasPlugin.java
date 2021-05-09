@@ -1,9 +1,11 @@
 package main;
 
 import arc.*;
+import arc.files.Fi;
 import arc.math.Mathf;
 import arc.struct.ObjectMap;
 import arc.struct.Seq;
+import arc.util.serialization.Jval;
 import database.*;
 import history.entry.BlockEntry;
 import history.entry.ConfigEntry;
@@ -29,8 +31,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.time.Duration;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 import static mindustry.Vars.*;
@@ -56,6 +57,27 @@ public class ThedimasPlugin extends Plugin {
         Vars.state.serverPaused = true;
 
         netServer.admins.addChatFilter((player, message) -> null);
+
+        Core.net.httpGet(ghApi + "/search/code?q=name+repo:Anuken/Mindustry+filename:bundle&per_page=100", res -> {
+            Jval json = Jval.read(res.getResultAsString());
+            Seq<String> names = json.get("items").asArray().map(obj -> obj.getString("name"))
+                    .filter(str -> str.endsWith(".properties") && !str.equals("bundle.properties"))
+                    .map(str -> str.substring("bundle".length() + 1, str.lastIndexOf('.')))
+                    .and("en");
+
+            locales = new Locale[names.size];
+            for(int i = 0; i < locales.length; i++){
+                String code = names.get(i);
+                if(code.contains("_")){
+                    locales[i] = new Locale(code.split("_")[0], code.split("_")[1]);
+                }else{
+                    locales[i] = new Locale(code);
+                }
+            }
+
+            Arrays.sort(locales, Structs.comparing(l -> l.getDisplayName(l), String.CASE_INSENSITIVE_ORDER));
+            locales = Seq.with(locales).and(new Locale("router")).toArray(Locale.class);
+        }, Log::err);
 
         Events.on(EventType.PlayerJoin.class, event -> {
             if (Groups.player.size() >= 1 && autoPause && Vars.state.serverPaused) {
