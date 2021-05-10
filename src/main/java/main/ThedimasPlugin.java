@@ -122,6 +122,8 @@ public class ThedimasPlugin extends Plugin {
                     DBHandler.save(data);
                 } else {
                     DBHandler.update(event.player.uuid(), database.Const.U_NAME, event.player.name);
+                    DBHandler.update(event.player.uuid(), database.Const.U_LOCALE, event.player.locale);
+                    DBHandler.update(event.player.uuid(), database.Const.U_IP, event.player.ip());
                 }
                 if (DBHandler.get(event.player.uuid(), database.Const.U_ADMIN).equals("1")) {
                     admins.put(event.player.uuid(), event.player.name);

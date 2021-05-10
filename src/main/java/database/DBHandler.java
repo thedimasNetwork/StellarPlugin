@@ -57,8 +57,7 @@ public class DBHandler {
             prSt.setString(1, uuid);
 
             ResultSet res = prSt.executeQuery();
-            res.next();
-            return res.getString(1);
+            return res.next() ? res.getString(1) : null;
         }
     }
 
