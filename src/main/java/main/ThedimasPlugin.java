@@ -40,6 +40,8 @@ import static mindustry.Vars.*;
 @SuppressWarnings({"unused", "unchecked"})
 public class ThedimasPlugin extends Plugin {
 
+    private final Bundle bundle = new Bundle();
+
     private boolean autoPause = true;
 
     private final Interval interval = new Interval();
@@ -49,7 +51,7 @@ public class ThedimasPlugin extends Plugin {
 
     private final Map<String, String> admins = new HashMap<>();
 
-    private CacheSeq<HistoryEntry> getHistorySeq(int x, int y){
+    private CacheSeq<HistoryEntry> getHistorySeq(int x, int y) {
         CacheSeq<HistoryEntry> seq = history[x][y];
         if (seq == null) {
             history[x][y] = seq = Seqs.newBuilder()
@@ -62,7 +64,6 @@ public class ThedimasPlugin extends Plugin {
 
     @Override
     public void init() {
-        Bundle bundle = new Bundle();
         Log.info("thedimasPlugin launched!");
 
         Vars.state.serverPaused = true;
