@@ -177,23 +177,22 @@ public class ThedimasPlugin extends Plugin {
 
                 Groups.player.each(otherPlayer -> {
                     String translated = event.message;
-                    String locale;
+                    String locale = otherPlayer.locale;
                     try {
                         locale = DBHandler.get(otherPlayer.uuid(), database.Const.U_LOCALE);
                     } catch (Throwable t) {
-                        Log.err(t.getMessage());
-                        locale = otherPlayer.locale;
+                        Log.err(t);
                     }
 
                     if (!otherPlayer.locale.equals(event.player.locale())) {
                         try {
-                            translated = Translator.translate(event.message, locale.equals("auto") || locale.equals("double") ? otherPlayer.locale : locale, "auto");
+                            translated = Translator.translate(event.message, "auto".equals(locale) || "double".equals(locale) ? otherPlayer.locale : locale, "auto");
                         } catch (Throwable t) {
                             Log.err(t.getMessage());
                             otherPlayer.sendMessage(MessageFormat.format(Const.CHAT_FORMAT, prefix, playerName, translated));
                         }
                     }
-                    otherPlayer.sendMessage(MessageFormat.format(locale.equals("double") ? Const.CHAT_FORMAT_DETAILED : Const.CHAT_FORMAT,
+                    otherPlayer.sendMessage(MessageFormat.format("double".equals(locale) ? Const.CHAT_FORMAT_DETAILED : Const.CHAT_FORMAT,
                             prefix, playerName, translated, event.message));
                 });
 
@@ -357,17 +356,24 @@ public class ThedimasPlugin extends Plugin {
 
             Groups.player.each(Player::admin, otherPlayer -> {
                 String translated = message;
-                if (!player.locale.equals(otherPlayer.locale)) {
+                String locale = otherPlayer.locale;
+                try {
+                    locale = DBHandler.get(otherPlayer.uuid(), database.Const.U_LOCALE);
+                } catch (Throwable t) {
+                    Log.err(t);
+                }
+
+                if (!otherPlayer.locale.equals(player.locale())) {
                     try {
-                        translated = Translator.translate(message, otherPlayer.locale, "auto");
+                        translated = Translator.translate(message, "auto".equals(locale) || "double".equals(locale) ? otherPlayer.locale : locale, "auto");
                     } catch (IOException e) {
                         Log.err(e.getMessage());
 
-                        String msg = MessageFormat.format(Const.CHAT_FORMAT, prefix, playerName, translated);
+                        String msg = MessageFormat.format("double".equals(locale) ? Const.CHAT_FORMAT_DETAILED : Const.CHAT_FORMAT, prefix, playerName, translated, message);
                         otherPlayer.sendMessage("<[scarlet]A[]>" + msg);
                     }
                 }
-                String msg = MessageFormat.format(Const.CHAT_FORMAT, prefix, playerName, translated);
+                String msg = MessageFormat.format("double".equals(locale) ? Const.CHAT_FORMAT_DETAILED : Const.CHAT_FORMAT, prefix, playerName, translated, message);
                 otherPlayer.sendMessage("<[scarlet]A[]>" + msg);
             });
 
@@ -381,21 +387,28 @@ public class ThedimasPlugin extends Plugin {
 
             Groups.player.each(o -> o.team() == player.team(), otherPlayer -> {
                 String translated = message;
-                if (!player.locale.equals(otherPlayer.locale)) {
-                    try {
-                        translated = Translator.translate(message, otherPlayer.locale, "auto");
-                    } catch (IOException e) {
-                        Log.err(e.getMessage());
+                String locale = otherPlayer.locale;
+                try {
+                    locale = DBHandler.get(otherPlayer.uuid(), database.Const.U_LOCALE);
+                } catch (Throwable t) {
+                    Log.err(t);
+                }
 
-                        String msg = MessageFormat.format(Const.CHAT_FORMAT, prefix, playerName, translated);
+                if (!otherPlayer.locale.equals(player.locale())) {
+                    try {
+                        translated = Translator.translate(message, "auto".equals(locale) || "double".equals(locale) ? otherPlayer.locale : locale, "auto");
+                    } catch (Throwable t) {
+                        Log.err(t.getMessage());
+
+                        String msg = MessageFormat.format("double".equals(locale) ? Const.CHAT_FORMAT_DETAILED : Const.CHAT_FORMAT, prefix, playerName, translated, message);
                         otherPlayer.sendMessage("<[#" + player.team().color + "]T[]>" + msg);
                     }
                 }
-                String msg = MessageFormat.format(Const.CHAT_FORMAT, prefix, playerName, translated);
+                String msg = MessageFormat.format("double".equals(locale) ? Const.CHAT_FORMAT_DETAILED : Const.CHAT_FORMAT, prefix, playerName, translated, message);
                 otherPlayer.sendMessage("<[#" + player.team().color + "]T[]>" + msg);
             });
 
-            Log.info("<T>" + MessageFormat.format(Const.CHAT_LOG_FORMAT, Strings.stripColors(player.name),  Strings.stripColors(message), player.locale));
+            Log.info("<T>" + MessageFormat.format(Const.CHAT_LOG_FORMAT, Strings.stripColors(player.name), Strings.stripColors(message), player.locale));
         });
 
         handler.<Player>register("rules", "Посмотреть список правил", (args, player) -> {
