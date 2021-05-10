@@ -31,7 +31,7 @@ import utils.Translator;
 import java.io.*;
 import java.sql.SQLException;
 import java.text.MessageFormat;
-import java.time.Duration;
+import java.time.*;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -115,6 +115,7 @@ public class ThedimasPlugin extends Plugin {
                     data.uuid = event.player.uuid();
                     data.ip = event.player.ip();
                     data.name = event.player.name();
+                    data.locale = event.player.locale;
                     data.admin = event.player.admin;
                     data.banned = false; //banned
 
@@ -176,15 +177,24 @@ public class ThedimasPlugin extends Plugin {
 
                 Groups.player.each(otherPlayer -> {
                     String translated = event.message;
+                    String locale;
+                    try {
+                        locale = DBHandler.get(otherPlayer.uuid(), database.Const.U_LOCALE);
+                    } catch (Throwable t) {
+                        Log.err(t.getMessage());
+                        locale = otherPlayer.locale;
+                    }
+
                     if (!otherPlayer.locale.equals(event.player.locale())) {
                         try {
-                            translated = Translator.translate(event.message, otherPlayer.locale, "auto");
-                        } catch (IOException e) {
-                            Log.err(e.getMessage());
+                            translated = Translator.translate(event.message, locale.equals("auto") || locale.equals("double") ? otherPlayer.locale : locale, "auto");
+                        } catch (Throwable t) {
+                            Log.err(t.getMessage());
                             otherPlayer.sendMessage(MessageFormat.format(Const.CHAT_FORMAT, prefix, playerName, translated));
                         }
                     }
-                    otherPlayer.sendMessage(MessageFormat.format(Const.CHAT_FORMAT, prefix, playerName, translated));
+                    otherPlayer.sendMessage(MessageFormat.format(locale.equals("double") ? Const.CHAT_FORMAT_DETAILED : Const.CHAT_FORMAT,
+                            prefix, playerName, translated, event.message));
                 });
 
                 Log.info(MessageFormat.format(Const.CHAT_LOG_FORMAT, Strings.stripColors(event.player.name),  Strings.stripColors(event.message), event.player.locale));
@@ -426,6 +436,68 @@ public class ThedimasPlugin extends Plugin {
             String ip = address[0];
             int port = Integer.parseInt(address[1]);
             Vars.net.pingHost(ip, port, host -> Call.connect(player.con, ip, port), e -> player.sendMessage("[scarlet]Сервер оффлайн"));
+        });
+
+        handler.<Player>register("tr", "[off|auto|double|somelocale]", "Настроить переводчик чата.", (args, player) -> {
+            String locale;
+            try {
+                locale = DBHandler.get(player.uuid(), database.Const.U_LOCALE);
+            } catch (Throwable t) {
+                player.sendMessage("[scarlet]Не получилось получить настройки языка.");
+                Log.err(t);
+                return;
+            }
+
+            if (args.length == 0) {
+                player.sendMessage("[sky]Текущий язык переводчика: " + locale);
+                return;
+            }
+
+            String mode = args[0].toLowerCase();
+            switch (mode) {
+                case "off":
+                    try {
+                        DBHandler.update(player.uuid(), database.Const.U_LOCALE, "off");
+                    } catch (Throwable t) {
+                        Log.err(t);
+                    }
+
+                    player.sendMessage("[sky]Перевод чата выключен.");
+                    break;
+                case "auto":
+                    try {
+                        DBHandler.update(player.uuid(), database.Const.U_LOCALE, "auto");
+                    } catch (Throwable t) {
+                        Log.err(t);
+                    }
+
+                    player.sendMessage("[sky]Перевод чата установлен в автоматический режим.");
+                    break;
+                case "double":
+                    try {
+                        DBHandler.update(player.uuid(), database.Const.U_LOCALE, "double");
+                    } catch (Throwable t) {
+                        Log.err(t);
+                    }
+
+                    player.sendMessage("[sky]Перевод чата установлен в автоматический режим c отображением оригинального сообщения.");
+                    break;
+                default:
+                    Locale target = Structs.find(locales, l -> mode.equalsIgnoreCase(l.toString()));
+                    if (target == null) {
+                        player.sendMessage("[sky]Список доступных локализаций:\n" + "<пока тут пусто>");
+                        return;
+                    }
+
+                    try {
+                        DBHandler.update(player.uuid(), database.Const.U_LOCALE, target.toString());
+                    } catch (Throwable t) {
+                        Log.err(t);
+                    }
+
+                    player.sendMessage("[sky]Язык переводчика установлен на: " + target);
+                    break;
+            }
         });
 
         handler.<Player>register("history", "[страница] [подробно]", "Посмотреть историю блока", (args, player) -> {
