@@ -28,7 +28,7 @@ import mindustry.world.blocks.logic.LogicBlock;
 import utils.Bundle;
 import utils.Translator;
 
-import java.io.IOException;
+import java.io.*;
 import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.time.Duration;
@@ -49,8 +49,17 @@ public class ThedimasPlugin extends Plugin {
 
     private final Map<String, String> admins = new HashMap<>();
 
+    private CacheSeq<HistoryEntry> getHistorySeq(int x, int y){
+        CacheSeq<HistoryEntry> seq = history[x][y];
+        if (seq == null) {
+            history[x][y] = seq = Seqs.newBuilder()
+                    .maximumSize(15)
+                    .expireAfterWrite(Duration.ofMillis(1800000L))
+                    .build();
+        }
+        return seq;
+    }
 
-    //called when game initializes
     @Override
     public void init() {
         Bundle bundle = new Bundle();
@@ -68,11 +77,11 @@ public class ThedimasPlugin extends Plugin {
                     .and("en");
 
             locales = new Locale[names.size];
-            for(int i = 0; i < locales.length; i++){
+            for (int i = 0; i < locales.length; i++) {
                 String code = names.get(i);
-                if(code.contains("_")){
+                if (code.contains("_")){
                     locales[i] = new Locale(code.split("_")[0], code.split("_")[1]);
-                }else{
+                } else {
                     locales[i] = new Locale(code);
                 }
             }
@@ -190,18 +199,12 @@ public class ThedimasPlugin extends Plugin {
             }
 
             history = new CacheSeq[world.width()][world.height()];
-            for (Tile tile : world.tiles) {
-                history[tile.x][tile.y] = Seqs.newBuilder()
-                        .maximumSize(15)
-                        .expireAfterWrite(Duration.ofMillis(1800000L))
-                        .build();
-            }
         });
 
         netServer.admins.addActionFilter(action -> {
             if (action.type == Administration.ActionType.rotate) {
                 HistoryEntry entry = new RotateEntry(action.player, action.tile.build.block, action.rotation);
-                history[action.tile.x][action.tile.y].add(entry);
+                getHistorySeq(action.tile.x, action.tile.y).add(entry);
             }
             return true;
         });
@@ -210,7 +213,7 @@ public class ThedimasPlugin extends Plugin {
             HistoryEntry historyEntry = new BlockEntry(event);
             Seq<Tile> linkedTile = event.tile.getLinkedTiles(new Seq<>());
             for (Tile tile : linkedTile) {
-                history[tile.x][tile.y].add(historyEntry);
+                getHistorySeq(tile.x, tile.y).add(historyEntry);
             }
         });
 
@@ -219,7 +222,7 @@ public class ThedimasPlugin extends Plugin {
                 return;
             }
 
-            CacheSeq<HistoryEntry> entries = history[event.tile.tileX()][event.tile.tileY()];
+            CacheSeq<HistoryEntry> entries = getHistorySeq(event.tile.tileX(), event.tile.tileY());
             boolean connect = true;
 
             HistoryEntry last = entries.peek();
@@ -235,7 +238,7 @@ public class ThedimasPlugin extends Plugin {
 
             Seq<Tile> linkedTile = event.tile.tile.getLinkedTiles(new Seq<>());
             for (Tile tile : linkedTile) {
-                history[tile.x][tile.y].add(entry);
+                getHistorySeq(tile.x, tile.y).add(entry);
             }
         });
 
@@ -244,7 +247,7 @@ public class ThedimasPlugin extends Plugin {
                 int x = event.tile.x;
                 int y = event.tile.y;
 
-                CacheSeq<HistoryEntry> entries = history[x][y];
+                CacheSeq<HistoryEntry> entries = getHistorySeq(x, y);
 
                 boolean detailed = activeHistoryPlayers.get(event.player.uuid());
 
@@ -436,7 +439,7 @@ public class ThedimasPlugin extends Plugin {
                 int mouseX = Mathf.clamp(Mathf.round(player.mouseX / 8), 1, world.width());
                 int mouseY = Mathf.clamp(Mathf.round(player.mouseY / 8), 1, world.height());
 
-                CacheSeq<HistoryEntry> entries = history[mouseX][mouseY];
+                CacheSeq<HistoryEntry> entries = getHistorySeq(mouseX, mouseY);
 
                 int page = Integer.parseInt(args[0]) - 1;
                 int pages = Mathf.ceil(entries.size / 6.0f);
