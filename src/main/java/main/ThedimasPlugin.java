@@ -500,7 +500,7 @@ public class ThedimasPlugin extends Plugin {
                 default:
                     Locale target = Structs.find(locales, l -> mode.equalsIgnoreCase(l.toString()));
                     if (target == null) {
-                        player.sendMessage("[sky]Список доступных локализаций:\n" + "<пока тут пусто>");
+                        player.sendMessage("[sky]Список доступных локализаций:\n" + Const.LOCALE_LIST);
                         return;
                     }
 

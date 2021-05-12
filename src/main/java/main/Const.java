@@ -1,6 +1,7 @@
 package main;
 
 import arc.struct.StringMap;
+import mindustry.Vars;
 
 public class Const {
     public static final String JOIN_LOG_FORMAT = "{0} has joined the server | locale: {1} | IP: {2}";
@@ -11,6 +12,24 @@ public class Const {
     public static final int HISTORY_PAGE_SIZE = 6;
 
     public static final String BOOL_VALUES = "1, on, yes, true, вкл, да";
+
+    public static final String LOCALE_LIST;
+
+    static {
+        StringBuilder tmp = new StringBuilder();
+
+        for (int i = 0; i < Vars.locales.length; i++) {
+            tmp.append(Vars.locales[i].toString());
+            if (i != Vars.locales.length - 1) {
+                tmp.append(", ");
+            }
+            if (i % 6 == 0) {
+                tmp.append("\n");
+            }
+        }
+
+        LOCALE_LIST = tmp.toString();
+    }
 
     public static final String TEAM_LIST = "[white][yellow]sharded[], [red]crux[], [green]green[], [purple]purple[], [blue]blue[], [gray]derelict[]";
 
