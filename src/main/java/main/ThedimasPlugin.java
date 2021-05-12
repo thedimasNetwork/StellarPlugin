@@ -40,6 +40,8 @@ import static mindustry.Vars.*;
 @SuppressWarnings({"unused", "unchecked"})
 public class ThedimasPlugin extends Plugin {
 
+    private Bundle bundle;
+
     private boolean autoPause = true;
 
     private final Interval interval = new Interval();
@@ -64,7 +66,7 @@ public class ThedimasPlugin extends Plugin {
     public void init() {
         Log.info("thedimasPlugin launched!");
 
-        final Bundle bundle = new Bundle();
+        bundle = new Bundle();
 
         Vars.state.serverPaused = true;
 
