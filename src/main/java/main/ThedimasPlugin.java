@@ -116,6 +116,7 @@ public class ThedimasPlugin extends Plugin {
                     data.ip = event.player.ip();
                     data.name = event.player.name();
                     data.locale = event.player.locale;
+                    data.translator = "auto";
                     data.admin = event.player.admin;
                     data.banned = false; //banned
 
@@ -124,6 +125,11 @@ public class ThedimasPlugin extends Plugin {
                     DBHandler.update(event.player.uuid(), database.Const.U_NAME, event.player.name);
                     DBHandler.update(event.player.uuid(), database.Const.U_LOCALE, event.player.locale);
                     DBHandler.update(event.player.uuid(), database.Const.U_IP, event.player.ip());
+                    String banned = DBHandler.get(event.player.uuid(), database.Const.U_BANNED);
+                    if("1".equals(banned)) {
+                        netServer.admins.banPlayer(event.player.uuid());
+                        netServer.admins.banPlayerIP(event.player.ip());
+                    }
                 }
                 if (DBHandler.get(event.player.uuid(), database.Const.U_ADMIN).equals("1")) {
                     admins.put(event.player.uuid(), event.player.name);
@@ -181,7 +187,7 @@ public class ThedimasPlugin extends Plugin {
                     String translated = event.message;
                     String locale = otherPlayer.locale;
                     try {
-                        locale = DBHandler.get(otherPlayer.uuid(), database.Const.U_LOCALE);
+                        locale = DBHandler.get(otherPlayer.uuid(), database.Const.U_TRANSLATOR);
                     } catch (Throwable t) {
                         Log.err(t);
                     }
@@ -202,6 +208,35 @@ public class ThedimasPlugin extends Plugin {
             }
         });
         // конец блока
+
+        //блок банов
+        Events.on(EventType.PlayerBanEvent.class, event -> {
+            try {
+                String ip = DBHandler.get(event.player.uuid(), database.Const.U_IP);
+                netServer.admins.banPlayer(event.player.uuid());
+                netServer.admins.banPlayerIP(event.player.ip());
+                DBHandler.update(event.player.uuid(), database.Const.U_BANNED, "1");
+            } catch (SQLException e) {
+                Log.err(e.getMessage());
+            }
+        });
+        Events.on(EventType.PlayerIpBanEvent.class, event -> {
+            netServer.admins.banPlayerIP(event.ip);
+        });
+        Events.on(EventType.PlayerUnbanEvent.class, event -> {
+            try {
+                String ip = DBHandler.get(event.player.uuid(), database.Const.U_IP);
+                netServer.admins.unbanPlayerID(event.player.uuid());
+                netServer.admins.unbanPlayerIP(event.player.ip());
+                DBHandler.update(event.player.uuid(), database.Const.U_BANNED, "0");
+            } catch (SQLException e) {
+                Log.err(e.getMessage());
+            }
+        });
+        Events.on(EventType.PlayerIpUnbanEvent.class, event -> {
+            netServer.admins.unbanPlayerIP(event.ip);
+        });
+
 
         // блок "история"
         Events.on(EventType.WorldLoadEvent.class, event -> {
@@ -290,7 +325,7 @@ public class ThedimasPlugin extends Plugin {
 
     @Override
     public void registerServerCommands(CommandHandler handler) {
-        handler.register("export-players", "Экспорт всех игроков, которые когда-либо заходили на сервер, в БД", args -> {
+        handler.register("export-players", "Export players into DB", args -> {
             ObjectMap<String, Administration.PlayerInfo> playerList = Reflect.get(netServer.admins, "playerInfo");
             int exported = 0;
             for (Administration.PlayerInfo info : playerList.values()) {
@@ -299,12 +334,15 @@ public class ThedimasPlugin extends Plugin {
                 data.ip = info.lastIP;
                 data.name = info.lastName;
                 data.locale = "undefined";
+                data.translator = "auto";
                 data.admin = info.admin;
                 data.banned = info.banned;
 
                 try {
-                    DBHandler.save(data);
-                    exported++;
+                    if(!DBHandler.userExist(info.id)) {
+                        DBHandler.save(data);
+                        exported++;
+                    }
                 } catch (SQLException e) {
                     Log.err(e.getMessage());
                     Log.err(MessageFormat.format("Unable to export data of player {0} ({1})", Strings.stripColors(info.lastName), Strings.stripColors(info.id)));
@@ -313,7 +351,7 @@ public class ThedimasPlugin extends Plugin {
             Log.info(MessageFormat.format("Successfully exported {0} players", exported));
         });
 
-        handler.register("auto-pause", "[on|off]", "Поставить игру на паузу, когда никого нет", args -> {
+        handler.register("auto-pause", "[on|off]", "Pause game with 0 people online", args -> {
             if (args.length == 0) {
                 if (autoPause) {
                     Log.info("Авто-пауза включена");
@@ -360,7 +398,7 @@ public class ThedimasPlugin extends Plugin {
                 String translated = message;
                 String locale = otherPlayer.locale;
                 try {
-                    locale = DBHandler.get(otherPlayer.uuid(), database.Const.U_LOCALE);
+                    locale = DBHandler.get(otherPlayer.uuid(), database.Const.U_TRANSLATOR);
                 } catch (Throwable t) {
                     Log.err(t);
                 }
@@ -391,7 +429,7 @@ public class ThedimasPlugin extends Plugin {
                 String translated = message;
                 String locale = otherPlayer.locale;
                 try {
-                    locale = DBHandler.get(otherPlayer.uuid(), database.Const.U_LOCALE);
+                    locale = DBHandler.get(otherPlayer.uuid(), database.Const.U_TRANSLATOR);
                 } catch (Throwable t) {
                     Log.err(t);
                 }
@@ -456,7 +494,7 @@ public class ThedimasPlugin extends Plugin {
         handler.<Player>register("tr", "[off|auto|double|somelocale]", "Настроить переводчик чата.", (args, player) -> {
             String locale;
             try {
-                locale = DBHandler.get(player.uuid(), database.Const.U_LOCALE);
+                locale = DBHandler.get(player.uuid(), database.Const.U_TRANSLATOR);
             } catch (Throwable t) {
                 player.sendMessage("[scarlet]Не получилось получить настройки языка.");
                 Log.err(t);
@@ -472,7 +510,7 @@ public class ThedimasPlugin extends Plugin {
             switch (mode) {
                 case "off":
                     try {
-                        DBHandler.update(player.uuid(), database.Const.U_LOCALE, "off");
+                        DBHandler.update(player.uuid(), database.Const.U_TRANSLATOR, "off");
                     } catch (Throwable t) {
                         Log.err(t);
                     }
@@ -481,7 +519,7 @@ public class ThedimasPlugin extends Plugin {
                     break;
                 case "auto":
                     try {
-                        DBHandler.update(player.uuid(), database.Const.U_LOCALE, "auto");
+                        DBHandler.update(player.uuid(), database.Const.U_TRANSLATOR, "auto");
                     } catch (Throwable t) {
                         Log.err(t);
                     }
@@ -490,7 +528,7 @@ public class ThedimasPlugin extends Plugin {
                     break;
                 case "double":
                     try {
-                        DBHandler.update(player.uuid(), database.Const.U_LOCALE, "double");
+                        DBHandler.update(player.uuid(), database.Const.U_TRANSLATOR, "double");
                     } catch (Throwable t) {
                         Log.err(t);
                     }
@@ -505,7 +543,7 @@ public class ThedimasPlugin extends Plugin {
                     }
 
                     try {
-                        DBHandler.update(player.uuid(), database.Const.U_LOCALE, target.toString());
+                        DBHandler.update(player.uuid(), database.Const.U_TRANSLATOR, target.toString());
                     } catch (Throwable t) {
                         Log.err(t);
                     }
