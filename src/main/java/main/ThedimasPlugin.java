@@ -587,7 +587,7 @@ public class ThedimasPlugin extends Plugin {
                 String playerName = NetClient.colorizeName(player.id, player.name);
                 player.sendMessage("[green]Ваше имя сброшено. Текущее имя - []" + playerName);
             } else {
-                player.name(args[1]);
+                player.name(args[0]);
                 String playerName = NetClient.colorizeName(player.id, player.name);
                 player.sendMessage("[green]Ваше имя изменено. Текущее имя - []" + playerName);
             }
