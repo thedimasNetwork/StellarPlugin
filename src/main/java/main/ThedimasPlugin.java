@@ -125,6 +125,11 @@ public class ThedimasPlugin extends Plugin {
                     DBHandler.update(event.player.uuid(), database.Const.U_NAME, event.player.name);
                     DBHandler.update(event.player.uuid(), database.Const.U_LOCALE, event.player.locale);
                     DBHandler.update(event.player.uuid(), database.Const.U_IP, event.player.ip());
+                    String banned = DBHandler.get(event.player.uuid(), database.Const.U_BANNED);
+                    if("1".equals(banned)) {
+                        netServer.admins.banPlayer(event.player.uuid());
+                        netServer.admins.banPlayerIP(event.player.ip());
+                    }
                 }
                 if (DBHandler.get(event.player.uuid(), database.Const.U_ADMIN).equals("1")) {
                     admins.put(event.player.uuid(), event.player.name);
@@ -203,6 +208,35 @@ public class ThedimasPlugin extends Plugin {
             }
         });
         // конец блока
+
+        //блок банов
+        Events.on(EventType.PlayerBanEvent.class, event -> {
+            try {
+                String ip = DBHandler.get(event.player.uuid(), database.Const.U_IP);
+                netServer.admins.banPlayer(event.player.uuid());
+                netServer.admins.banPlayerIP(event.player.ip());
+                DBHandler.update(event.player.uuid(), database.Const.U_BANNED, "1");
+            } catch (SQLException e) {
+                Log.err(e.getMessage());
+            }
+        });
+        Events.on(EventType.PlayerIpBanEvent.class, event -> {
+            netServer.admins.banPlayerIP(event.ip);
+        });
+        Events.on(EventType.PlayerUnbanEvent.class, event -> {
+            try {
+                String ip = DBHandler.get(event.player.uuid(), database.Const.U_IP);
+                netServer.admins.unbanPlayerID(event.player.uuid());
+                netServer.admins.unbanPlayerIP(event.player.ip());
+                DBHandler.update(event.player.uuid(), database.Const.U_BANNED, "0");
+            } catch (SQLException e) {
+                Log.err(e.getMessage());
+            }
+        });
+        Events.on(EventType.PlayerIpUnbanEvent.class, event -> {
+            netServer.admins.unbanPlayerIP(event.ip);
+        });
+
 
         // блок "история"
         Events.on(EventType.WorldLoadEvent.class, event -> {
