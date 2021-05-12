@@ -40,8 +40,6 @@ import static mindustry.Vars.*;
 @SuppressWarnings({"unused", "unchecked"})
 public class ThedimasPlugin extends Plugin {
 
-    private final Bundle bundle = new Bundle();
-
     private boolean autoPause = true;
 
     private final Interval interval = new Interval();
@@ -65,6 +63,8 @@ public class ThedimasPlugin extends Plugin {
     @Override
     public void init() {
         Log.info("thedimasPlugin launched!");
+
+        final Bundle bundle = new Bundle();
 
         Vars.state.serverPaused = true;
 
@@ -99,7 +99,7 @@ public class ThedimasPlugin extends Plugin {
 
             Log.info(MessageFormat.format(Const.JOIN_LOG_FORMAT, event.player.name, event.player.locale, event.player.con.address));
             String playerName = NetClient.colorizeName(event.player.id, event.player.name);
-            Call.sendMessage(Bundle.get("player.onJoin", playerName));
+            Call.sendMessage(bundle.get("player.onJoin", playerName));
 
             if (event.player.locale.startsWith("uk")) {
                 Call.infoMessage(event.player.con, Const.WELCOME_UK);
@@ -150,7 +150,7 @@ public class ThedimasPlugin extends Plugin {
 
             Log.info(event.player.name + " has disconnected from the server");
             String playerName = NetClient.colorizeName(event.player.id, event.player.name);
-            Call.sendMessage(Bundle.get("player.onLeave", playerName));
+            Call.sendMessage(bundle.get("player.onLeave", playerName));
         });
 
         // блок "торийки"
