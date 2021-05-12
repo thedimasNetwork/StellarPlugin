@@ -4,7 +4,6 @@ import arc.files.Fi;
 import arc.util.Log;
 import arc.util.io.Streams;
 import main.ThedimasPlugin;
-import mindustry.Vars;
 
 import java.io.IOException;
 import java.util.Properties;
@@ -34,14 +33,11 @@ public class Bundle {
         }
     }
 
-    public String get(String key, String... replace) {
+    public String get(String key, Object... replace) {
         String value = props.getProperty(key);
-        int i = 0;
-        for (String to : replace) {
-            value = value.replace("{" + i + "}", to);
-            i++;
+        for(int i = 0; i < replace.length; i++){
+            value = value.replace("{" + i + "}", String.valueOf(replace[i]));
         }
-
         return value;
     }
 }
