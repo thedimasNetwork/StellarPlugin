@@ -327,6 +327,10 @@ public class ThedimasPlugin extends Plugin {
 
     @Override
     public void registerServerCommands(CommandHandler handler) {
+        handler.register("reload-bundle", "Reload bundle", args ->{
+            bundle.reload();
+            Log.info("Bundle has successfully reloaded");
+        });
         handler.register("export-players", "Export players into DB", args -> {
             ObjectMap<String, Administration.PlayerInfo> playerList = Reflect.get(netServer.admins, "playerInfo");
             int exported = 0;
