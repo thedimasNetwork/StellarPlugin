@@ -135,7 +135,8 @@ public class ThedimasPlugin extends Plugin {
                         netServer.admins.banPlayerIP(event.player.ip());
                     }
                 }
-                if (DBHandler.get(event.player.uuid(), database.Const.U_ADMIN).equals("1")) {
+                String admin = DBHandler.get(event.player.uuid(), database.Const.U_ADMIN);
+                if ("1".equals(admin)) {
                     admins.put(event.player.uuid(), event.player.name);
                     event.player.admin = true;
                 }
@@ -144,9 +145,7 @@ public class ThedimasPlugin extends Plugin {
             }
         });
 
-        Events.on(EventType.GameOverEvent.class, e -> {
-            votesRTV.clear();
-        });
+        Events.on(EventType.GameOverEvent.class, e -> votesRTV.clear());
 
         Events.on(EventType.PlayerLeave.class, event -> {
             if (Groups.player.size() - 1 < 1 && autoPause) {
@@ -225,7 +224,7 @@ public class ThedimasPlugin extends Plugin {
         });
         // конец блока
 
-        //блок банов
+        //блок "баны"
         Events.on(EventType.PlayerBanEvent.class, event -> {
             try {
                 String ip = DBHandler.get(event.player.uuid(), database.Const.U_IP);
@@ -236,9 +235,9 @@ public class ThedimasPlugin extends Plugin {
                 Log.err(e.getMessage());
             }
         });
-        Events.on(EventType.PlayerIpBanEvent.class, event -> {
-            netServer.admins.banPlayerIP(event.ip);
-        });
+
+        Events.on(EventType.PlayerIpBanEvent.class, event -> netServer.admins.banPlayerIP(event.ip));
+
         Events.on(EventType.PlayerUnbanEvent.class, event -> {
             try {
                 String ip = DBHandler.get(event.player.uuid(), database.Const.U_IP);
@@ -249,10 +248,9 @@ public class ThedimasPlugin extends Plugin {
                 Log.err(e.getMessage());
             }
         });
-        Events.on(EventType.PlayerIpUnbanEvent.class, event -> {
-            netServer.admins.unbanPlayerIP(event.ip);
-        });
 
+        Events.on(EventType.PlayerIpUnbanEvent.class, event -> netServer.admins.unbanPlayerIP(event.ip));
+        // конец блока
 
         // блок "история"
         Events.on(EventType.WorldLoadEvent.class, event -> {
@@ -396,9 +394,6 @@ public class ThedimasPlugin extends Plugin {
     @Override
     public void registerClientCommands(CommandHandler handler) {
         handler.removeCommand("a");
-
-        handler.removeCommand("t");
-
         handler.<Player>register("a", "<текст...>", "Отправить сообщение администрации", (args, player) -> {
             if (!admins.containsKey(player.uuid())) {
                 player.sendMessage("[scarlet]Только админы могут использовать эту команду!");
@@ -436,6 +431,7 @@ public class ThedimasPlugin extends Plugin {
             Log.info("<A>" + MessageFormat.format(Const.CHAT_LOG_FORMAT, Strings.stripColors(player.name),  Strings.stripColors(message), player.locale));
         });
 
+        handler.removeCommand("t");
         handler.<Player>register("t", "<текст...>", "Отправить сообщение команде", (args, player) -> {
             String message = args[0];
             String playerName = NetClient.colorizeName(player.id, player.name);
