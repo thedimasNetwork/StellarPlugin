@@ -46,6 +46,8 @@ public class ThedimasPlugin extends Plugin {
 
     private final Interval interval = new Interval();
 
+    private final HashSet<String> votesRTV = new HashSet<>();
+
     private CacheSeq<HistoryEntry>[][] history;
     private final Map<String, Boolean> activeHistoryPlayers = new HashMap<>();
 
@@ -142,10 +144,22 @@ public class ThedimasPlugin extends Plugin {
             }
         });
 
+        Events.on(EventType.GameOverEvent.class, e -> {
+            votesRTV.clear();
+        });
+
         Events.on(EventType.PlayerLeave.class, event -> {
             if (Groups.player.size() - 1 < 1 && autoPause) {
                 Vars.state.serverPaused = true;
                 Log.info("auto-pause: " + (Groups.player.size() - 1) + " player connected -> Game paused...");
+            }
+
+            if(votesRTV.contains(player.uuid())) {
+                votesRTV.remove(player.uuid());
+                int cur = votesRTV.size();
+                int req = (int) Math.ceil(Const.VOTES_RATIO * Groups.player.size());
+                String playerName = NetClient.colorizeName(event.player.id, event.player.name);
+                Call.sendMessage(bundle.get("rtv.leave", playerName, cur, req));
             }
 
             activeHistoryPlayers.remove(event.player.uuid());
@@ -455,6 +469,21 @@ public class ThedimasPlugin extends Plugin {
             });
 
             Log.info("<T>" + MessageFormat.format(Const.CHAT_LOG_FORMAT, Strings.stripColors(player.name), Strings.stripColors(message), player.locale));
+        });
+
+        handler.<Player>register("rtv", bundle.get("rtv.description"), (arg, player) -> {
+            votesRTV.add(player.uuid());
+            int cur = votesRTV.size();
+            int req = (int) Math.ceil(Const.VOTES_RATIO * Groups.player.size());
+
+            String playerName = NetClient.colorizeName(player.id, player.name);
+            Call.sendMessage(bundle.get("rtv.vote", playerName, cur, req));
+
+            if (cur >= req) {
+                votesRTV.clear();
+                Call.sendMessage(bundle.get("rtv.passed"));
+                Events.fire(new EventType.GameOverEvent(Team.crux));
+            }
         });
 
         handler.<Player>register("rules", "Посмотреть список правил", (args, player) -> {
