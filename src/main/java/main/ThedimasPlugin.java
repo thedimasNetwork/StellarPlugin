@@ -171,10 +171,12 @@ public class ThedimasPlugin extends Plugin {
         // блок "торийки"
         Events.on(EventType.DepositEvent.class, event -> {
             Building building = event.tile;
-            if (building.block() == Blocks.thoriumReactor && event.item == Items.thorium && player.team().cores().contains(c -> event.tile.dst(c.x, c.y) < 300)) {
+            Player target = event.player;
+            if(building.block() == Blocks.thoriumReactor && event.item == Items.thorium &&
+                    target.team().cores().contains(c -> event.tile.dst(c.x, c.y) < 300)){
                 String playerName = NetClient.colorizeName(event.player.id, event.player.name);
                 Groups.player.each(p -> p.sendMessage(MessageFormat.format("[scarlet]ВНИМАНИЕ! [accent]{0[accent]} положил торий в реактор!\n x: [lightgray]{1}[accent], y: [lightgray]{2}", playerName, building.tileX(), building.tileY())));
-                Log.info(MessageFormat.format("{0} положил торий в реактор ({1}, {2})", event.player.name, building.tileX(), building.tileY()));
+                Log.info(MessageFormat.format("{0} положил торий в реактор ({1}, {2})", target.name, building.tileX(), building.tileY()));
             }
         });
 
