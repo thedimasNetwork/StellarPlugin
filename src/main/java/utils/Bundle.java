@@ -7,7 +7,6 @@ import main.ThedimasPlugin;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 
@@ -17,7 +16,7 @@ public class Bundle {
 
     public Bundle() {
         Fi propsFile = Fi.get("config/mods/thedimasPlugin/lang.properties");
-        if(!propsFile.exists()) {
+        if (!propsFile.exists()) {
             try {
                 Streams.copy(ThedimasPlugin.class.getClassLoader().getResourceAsStream(propsFile.name()), propsFile.write());
             } catch (Throwable t) {
@@ -38,7 +37,7 @@ public class Bundle {
 
     public String get(String key, Object... replace) {
         String value = props.getProperty(key);
-        for(int i = 0; i < replace.length; i++){
+        for (int i = 0; i < replace.length; i++) {
             value = value.replace("{" + i + "}", String.valueOf(replace[i]));
         }
         return value;

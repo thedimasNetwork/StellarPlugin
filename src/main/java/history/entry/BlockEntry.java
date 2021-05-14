@@ -2,6 +2,7 @@ package history.entry;
 
 import arc.util.Nullable;
 import arc.util.Time;
+import mindustry.core.NetClient;
 import mindustry.game.EventType.BlockBuildEndEvent;
 import mindustry.gen.Player;
 import mindustry.gen.Unit;
@@ -22,7 +23,8 @@ public class BlockEntry implements HistoryEntry {
 
     public BlockEntry(BlockBuildEndEvent event) {
         this.unit = event.unit;
-        this.name = unit.isPlayer() ? unit.getPlayer().name : unit.controller() instanceof Player ? unit.getPlayer().name : null;
+        Player player = unit.isPlayer() ? unit.getPlayer() : null;
+        this.name = player != null ? NetClient.colorizeName(player.id, player.name) : null;
         this.block = event.tile.build.block;
         this.breaking = event.breaking;
         this.rotation = event.tile.build.rotation;
