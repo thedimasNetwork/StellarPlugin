@@ -153,8 +153,8 @@ public class ThedimasPlugin extends Plugin {
                 Log.info("auto-pause: " + (Groups.player.size() - 1) + " player connected -> Game paused...");
             }
 
-            if(votesRTV.contains(player.uuid())) {
-                votesRTV.remove(player.uuid());
+            if(votesRTV.contains(event.player.uuid())) {
+                votesRTV.remove(event.player.uuid());
                 int cur = votesRTV.size();
                 int req = (int) Math.ceil(Const.VOTES_RATIO * Groups.player.size());
                 String playerName = NetClient.colorizeName(event.player.id, event.player.name);
@@ -175,7 +175,7 @@ public class ThedimasPlugin extends Plugin {
             if(building.block() == Blocks.thoriumReactor && event.item == Items.thorium &&
                     target.team().cores().contains(c -> event.tile.dst(c.x, c.y) < 300)){
                 String playerName = NetClient.colorizeName(event.player.id, event.player.name);
-                Groups.player.each(p -> p.sendMessage(MessageFormat.format("[scarlet]ВНИМАНИЕ! [accent]{0[accent]} положил торий в реактор!\n x: [lightgray]{1}[accent], y: [lightgray]{2}", playerName, building.tileX(), building.tileY())));
+                Groups.player.each(p -> p.sendMessage(MessageFormat.format("[scarlet]ВНИМАНИЕ! [accent]{0}[accent] положил торий в реактор!\n x: [lightgray]{1}[accent], y: [lightgray]{2}", playerName, building.tileX(), building.tileY())));
                 Log.info(MessageFormat.format("{0} положил торий в реактор ({1}, {2})", target.name, building.tileX(), building.tileY()));
             }
         });
@@ -187,7 +187,7 @@ public class ThedimasPlugin extends Plugin {
                 Player player = event.builder.getPlayer();
                 String playerName = NetClient.colorizeName(player.id, player.name);
                 if (interval.get(300)) {
-                    Groups.player.each(p -> p.sendMessage(MessageFormat.format("[scarlet]ВНИМАНИЕ! [accent]{0[accent]} строит ториевый реактор возле ядра!\nx: [lightgray]{1}[accent], y: [lightgray]{2}", playerName, event.tile.x, event.tile.y)));
+                    Groups.player.each(p -> p.sendMessage(MessageFormat.format("[scarlet]ВНИМАНИЕ! [accent]{0}[accent] строит ториевый реактор возле ядра!\nx: [lightgray]{1}[accent], y: [lightgray]{2}", playerName, event.tile.x, event.tile.y)));
                     Log.info(MessageFormat.format("{0} начал строить ториевый реактор близко к ядру ({1}, {2})", player.name, event.tile.x, event.tile.y));
                 }
             }
