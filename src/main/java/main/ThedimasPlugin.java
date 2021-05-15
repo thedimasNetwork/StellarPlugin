@@ -725,46 +725,6 @@ public class ThedimasPlugin extends Plugin {
             }
         });
 
-        handler.<Player>register("tp", "<x> <y> [name...]", "Телепортировать игрока по координатам", (args, player) -> {
-            if (!admins.containsKey(player.uuid())) {
-                player.sendMessage("[scarlet]Только админы могут использовать эту команду![]");
-                return;
-            }
-
-            if (!Strings.canParseInt(args[0]) || !Strings.canParseInt(args[1])) {
-                player.sendMessage("[scarlet]Неверный формат координат!");
-                return;
-            }
-
-            int x = Integer.parseInt(args[0]);
-            int y = Integer.parseInt(args[1]);
-
-            if (x > world.width() || x < 0 || y > world.height() || y < 0) {
-                player.sendMessage("[scarlet]Неверные координаты. Максимум: [orange]" + world.width() + "[], [orange]" + world.height() + "[]. Минимум : [orange]0[], [orange]0[].");
-                return;
-            }
-
-            if (args.length == 3) {
-                Player otherPlayer = Groups.player.find(p -> Strings.stripGlyphs(Strings.stripColors(p.name())).equalsIgnoreCase(args[0]));
-                if (otherPlayer == null) {
-                    player.sendMessage("[scarlet]Игрока с таким ником нет на сервере");
-                } else {
-                    otherPlayer.unit().set(x * 8, y * 8);
-                    Call.setPosition(otherPlayer.con, x * 8, y * 8);
-                    otherPlayer.snapSync();
-
-                    String playerName = NetClient.colorizeName(player.id, player.name);
-                    otherPlayer.sendMessage("Вас телепортировали на координаты [accent]" + x + "[], [accent]" + y);
-                    player.sendMessage("Вы телепортировали " + playerName + " []на координаты [accent]" + x + "[], [accent]" + y);
-                }
-            }
-
-            player.unit().set(x * 8, y * 8);
-            Call.setPosition(player.con, x * 8, y * 8);
-
-            player.sendMessage("Вы телепортированы на координаты [accent]" + x + "[], [accent]" + y);
-        });
-
         handler.<Player>register("kill", "[username...]", "Убить игрока", (args, player) -> {
             if (!admins.containsKey(player.uuid())) {
                 player.sendMessage("[scarlet]Только админы могут использовать эту команду![]");
