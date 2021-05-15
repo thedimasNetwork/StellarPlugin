@@ -25,8 +25,8 @@ import history.struct.CacheSeq;
 import history.entry.HistoryEntry;
 import mindustry.world.Tile;
 import mindustry.world.blocks.logic.LogicBlock;
-import utils.Bundle;
-import utils.Translator;
+import util.Bundle;
+import util.Translator;
 
 import java.io.*;
 import java.sql.SQLException;
@@ -40,15 +40,14 @@ import static mindustry.Vars.*;
 @SuppressWarnings({"unused", "unchecked"})
 public class ThedimasPlugin extends Plugin {
 
-    private Bundle bundle;
-
     private boolean autoPause = true;
 
     private final Interval interval = new Interval();
 
-    private final HashSet<String> votesRTV = new HashSet<>();
+    private final Set<String> votesRTV = new HashSet<>();
 
     private CacheSeq<HistoryEntry>[][] history;
+
     private final Map<String, Boolean> activeHistoryPlayers = new HashMap<>();
 
     private final Map<String, String> admins = new HashMap<>();
@@ -68,8 +67,6 @@ public class ThedimasPlugin extends Plugin {
     public void init() {
         Log.info("thedimasPlugin launched!");
 
-        bundle = new Bundle();
-
         Vars.state.serverPaused = true;
 
         netServer.admins.addChatFilter((player, message) -> null);
@@ -84,8 +81,9 @@ public class ThedimasPlugin extends Plugin {
             locales = new Locale[names.size];
             for (int i = 0; i < locales.length; i++) {
                 String code = names.get(i);
-                if (code.contains("_")){
-                    locales[i] = new Locale(code.split("_")[0], code.split("_")[1]);
+                if (code.contains("_")) {
+                    String[] codes = code.split("_");
+                    locales[i] = new Locale(codes[0], codes[1]);
                 } else {
                     locales[i] = new Locale(code);
                 }
@@ -103,7 +101,7 @@ public class ThedimasPlugin extends Plugin {
 
             Log.info(MessageFormat.format(Const.JOIN_LOG_FORMAT, event.player.name, event.player.locale, event.player.con.address));
             String playerName = NetClient.colorizeName(event.player.id, event.player.name);
-            Call.sendMessage(bundle.get("player.onJoin", playerName));
+            bundled("player.onJoin", playerName);
 
             if (event.player.locale.startsWith("uk")) {
                 Call.infoMessage(event.player.con, Const.WELCOME_UK);
@@ -158,14 +156,14 @@ public class ThedimasPlugin extends Plugin {
                 int cur = votesRTV.size();
                 int req = (int) Math.ceil(Const.VOTES_RATIO * Groups.player.size());
                 String playerName = NetClient.colorizeName(event.player.id, event.player.name);
-                Call.sendMessage(bundle.get("rtv.leave", playerName, cur, req));
+                bundled("rtv.leave", playerName, cur, req);
             }
 
             activeHistoryPlayers.remove(event.player.uuid());
 
             Log.info(event.player.name + " has disconnected from the server");
             String playerName = NetClient.colorizeName(event.player.id, event.player.name);
-            Call.sendMessage(bundle.get("player.onLeave", playerName));
+            bundled("player.onLeave", playerName);
         });
 
         // блок "торийки"
@@ -175,7 +173,8 @@ public class ThedimasPlugin extends Plugin {
             if(building.block() == Blocks.thoriumReactor && event.item == Items.thorium &&
                     target.team().cores().contains(c -> event.tile.dst(c.x, c.y) < 300)){
                 String playerName = NetClient.colorizeName(event.player.id, event.player.name);
-                Groups.player.each(p -> p.sendMessage(MessageFormat.format("[scarlet]ВНИМАНИЕ! [accent]{0}[accent] положил торий в реактор!\n x: [lightgray]{1}[accent], y: [lightgray]{2}", playerName, building.tileX(), building.tileY())));
+                Groups.player.each(p -> p.sendMessage(MessageFormat.format("[scarlet]ВНИМАНИЕ! [accent]{0}[accent] положил торий в реактор!\n" +
+                        "x: [lightgray]{1}[accent], y: [lightgray]{2}", playerName, building.tileX(), building.tileY())));
                 Log.info(MessageFormat.format("{0} положил торий в реактор ({1}, {2})", target.name, building.tileX(), building.tileY()));
             }
         });
@@ -187,7 +186,8 @@ public class ThedimasPlugin extends Plugin {
                 Player player = event.builder.getPlayer();
                 String playerName = NetClient.colorizeName(player.id, player.name);
                 if (interval.get(300)) {
-                    Groups.player.each(p -> p.sendMessage(MessageFormat.format("[scarlet]ВНИМАНИЕ! [accent]{0}[accent] строит ториевый реактор возле ядра!\nx: [lightgray]{1}[accent], y: [lightgray]{2}", playerName, event.tile.x, event.tile.y)));
+                    Groups.player.each(p -> p.sendMessage(MessageFormat.format("[scarlet]ВНИМАНИЕ! [accent]{0}[accent] строит ториевый реактор возле ядра!\n" +
+                            "x: [lightgray]{1}[accent], y: [lightgray]{2}", playerName, event.tile.x, event.tile.y)));
                     Log.info(MessageFormat.format("{0} начал строить ториевый реактор близко к ядру ({1}, {2})", player.name, event.tile.x, event.tile.y));
                 }
             }
@@ -209,19 +209,19 @@ public class ThedimasPlugin extends Plugin {
                         Log.err(t);
                     }
 
-                    if (!otherPlayer.locale.equals(event.player.locale())) {
+                    if (!otherPlayer.locale.equals(event.player.locale()) && !"off".equals(locale)) {
                         try {
-                            translated = Translator.translate(event.message, "auto".equals(locale) || "double".equals(locale) ? otherPlayer.locale : locale, "auto");
+                            String targetLocale = "auto".equals(locale) || "double".equals(locale) ? otherPlayer.locale : locale;
+                            translated = Translator.translate(event.message, targetLocale, "auto");
                         } catch (Throwable t) {
-                            Log.err(t.getMessage());
-                            otherPlayer.sendMessage(MessageFormat.format(Const.CHAT_FORMAT, prefix, playerName, translated));
+                            Log.err(t);
                         }
                     }
                     otherPlayer.sendMessage(MessageFormat.format("double".equals(locale) ? Const.CHAT_FORMAT_DETAILED : Const.CHAT_FORMAT,
                             prefix, playerName, translated, event.message));
                 });
 
-                Log.info(MessageFormat.format(Const.CHAT_LOG_FORMAT, Strings.stripColors(event.player.name),  Strings.stripColors(event.message), event.player.locale));
+                Log.info(MessageFormat.format(Const.CHAT_LOG_FORMAT, Strings.stripColors(event.player.name), Strings.stripColors(event.message), event.player.locale));
             }
         });
         // конец блока
@@ -319,7 +319,7 @@ public class ThedimasPlugin extends Plugin {
 
                 entries.cleanUp();
                 if (entries.isEmpty()) {
-                    result.append("\n[royal]* [lightgray]записи отсутствуют");
+                    result.append("[royal]* [lightgray]записи отсутствуют\n");
                 }
 
                 for (int i = 0; i < entries.size && i < Const.HISTORY_PAGE_SIZE; i++) {
@@ -327,7 +327,7 @@ public class ThedimasPlugin extends Plugin {
 
                     result.append(entry.getMessage());
                     if (detailed) {
-                        result.append(" ").append(entry.getLastAccessTime(TimeUnit.MINUTES)).append(" минут назад");
+                        result.append(" [lightgray]").append(entry.getLastAccessTime(TimeUnit.MINUTES)).append(" минут назад");
                     }
 
                     result.append("\n");
@@ -341,10 +341,6 @@ public class ThedimasPlugin extends Plugin {
 
     @Override
     public void registerServerCommands(CommandHandler handler) {
-        handler.register("reload-bundle", "Reload bundle", args ->{
-            bundle.reload();
-            Log.info("Bundle has successfully reloaded");
-        });
         handler.register("export-players", "Export players into DB", args -> {
             ObjectMap<String, Administration.PlayerInfo> playerList = Reflect.get(netServer.admins, "playerInfo");
             int exported = 0;
@@ -420,21 +416,20 @@ public class ThedimasPlugin extends Plugin {
                     Log.err(t);
                 }
 
-                if (!otherPlayer.locale.equals(player.locale())) {
+                if (!otherPlayer.locale.equals(player.locale()) && !"off".equals(locale)) {
                     try {
-                        translated = Translator.translate(message, "auto".equals(locale) || "double".equals(locale) ? otherPlayer.locale : locale, "auto");
-                    } catch (IOException e) {
-                        Log.err(e.getMessage());
-
-                        String msg = MessageFormat.format("double".equals(locale) ? Const.CHAT_FORMAT_DETAILED : Const.CHAT_FORMAT, prefix, playerName, translated, message);
-                        otherPlayer.sendMessage("<[scarlet]A[]>" + msg);
+                        String targetLocale = "auto".equals(locale) || "double".equals(locale) ? otherPlayer.locale : locale;
+                        translated = Translator.translate(message, targetLocale, "auto");
+                    } catch (Throwable t) {
+                        Log.err(t);
                     }
                 }
-                String msg = MessageFormat.format("double".equals(locale) ? Const.CHAT_FORMAT_DETAILED : Const.CHAT_FORMAT, prefix, playerName, translated, message);
+                String msg = MessageFormat.format("double".equals(locale) ? Const.CHAT_FORMAT_DETAILED : Const.CHAT_FORMAT,
+                        prefix, playerName, translated, message);
                 otherPlayer.sendMessage("<[scarlet]A[]>" + msg);
             });
 
-            Log.info("<A>" + MessageFormat.format(Const.CHAT_LOG_FORMAT, Strings.stripColors(player.name),  Strings.stripColors(message), player.locale));
+            Log.info("<A>" + MessageFormat.format(Const.CHAT_LOG_FORMAT, Strings.stripColors(player.name), Strings.stripColors(message), player.locale));
         });
 
         handler.removeCommand("t");
@@ -452,34 +447,62 @@ public class ThedimasPlugin extends Plugin {
                     Log.err(t);
                 }
 
-                if (!otherPlayer.locale.equals(player.locale())) {
+                if (!otherPlayer.locale.equals(player.locale()) && !"off".equals(locale)) {
                     try {
-                        translated = Translator.translate(message, "auto".equals(locale) || "double".equals(locale) ? otherPlayer.locale : locale, "auto");
+                        String targetLocale = "auto".equals(locale) || "double".equals(locale) ? otherPlayer.locale : locale;
+                        translated = Translator.translate(message, targetLocale, "auto");
                     } catch (Throwable t) {
-                        Log.err(t.getMessage());
-
-                        String msg = MessageFormat.format("double".equals(locale) ? Const.CHAT_FORMAT_DETAILED : Const.CHAT_FORMAT, prefix, playerName, translated, message);
-                        otherPlayer.sendMessage("<[#" + player.team().color + "]T[]>" + msg);
+                        Log.err(t);
                     }
                 }
-                String msg = MessageFormat.format("double".equals(locale) ? Const.CHAT_FORMAT_DETAILED : Const.CHAT_FORMAT, prefix, playerName, translated, message);
+                String msg = MessageFormat.format("double".equals(locale) ? Const.CHAT_FORMAT_DETAILED : Const.CHAT_FORMAT,
+                        prefix, playerName, translated, message);
                 otherPlayer.sendMessage("<[#" + player.team().color + "]T[]>" + msg);
             });
 
             Log.info("<T>" + MessageFormat.format(Const.CHAT_LOG_FORMAT, Strings.stripColors(player.name), Strings.stripColors(message), player.locale));
         });
 
-        handler.<Player>register("rtv", bundle.get("rtv.description"), (arg, player) -> {
+        handler.removeCommand("help");
+        handler.<Player>register("help", "[page]", "Посмотреть список доступных команд", (args, player) -> {
+            if (args.length > 0 && !Strings.canParseInt(args[0])) {
+                bundled(player, "commands.page-not-int");
+                return;
+            }
+            Locale locale = findLocale(player.locale);
+            int page = args.length > 0 ? Strings.parseInt(args[0]) : 1;
+            int pages = Mathf.ceil(handler.getCommandList().size / Const.HISTORY_PAGE_SIZE);
+
+            if (--page >= pages || page < 0) {
+                bundled(player, "commands.under-page", pages);
+                return;
+            }
+
+            StringBuilder result = new StringBuilder();
+            result.append(Bundle.format("commands.help.page", locale, page + 1, pages)).append("\n\n");
+
+            for (int i = 6 * page; i < Math.min(6 * (page + 1), handler.getCommandList().size); i++) {
+                CommandHandler.Command command = handler.getCommandList().get(i);
+                result.append("[orange] /").append(command.text).append("[white] ")
+                        .append(command.paramText)
+                        .append("[lightgray] - ")
+                        .append(Bundle.has(command.description, locale) ? Bundle.get(command.description, locale) : command.description)
+                        .append("\n");
+            }
+            player.sendMessage(result.toString());
+        });
+
+        handler.<Player>register("rtv", "rtv.description", (arg, player) -> {
             votesRTV.add(player.uuid());
             int cur = votesRTV.size();
             int req = (int) Math.ceil(Const.VOTES_RATIO * Groups.player.size());
 
             String playerName = NetClient.colorizeName(player.id, player.name);
-            Call.sendMessage(bundle.get("rtv.vote", playerName, cur, req));
+            bundled("rtv.vote", playerName, cur, req);
 
             if (cur >= req) {
                 votesRTV.clear();
-                Call.sendMessage(bundle.get("rtv.passed"));
+                bundled("rtv.passed");
                 Events.fire(new EventType.GameOverEvent(Team.crux));
             }
         });
@@ -571,7 +594,7 @@ public class ThedimasPlugin extends Plugin {
                 default:
                     Locale target = Structs.find(locales, l -> mode.equalsIgnoreCase(l.toString()));
                     if (target == null) {
-                        player.sendMessage("[sky]Список доступных локализаций:\n" + Const.LOCALE_LIST);
+                        player.sendMessage("[sky]Список доступных локализаций:\n" + Const.LocaleListHolder.LOCALE_LIST);
                         return;
                     }
 
@@ -591,7 +614,7 @@ public class ThedimasPlugin extends Plugin {
 
             if (args.length > 0 && activeHistoryPlayers.containsKey(player.uuid())) {
                 if (!Strings.canParseInt(args[0])) {
-                    player.sendMessage("[scarlet]Страница должна быть числом!");
+                    bundled(player, "commands.page-not-int");
                     return;
                 }
 
@@ -601,10 +624,10 @@ public class ThedimasPlugin extends Plugin {
                 CacheSeq<HistoryEntry> entries = getHistorySeq(mouseX, mouseY);
 
                 int page = Integer.parseInt(args[0]) - 1;
-                int pages = Mathf.ceil(entries.size / 6.0f);
+                int pages = Mathf.ceil(entries.size / Const.HISTORY_PAGE_SIZE);
 
-                if ((page >= pages || page < 0) && !entries.isEmpty()) {
-                    player.sendMessage(MessageFormat.format("[scarlet]'Страница' должна быть между [orange]1 []и [orange]{0}[scarlet]", pages));
+                if (page >= pages || pages < 0 || page < 0) {
+                    bundled(player, "commands.under-page", page);
                     return;
                 }
 
@@ -612,14 +635,14 @@ public class ThedimasPlugin extends Plugin {
                 result.append(MessageFormat.format("[orange]-- История Блока ([lightgray]{0}[gray],[lightgray]{1}[orange]) Страница [lightgray]{2}[gray]/[lightgray]{3}[orange] --", mouseX, mouseY, page + 1, pages)).append("\n");
 
                 if (entries.isEmpty()) {
-                    result.append("\n[royal]* [lightgray]записи отсутствуют");
+                    result.append("[royal]* [lightgray]записи отсутствуют\n");
                 }
 
                 for (int i = 6 * page; i < Math.min(6 * (page + 1), entries.size); i++) {
                     HistoryEntry entry = entries.get(i);
                     result.append(entry.getMessage());
                     if (detailed) {
-                        result.append(" ").append(entry.getLastAccessTime(TimeUnit.MINUTES)).append(" минут назад");
+                        result.append(" [lightgray]").append(entry.getLastAccessTime(TimeUnit.MINUTES)).append(" минут назад");
                     }
                     result.append("\n");
                 }
@@ -676,7 +699,7 @@ public class ThedimasPlugin extends Plugin {
                 return;
             }
 
-            int count = (args.length > 1 && Strings.canParseInt(args[1])) ? Strings.parseInt(args[1]) : 1;
+            int count = args.length > 1 && Strings.canParseInt(args[1]) ? Strings.parseInt(args[1]) : 1;
             if (count > 24) {
                 player.sendMessage("[scarlet]Нельзя заспавнить больше 24 юнитов!");
                 return;
@@ -777,5 +800,18 @@ public class ThedimasPlugin extends Plugin {
             Log.info(MessageFormat.format("{0} убил всех", Strings.stripColors(player.name)));
         });
         // конец блока
+    }
+
+    public static void bundled(Player player, String key, Object... values) {
+        player.sendMessage(Bundle.format(key, findLocale(player.locale), values));
+    }
+
+    public static void bundled(String key, Object... values) {
+        Groups.player.each(p -> bundled(p, key, values));
+    }
+
+    private static Locale findLocale(String code) {
+        Locale locale = Structs.find(Const.supportedLocales, l -> l.toString().equals(code));
+        return locale != null ? locale : Const.defaultLocale();
     }
 }

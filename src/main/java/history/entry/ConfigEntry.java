@@ -220,7 +220,7 @@ public class ConfigEntry implements HistoryEntry {
 
     @Override
     public String getMessage() {
-        if (block.configurations.containsKey(Integer.class) && block.configurations.containsKey(Point2.class)) {
+        if (block.configurations.containsKey(Integer.class) && block.configurations.containsKey(Point2[].class)) {
             int data = (int) value;
             Tile tile = world.tile(data);
             if (tile == null) {

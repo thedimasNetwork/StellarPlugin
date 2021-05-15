@@ -9,15 +9,16 @@ public class DBHandler {
 
     private static Connection connection;
 
-    public static Connection getDbConnection() {
+    public static Connection getDbConnection() throws SQLException {
         if (connection == null) {
             try {
-                Class.forName("com.mysql.jdbc.Driver");
-                String connectionURL = "jdbc:mysql://" + Config.DB_HOST + ":" + Config.DB_PORT + "/" + Config.DB_NAME;
-                connection = DriverManager.getConnection(connectionURL, Config.DB_USER, Config.DB_PASS);
+                Class.forName("com.mysql.cj.jdbc.Driver");
+                connection = DriverManager.getConnection(Config.getConnectionUrl(), Config.DB_USER, Config.DB_PASS);
             } catch (Throwable t) {
                 Log.err(t);
             }
+        } else if (connection.isClosed()) {
+            connection = DriverManager.getConnection(Config.getConnectionUrl(), Config.DB_USER, Config.DB_PASS);
         }
 
         return connection;
