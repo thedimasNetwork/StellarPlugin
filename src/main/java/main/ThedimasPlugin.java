@@ -218,7 +218,7 @@ public class ThedimasPlugin extends Plugin {
                         }
                     }
                     otherPlayer.sendMessage(MessageFormat.format("double".equals(locale) ? Const.CHAT_FORMAT_DETAILED : Const.CHAT_FORMAT,
-                            prefix, playerName, translated));
+                            prefix, playerName, translated, event.message));
                 });
 
                 Log.info(MessageFormat.format(Const.CHAT_LOG_FORMAT, Strings.stripColors(event.player.name), Strings.stripColors(event.message), event.player.locale));
