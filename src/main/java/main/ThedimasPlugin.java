@@ -209,19 +209,19 @@ public class ThedimasPlugin extends Plugin {
                         Log.err(t);
                     }
 
-                    if (!otherPlayer.locale.equals(event.player.locale())) {
+                    if (!otherPlayer.locale.equals(event.player.locale()) && !"off".equals(locale)) {
                         try {
-                            translated = Translator.translate(event.message, "auto".equals(locale) || "double".equals(locale) ? otherPlayer.locale : locale, "auto");
+                            String targetLocale = "auto".equals(locale) || "double".equals(locale) ? otherPlayer.locale : locale;
+                            translated = Translator.translate(event.message, targetLocale, "auto");
                         } catch (Throwable t) {
-                            Log.err(t.getMessage());
-                            otherPlayer.sendMessage(MessageFormat.format(Const.CHAT_FORMAT, prefix, playerName, translated));
+                            Log.err(t);
                         }
                     }
                     otherPlayer.sendMessage(MessageFormat.format("double".equals(locale) ? Const.CHAT_FORMAT_DETAILED : Const.CHAT_FORMAT,
-                            prefix, playerName, translated, event.message));
+                            prefix, playerName, translated));
                 });
 
-                Log.info(MessageFormat.format(Const.CHAT_LOG_FORMAT, Strings.stripColors(event.player.name),  Strings.stripColors(event.message), event.player.locale));
+                Log.info(MessageFormat.format(Const.CHAT_LOG_FORMAT, Strings.stripColors(event.player.name), Strings.stripColors(event.message), event.player.locale));
             }
         });
         // конец блока
@@ -416,21 +416,20 @@ public class ThedimasPlugin extends Plugin {
                     Log.err(t);
                 }
 
-                if (!otherPlayer.locale.equals(player.locale())) {
+                if (!otherPlayer.locale.equals(player.locale()) && !"off".equals(locale)) {
                     try {
-                        translated = Translator.translate(message, "auto".equals(locale) || "double".equals(locale) ? otherPlayer.locale : locale, "auto");
-                    } catch (IOException e) {
-                        Log.err(e.getMessage());
-
-                        String msg = MessageFormat.format("double".equals(locale) ? Const.CHAT_FORMAT_DETAILED : Const.CHAT_FORMAT, prefix, playerName, translated, message);
-                        otherPlayer.sendMessage("<[scarlet]A[]>" + msg);
+                        String targetLocale = "auto".equals(locale) || "double".equals(locale) ? otherPlayer.locale : locale;
+                        translated = Translator.translate(message, targetLocale, "auto");
+                    } catch (Throwable t) {
+                        Log.err(t);
                     }
                 }
-                String msg = MessageFormat.format("double".equals(locale) ? Const.CHAT_FORMAT_DETAILED : Const.CHAT_FORMAT, prefix, playerName, translated, message);
+                String msg = MessageFormat.format("double".equals(locale) ? Const.CHAT_FORMAT_DETAILED : Const.CHAT_FORMAT,
+                        prefix, playerName, translated, message);
                 otherPlayer.sendMessage("<[scarlet]A[]>" + msg);
             });
 
-            Log.info("<A>" + MessageFormat.format(Const.CHAT_LOG_FORMAT, Strings.stripColors(player.name),  Strings.stripColors(message), player.locale));
+            Log.info("<A>" + MessageFormat.format(Const.CHAT_LOG_FORMAT, Strings.stripColors(player.name), Strings.stripColors(message), player.locale));
         });
 
         handler.removeCommand("t");
@@ -448,17 +447,16 @@ public class ThedimasPlugin extends Plugin {
                     Log.err(t);
                 }
 
-                if (!otherPlayer.locale.equals(player.locale())) {
+                if (!otherPlayer.locale.equals(player.locale()) && !"off".equals(locale)) {
                     try {
-                        translated = Translator.translate(message, "auto".equals(locale) || "double".equals(locale) ? otherPlayer.locale : locale, "auto");
+                        String targetLocale = "auto".equals(locale) || "double".equals(locale) ? otherPlayer.locale : locale;
+                        translated = Translator.translate(message, targetLocale, "auto");
                     } catch (Throwable t) {
-                        Log.err(t.getMessage());
-
-                        String msg = MessageFormat.format("double".equals(locale) ? Const.CHAT_FORMAT_DETAILED : Const.CHAT_FORMAT, prefix, playerName, translated, message);
-                        otherPlayer.sendMessage("<[#" + player.team().color + "]T[]>" + msg);
+                        Log.err(t);
                     }
                 }
-                String msg = MessageFormat.format("double".equals(locale) ? Const.CHAT_FORMAT_DETAILED : Const.CHAT_FORMAT, prefix, playerName, translated, message);
+                String msg = MessageFormat.format("double".equals(locale) ? Const.CHAT_FORMAT_DETAILED : Const.CHAT_FORMAT,
+                        prefix, playerName, translated, message);
                 otherPlayer.sendMessage("<[#" + player.team().color + "]T[]>" + msg);
             });
 
@@ -467,7 +465,7 @@ public class ThedimasPlugin extends Plugin {
 
         handler.removeCommand("help");
         handler.<Player>register("help", "[page]", "Посмотреть список доступных команд", (args, player) -> {
-            if(args.length > 0 && !Strings.canParseInt(args[0])){
+            if (args.length > 0 && !Strings.canParseInt(args[0])) {
                 bundled(player, "commands.page-not-int");
                 return;
             }
