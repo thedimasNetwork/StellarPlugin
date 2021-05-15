@@ -1,45 +1,63 @@
 package utils;
 
-import arc.files.Fi;
-import arc.util.Log;
-import arc.util.io.Streams;
-import main.ThedimasPlugin;
+import arc.struct.ObjectMap;
+import arc.util.Structs;
+import main.Const;
 
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
-import java.util.Properties;
+import java.text.MessageFormat;
+import java.util.*;
 
 public class Bundle {
 
-    private static final Properties props = new Properties();
+    private static final ObjectMap<Locale, ResourceBundle> bundles = new ObjectMap<>();
 
-    public Bundle() {
-        Fi propsFile = Fi.get("config/mods/thedimasPlugin/lang.properties");
-        if (!propsFile.exists()) {
-            try {
-                Streams.copy(ThedimasPlugin.class.getClassLoader().getResourceAsStream(propsFile.name()), propsFile.write());
-            } catch (Throwable t) {
-                Log.err("Failed to copy 'lang.properties'", t);
-            }
-        }
-        reload();
-    }
+    private static final ObjectMap<Locale, MessageFormat> formats = new ObjectMap<>();
 
-    public void reload() {
-        Fi bundle = Fi.get("config/mods/thedimasPlugin/lang.properties");
-        try {
-            props.load(new InputStreamReader(bundle.read(), StandardCharsets.UTF_8));
-        } catch (IOException e) {
-            Log.err(e.getMessage());
+    private Bundle() {}
+
+    public static String get(String key, Locale locale) {
+        try{
+            ResourceBundle bundle = getOrLoad(locale);
+            return bundle != null && bundle.containsKey(key) ? bundle.getString(key) : "???" + key + "???";
+        } catch (MissingResourceException t) {
+            return key;
         }
     }
 
-    public String get(String key, Object... replace) {
-        String value = props.getProperty(key);
-        for (int i = 0; i < replace.length; i++) {
-            value = value.replace("{" + i + "}", String.valueOf(replace[i]));
+    public static boolean has(String key) {
+        return getOrLoad(Const.defaultLocale()).containsKey(key);
+    }
+
+    public static String get(String key){
+        return get(key, Const.defaultLocale());
+    }
+
+    public static String format(String key, Locale locale, Object... values) {
+        String pattern = get(key, locale);
+        MessageFormat format = formats.get(locale);
+        if (!Structs.contains(Const.supportedLocales, locale)) {
+            format = formats.get(Const.defaultLocale(), () -> new MessageFormat(pattern, Const.defaultLocale()));
+            format.applyPattern(pattern);
+        } else if (format == null) {
+            format = new MessageFormat(pattern, locale);
+            formats.put(locale, format);
+        } else {
+            format.applyPattern(pattern);
         }
-        return value;
+        return format.format(values);
+    }
+
+    public static String format(String key, Object... values) {
+        return format(key, Const.defaultLocale(), values);
+    }
+
+    private static ResourceBundle getOrLoad(Locale locale) {
+        ResourceBundle bundle = bundles.get(locale);
+        if (bundle == null && Structs.contains(Const.supportedLocales, locale)) {
+            bundles.put(locale, bundle = ResourceBundle.getBundle("bundles.bundle", locale));
+        } else {
+            bundle = bundles.get(Const.defaultLocale());
+        }
+        return bundle;
     }
 }

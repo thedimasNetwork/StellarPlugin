@@ -12,7 +12,7 @@ public class DBHandler {
     public static Connection getDbConnection() {
         if (connection == null) {
             try {
-                Class.forName("com.mysql.jdbc.Driver");
+                Class.forName("com.mysql.cj.jdbc.Driver");
                 String connectionURL = "jdbc:mysql://" + Config.DB_HOST + ":" + Config.DB_PORT + "/" + Config.DB_NAME;
                 connection = DriverManager.getConnection(connectionURL, Config.DB_USER, Config.DB_PASS);
             } catch (Throwable t) {

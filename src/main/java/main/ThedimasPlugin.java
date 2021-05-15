@@ -40,8 +40,6 @@ import static mindustry.Vars.*;
 @SuppressWarnings({"unused", "unchecked"})
 public class ThedimasPlugin extends Plugin {
 
-    private Bundle bundle;
-
     private boolean autoPause = true;
 
     private final Interval interval = new Interval();
@@ -69,8 +67,6 @@ public class ThedimasPlugin extends Plugin {
     public void init() {
         Log.info("thedimasPlugin launched!");
 
-        bundle = new Bundle();
-
         Vars.state.serverPaused = true;
 
         netServer.admins.addChatFilter((player, message) -> null);
@@ -85,8 +81,9 @@ public class ThedimasPlugin extends Plugin {
             locales = new Locale[names.size];
             for (int i = 0; i < locales.length; i++) {
                 String code = names.get(i);
-                if (code.contains("_")){
-                    locales[i] = new Locale(code.split("_")[0], code.split("_")[1]);
+                if (code.contains("_")) {
+                    String[] codes = code.split("_");
+                    locales[i] = new Locale(codes[0], codes[1]);
                 } else {
                     locales[i] = new Locale(code);
                 }
@@ -104,7 +101,7 @@ public class ThedimasPlugin extends Plugin {
 
             Log.info(MessageFormat.format(Const.JOIN_LOG_FORMAT, event.player.name, event.player.locale, event.player.con.address));
             String playerName = NetClient.colorizeName(event.player.id, event.player.name);
-            Call.sendMessage(bundle.get("player.onJoin", playerName));
+            Call.sendMessage(Bundle.format("player.onJoin", playerName));
 
             if (event.player.locale.startsWith("uk")) {
                 Call.infoMessage(event.player.con, Const.WELCOME_UK);
@@ -159,14 +156,14 @@ public class ThedimasPlugin extends Plugin {
                 int cur = votesRTV.size();
                 int req = (int) Math.ceil(Const.VOTES_RATIO * Groups.player.size());
                 String playerName = NetClient.colorizeName(event.player.id, event.player.name);
-                Call.sendMessage(bundle.get("rtv.leave", playerName, cur, req));
+                Call.sendMessage(Bundle.format("rtv.leave", playerName, cur, req));
             }
 
             activeHistoryPlayers.remove(event.player.uuid());
 
             Log.info(event.player.name + " has disconnected from the server");
             String playerName = NetClient.colorizeName(event.player.id, event.player.name);
-            Call.sendMessage(bundle.get("player.onLeave", playerName));
+            Call.sendMessage(Bundle.format("player.onLeave", playerName));
         });
 
         // блок "торийки"
@@ -344,10 +341,6 @@ public class ThedimasPlugin extends Plugin {
 
     @Override
     public void registerServerCommands(CommandHandler handler) {
-        handler.register("reload-bundle", "Reload bundle", args ->{
-            bundle.reload();
-            Log.info("Bundle has successfully reloaded");
-        });
         handler.register("export-players", "Export players into DB", args -> {
             ObjectMap<String, Administration.PlayerInfo> playerList = Reflect.get(netServer.admins, "playerInfo");
             int exported = 0;
@@ -472,17 +465,17 @@ public class ThedimasPlugin extends Plugin {
             Log.info("<T>" + MessageFormat.format(Const.CHAT_LOG_FORMAT, Strings.stripColors(player.name), Strings.stripColors(message), player.locale));
         });
 
-        handler.<Player>register("rtv", bundle.get("rtv.description"), (arg, player) -> {
+        handler.<Player>register("rtv", Bundle.get("rtv.description"), (arg, player) -> {
             votesRTV.add(player.uuid());
             int cur = votesRTV.size();
             int req = (int) Math.ceil(Const.VOTES_RATIO * Groups.player.size());
 
             String playerName = NetClient.colorizeName(player.id, player.name);
-            Call.sendMessage(bundle.get("rtv.vote", playerName, cur, req));
+            Call.sendMessage(Bundle.format("rtv.vote", playerName, cur, req));
 
             if (cur >= req) {
                 votesRTV.clear();
-                Call.sendMessage(bundle.get("rtv.passed"));
+                Call.sendMessage(Bundle.get("rtv.passed"));
                 Events.fire(new EventType.GameOverEvent(Team.crux));
             }
         });
@@ -574,7 +567,7 @@ public class ThedimasPlugin extends Plugin {
                 default:
                     Locale target = Structs.find(locales, l -> mode.equalsIgnoreCase(l.toString()));
                     if (target == null) {
-                        player.sendMessage("[sky]Список доступных локализаций:\n" + Const.LOCALE_LIST);
+                        player.sendMessage("[sky]Список доступных локализаций:\n" + Const.LocaleListHolder.LOCALE_LIST);
                         return;
                     }
 
