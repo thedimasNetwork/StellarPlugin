@@ -46,9 +46,10 @@ public class ThedimasPlugin extends Plugin {
 
     private final Interval interval = new Interval();
 
-    private final HashSet<String> votesRTV = new HashSet<>();
+    private final Set<String> votesRTV = new HashSet<>();
 
     private CacheSeq<HistoryEntry>[][] history;
+
     private final Map<String, Boolean> activeHistoryPlayers = new HashMap<>();
 
     private final Map<String, String> admins = new HashMap<>();
@@ -175,7 +176,8 @@ public class ThedimasPlugin extends Plugin {
             if(building.block() == Blocks.thoriumReactor && event.item == Items.thorium &&
                     target.team().cores().contains(c -> event.tile.dst(c.x, c.y) < 300)){
                 String playerName = NetClient.colorizeName(event.player.id, event.player.name);
-                Groups.player.each(p -> p.sendMessage(MessageFormat.format("[scarlet]ВНИМАНИЕ! [accent]{0}[accent] положил торий в реактор!\n x: [lightgray]{1}[accent], y: [lightgray]{2}", playerName, building.tileX(), building.tileY())));
+                Groups.player.each(p -> p.sendMessage(MessageFormat.format("[scarlet]ВНИМАНИЕ! [accent]{0}[accent] положил торий в реактор!\n" +
+                        "x: [lightgray]{1}[accent], y: [lightgray]{2}", playerName, building.tileX(), building.tileY())));
                 Log.info(MessageFormat.format("{0} положил торий в реактор ({1}, {2})", target.name, building.tileX(), building.tileY()));
             }
         });
@@ -187,7 +189,8 @@ public class ThedimasPlugin extends Plugin {
                 Player player = event.builder.getPlayer();
                 String playerName = NetClient.colorizeName(player.id, player.name);
                 if (interval.get(300)) {
-                    Groups.player.each(p -> p.sendMessage(MessageFormat.format("[scarlet]ВНИМАНИЕ! [accent]{0}[accent] строит ториевый реактор возле ядра!\nx: [lightgray]{1}[accent], y: [lightgray]{2}", playerName, event.tile.x, event.tile.y)));
+                    Groups.player.each(p -> p.sendMessage(MessageFormat.format("[scarlet]ВНИМАНИЕ! [accent]{0}[accent] строит ториевый реактор возле ядра!\n" +
+                            "x: [lightgray]{1}[accent], y: [lightgray]{2}", playerName, event.tile.x, event.tile.y)));
                     Log.info(MessageFormat.format("{0} начал строить ториевый реактор близко к ядру ({1}, {2})", player.name, event.tile.x, event.tile.y));
                 }
             }
@@ -319,7 +322,7 @@ public class ThedimasPlugin extends Plugin {
 
                 entries.cleanUp();
                 if (entries.isEmpty()) {
-                    result.append("\n[royal]* [lightgray]записи отсутствуют");
+                    result.append("[royal]* [lightgray]записи отсутствуют\n");
                 }
 
                 for (int i = 0; i < entries.size && i < Const.HISTORY_PAGE_SIZE; i++) {
@@ -327,7 +330,7 @@ public class ThedimasPlugin extends Plugin {
 
                     result.append(entry.getMessage());
                     if (detailed) {
-                        result.append(" ").append(entry.getLastAccessTime(TimeUnit.MINUTES)).append(" минут назад");
+                        result.append(" [lightgray]").append(entry.getLastAccessTime(TimeUnit.MINUTES)).append(" минут назад");
                     }
 
                     result.append("\n");
@@ -601,9 +604,9 @@ public class ThedimasPlugin extends Plugin {
                 CacheSeq<HistoryEntry> entries = getHistorySeq(mouseX, mouseY);
 
                 int page = Integer.parseInt(args[0]) - 1;
-                int pages = Mathf.ceil(entries.size / 6.0f);
+                int pages = Mathf.ceil(entries.size / Const.HISTORY_PAGE_SIZE);
 
-                if ((page >= pages || page < 0) && !entries.isEmpty()) {
+                if (page >= pages || pages < 0 || page < 0) {
                     player.sendMessage(MessageFormat.format("[scarlet]'Страница' должна быть между [orange]1 []и [orange]{0}[scarlet]", pages));
                     return;
                 }
@@ -612,14 +615,14 @@ public class ThedimasPlugin extends Plugin {
                 result.append(MessageFormat.format("[orange]-- История Блока ([lightgray]{0}[gray],[lightgray]{1}[orange]) Страница [lightgray]{2}[gray]/[lightgray]{3}[orange] --", mouseX, mouseY, page + 1, pages)).append("\n");
 
                 if (entries.isEmpty()) {
-                    result.append("\n[royal]* [lightgray]записи отсутствуют");
+                    result.append("[royal]* [lightgray]записи отсутствуют\n");
                 }
 
                 for (int i = 6 * page; i < Math.min(6 * (page + 1), entries.size); i++) {
                     HistoryEntry entry = entries.get(i);
                     result.append(entry.getMessage());
                     if (detailed) {
-                        result.append(" ").append(entry.getLastAccessTime(TimeUnit.MINUTES)).append(" минут назад");
+                        result.append(" [lightgray]").append(entry.getLastAccessTime(TimeUnit.MINUTES)).append(" минут назад");
                     }
                     result.append("\n");
                 }
@@ -676,7 +679,7 @@ public class ThedimasPlugin extends Plugin {
                 return;
             }
 
-            int count = (args.length > 1 && Strings.canParseInt(args[1])) ? Strings.parseInt(args[1]) : 1;
+            int count = args.length > 1 && Strings.canParseInt(args[1]) ? Strings.parseInt(args[1]) : 1;
             if (count > 24) {
                 player.sendMessage("[scarlet]Нельзя заспавнить больше 24 юнитов!");
                 return;

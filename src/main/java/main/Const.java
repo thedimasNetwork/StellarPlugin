@@ -11,7 +11,7 @@ public class Const {
 
     public static final double VOTES_RATIO = 0.6;
 
-    public static final int HISTORY_PAGE_SIZE = 6;
+    public static final float HISTORY_PAGE_SIZE = 6f;
 
     public static final String BOOL_VALUES = "1, on, yes, true, вкл, да";
 
