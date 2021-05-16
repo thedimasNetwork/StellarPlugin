@@ -814,11 +814,8 @@ public class ThedimasPlugin extends Plugin {
     }
 
     public static void bundled(Player player, boolean condition, String keyTrue, String keyFalse, Object... values) {
-        if (condition) {
-            player.sendMessage(Bundle.format(keyTrue, findLocale(player.locale), values));
-        } else {
-            player.sendMessage(Bundle.format(keyFalse, findLocale(player.locale), values));
-        }
+        String key = condition ? keyTrue : keyFalse;
+        player.sendMessage(Bundle.format(key, findLocale(player.locale), values));
     }
 
     public static void bundled(Player player, String key, Object... values) {
