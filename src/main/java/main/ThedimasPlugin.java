@@ -23,6 +23,7 @@ import mindustry.type.UnitType;
 
 import history.struct.CacheSeq;
 import history.entry.HistoryEntry;
+import mindustry.world.Block;
 import mindustry.world.Tile;
 import mindustry.world.blocks.logic.LogicBlock;
 import util.Bundle;
@@ -790,6 +791,35 @@ public class ThedimasPlugin extends Plugin {
             }
         });
 
+        handler.<Player>register("core", "<small|medium|big>", "Spawn a core to your coordinate", (arg, player) -> {
+            if (!admins.containsKey(player.uuid())) {
+                player.sendMessage("[scarlet]Только админы могут использовать эту команду![]");
+            }
+
+            Block core;
+            switch (arg[0]) {
+                case "small":
+                    core = Blocks.coreShard;
+                    break;
+                case "medium":
+                    core = Blocks.coreFoundation;
+                    break;
+                case "big":
+                    core = Blocks.coreNucleus;
+                    break;
+                default:
+                    bundled("commands.core.core-type-not-found");
+                    return;
+            }
+
+            Tile tile = player.tileOn();
+            Call.constructFinish(tile, core, player.unit(), (byte)0, player.team(), false);
+
+            bundled(player, tile.block() == core, "commands.core.done", "commands.core.error");
+
+            Log.info(MessageFormat.format("{0} заспавнил ядро ({1}, {2})", Strings.stripColors(player.name), tile.x, tile.y));
+        });
+
         handler.<Player>register("killall", "[team]", "Убить ВСЕХ", (args, player) -> {
             if (!admins.containsKey(player.uuid())) {
                 player.sendMessage("[scarlet]Только админы могут использовать эту команду![]");
@@ -815,6 +845,14 @@ public class ThedimasPlugin extends Plugin {
             }
         });
         // конец блока
+    }
+
+    public static void bundled(Player player, boolean condition, String keyTrue, String keyFalse, Object... values) {
+        if (condition) {
+            player.sendMessage(Bundle.format(keyTrue, findLocale(player.locale), values));
+        } else {
+            player.sendMessage(Bundle.format(keyFalse, findLocale(player.locale), values));
+        }
     }
 
     public static void bundled(Player player, String key, Object... values) {
