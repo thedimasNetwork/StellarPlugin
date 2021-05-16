@@ -375,7 +375,7 @@ public class ThedimasPlugin extends Plugin {
                     Log.info("Авто-пауза выключена");
                 }
             }
-            if (args[0].equalsIgnoreCase("off")) {
+            else if (args[0].equalsIgnoreCase("off")) {
                 autoPause = false;
                 Log.info("Авто-пауза выключена");
 
