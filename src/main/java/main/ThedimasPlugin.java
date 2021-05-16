@@ -198,28 +198,9 @@ public class ThedimasPlugin extends Plugin {
         // блок "чат"
         Events.on(EventType.PlayerChatEvent.class, event -> {
             if (!event.message.startsWith("/")) {
-                String prefix = event.player.admin() ? "\uE82C" : "\uE872";
-                String playerName = NetClient.colorizeName(event.player.id, event.player.name);
-
                 Groups.player.each(otherPlayer -> {
-                    String translated = event.message;
-                    String locale = otherPlayer.locale;
-                    try {
-                        locale = DBHandler.get(otherPlayer.uuid(), database.Const.U_TRANSLATOR);
-                    } catch (Throwable t) {
-                        Log.err(t);
-                    }
-
-                    if (!otherPlayer.locale.equals(event.player.locale()) && !"off".equals(locale)) {
-                        try {
-                            String targetLocale = "auto".equals(locale) || "double".equals(locale) ? otherPlayer.locale : locale;
-                            translated = Translator.translate(event.message, targetLocale, "auto");
-                        } catch (Throwable t) {
-                            Log.err(t);
-                        }
-                    }
-                    otherPlayer.sendMessage(MessageFormat.format("double".equals(locale) ? Const.CHAT_FORMAT_DETAILED : Const.CHAT_FORMAT,
-                            prefix, playerName, translated, event.message));
+                    String msg = translateChat(event.player, otherPlayer, event.message);
+                    otherPlayer.sendMessage(msg);
                 });
 
                 Log.info(MessageFormat.format(Const.CHAT_LOG_FORMAT, Strings.stripColors(event.player.name), Strings.stripColors(event.message), event.player.locale));
@@ -405,28 +386,8 @@ public class ThedimasPlugin extends Plugin {
             }
 
             String message = args[0];
-            String prefix = "\uE82C";
-            String playerName = NetClient.colorizeName(player.id, player.name);
-
             Groups.player.each(Player::admin, otherPlayer -> {
-                String translated = message;
-                String locale = otherPlayer.locale;
-                try {
-                    locale = DBHandler.get(otherPlayer.uuid(), database.Const.U_TRANSLATOR);
-                } catch (Throwable t) {
-                    Log.err(t);
-                }
-
-                if (!otherPlayer.locale.equals(player.locale()) && !"off".equals(locale)) {
-                    try {
-                        String targetLocale = "auto".equals(locale) || "double".equals(locale) ? otherPlayer.locale : locale;
-                        translated = Translator.translate(message, targetLocale, "auto");
-                    } catch (Throwable t) {
-                        Log.err(t);
-                    }
-                }
-                String msg = MessageFormat.format("double".equals(locale) ? Const.CHAT_FORMAT_DETAILED : Const.CHAT_FORMAT,
-                        prefix, playerName, translated, message);
+                String msg = translateChat(player, otherPlayer, message);
                 otherPlayer.sendMessage("<[scarlet]A[]>" + msg);
             });
 
@@ -436,28 +397,8 @@ public class ThedimasPlugin extends Plugin {
         handler.removeCommand("t");
         handler.<Player>register("t", "<текст...>", "Отправить сообщение команде", (args, player) -> {
             String message = args[0];
-            String playerName = NetClient.colorizeName(player.id, player.name);
-            String prefix = player.admin() ? "\uE82C" : "\uE872";
-
             Groups.player.each(o -> o.team() == player.team(), otherPlayer -> {
-                String translated = message;
-                String locale = otherPlayer.locale;
-                try {
-                    locale = DBHandler.get(otherPlayer.uuid(), database.Const.U_TRANSLATOR);
-                } catch (Throwable t) {
-                    Log.err(t);
-                }
-
-                if (!otherPlayer.locale.equals(player.locale()) && !"off".equals(locale)) {
-                    try {
-                        String targetLocale = "auto".equals(locale) || "double".equals(locale) ? otherPlayer.locale : locale;
-                        translated = Translator.translate(message, targetLocale, "auto");
-                    } catch (Throwable t) {
-                        Log.err(t);
-                    }
-                }
-                String msg = MessageFormat.format("double".equals(locale) ? Const.CHAT_FORMAT_DETAILED : Const.CHAT_FORMAT,
-                        prefix, playerName, translated, message);
+                String msg = translateChat(player, otherPlayer, message);
                 otherPlayer.sendMessage("<[#" + player.team().color + "]T[]>" + msg);
             });
 
@@ -845,6 +786,31 @@ public class ThedimasPlugin extends Plugin {
             }
         });
         // конец блока
+    }
+
+    private String translateChat(Player player,  Player otherPlayer, String message) {
+        String locale = otherPlayer.locale;
+        try {
+            locale = DBHandler.get(otherPlayer.uuid(), database.Const.U_TRANSLATOR);
+        } catch (Throwable t) {
+            Log.err(t);
+        }
+
+        String translated = message;
+        if (!otherPlayer.locale.equals(player.locale()) && !"off".equals(locale)) {
+            try {
+                String targetLocale = "auto".equals(locale) || "double".equals(locale) ? otherPlayer.locale : locale;
+                translated = Translator.translate(message, targetLocale, "auto");
+            } catch (Throwable t) {
+                Log.err(t);
+            }
+        }
+
+        String prefix = player.admin() ? "\uE82C" : "\uE872";
+        String playerName = NetClient.colorizeName(player.id, player.name);
+
+        return MessageFormat.format("double".equals(locale) ? Const.CHAT_FORMAT_DETAILED : Const.CHAT_FORMAT,
+                prefix, playerName, translated, message);
     }
 
     public static void bundled(Player player, boolean condition, String keyTrue, String keyFalse, Object... values) {
