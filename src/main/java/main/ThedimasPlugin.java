@@ -790,14 +790,29 @@ public class ThedimasPlugin extends Plugin {
             }
         });
 
-        handler.<Player>register("killall", "Убить ВСЕХ", (args, player) -> {
+        handler.<Player>register("killall", "[team]", "Убить ВСЕХ", (args, player) -> {
             if (!admins.containsKey(player.uuid())) {
                 player.sendMessage("[scarlet]Только админы могут использовать эту команду![]");
                 return;
             }
-            Groups.unit.each(Unitc::kill);
-            player.sendMessage("[scarlet]Вы убили всех");
-            Log.info(MessageFormat.format("{0} убил всех", Strings.stripColors(player.name)));
+
+            if (args.length == 0) {
+                Groups.unit.each(Unitc::kill);
+                player.sendMessage("[scarlet]Ты убил их всех... За что, Джонни?");
+
+                Log.info(MessageFormat.format("{0} убил всех...", Strings.stripColors(player.name)));
+            } else {
+                Team team = Structs.find(Team.baseTeams, t -> t.name.equalsIgnoreCase(args[0]));
+                if (team == null) {
+                    player.sendMessage("[scarlet]Неверная команда. Возможные варианты:\n" + Const.TEAM_LIST);
+                    return;
+                }
+
+                Groups.unit.each(u -> u.team == team, Unitc::kill); // Надеюсь, оно работает
+                player.sendMessage("[scarlet]Ты убил всех с команды [#" + team.color + "]" + team + "... Их призраки буду преследовать тебя вечно!");
+
+                Log.info(MessageFormat.format("{0} убил всех с команды {1}...", Strings.stripColors(player.name), team));
+            }
         });
         // конец блока
     }
