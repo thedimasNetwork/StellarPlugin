@@ -356,8 +356,7 @@ public class ThedimasPlugin extends Plugin {
                 } else {
                     Log.info("Авто-пауза выключена");
                 }
-            }
-            else if (args[0].equalsIgnoreCase("off")) {
+            } else if (args[0].equalsIgnoreCase("off")) {
                 autoPause = false;
                 Log.info("Авто-пауза выключена");
 
@@ -371,6 +370,8 @@ public class ThedimasPlugin extends Plugin {
                     Vars.state.serverPaused = true;
                     Log.info("auto-pause: " + Groups.player.size() + " игроков онлайн -> Игра поставлена на паузу...");
                 }
+            } else {
+                Log.info("auto-pause: некорректное действие");
             }
         });
     }
@@ -469,12 +470,8 @@ public class ThedimasPlugin extends Plugin {
 
         handler.<Player>register("discord", "Получить ссылку на Discord сервер", (args, player) -> player.sendMessage("https://discord.gg/RkbFYXFU9E"));
 
-        handler.<Player>register("connect", "[сервер...]", "Подключиться к другому серверу", (args, player) -> {
-            if (args.length == 0) {
-                player.sendMessage("[sky]Список доступных серверов:\n" + Const.SERVER_LIST);
-                return;
-            }
-            if (args[0].equalsIgnoreCase("list")) {
+        handler.<Player>register("connect", "[list|server...]", "Подключиться к другому серверу", (args, player) -> {
+            if (args.length == 0 || args[0].equalsIgnoreCase("list")) {
                 player.sendMessage("[sky]Список доступных серверов:\n" + Const.SERVER_LIST);
                 return;
             }
@@ -483,6 +480,7 @@ public class ThedimasPlugin extends Plugin {
                 player.sendMessage("[scarlet]Такого сервера не существует. Доступные сервера:\n" + Const.SERVER_LIST);
                 return;
             }
+
             String[] address = Const.SERVER_ADDRESS.get(serverName).split(":");
             String ip = address[0];
             int port = Integer.parseInt(address[1]);
@@ -738,7 +736,7 @@ public class ThedimasPlugin extends Plugin {
             }
 
             Block core;
-            switch (arg[0]) {
+            switch (arg[0].toLowerCase()) {
                 case "small":
                     core = Blocks.coreShard;
                     break;
@@ -788,7 +786,7 @@ public class ThedimasPlugin extends Plugin {
         // конец блока
     }
 
-    private String translateChat(Player player,  Player otherPlayer, String message) {
+    private String translateChat(Player player, Player otherPlayer, String message) {
         String locale = otherPlayer.locale;
         try {
             locale = DBHandler.get(otherPlayer.uuid(), database.Const.U_TRANSLATOR);
