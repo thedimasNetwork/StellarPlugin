@@ -13,9 +13,9 @@ public class Const {
     public static final String CHAT_FORMAT = "<{0}> {1}[white]: {2}";
     public static final String CHAT_FORMAT_DETAILED = CHAT_FORMAT + " [gray]({3}[gray])";
 
-    public static final double VOTES_RATIO = 0.6;
+    public static final float VOTES_RATIO = 0.6f;
 
-    public static final float HISTORY_PAGE_SIZE = 6f;
+    public static final float LIST_PAGE_SIZE = 6f;
 
     public static final String BOOL_VALUES = "1, on, yes, true, вкл, да";
 

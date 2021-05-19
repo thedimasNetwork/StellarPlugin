@@ -303,7 +303,7 @@ public class ThedimasPlugin extends Plugin {
                     result.append("[royal]* [lightgray]записи отсутствуют\n");
                 }
 
-                for (int i = 0; i < entries.size && i < Const.HISTORY_PAGE_SIZE; i++) {
+                for (int i = 0; i < entries.size && i < Const.LIST_PAGE_SIZE; i++) {
                     HistoryEntry entry = entries.get(i);
 
                     result.append(entry.getMessage());
@@ -378,7 +378,7 @@ public class ThedimasPlugin extends Plugin {
     @Override
     public void registerClientCommands(CommandHandler handler) {
         handler.removeCommand("a");
-        handler.<Player>register("a", "<текст...>", "Отправить сообщение администрации", (args, player) -> {
+        handler.<Player>register("a", "<text...>", "commands.admin.a.description", (args, player) -> {
             if (!admins.containsKey(player.uuid())) {
                 bundled(player, "commands.access-denied");
                 Log.info(MessageFormat.format("{0} попытался отправить сообщение админам", Strings.stripColors(player.name)));
@@ -395,7 +395,7 @@ public class ThedimasPlugin extends Plugin {
         });
 
         handler.removeCommand("t");
-        handler.<Player>register("t", "<текст...>", "Отправить сообщение команде", (args, player) -> {
+        handler.<Player>register("t", "<text...>", "commands.t.description ", (args, player) -> {
             String message = args[0];
             Groups.player.each(o -> o.team() == player.team(), otherPlayer -> {
                 String msg = translateChat(player, otherPlayer, message);
@@ -406,14 +406,14 @@ public class ThedimasPlugin extends Plugin {
         });
 
         handler.removeCommand("help");
-        handler.<Player>register("help", "[page]", "Посмотреть список доступных команд", (args, player) -> {
+        handler.<Player>register("help", "[page]", "commands.help.description", (args, player) -> {
             if (args.length > 0 && !Strings.canParseInt(args[0])) {
                 bundled(player, "commands.page-not-int");
                 return;
             }
             Locale locale = findLocale(player.locale);
             int page = args.length > 0 ? Strings.parseInt(args[0]) : 1;
-            int pages = Mathf.ceil(handler.getCommandList().size / Const.HISTORY_PAGE_SIZE);
+            int pages = Mathf.ceil(handler.getCommandList().size / Const.LIST_PAGE_SIZE);
 
             if (--page >= pages || page < 0) {
                 bundled(player, "commands.under-page", pages);
@@ -425,6 +425,7 @@ public class ThedimasPlugin extends Plugin {
 
             for (int i = 6 * page; i < Math.min(6 * (page + 1), handler.getCommandList().size); i++) {
                 CommandHandler.Command command = handler.getCommandList().get(i);
+                if (command.description.startsWith("commands.admin") && !player.admin) continue; // скипаем админские команды
                 result.append("[orange] /").append(command.text).append("[white] ")
                         .append(command.paramText)
                         .append("[lightgray] - ")
@@ -561,7 +562,7 @@ public class ThedimasPlugin extends Plugin {
                 CacheSeq<HistoryEntry> entries = getHistorySeq(mouseX, mouseY);
 
                 int page = Integer.parseInt(args[0]) - 1;
-                int pages = Mathf.ceil(entries.size / Const.HISTORY_PAGE_SIZE);
+                int pages = Mathf.ceil(entries.size / Const.LIST_PAGE_SIZE);
 
                 if (page >= pages || pages < 0 || page < 0) {
                     bundled(player, "commands.under-page", page);
@@ -685,7 +686,7 @@ public class ThedimasPlugin extends Plugin {
             }
         });
 
-        handler.<Player>register("kill", "[username...]", "commands.kill.description", (args, player) -> {
+        handler.<Player>register("kill", "[username...]", "commands.admin.kill.description", (args, player) -> {
             if (!admins.containsKey(player.uuid())) {
                 bundled(player, "commands.access-denied");
                 return;
@@ -693,7 +694,7 @@ public class ThedimasPlugin extends Plugin {
 
             if (args.length == 0) {
                 player.unit().kill();
-                bundled(player, "commands.kill.suicide");
+                bundled(player, "commands.admin.kill.suicide");
 
                 Log.info(MessageFormat.format("{0} убил сам себя", Strings.stripColors(player.name)));
                 return;
@@ -703,7 +704,7 @@ public class ThedimasPlugin extends Plugin {
             if (otherPlayer != null) {
                 otherPlayer.unit().kill();
                 String otherPlayerName = NetClient.colorizeName(otherPlayer.id, otherPlayer.name);
-                bundled(player, "commands.kill.kill-another", otherPlayerName);
+                bundled(player, "commands.admin.kill.kill-another", otherPlayerName);
 
                 Log.info(MessageFormat.format("{0} убил {1}", Strings.stripColors(player.name), Strings.stripColors(otherPlayerName)));
             } else {
@@ -736,9 +737,10 @@ public class ThedimasPlugin extends Plugin {
             }
         });
 
-        handler.<Player>register("core", "<small|medium|big>", "commands.core.description", (args, player) -> {
+        handler.<Player>register("core", "<small|medium|big>", "commands.admin.core.description", (args, player) -> {
             if (!admins.containsKey(player.uuid())) {
                 bundled(player, "commands.access-denied");
+                return;
             }
 
             Block core;
@@ -747,7 +749,7 @@ public class ThedimasPlugin extends Plugin {
                 case "medium" -> core = Blocks.coreFoundation;
                 case "big" -> core = Blocks.coreNucleus;
                 default -> {
-                    bundled("commands.core.core-type-not-found");
+                    bundled("commands.admin.core.core-type-not-found");
                     return;
                 }
             }
@@ -755,7 +757,7 @@ public class ThedimasPlugin extends Plugin {
             Tile tile = player.tileOn();
             Call.constructFinish(tile, core, player.unit(), (byte)0, player.team(), false);
 
-            bundled(player, tile.block() == core, "commands.core.success", "commands.core.failed");
+            bundled(player, tile.block() == core, "commands.admin.core.success", "commands.admin.core.failed");
 
             Log.info(MessageFormat.format("{0} заспавнил ядро ({1}, {2})", Strings.stripColors(player.name), tile.x, tile.y));
         });
