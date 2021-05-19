@@ -40,7 +40,7 @@ import static mindustry.Vars.*;
 @SuppressWarnings({"unused", "unchecked"})
 public class ThedimasPlugin extends Plugin {
 
-    private final String version = "1.0 build 189";
+    private final String version = "1.0 build 190";
 
     private boolean autoPause = true;
 
@@ -158,7 +158,7 @@ public class ThedimasPlugin extends Plugin {
                 int cur = votesRTV.size();
                 int req = (int) Math.ceil(Const.VOTES_RATIO * Groups.player.size());
                 String playerName = NetClient.colorizeName(event.player.id, event.player.name);
-                bundled("rtv.leave", playerName, cur, req);
+                bundled("commands.rtv.leave", playerName, cur, req);
             }
 
             activeHistoryPlayers.remove(event.player.uuid());
@@ -382,7 +382,7 @@ public class ThedimasPlugin extends Plugin {
         handler.removeCommand("a");
         handler.<Player>register("a", "<текст...>", "Отправить сообщение администрации", (args, player) -> {
             if (!admins.containsKey(player.uuid())) {
-                player.sendMessage("[scarlet]Только админы могут использовать эту команду!");
+                bundled(player, "commands.access-denied");
                 Log.info(MessageFormat.format("{0} попытался отправить сообщение админам", Strings.stripColors(player.name)));
                 return;
             }
@@ -438,17 +438,17 @@ public class ThedimasPlugin extends Plugin {
 
         handler.<Player>register("version", "commands.version.description", (arg, player) -> bundled(player, "commands.version.msg", version));
 
-        handler.<Player>register("rtv", "rtv.description", (arg, player) -> {
+        handler.<Player>register("rtv", "commands.rtv.description", (arg, player) -> {
             votesRTV.add(player.uuid());
             int cur = votesRTV.size();
             int req = (int) Math.ceil(Const.VOTES_RATIO * Groups.player.size());
 
             String playerName = NetClient.colorizeName(player.id, player.name);
-            bundled("rtv.vote", playerName, cur, req);
+            bundled("commands.rtv.vote", playerName, cur, req);
 
             if (cur >= req) {
                 votesRTV.clear();
-                bundled("rtv.passed");
+                bundled("commands.rtv.passed");
                 Events.fire(new EventType.GameOverEvent(Team.crux));
             }
         });
@@ -607,7 +607,7 @@ public class ThedimasPlugin extends Plugin {
         // блок "для админов"
         handler.<Player>register("admin", "Изменить свой статус", (args, player) -> {
             if (!admins.containsKey(player.uuid())) {
-                player.sendMessage("[scarlet]Только админы могут использовать эту команду!");
+                bundled(player, "commands.access-denied");
             } else {
                 player.admin = !player.admin;
             }
@@ -615,7 +615,7 @@ public class ThedimasPlugin extends Plugin {
 
         handler.<Player>register("name", "[name...]","Изменить свое имя", (args, player) -> {
             if (!admins.containsKey(player.uuid())) {
-                player.sendMessage("[scarlet]Только админы могут использовать эту команду!");
+                bundled(player, "commands.access-denied");
                 return;
             }
 
@@ -632,7 +632,7 @@ public class ThedimasPlugin extends Plugin {
 
         handler.<Player>register("spawn", "<юнит> [количество] [команда]", "Заспавнить юнитов", (args, player) -> {
             if (!admins.containsKey(player.uuid())) {
-                player.sendMessage("[scarlet]Только админы могут использовать эту команду!");
+                bundled(player, "commands.access-denied");
                 return;
             }
 
@@ -666,7 +666,7 @@ public class ThedimasPlugin extends Plugin {
 
         handler.<Player>register("team", "<команда> [username...]", "Изменить команду", (args, player) -> {
             if (!admins.containsKey(player.uuid())) {
-                player.sendMessage("[scarlet]Только админы могут использовать эту команду![]");
+                bundled(player, "commands.access-denied");
                 return;
             }
             Team team = Structs.find(Team.baseTeams, t -> t.name.equalsIgnoreCase(args[0]));
@@ -691,33 +691,35 @@ public class ThedimasPlugin extends Plugin {
             }
         });
 
-        handler.<Player>register("kill", "[username...]", "Убить игрока", (args, player) -> {
+        handler.<Player>register("kill", "[username...]", "commands.kill.description", (args, player) -> {
             if (!admins.containsKey(player.uuid())) {
-                player.sendMessage("[scarlet]Только админы могут использовать эту команду![]");
+                bundled(player, "commands.access-denied");
                 return;
             }
 
             if (args.length == 0) {
                 player.unit().kill();
-                Log.info(MessageFormat.format("{0} убил сам себя", Strings.stripColors(player.name)));
-            } else {
-                Player otherPlayer = Groups.player.find(p -> Strings.stripGlyphs(Strings.stripColors(p.name())).equalsIgnoreCase(args[0]));
-                if (otherPlayer != null) {
-                    otherPlayer.unit().kill();
+                bundled(player, "commands.kill.suicide");
 
-                    String otherPlayerName = NetClient.colorizeName(otherPlayer.id, otherPlayer.name);
-                    player.sendMessage("[accent]Вы успешно убили игрока " + otherPlayerName +
-                            "\n[orange]Дьявол доволен Вами. =)");
-                    Log.info(MessageFormat.format("{0} убил {1}", Strings.stripColors(player.name), Strings.stripColors(otherPlayerName)));
-                } else {
-                    player.sendMessage("[scarlet]Игрока с таким ником нет на сервере");
-                }
+                Log.info(MessageFormat.format("{0} убил сам себя", Strings.stripColors(player.name)));
+                return;
+            }
+
+            Player otherPlayer = Groups.player.find(p -> Strings.stripGlyphs(Strings.stripColors(p.name())).equalsIgnoreCase(args[0]));
+            if (otherPlayer != null) {
+                otherPlayer.unit().kill();
+                String otherPlayerName = NetClient.colorizeName(otherPlayer.id, otherPlayer.name);
+                bundled(player, "commands.kill.kill-another", otherPlayerName);
+
+                Log.info(MessageFormat.format("{0} убил {1}", Strings.stripColors(player.name), Strings.stripColors(otherPlayerName)));
+            } else {
+                player.sendMessage("[scarlet]Игрока с таким ником нет на сервере");
             }
         });
 
         handler.<Player>register("pause", "Поставить игру на паузу", (args, player) -> {
             if (!admins.containsKey(player.uuid())) {
-                player.sendMessage("[scarlet]Только админы могут использовать эту команду![]");
+                bundled(player, "commands.access-denied");
                 return;
             }
             Vars.state.serverPaused = !Vars.state.serverPaused;
@@ -726,7 +728,7 @@ public class ThedimasPlugin extends Plugin {
 
         handler.<Player>register("end", "Принудительно сменить карту", (args, player) -> {
             if (!admins.containsKey(player.uuid())) {
-                player.sendMessage("[scarlet]Только админы могут использовать эту команду![]");
+                bundled(player, "commands.access-denied");
             } else {
                 Events.fire(new EventType.GameOverEvent(Team.crux));
                 Log.info(MessageFormat.format("{0} сменил карту принудительно", Strings.stripColors(player.name)));
@@ -735,7 +737,7 @@ public class ThedimasPlugin extends Plugin {
 
         handler.<Player>register("core", "<small|medium|big>", "Spawn a core to your coordinate", (arg, player) -> {
             if (!admins.containsKey(player.uuid())) {
-                player.sendMessage("[scarlet]Только админы могут использовать эту команду![]");
+                bundled(player, "commands.access-denied");
             }
 
             Block core;
@@ -764,7 +766,7 @@ public class ThedimasPlugin extends Plugin {
 
         handler.<Player>register("killall", "[team]", "Убить ВСЕХ", (args, player) -> {
             if (!admins.containsKey(player.uuid())) {
-                player.sendMessage("[scarlet]Только админы могут использовать эту команду![]");
+                bundled(player, "commands.access-denied");
                 return;
             }
 
