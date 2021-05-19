@@ -23,3 +23,13 @@ jar {
         configurations.runtimeClasspath.collect{ it.isDirectory() ? it : zipTree(it) }
     }
 }
+
+processResources {
+    def build = project.hasProperty("buildVersion") ? project.property("buildVersion") : "snapshot"
+    println("Compiling with build: '$build'")
+
+    filesMatching("**/plugin.json") {
+        from it.file
+        filter { line -> line.replace("\$buildVersion", "$build") }
+    }
+}
