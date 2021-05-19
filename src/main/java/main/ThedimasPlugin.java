@@ -40,7 +40,7 @@ import static mindustry.Vars.*;
 @SuppressWarnings({"unused", "unchecked"})
 public class ThedimasPlugin extends Plugin {
 
-    private final String version = "1.0 build 191";
+    private final String version = "1.0 build 194";
 
     private boolean autoPause = true;
 
@@ -453,48 +453,43 @@ public class ThedimasPlugin extends Plugin {
 
             String mode = args[0].toLowerCase();
             switch (mode) {
-                case "off":
+                case "off" -> {
                     try {
                         DBHandler.update(player.uuid(), database.Const.U_TRANSLATOR, "off");
                     } catch (Throwable t) {
                         Log.err(t);
                     }
-
                     player.sendMessage("[sky]Перевод чата выключен.");
-                    break;
-                case "auto":
+                }
+                case "auto" -> {
                     try {
                         DBHandler.update(player.uuid(), database.Const.U_TRANSLATOR, "auto");
                     } catch (Throwable t) {
                         Log.err(t);
                     }
-
                     player.sendMessage("[sky]Перевод чата установлен в автоматический режим.");
-                    break;
-                case "double":
+                }
+                case "double" -> {
                     try {
                         DBHandler.update(player.uuid(), database.Const.U_TRANSLATOR, "double");
                     } catch (Throwable t) {
                         Log.err(t);
                     }
-
                     player.sendMessage("[sky]Перевод чата установлен в автоматический режим c отображением оригинального сообщения.");
-                    break;
-                default:
+                }
+                default -> {
                     Locale target = Structs.find(locales, l -> mode.equalsIgnoreCase(l.toString()));
                     if (target == null) {
                         player.sendMessage("[sky]Список доступных локализаций:\n" + Const.LocaleListHolder.LOCALE_LIST);
                         return;
                     }
-
                     try {
                         DBHandler.update(player.uuid(), database.Const.U_TRANSLATOR, target.toString());
                     } catch (Throwable t) {
                         Log.err(t);
                     }
-
                     player.sendMessage("[sky]Язык переводчика установлен на: " + target);
-                    break;
+                }
             }
         });
 
@@ -742,31 +737,26 @@ public class ThedimasPlugin extends Plugin {
             }
         });
 
-        handler.<Player>register("core", "<small|medium|big>", "Spawn a core to your coordinate", (arg, player) -> {
+        handler.<Player>register("core", "<small|medium|big>", "commands.core.description", (args, player) -> {
             if (!admins.containsKey(player.uuid())) {
                 bundled(player, "commands.access-denied");
             }
 
             Block core;
-            switch (arg[0].toLowerCase()) {
-                case "small":
-                    core = Blocks.coreShard;
-                    break;
-                case "medium":
-                    core = Blocks.coreFoundation;
-                    break;
-                case "big":
-                    core = Blocks.coreNucleus;
-                    break;
-                default:
+            switch (args[0].toLowerCase()) {
+                case "small" -> core = Blocks.coreShard;
+                case "medium" -> core = Blocks.coreFoundation;
+                case "big" -> core = Blocks.coreNucleus;
+                default -> {
                     bundled("commands.core.core-type-not-found");
                     return;
+                }
             }
 
             Tile tile = player.tileOn();
             Call.constructFinish(tile, core, player.unit(), (byte)0, player.team(), false);
 
-            bundled(player, tile.block() == core, "commands.core.done", "commands.core.error");
+            bundled(player, tile.block() == core, "commands.core.success", "commands.core.failed");
 
             Log.info(MessageFormat.format("{0} заспавнил ядро ({1}, {2})", Strings.stripColors(player.name), tile.x, tile.y));
         });
