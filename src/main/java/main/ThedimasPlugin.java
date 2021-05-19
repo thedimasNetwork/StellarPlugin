@@ -40,7 +40,7 @@ import static mindustry.Vars.*;
 @SuppressWarnings({"unused", "unchecked"})
 public class ThedimasPlugin extends Plugin {
 
-    private final String version = "1.0 build 190";
+    private final String version = "1.0 build 191";
 
     private boolean autoPause = true;
 
@@ -436,60 +436,6 @@ public class ThedimasPlugin extends Plugin {
             player.sendMessage(result.toString());
         });
 
-        handler.<Player>register("version", "commands.version.description", (arg, player) -> bundled(player, "commands.version.msg", version));
-
-        handler.<Player>register("rtv", "commands.rtv.description", (arg, player) -> {
-            votesRTV.add(player.uuid());
-            int cur = votesRTV.size();
-            int req = (int) Math.ceil(Const.VOTES_RATIO * Groups.player.size());
-
-            String playerName = NetClient.colorizeName(player.id, player.name);
-            bundled("commands.rtv.vote", playerName, cur, req);
-
-            if (cur >= req) {
-                votesRTV.clear();
-                bundled("commands.rtv.passed");
-                Events.fire(new EventType.GameOverEvent(Team.crux));
-            }
-        });
-
-        handler.<Player>register("rules", "Посмотреть список правил", (args, player) -> {
-            if (player.locale.startsWith("uk")) {
-                player.sendMessage(Const.RULES_UK);
-            } else if (player.locale.startsWith("ru")) {
-                player.sendMessage(Const.RULES_RU);
-            } else {
-                player.sendMessage(Const.RULES_EN);
-            }
-        });
-
-        handler.<Player>register("hub", "Подключиться к Хабу", (args, player) -> {
-            String[] address = Const.SERVER_ADDRESS.get("hub").split(":");
-            String ip = address[0];
-            int port = Integer.parseInt(address[1]);
-
-            Call.connect(player.con, ip, port);
-        });
-
-        handler.<Player>register("discord", "Получить ссылку на Discord сервер", (args, player) -> player.sendMessage("https://discord.gg/RkbFYXFU9E"));
-
-        handler.<Player>register("connect", "[list|server...]", "Подключиться к другому серверу", (args, player) -> {
-            if (args.length == 0 || args[0].equalsIgnoreCase("list")) {
-                player.sendMessage("[sky]Список доступных серверов:\n" + Const.SERVER_LIST);
-                return;
-            }
-            String serverName = args[0].toLowerCase();
-            if (!Const.SERVER_ADDRESS.containsKey(serverName)) {
-                player.sendMessage("[scarlet]Такого сервера не существует. Доступные сервера:\n" + Const.SERVER_LIST);
-                return;
-            }
-
-            String[] address = Const.SERVER_ADDRESS.get(serverName).split(":");
-            String ip = address[0];
-            int port = Integer.parseInt(address[1]);
-            Vars.net.pingHost(ip, port, host -> Call.connect(player.con, ip, port), e -> player.sendMessage("[scarlet]Сервер оффлайн"));
-        });
-
         handler.<Player>register("tr", "[off|auto|double|somelocale]", "Настроить переводчик чата.", (args, player) -> {
             String locale;
             try {
@@ -550,6 +496,60 @@ public class ThedimasPlugin extends Plugin {
                     player.sendMessage("[sky]Язык переводчика установлен на: " + target);
                     break;
             }
+        });
+
+        handler.<Player>register("rtv", "commands.rtv.description", (arg, player) -> {
+            votesRTV.add(player.uuid());
+            int cur = votesRTV.size();
+            int req = (int) Math.ceil(Const.VOTES_RATIO * Groups.player.size());
+
+            String playerName = NetClient.colorizeName(player.id, player.name);
+            bundled("commands.rtv.vote", playerName, cur, req);
+
+            if (cur >= req) {
+                votesRTV.clear();
+                bundled("commands.rtv.passed");
+                Events.fire(new EventType.GameOverEvent(Team.crux));
+            }
+        });
+
+        handler.<Player>register("version", "commands.version.description", (arg, player) -> bundled(player, "commands.version.msg", version));
+
+        handler.<Player>register("discord", "Получить ссылку на Discord сервер", (args, player) -> player.sendMessage("https://discord.gg/RkbFYXFU9E"));
+
+        handler.<Player>register("rules", "Посмотреть список правил", (args, player) -> {
+            if (player.locale.startsWith("uk")) {
+                player.sendMessage(Const.RULES_UK);
+            } else if (player.locale.startsWith("ru")) {
+                player.sendMessage(Const.RULES_RU);
+            } else {
+                player.sendMessage(Const.RULES_EN);
+            }
+        });
+
+        handler.<Player>register("hub", "Подключиться к Хабу", (args, player) -> {
+            String[] address = Const.SERVER_ADDRESS.get("hub").split(":");
+            String ip = address[0];
+            int port = Integer.parseInt(address[1]);
+
+            Call.connect(player.con, ip, port);
+        });
+
+        handler.<Player>register("connect", "[list|server...]", "Подключиться к другому серверу", (args, player) -> {
+            if (args.length == 0 || args[0].equalsIgnoreCase("list")) {
+                player.sendMessage("[sky]Список доступных серверов:\n" + Const.SERVER_LIST);
+                return;
+            }
+            String serverName = args[0].toLowerCase();
+            if (!Const.SERVER_ADDRESS.containsKey(serverName)) {
+                player.sendMessage("[scarlet]Такого сервера не существует. Доступные сервера:\n" + Const.SERVER_LIST);
+                return;
+            }
+
+            String[] address = Const.SERVER_ADDRESS.get(serverName).split(":");
+            String ip = address[0];
+            int port = Integer.parseInt(address[1]);
+            Vars.net.pingHost(ip, port, host -> Call.connect(player.con, ip, port), e -> player.sendMessage("[scarlet]Сервер оффлайн"));
         });
 
         handler.<Player>register("history", "[страница] [подробно]", "Посмотреть историю блока", (args, player) -> {
@@ -717,21 +717,28 @@ public class ThedimasPlugin extends Plugin {
             }
         });
 
-        handler.<Player>register("pause", "Поставить игру на паузу", (args, player) -> {
+        handler.<Player>register("killall", "[team]", "Убить ВСЕХ", (args, player) -> {
             if (!admins.containsKey(player.uuid())) {
                 bundled(player, "commands.access-denied");
                 return;
             }
-            Vars.state.serverPaused = !Vars.state.serverPaused;
-            Log.info(MessageFormat.format("{0} поставил игру на паузу", Strings.stripColors(player.name)));
-        });
 
-        handler.<Player>register("end", "Принудительно сменить карту", (args, player) -> {
-            if (!admins.containsKey(player.uuid())) {
-                bundled(player, "commands.access-denied");
+            if (args.length == 0) {
+                Groups.unit.each(Unitc::kill);
+                player.sendMessage("[scarlet]Ты убил их всех... За что, Джонни?");
+
+                Log.info(MessageFormat.format("{0} убил всех...", Strings.stripColors(player.name)));
             } else {
-                Events.fire(new EventType.GameOverEvent(Team.crux));
-                Log.info(MessageFormat.format("{0} сменил карту принудительно", Strings.stripColors(player.name)));
+                Team team = Structs.find(Team.baseTeams, t -> t.name.equalsIgnoreCase(args[0]));
+                if (team == null) {
+                    player.sendMessage("[scarlet]Неверная команда. Возможные варианты:\n" + Const.TEAM_LIST);
+                    return;
+                }
+
+                Groups.unit.each(u -> u.team == team, Unitc::kill); // Надеюсь, оно работает
+                player.sendMessage("[scarlet]Ты убил всех с команды [#" + team.color + "]" + team + "... Их призраки буду преследовать тебя вечно!");
+
+                Log.info(MessageFormat.format("{0} убил всех с команды {1}...", Strings.stripColors(player.name), team));
             }
         });
 
@@ -764,28 +771,21 @@ public class ThedimasPlugin extends Plugin {
             Log.info(MessageFormat.format("{0} заспавнил ядро ({1}, {2})", Strings.stripColors(player.name), tile.x, tile.y));
         });
 
-        handler.<Player>register("killall", "[team]", "Убить ВСЕХ", (args, player) -> {
+        handler.<Player>register("pause", "Поставить игру на паузу", (args, player) -> {
             if (!admins.containsKey(player.uuid())) {
                 bundled(player, "commands.access-denied");
                 return;
             }
+            Vars.state.serverPaused = !Vars.state.serverPaused;
+            Log.info(MessageFormat.format("{0} поставил игру на паузу", Strings.stripColors(player.name)));
+        });
 
-            if (args.length == 0) {
-                Groups.unit.each(Unitc::kill);
-                player.sendMessage("[scarlet]Ты убил их всех... За что, Джонни?");
-
-                Log.info(MessageFormat.format("{0} убил всех...", Strings.stripColors(player.name)));
+        handler.<Player>register("end", "Принудительно сменить карту", (args, player) -> {
+            if (!admins.containsKey(player.uuid())) {
+                bundled(player, "commands.access-denied");
             } else {
-                Team team = Structs.find(Team.baseTeams, t -> t.name.equalsIgnoreCase(args[0]));
-                if (team == null) {
-                    player.sendMessage("[scarlet]Неверная команда. Возможные варианты:\n" + Const.TEAM_LIST);
-                    return;
-                }
-
-                Groups.unit.each(u -> u.team == team, Unitc::kill); // Надеюсь, оно работает
-                player.sendMessage("[scarlet]Ты убил всех с команды [#" + team.color + "]" + team + "... Их призраки буду преследовать тебя вечно!");
-
-                Log.info(MessageFormat.format("{0} убил всех с команды {1}...", Strings.stripColors(player.name), team));
+                Events.fire(new EventType.GameOverEvent(Team.crux));
+                Log.info(MessageFormat.format("{0} сменил карту принудительно", Strings.stripColors(player.name)));
             }
         });
         // конец блока
