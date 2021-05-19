@@ -40,8 +40,6 @@ import static mindustry.Vars.*;
 @SuppressWarnings({"unused", "unchecked"})
 public class ThedimasPlugin extends Plugin {
 
-    private final String version = "1.0 build 194";
-
     private boolean autoPause = true;
 
     private final Interval interval = new Interval();
@@ -508,7 +506,8 @@ public class ThedimasPlugin extends Plugin {
             }
         });
 
-        handler.<Player>register("version", "commands.version.description", (arg, player) -> bundled(player, "commands.version.msg", version));
+        handler.<Player>register("version", "commands.version.description", (arg, player) -> bundled(player, "commands.version.msg",
+                mods.list().find(l -> l.main instanceof ThedimasPlugin).meta.version));
 
         handler.<Player>register("discord", "Получить ссылку на Discord сервер", (args, player) -> player.sendMessage("https://discord.gg/RkbFYXFU9E"));
 
