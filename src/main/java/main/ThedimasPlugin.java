@@ -29,7 +29,6 @@ import mindustry.world.blocks.logic.LogicBlock;
 import util.Bundle;
 import util.Translator;
 
-import java.io.*;
 import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.time.*;
@@ -40,6 +39,8 @@ import static mindustry.Vars.*;
 
 @SuppressWarnings({"unused", "unchecked"})
 public class ThedimasPlugin extends Plugin {
+
+    private final String version = "1.0 build 189";
 
     private boolean autoPause = true;
 
@@ -434,6 +435,8 @@ public class ThedimasPlugin extends Plugin {
             }
             player.sendMessage(result.toString());
         });
+
+        handler.<Player>register("version", "commands.version.description", (arg, player) -> bundled(player, "commands.version.msg", version));
 
         handler.<Player>register("rtv", "rtv.description", (arg, player) -> {
             votesRTV.add(player.uuid());
