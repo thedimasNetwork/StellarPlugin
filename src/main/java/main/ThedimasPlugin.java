@@ -395,7 +395,7 @@ public class ThedimasPlugin extends Plugin {
         });
 
         handler.removeCommand("t");
-        handler.<Player>register("t", "<text...>", "commands.t.description ", (args, player) -> {
+        handler.<Player>register("t", "<text...>", "commands.t.description", (args, player) -> {
             String message = args[0];
             Groups.player.each(o -> o.team() == player.team(), otherPlayer -> {
                 String msg = translateChat(player, otherPlayer, message);
