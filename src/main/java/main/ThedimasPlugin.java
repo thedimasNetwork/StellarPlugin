@@ -29,8 +29,6 @@ import mindustry.world.blocks.logic.LogicBlock;
 import util.Bundle;
 import util.Translator;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.text.MessageFormat;
@@ -43,11 +41,9 @@ import static mindustry.Vars.*;
 @SuppressWarnings({"unused", "unchecked"})
 public class ThedimasPlugin extends Plugin {
 
-    private int tick;
-
     private boolean autoPause = true;
 
-    private final Interval interval = new Interval();
+    private final Interval interval = new Interval(2);
 
     private final Set<String> votesRTV = new HashSet<>();
 
@@ -98,19 +94,16 @@ public class ThedimasPlugin extends Plugin {
             locales = Seq.with(locales).and(new Locale("router")).toArray(Locale.class);
         }, Log::err);
 
-
         Events.on(EventType.Trigger.update.getClass(), e -> {
-            if (tick != 60) {
-                tick++;
-                return;
-            }
-            for (Player p : Groups.player) {
-                try {
-                    long time = Long.parseLong(Objects.requireNonNull(DBHandler.get(p.uuid(), database.Const.U_PLAY_TIME)));
-                    long newTime = longToDateTime(time).plusSeconds(1).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
-                    DBHandler.update(p.uuid(), database.Const.U_PLAY_TIME, Long.toString(newTime));
-                } catch (Throwable t) {
-                    Log.err(t);
+            if(interval.get(1, 3600)){ // 1 минута
+                for (Player p : Groups.player) {
+                    try {
+                        long time = Long.parseLong(Objects.requireNonNull(DBHandler.get(p.uuid(), database.Const.U_PLAY_TIME)));
+                        long newTime = longToDateTime(time).plusMinutes(1).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+                        DBHandler.update(p.uuid(), database.Const.U_PLAY_TIME, Long.toString(newTime));
+                    } catch (Throwable t) {
+                        Log.err(t);
+                    }
                 }
             }
         });
@@ -207,7 +200,7 @@ public class ThedimasPlugin extends Plugin {
                     event.team.cores().contains(c -> event.tile.dst(c.x, c.y) < 300)) {
                 Player player = event.builder.getPlayer();
                 String playerName = NetClient.colorizeName(player.id, player.name);
-                if (interval.get(300)) {
+                if (interval.get(0, 300)) {
                     Groups.player.each(p -> p.sendMessage(MessageFormat.format("[scarlet]ВНИМАНИЕ! [accent]{0}[accent] строит ториевый реактор возле ядра!\n" +
                             "x: [lightgray]{1}[accent], y: [lightgray]{2}", playerName, event.tile.x, event.tile.y)));
                     Log.info(MessageFormat.format("{0} начал строить ториевый реактор близко к ядру ({1}, {2})", player.name, event.tile.x, event.tile.y));
