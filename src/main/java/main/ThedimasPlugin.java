@@ -30,7 +30,6 @@ import util.Bundle;
 import util.Translator;
 
 import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.text.MessageFormat;
 import java.time.*;
 import java.util.*;
@@ -99,7 +98,7 @@ public class ThedimasPlugin extends Plugin {
                 for (Player p : Groups.player) {
                     try {
                         long time = Long.parseLong(Objects.requireNonNull(DBHandler.get(p.uuid(), database.Const.U_PLAY_TIME)));
-                        DBHandler.update(p.uuid(), database.Const.U_PLAY_TIME, Long.toString(time + 3600));
+                        DBHandler.update(p.uuid(), database.Const.U_PLAY_TIME, Long.toString(time + 60));
                     } catch (Throwable t) {
                         Log.err(t);
                     }
