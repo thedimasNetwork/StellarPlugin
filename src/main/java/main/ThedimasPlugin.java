@@ -94,7 +94,7 @@ public class ThedimasPlugin extends Plugin {
             locales = Seq.with(locales).and(new Locale("router")).toArray(Locale.class);
         }, Log::err);
 
-        Events.on(EventType.Trigger.update.getClass(), e -> {
+        Events.run(EventType.Trigger.update, () -> {
             if(interval.get(1, 3600)){ // 1 минута
                 for (Player p : Groups.player) {
                     try {

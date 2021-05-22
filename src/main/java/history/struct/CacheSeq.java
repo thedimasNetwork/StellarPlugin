@@ -1,14 +1,12 @@
 package history.struct;
 
-import arc.struct.Queue;
-import arc.struct.Seq;
+import arc.struct.*;
 import arc.util.Time;
 
-import java.util.Map;
 import java.util.Objects;
 
 public class CacheSeq<T> extends Seq<T> {
-    private final Queue<Map.Entry<T, Long>> writeQueue;
+    private final Queue<ValueReference<T>> writeQueue;
     private final long expireAfterWriteNanos;
     private final int maximumSize;
 
@@ -25,7 +23,7 @@ public class CacheSeq<T> extends Seq<T> {
         }
 
         super.add(e);
-        writeQueue.add(Map.entry(e, Time.nanos()));
+        writeQueue.add(new ValueReference<>(Time.nanos(), e));
 
         cleanUpBySize();
         cleanUp();
@@ -51,7 +49,7 @@ public class CacheSeq<T> extends Seq<T> {
 
     @Override
     public boolean remove(T value) {
-        int index = writeQueue.indexOf(t -> Objects.equals(t.getKey(), value));
+        int index = writeQueue.indexOf(t -> Objects.equals(t.value, value));
         if (index != -1) {
             writeQueue.removeIndex(index);
         }
@@ -63,9 +61,9 @@ public class CacheSeq<T> extends Seq<T> {
     }
 
     public void cleanUp() {
-        Map.Entry<T, Long> entry;
-        while ((entry = writeQueue.last()) != null && isExpired(entry.getValue())) {
-            remove(entry.getKey());
+        ValueReference<T> valueReference;
+        while ((valueReference = writeQueue.last()) != null && isExpired(valueReference.writeTime)) {
+            remove(valueReference.value);
         }
     }
 
@@ -77,5 +75,15 @@ public class CacheSeq<T> extends Seq<T> {
 
     private boolean isExpired(Long time) {
         return time != null && Time.timeSinceNanos(time) >= expireAfterWriteNanos;
+    }
+
+    static class ValueReference<T>{
+        private long writeTime;
+        private T value;
+
+        public ValueReference(long writeTime, T value){
+            this.writeTime = writeTime;
+            this.value = value;
+        }
     }
 }
