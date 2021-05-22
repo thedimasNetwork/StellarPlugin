@@ -587,7 +587,7 @@ public class ThedimasPlugin extends Plugin {
             Vars.net.pingHost(ip, port, host -> Call.connect(player.con, ip, port), e -> player.sendMessage("[scarlet]Сервер оффлайн"));
         });
 
-        handler.<Player>register("history", "[страница] [подробно]", "Посмотреть историю блока", (args, player) -> {
+        handler.<Player>register("history", "[page] [detailed]", "Посмотреть историю блока", (args, player) -> {
             boolean detailed = args.length == 2 && Structs.contains(Const.BOOL_VALUES.split(", "), args[1].toLowerCase());
 
             if (args.length > 0 && activeHistoryPlayers.containsKey(player.uuid())) {
@@ -676,7 +676,7 @@ public class ThedimasPlugin extends Plugin {
             }
         });
 
-        handler.<Player>register("spawn", "<юнит> [количество] [команда]", "Заспавнить юнитов", (args, player) -> {
+        handler.<Player>register("spawn", "<unit> [count] [team]", "Заспавнить юнитов", (args, player) -> {
             if (!admins.containsKey(player.uuid())) {
                 bundled(player, "commands.access-denied");
                 return;
@@ -710,7 +710,7 @@ public class ThedimasPlugin extends Plugin {
             player.sendMessage("[green]Ты заспавнил [accent]" + count + " " + unit + " [green]для команды [#" + team.color.toString().substring(0, 6) + "]" + team);
         });
 
-        handler.<Player>register("team", "<команда> [username...]", "Изменить команду", (args, player) -> {
+        handler.<Player>register("team", "<team> [username...]", "Изменить команду", (args, player) -> {
             if (!admins.containsKey(player.uuid())) {
                 bundled(player, "commands.access-denied");
                 return;
@@ -813,7 +813,7 @@ public class ThedimasPlugin extends Plugin {
             Log.info(MessageFormat.format("{0} заспавнил ядро ({1}, {2})", Strings.stripColors(player.name), tile.x, tile.y));
         });
 
-        handler.<Player>register("pause", "Поставить игру на паузу", (args, player) -> {
+        handler.<Player>register("pause", "commands.admin.pause.description", (args, player) -> {
             if (!admins.containsKey(player.uuid())) {
                 bundled(player, "commands.access-denied");
                 return;
@@ -822,13 +822,14 @@ public class ThedimasPlugin extends Plugin {
             Log.info(MessageFormat.format("{0} поставил игру на паузу", Strings.stripColors(player.name)));
         });
 
-        handler.<Player>register("end", "Принудительно сменить карту", (args, player) -> {
+        handler.<Player>register("end", "commands.admin.end.description", (args, player) -> {
             if (!admins.containsKey(player.uuid())) {
                 bundled(player, "commands.access-denied");
-            } else {
-                Events.fire(new EventType.GameOverEvent(Team.crux));
-                Log.info(MessageFormat.format("{0} сменил карту принудительно", Strings.stripColors(player.name)));
+                return;
             }
+
+            Events.fire(new EventType.GameOverEvent(Team.crux));
+            Log.info(MessageFormat.format("{0} сменил карту принудительно", Strings.stripColors(player.name)));
         });
         // конец блока
     }
