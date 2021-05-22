@@ -99,8 +99,7 @@ public class ThedimasPlugin extends Plugin {
                 for (Player p : Groups.player) {
                     try {
                         long time = Long.parseLong(Objects.requireNonNull(DBHandler.get(p.uuid(), database.Const.U_PLAY_TIME)));
-                        long newTime = longToDateTime(time).plusMinutes(1).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
-                        DBHandler.update(p.uuid(), database.Const.U_PLAY_TIME, Long.toString(newTime));
+                        DBHandler.update(p.uuid(), database.Const.U_PLAY_TIME, Long.toString(time + 3600));
                     } catch (Throwable t) {
                         Log.err(t);
                     }
@@ -827,16 +826,10 @@ public class ThedimasPlugin extends Plugin {
         // конец блока
     }
 
-    public LocalDateTime longToDateTime(Long mils) {
-        return new Timestamp(mils).toLocalDateTime();
-    }
-
     public String longToTime(Long seconds) {
         long min = seconds / 60;
         long hour = min / 60;
-        long days = hour / 24;
-        return String.format("%d:%02d:%02d:%02d",
-                days % 365, hour % 24, min % 60, seconds % 60);
+        return String.format("%d:%02d:%02d", hour, min % 60, seconds % 60);
     }
 
     private String translateChat(Player player, Player otherPlayer, String message) {
