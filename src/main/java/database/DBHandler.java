@@ -36,8 +36,8 @@ public class DBHandler {
     }
 
     public static void save(PlayerData data) throws SQLException {
-        preparedExecute("INSERT INTO " + Const.U_TABLE + " (" + Const.U_ALL + ") VALUES (?,?,?,?,?,?,?)",
-                data.uuid, data.ip, escapeString(data.name), data.locale, data.translator, data.admin, data.banned);
+        preparedExecute("INSERT INTO " + Const.U_TABLE + " (" + Const.U_ALL + ") VALUES (?,?,?,?,?,?,?,?)",
+                data.uuid, data.ip, escapeString(data.name), data.locale, data.translator, data.playTime, data.admin, data.banned);
     }
 
     private static String escapeString(String text) {

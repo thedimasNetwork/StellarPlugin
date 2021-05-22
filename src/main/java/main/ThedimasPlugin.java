@@ -29,7 +29,10 @@ import mindustry.world.blocks.logic.LogicBlock;
 import util.Bundle;
 import util.Translator;
 
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.text.MessageFormat;
 import java.time.*;
 import java.util.*;
@@ -39,6 +42,8 @@ import static mindustry.Vars.*;
 
 @SuppressWarnings({"unused", "unchecked"})
 public class ThedimasPlugin extends Plugin {
+
+    private int tick;
 
     private boolean autoPause = true;
 
@@ -93,6 +98,23 @@ public class ThedimasPlugin extends Plugin {
             locales = Seq.with(locales).and(new Locale("router")).toArray(Locale.class);
         }, Log::err);
 
+
+        Events.on(EventType.Trigger.update.getClass(), e -> {
+            if (tick != 60) {
+                tick++;
+                return;
+            }
+            for (Player p : Groups.player) {
+                try {
+                    long time = Long.parseLong(Objects.requireNonNull(DBHandler.get(p.uuid(), database.Const.U_PLAY_TIME)));
+                    long newTime = longToDateTime(time).plusSeconds(1).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+                    DBHandler.update(p.uuid(), database.Const.U_PLAY_TIME, Long.toString(newTime));
+                } catch (Throwable t) {
+                    Log.err(t);
+                }
+            }
+        });
+
         Events.on(EventType.PlayerJoin.class, event -> {
             if (Groups.player.size() >= 1 && autoPause && Vars.state.serverPaused) {
                 Vars.state.serverPaused = false;
@@ -118,21 +140,21 @@ public class ThedimasPlugin extends Plugin {
                     data.ip = event.player.ip();
                     data.name = event.player.name();
                     data.locale = event.player.locale;
-                    data.translator = "auto";
                     data.admin = event.player.admin;
-                    data.banned = false; //banned
 
                     DBHandler.save(data);
                 } else {
                     DBHandler.update(event.player.uuid(), database.Const.U_NAME, event.player.name);
                     DBHandler.update(event.player.uuid(), database.Const.U_LOCALE, event.player.locale);
                     DBHandler.update(event.player.uuid(), database.Const.U_IP, event.player.ip());
+
                     String banned = DBHandler.get(event.player.uuid(), database.Const.U_BANNED);
                     if("1".equals(banned)) {
                         netServer.admins.banPlayer(event.player.uuid());
                         netServer.admins.banPlayerIP(event.player.ip());
                     }
                 }
+
                 String admin = DBHandler.get(event.player.uuid(), database.Const.U_ADMIN);
                 if ("1".equals(admin)) {
                     admins.put(event.player.uuid(), event.player.name);
@@ -346,6 +368,24 @@ public class ThedimasPlugin extends Plugin {
                 }
             }
             Log.info(MessageFormat.format("Successfully exported {0} players", exported));
+        });
+
+        handler.register("playtime", "<player/uuid>", "Check player playtime", (args) -> {
+            Playerc player = Groups.player.find(p -> p.name.equals(args[0]));
+            String uuid = player != null ? player.uuid() : args[0];
+
+            try {
+                String time = DBHandler.get(uuid, database.Const.U_PLAY_TIME);
+                if (time != null) {
+                    StringBuilder result = new StringBuilder(player != null ? player.name() : args[0]);
+                    result.append("plays").append(longToTime(Long.parseLong(time)));
+                    Log.info(result);
+                } else {
+                    Log.warn("Player/uuid not found!");
+                }
+            } catch (Throwable t) {
+                Log.err(t);
+            }
         });
 
         handler.register("auto-pause", "[on|off]", "Pause game with 0 people online", args -> {
@@ -599,6 +639,17 @@ public class ThedimasPlugin extends Plugin {
             }
         });
 
+        handler.<Player>register("playtime", "commands.playtime.description", (args, player) -> {
+            try {
+                String time = DBHandler.get(player.uuid(), database.Const.U_PLAY_TIME);
+                if (time != null) {
+                    bundled(player, "commands.playtime.msg", longToTime(Long.parseLong(time)));
+                }
+            } catch (Throwable t) {
+                Log.err(t);
+            }
+        });
+
         // блок "для админов"
         handler.<Player>register("admin", "Изменить свой статус", (args, player) -> {
             if (!admins.containsKey(player.uuid())) {
@@ -780,6 +831,18 @@ public class ThedimasPlugin extends Plugin {
             }
         });
         // конец блока
+    }
+
+    public LocalDateTime longToDateTime(Long mils) {
+        return new Timestamp(mils).toLocalDateTime();
+    }
+
+    public String longToTime(Long seconds) {
+        long min = seconds / 60;
+        long hour = min / 60;
+        long days = hour / 24;
+        return String.format("%d:%02d:%02d:%02d",
+                days % 365, hour % 24, min % 60, seconds % 60);
     }
 
     private String translateChat(Player player, Player otherPlayer, String message) {
