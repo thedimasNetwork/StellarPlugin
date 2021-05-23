@@ -6,17 +6,17 @@ public class PlayerData {
     public String name;
     public String locale;
     public String translator;
-    public String playTime;
+    public long playTime;
     public boolean admin;
     public boolean banned;
 
     public PlayerData() {
         translator = "off";
-        playTime = "0";
+        playTime = 0;
         banned = false;
     }
 
-    public PlayerData(String uuid, String ip, String name, String locale, String translator, String playTime, boolean admin, boolean banned) {
+    public PlayerData(String uuid, String ip, String name, String locale, String translator, long playTime, boolean admin, boolean banned) {
         this.uuid = uuid;
         this.ip = ip;
         this.name = name;

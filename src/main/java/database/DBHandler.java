@@ -62,18 +62,35 @@ public class DBHandler {
         }
     }
 
-    public static String[] get(String uuid) throws SQLException {
-        String select = "SELECT * FROM " + Const.U_TABLE + " WHERE " + Const.U_UUID + "=?";
+    public static <T> T get(String uuid, String column, Class<T> type) throws SQLException {
+        String select = "SELECT " + column + " FROM " + Const.U_TABLE + " WHERE " + Const.U_UUID + "=?";
+        try (PreparedStatement prSt = getDbConnection().prepareStatement(select)) {
+            prSt.setString(1, uuid);
+
+            ResultSet res = prSt.executeQuery();
+            return res.next() ? res.getObject(1, type) : null;
+        }
+    }
+
+    public static PlayerData get(String uuid) throws SQLException {
+        String select = "SELECT " + Const.U_ALL + " FROM " + Const.U_TABLE + " WHERE " + Const.U_UUID + "=?";
         try (PreparedStatement prSt = getDbConnection().prepareStatement(select)) {
             prSt.setString(1, uuid);
 
             ResultSet data = prSt.executeQuery();
             data.next();
-            String[] dataArray = new String[data.getMetaData().getColumnCount()];
-            for (int i = 0; i < dataArray.length; i++) {
-                dataArray[i] = data.getString(i);
-            }
-            return dataArray;
+
+            PlayerData result = new PlayerData();
+            result.uuid = data.getString(1);
+            result.ip = data.getString(2);
+            result.name = data.getString(3);
+            result.locale = data.getString(4);
+            result.translator = data.getString(5);
+            result.playTime = data.getLong(6);
+            result.admin = data.getBoolean(7);
+            result.banned = data.getBoolean(8);
+
+            return result;
         }
     }
 

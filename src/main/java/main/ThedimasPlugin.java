@@ -97,7 +97,7 @@ public class ThedimasPlugin extends Plugin {
             if(interval.get(1, 3600)){ // 1 минута
                 for (Player p : Groups.player) {
                     try {
-                        long time = Long.parseLong(Objects.requireNonNull(DBHandler.get(p.uuid(), database.Const.U_PLAY_TIME)));
+                        Long time = Objects.requireNonNull(DBHandler.get(player.uuid(), database.Const.U_PLAY_TIME, Long.class));
                         DBHandler.update(p.uuid(), database.Const.U_PLAY_TIME, Long.toString(time + 60));
                     } catch (Throwable t) {
                         Log.err(t);
@@ -139,15 +139,15 @@ public class ThedimasPlugin extends Plugin {
                     DBHandler.update(event.player.uuid(), database.Const.U_LOCALE, event.player.locale);
                     DBHandler.update(event.player.uuid(), database.Const.U_IP, event.player.ip());
 
-                    String banned = DBHandler.get(event.player.uuid(), database.Const.U_BANNED);
-                    if("1".equals(banned)) {
+                    Boolean banned = DBHandler.get(event.player.uuid(), database.Const.U_BANNED, Boolean.class);
+                    if(banned != null && banned) {
                         netServer.admins.banPlayer(event.player.uuid());
                         netServer.admins.banPlayerIP(event.player.ip());
                     }
                 }
 
-                String admin = DBHandler.get(event.player.uuid(), database.Const.U_ADMIN);
-                if ("1".equals(admin)) {
+                Boolean admin = DBHandler.get(event.player.uuid(), database.Const.U_ADMIN, Boolean.class);
+                if (admin != null && admin) {
                     admins.put(event.player.uuid(), event.player.name);
                     event.player.admin = true;
                 }
@@ -366,10 +366,10 @@ public class ThedimasPlugin extends Plugin {
             String uuid = player != null ? player.uuid() : args[0];
 
             try {
-                String time = DBHandler.get(uuid, database.Const.U_PLAY_TIME);
+                Long time = DBHandler.get(uuid, database.Const.U_PLAY_TIME, Long.class);
                 if (time != null) {
                     StringBuilder result = new StringBuilder(player != null ? player.name() : args[0]);
-                    result.append("plays").append(longToTime(Long.parseLong(time)));
+                    result.append("plays").append(longToTime(time));
                     Log.info(result);
                 } else {
                     Log.warn("Player/uuid not found!");
@@ -632,9 +632,9 @@ public class ThedimasPlugin extends Plugin {
 
         handler.<Player>register("playtime", "commands.playtime.description", (args, player) -> {
             try {
-                String time = DBHandler.get(player.uuid(), database.Const.U_PLAY_TIME);
+                Long time = DBHandler.get(player.uuid(), database.Const.U_PLAY_TIME, Long.class);
                 if (time != null) {
-                    bundled(player, "commands.playtime.msg", longToTime(Long.parseLong(time)));
+                    bundled(player, "commands.playtime.msg", longToTime(time));
                 }
             } catch (Throwable t) {
                 Log.err(t);
