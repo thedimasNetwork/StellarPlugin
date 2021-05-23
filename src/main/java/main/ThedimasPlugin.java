@@ -97,7 +97,7 @@ public class ThedimasPlugin extends Plugin {
             if(interval.get(1, 3600)){ // 1 минута
                 for (Player p : Groups.player) {
                     try {
-                        Long time = Objects.requireNonNull(DBHandler.get(player.uuid(), database.Const.U_PLAY_TIME, Long.class));
+                        Long time = Objects.requireNonNull(DBHandler.get(player.uuid(), Table.PLAY_TIME));
                         DBHandler.update(p.uuid(), Table.PLAY_TIME, time + 60);
                     } catch (Throwable t) {
                         Log.err(t);
