@@ -11,7 +11,7 @@ public class PlayerData {
     public boolean banned;
 
     public PlayerData() {
-        translator = "off";
+        translator = "auto";
         playTime = 0;
         banned = false;
     }
