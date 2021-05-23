@@ -73,15 +73,15 @@ public class CacheSeq<T> extends Seq<T> {
         }
     }
 
-    private boolean isExpired(Long time) {
-        return time != null && Time.timeSinceNanos(time) >= expireAfterWriteNanos;
+    private boolean isExpired(long time) {
+        return Time.timeSinceNanos(time) >= expireAfterWriteNanos;
     }
 
-    static class ValueReference<T>{
+    static class ValueReference<T> {
         private long writeTime;
         private T value;
 
-        public ValueReference(long writeTime, T value){
+        public ValueReference(long writeTime, T value) {
             this.writeTime = writeTime;
             this.value = value;
         }
