@@ -4,28 +4,28 @@ import arc.*;
 import arc.math.Mathf;
 import arc.struct.ObjectMap;
 import arc.struct.Seq;
+import arc.util.*;
 import arc.util.serialization.Jval;
-import database.*;
-import history.entry.BlockEntry;
-import history.entry.ConfigEntry;
-import history.entry.RotateEntry;
-import history.struct.Seqs;
 import mindustry.Vars;
 import mindustry.content.Blocks;
 import mindustry.content.Items;
 import mindustry.core.NetClient;
-import mindustry.gen.*;
 import mindustry.game.*;
+import mindustry.gen.*;
 import mindustry.mod.*;
-import arc.util.*;
 import mindustry.net.Administration;
 import mindustry.type.UnitType;
-
-import history.struct.CacheSeq;
-import history.entry.HistoryEntry;
 import mindustry.world.Block;
 import mindustry.world.Tile;
 import mindustry.world.blocks.logic.LogicBlock;
+
+import database.*;
+import history.entry.BlockEntry;
+import history.entry.ConfigEntry;
+import history.entry.HistoryEntry;
+import history.entry.RotateEntry;
+import history.struct.CacheSeq;
+import history.struct.Seqs;
 import util.Bundle;
 import util.Translator;
 
@@ -97,7 +97,7 @@ public class ThedimasPlugin extends Plugin {
             if(interval.get(1, 3600)){ // 1 минута
                 for (Player p : Groups.player) {
                     try {
-                        Long time = Objects.requireNonNull(DBHandler.get(player.uuid(), Table.PLAY_TIME));
+                        Long time = Objects.requireNonNull(DBHandler.get(player.uuid(), database.Const.U_PLAY_TIME, Long.class));
                         DBHandler.update(p.uuid(), Table.PLAY_TIME, time + 60);
                     } catch (Throwable t) {
                         Log.err(t);
@@ -114,7 +114,7 @@ public class ThedimasPlugin extends Plugin {
 
             Log.info(MessageFormat.format(Const.JOIN_LOG_FORMAT, event.player.name, event.player.locale, event.player.con.address));
             String playerName = NetClient.colorizeName(event.player.id, event.player.name);
-            bundled("player.onJoin", playerName);
+            bundled("events.join.player-join", playerName);
 
             if (event.player.locale.startsWith("uk")) {
                 Call.infoMessage(event.player.con, Const.WELCOME_UK);
@@ -126,15 +126,6 @@ public class ThedimasPlugin extends Plugin {
 
             try {
                 if (!DBHandler.userExist(event.player.uuid())) {
-                    PlayerData data = new PlayerData();
-                    data.uuid = event.player.uuid();
-                    data.ip = event.player.ip();
-                    data.name = event.player.name();
-                    data.locale = event.player.locale;
-                    data.admin = event.player.admin;
-
-                    DBHandler.save(data);
-                } else {
                     DBHandler.update(event.player.uuid(), Table.NAME, event.player.name);
                     DBHandler.update(event.player.uuid(), Table.LOCALE, event.player.locale);
                     DBHandler.update(event.player.uuid(), Table.IP, event.player.ip());
@@ -143,13 +134,22 @@ public class ThedimasPlugin extends Plugin {
                     if(banned != null && banned) {
                         netServer.admins.banPlayer(event.player.uuid());
                         netServer.admins.banPlayerIP(event.player.ip());
+                    } else {
+                        Boolean admin = DBHandler.get(event.player.uuid(), Table.ADMIN);
+                        if (admin != null && admin) {
+                            admins.put(event.player.uuid(), event.player.name);
+                            event.player.admin = true;
+                        }
                     }
-                }
+                } else {
+                    PlayerData data = new PlayerData();
+                    data.uuid = event.player.uuid();
+                    data.ip = event.player.ip();
+                    data.name = event.player.name();
+                    data.locale = event.player.locale;
+                    data.admin = event.player.admin;
 
-                Boolean admin = DBHandler.get(event.player.uuid(), Table.ADMIN);
-                if (admin != null && admin) {
-                    admins.put(event.player.uuid(), event.player.name);
-                    event.player.admin = true;
+                    DBHandler.save(data);
                 }
             } catch (SQLException e) {
                 Log.err(e);
@@ -176,18 +176,18 @@ public class ThedimasPlugin extends Plugin {
 
             Log.info(event.player.name + " has disconnected from the server");
             String playerName = NetClient.colorizeName(event.player.id, event.player.name);
-            bundled("player.onLeave", playerName);
+            bundled("events.leave.player-leave", playerName);
         });
 
         // блок "торийки"
         Events.on(EventType.DepositEvent.class, event -> {
-            Building building = event.tile;
             Player target = event.player;
+            Building building = event.tile;
+
             if(building.block() == Blocks.thoriumReactor && event.item == Items.thorium &&
-                    target.team().cores().contains(c -> event.tile.dst(c.x, c.y) < 300)){
+                    target.team().cores().contains(c -> event.tile.dst(c.x, c.y) < 300)) {
                 String playerName = NetClient.colorizeName(event.player.id, event.player.name);
-                Groups.player.each(p -> p.sendMessage(MessageFormat.format("[scarlet]ВНИМАНИЕ! [accent]{0}[accent] положил торий в реактор!\n" +
-                        "x: [lightgray]{1}[accent], y: [lightgray]{2}", playerName, building.tileX(), building.tileY())));
+                bundled("events.deposit.thorium-in-reactor", playerName, building.tileX(), building.tileY());
                 Log.info(MessageFormat.format("{0} положил торий в реактор ({1}, {2})", target.name, building.tileX(), building.tileY()));
             }
         });
@@ -199,8 +199,7 @@ public class ThedimasPlugin extends Plugin {
                 Player player = event.builder.getPlayer();
                 String playerName = NetClient.colorizeName(player.id, player.name);
                 if (interval.get(0, 300)) {
-                    Groups.player.each(p -> p.sendMessage(MessageFormat.format("[scarlet]ВНИМАНИЕ! [accent]{0}[accent] строит ториевый реактор возле ядра!\n" +
-                            "x: [lightgray]{1}[accent], y: [lightgray]{2}", playerName, event.tile.x, event.tile.y)));
+                    bundled("events.build-select.reactor-near-core", playerName, event.tile.x, event.tile.y);
                     Log.info(MessageFormat.format("{0} начал строить ториевый реактор близко к ядру ({1}, {2})", player.name, event.tile.x, event.tile.y));
                 }
             }
@@ -343,8 +342,6 @@ public class ThedimasPlugin extends Plugin {
                 data.uuid = info.id;
                 data.ip = info.lastIP;
                 data.name = info.lastName;
-                data.locale = "undefined";
-                data.translator = "auto";
                 data.admin = info.admin;
                 data.banned = info.banned;
 
