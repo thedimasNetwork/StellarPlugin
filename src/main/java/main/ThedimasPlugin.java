@@ -5,11 +5,13 @@ import arc.math.Mathf;
 import arc.struct.ObjectMap;
 import arc.struct.Seq;
 import arc.util.*;
+import arc.util.Timer;
 import arc.util.serialization.Jval;
 import mindustry.Vars;
-import mindustry.content.Blocks;
+import mindustry.content.*;
 import mindustry.content.Items;
 import mindustry.core.NetClient;
+import mindustry.entities.bullet.BulletType;
 import mindustry.game.*;
 import mindustry.gen.*;
 import mindustry.mod.*;
@@ -67,7 +69,7 @@ public class ThedimasPlugin extends Plugin {
     public void init() {
         Log.info("thedimasPlugin launched!");
 
-        Vars.state.serverPaused = true;
+        state.serverPaused = true;
 
         netServer.admins.addChatFilter((player, message) -> null);
 
@@ -93,6 +95,46 @@ public class ThedimasPlugin extends Plugin {
             locales = Seq.with(locales).and(new Locale("router")).toArray(Locale.class);
         }, Log::err);
 
+        Timer.schedule(() -> {
+            Groups.build.each(b -> b.block == Blocks.launchPad, building -> {
+                if (building.items.total() == 100 && building.power.status > 0.95) {
+                    building.items.each((item, amount) -> {
+                        state.teams.cores(building.team).first().items.add(item, amount);
+                    });
+                    Call.clearItems(building);
+                    float thisX = building.x;
+                    float thisY = building.y;
+                    float coreX = state.teams.cores(building.team).first().x;
+                    float coreY = state.teams.cores(building.team).first().y;
+                    float a = Math.abs(thisX - coreX);
+                    float b = Math.abs(thisY - coreY);
+                    float c = (float)Math.hypot(a, b);
+                    float angle = (float)(Math.acos((b * b + c * c - a * a) / (2 * b * c)) * 180 / Math.PI) - 90;
+                    BulletType bullet = Bullets.artilleryDense;
+                    float baseSpeed = bullet.speed;
+                    float baseLifetime = bullet.lifetime;
+
+                    if (thisX == coreX && thisY < coreY) {
+                        angle = 90;
+                    } else if (thisX == coreX && thisY > coreY) {
+                        angle = 270;
+                    } else if (thisX < coreX && thisY == coreY) {
+                        angle = 0;
+                    } else if (thisX > coreX && thisY == coreY) {
+                        angle = 180;
+                    } else if (thisY < coreY && thisX < coreX) {
+                        angle = 360 - angle;
+                    } else if (thisX > coreX && thisY < coreY) {
+                        angle += 180;
+                    } else if (thisX > coreX && thisY > coreY) {
+                        angle = (float)(Math.acos((a * a + c * c - b * b) / (2 * a * c)) * 180 / Math.PI) - 180;
+                    }
+
+                    Call.createBullet(bullet, building.team, thisX, thisY, angle, 0F, 1F, c / baseSpeed / baseLifetime);
+                }
+            });
+        }, 0, 0.1F);
+
         Events.run(EventType.Trigger.update, () -> {
             if(interval.get(1, 3600)){ // 1 минута
                 for (Player p : Groups.player) {
@@ -105,10 +147,12 @@ public class ThedimasPlugin extends Plugin {
                 }
             }
         });
-
+        Events.on(EventType.PlayEvent.class, event -> {
+           state.rules.revealedBlocks.add(Blocks.launchPad);
+        });
         Events.on(EventType.PlayerJoin.class, event -> {
-            if (Groups.player.size() >= 1 && autoPause && Vars.state.serverPaused) {
-                Vars.state.serverPaused = false;
+            if (Groups.player.size() >= 1 && autoPause && state.serverPaused) {
+                state.serverPaused = false;
                 Log.info("auto-pause: " + Groups.player.size() + " player(s) connected -> Game unpaused...");
             }
 
@@ -156,11 +200,15 @@ public class ThedimasPlugin extends Plugin {
             }
         });
 
+        Events.on(EventType.ServerLoadEvent.class, event -> {
+            Log.info("thedimasPlugin: Server loaded");
+        });
+
         Events.on(EventType.GameOverEvent.class, e -> votesRTV.clear());
 
         Events.on(EventType.PlayerLeave.class, event -> {
             if (Groups.player.size() - 1 < 1 && autoPause) {
-                Vars.state.serverPaused = true;
+                state.serverPaused = true;
                 Log.info("auto-pause: " + (Groups.player.size() - 1) + " player connected -> Game paused...");
             }
 
@@ -250,7 +298,7 @@ public class ThedimasPlugin extends Plugin {
         // блок "история"
         Events.on(EventType.WorldLoadEvent.class, event -> {
             if (Groups.player.size() > 0 && autoPause) {
-                Vars.state.serverPaused = false;
+                state.serverPaused = false;
                 Log.info("auto-pause: " + Groups.player.size() + " player(s) connected -> Game unpaused...");
             }
 
