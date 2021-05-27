@@ -2,6 +2,8 @@ apply plugin: "java"
 
 version '1.0'
 
+sourceCompatibility = 15
+
 compileJava.options.encoding = "UTF-8"
 compileTestJava.options.encoding = "UTF-8"
 
