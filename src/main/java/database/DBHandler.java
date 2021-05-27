@@ -52,8 +52,8 @@ public class DBHandler {
         }
     }
 
-    public static <T> T get(String uuid, Row<T> row) throws SQLException {
-        String select = "SELECT " + row.getField() + " FROM " + Table.U_TABLE + " WHERE " + Table.U_UUID + "=?";
+    public static <T> T get(String uuid, Field<T> row) throws SQLException {
+        String select = "SELECT " + row.getName() + " FROM " + Table.U_TABLE + " WHERE " + Table.U_UUID + "=?";
         try (PreparedStatement prSt = getDbConnection().prepareStatement(select)) {
             prSt.setString(1, uuid);
 
@@ -84,8 +84,8 @@ public class DBHandler {
         }
     }
 
-    public static <T> void update(String uuid, Row<T> column, T value) throws SQLException {
-        preparedExecute("UPDATE " + Table.U_TABLE + " SET " + column.getField() + "=? WHERE " + Table.U_UUID + "=?",
+    public static <T> void update(String uuid, Field<T> column, T value) throws SQLException {
+        preparedExecute("UPDATE " + Table.U_TABLE + " SET " + column.getName() + "=? WHERE " + Table.U_UUID + "=?",
                 escapeString(String.valueOf(value)), uuid);
     }
 }

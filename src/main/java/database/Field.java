@@ -2,18 +2,18 @@ package database;
 
 import java.util.Objects;
 
-public class Row<T>{
+public class Field<T>{
 
-    public final String field;
-    public final Class<T> type;
+    private final String name;
+    private final Class<T> type;
 
-    public Row(String field, Class<T> type) {
-        this.field = field;
+    public Field(String field, Class<T> type) {
+        this.name = field;
         this.type = type;
     }
 
-    public String getField() {
-        return field;
+    public String getName() {
+        return name;
     }
 
     public Class<T> getType() {
@@ -24,19 +24,19 @@ public class Row<T>{
     public boolean equals(Object o){
         if(this == o) return true;
         if(o == null || getClass() != o.getClass()) return false;
-        Row<?> row = (Row<?>)o;
-        return field.equals(row.field) && type.equals(row.type);
+        Field<?> row = (Field<?>)o;
+        return this.name.equals(row.name) && type.equals(row.type);
     }
 
     @Override
     public int hashCode(){
-        return Objects.hash(field, type);
+        return Objects.hash(name, type);
     }
 
     @Override
     public String toString(){
-        return "Row{" +
-                "field='" + field + '\'' +
+        return "Field{" +
+                "name='" + name + '\'' +
                 ", type=" + type +
                 '}';
     }

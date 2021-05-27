@@ -13,12 +13,12 @@ public class Table {
     public static final String U_ALL = String.format("%s,%s,%s,%s,%s,%s,%s,%s", U_UUID, U_IP, U_NAME, U_LOCALE, U_TRANSLATOR, U_PLAY_TIME, U_ADMIN, U_BANNED);
     public static final String U_ALL_RAW = U_ALL.replaceAll("([a-zA-Z_])+", "?"); // заменяет все символы кроме ',' на '?'
 
-    public static final Row<String> UUID = new Row<>(U_UUID, String.class);
-    public static final Row<String> NAME = new Row<>(U_NAME, String.class);
-    public static final Row<String> IP = new Row<>(U_IP, String.class);
-    public static final Row<String> LOCALE = new Row<>(U_LOCALE, String.class);
-    public static final Row<String> TRANSLATOR = new Row<>(U_TRANSLATOR, String.class);
-    public static final Row<Long> PLAY_TIME = new Row<>(U_PLAY_TIME, Long.class);
-    public static final Row<Boolean> ADMIN = new Row<>(U_ADMIN, Boolean.class);
-    public static final Row<Boolean> BANNED = new Row<>(U_BANNED, Boolean.class);
+    public static final Field<String> UUID = new Field<>(U_UUID, String.class);
+    public static final Field<String> NAME = new Field<>(U_NAME, String.class);
+    public static final Field<String> IP = new Field<>(U_IP, String.class);
+    public static final Field<String> LOCALE = new Field<>(U_LOCALE, String.class);
+    public static final Field<String> TRANSLATOR = new Field<>(U_TRANSLATOR, String.class);
+    public static final Field<Long> PLAY_TIME = new Field<>(U_PLAY_TIME, Long.class);
+    public static final Field<Boolean> ADMIN = new Field<>(U_ADMIN, Boolean.class);
+    public static final Field<Boolean> BANNED = new Field<>(U_BANNED, Boolean.class);
 }
