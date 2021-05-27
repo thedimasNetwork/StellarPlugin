@@ -95,45 +95,50 @@ public class ThedimasPlugin extends Plugin {
             locales = Seq.with(locales).and(new Locale("router")).toArray(Locale.class);
         }, Log::err);
 
-        Timer.schedule(() -> {
-            Groups.build.each(b -> b.block == Blocks.launchPad, building -> {
-                if (building.items.total() == 100 && building.power.status > 0.95) {
-                    building.items.each((item, amount) -> {
-                        state.teams.cores(building.team).first().items.add(item, amount);
-                    });
-                    Call.clearItems(building);
-                    float thisX = building.x;
-                    float thisY = building.y;
-                    float coreX = state.teams.cores(building.team).first().x;
-                    float coreY = state.teams.cores(building.team).first().y;
-                    float a = Math.abs(thisX - coreX);
-                    float b = Math.abs(thisY - coreY);
-                    float c = (float)Math.hypot(a, b);
-                    float angle = (float)(Math.acos((b * b + c * c - a * a) / (2 * b * c)) * 180 / Math.PI) - 90;
-                    BulletType bullet = Bullets.artilleryDense;
-                    float baseSpeed = bullet.speed;
-                    float baseLifetime = bullet.lifetime;
+        Timer.schedule(() -> Groups.build.each(b -> b.block == Blocks.launchPad, building -> {
+            if (building.items.total() == 100 && building.power.status > 0.95) {
+                building.items.each((item, amount) -> {
+                    // TODO: сделать проверку, влезает ли предмет в ядро
+                    state.teams.cores(building.team).first().items.add(item, amount);
+                });
 
-                    if (thisX == coreX && thisY < coreY) {
-                        angle = 90;
-                    } else if (thisX == coreX && thisY > coreY) {
-                        angle = 270;
-                    } else if (thisX < coreX && thisY == coreY) {
-                        angle = 0;
-                    } else if (thisX > coreX && thisY == coreY) {
-                        angle = 180;
-                    } else if (thisY < coreY && thisX < coreX) {
-                        angle = 360 - angle;
-                    } else if (thisX > coreX && thisY < coreY) {
-                        angle += 180;
-                    } else if (thisX > coreX && thisY > coreY) {
-                        angle = (float)(Math.acos((a * a + c * c - b * b) / (2 * a * c)) * 180 / Math.PI) - 180;
-                    }
+                Call.clearItems(building);
 
-                    Call.createBullet(bullet, building.team, thisX, thisY, angle, 0F, 1F, c / baseSpeed / baseLifetime);
+                float thisX = building.x;
+                float thisY = building.y;
+
+                // TODO: искать ближайшее ядро
+                float coreX = state.teams.cores(building.team).first().x;
+                float coreY = state.teams.cores(building.team).first().y;
+
+                float a = Math.abs(thisX - coreX);
+                float b = Math.abs(thisY - coreY);
+                float c = (float) Math.hypot(a, b);
+                float angle = (float) (Math.acos((b * b + c * c - a * a) / (2 * b * c)) * 180 / Math.PI) - 90;
+
+                if (thisX == coreX && thisY < coreY) {
+                    angle = 90;
+                } else if (thisX == coreX && thisY > coreY) {
+                    angle = 270;
+                } else if (thisX < coreX && thisY == coreY) {
+                    angle = 0;
+                } else if (thisX > coreX && thisY == coreY) {
+                    angle = 180;
+                } else if (thisY < coreY && thisX < coreX) {
+                    angle = 360 - angle;
+                } else if (thisX > coreX && thisY < coreY) {
+                    angle += 180;
+                } else if (thisX > coreX && thisY > coreY) {
+                    angle = (float) (Math.acos((a * a + c * c - b * b) / (2 * a * c)) * 180 / Math.PI) - 180;
                 }
-            });
-        }, 0, 0.1F);
+
+                BulletType bullet = Bullets.artilleryDense;
+                float baseSpeed = bullet.speed;
+                float baseLifetime = bullet.lifetime;
+
+                Call.createBullet(bullet, building.team, thisX, thisY, angle, 0F, 1F, c / baseSpeed / baseLifetime);
+            }
+        }), 0, 0.1F);
 
         Events.run(EventType.Trigger.update, () -> {
             if(interval.get(1, 3600)){ // 1 минута
@@ -147,9 +152,9 @@ public class ThedimasPlugin extends Plugin {
                 }
             }
         });
-        Events.on(EventType.PlayEvent.class, event -> {
-           state.rules.revealedBlocks.add(Blocks.launchPad);
-        });
+
+        Events.on(EventType.PlayEvent.class, event -> state.rules.revealedBlocks.add(Blocks.launchPad));
+
         Events.on(EventType.PlayerJoin.class, event -> {
             if (Groups.player.size() >= 1 && autoPause && state.serverPaused) {
                 state.serverPaused = false;
@@ -200,9 +205,7 @@ public class ThedimasPlugin extends Plugin {
             }
         });
 
-        Events.on(EventType.ServerLoadEvent.class, event -> {
-            Log.info("thedimasPlugin: Server loaded");
-        });
+        Events.on(EventType.ServerLoadEvent.class, event -> Log.info("thedimasPlugin: Server loaded"));
 
         Events.on(EventType.GameOverEvent.class, e -> votesRTV.clear());
 
