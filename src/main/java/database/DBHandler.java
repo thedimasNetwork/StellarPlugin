@@ -36,7 +36,7 @@ public class DBHandler {
     }
 
     public static void save(PlayerData data) throws SQLException {
-        preparedExecute("INSERT INTO " + Const.U_TABLE + " (" + Const.U_ALL + ") VALUES (" + Const.U_ALL_RAW + ")",
+        preparedExecute("INSERT INTO " + Table.U_TABLE + " (" + Table.U_ALL + ") VALUES (" + Table.U_ALL_RAW + ")",
                 data.uuid, data.ip, escapeString(data.name), data.locale, data.translator, data.playTime, data.admin, data.banned);
     }
 
@@ -45,35 +45,25 @@ public class DBHandler {
     }
 
     public static boolean userExist(String uuid) throws SQLException {
-        String select = "SELECT * FROM " + Const.U_TABLE + " WHERE " + Const.U_UUID + "=?";
+        String select = "SELECT * FROM " + Table.U_TABLE + " WHERE " + Table.U_UUID + "=?";
         try (PreparedStatement prSt = getDbConnection().prepareStatement(select)) {
             prSt.setString(1, uuid);
             return prSt.executeQuery().next();
         }
     }
 
-    public static String get(String uuid, String column) throws SQLException {
-        String select = "SELECT " + column + " FROM " + Const.U_TABLE + " WHERE " + Const.U_UUID + "=?";
+    public static <T> T get(String uuid, Field<T> row) throws SQLException {
+        String select = "SELECT " + row.getName() + " FROM " + Table.U_TABLE + " WHERE " + Table.U_UUID + "=?";
         try (PreparedStatement prSt = getDbConnection().prepareStatement(select)) {
             prSt.setString(1, uuid);
 
             ResultSet res = prSt.executeQuery();
-            return res.next() ? res.getString(1) : null;
-        }
-    }
-
-    public static <T> T get(String uuid, String column, Class<T> type) throws SQLException {
-        String select = "SELECT " + column + " FROM " + Const.U_TABLE + " WHERE " + Const.U_UUID + "=?";
-        try (PreparedStatement prSt = getDbConnection().prepareStatement(select)) {
-            prSt.setString(1, uuid);
-
-            ResultSet res = prSt.executeQuery();
-            return res.next() ? res.getObject(1, type) : null;
+            return res.next() ? res.getObject(1, row.getType()) : null;
         }
     }
 
     public static PlayerData get(String uuid) throws SQLException {
-        String select = "SELECT " + Const.U_ALL + " FROM " + Const.U_TABLE + " WHERE " + Const.U_UUID + "=?";
+        String select = "SELECT " + Table.U_ALL + " FROM " + Table.U_TABLE + " WHERE " + Table.U_UUID + "=?";
         try (PreparedStatement prSt = getDbConnection().prepareStatement(select)) {
             prSt.setString(1, uuid);
 
@@ -94,8 +84,8 @@ public class DBHandler {
         }
     }
 
-    public static void update(String uuid, String column, String value) throws SQLException {
-        preparedExecute("UPDATE " + Const.U_TABLE + " SET " + column + "=? WHERE " + Const.U_UUID + "=?",
-                escapeString(value), uuid);
+    public static <T> void update(String uuid, Field<T> column, T value) throws SQLException {
+        preparedExecute("UPDATE " + Table.U_TABLE + " SET " + column.getName() + "=? WHERE " + Table.U_UUID + "=?",
+                escapeString(String.valueOf(value)), uuid);
     }
 }
