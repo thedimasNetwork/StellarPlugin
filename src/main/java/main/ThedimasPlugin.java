@@ -114,23 +114,8 @@ public class ThedimasPlugin extends Plugin {
                 float a = Math.abs(thisX - coreX);
                 float b = Math.abs(thisY - coreY);
                 float c = (float) Math.hypot(a, b);
-                float angle = (float) (Math.acos((b * b + c * c - a * a) / (2 * b * c)) * 180 / Math.PI) - 90;
 
-                if (thisX == coreX && thisY < coreY) {
-                    angle = 90;
-                } else if (thisX == coreX && thisY > coreY) {
-                    angle = 270;
-                } else if (thisX < coreX && thisY == coreY) {
-                    angle = 0;
-                } else if (thisX > coreX && thisY == coreY) {
-                    angle = 180;
-                } else if (thisY < coreY && thisX < coreX) {
-                    angle = 360 - angle;
-                } else if (thisX > coreX && thisY < coreY) {
-                    angle += 180;
-                } else if (thisX > coreX && thisY > coreY) {
-                    angle = (float) (Math.acos((a * a + c * c - b * b) / (2 * a * c)) * 180 / Math.PI) - 180;
-                }
+                float angle = (float) Math.atan((thisY - coreY) / (thisX - coreX));
 
                 BulletType bullet = Bullets.artilleryDense;
                 float baseSpeed = bullet.speed;
