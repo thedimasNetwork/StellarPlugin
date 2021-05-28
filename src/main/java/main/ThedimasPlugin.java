@@ -129,8 +129,8 @@ public class ThedimasPlugin extends Plugin {
             if(interval.get(1, 3600)){ // 1 минута
                 for (Player p : Groups.player) {
                     try {
-                        Long time = Objects.requireNonNull(DBHandler.get(player.uuid(), database.Const.U_PLAY_TIME, Long.class));
-                        DBHandler.update(p.uuid(), database.Const.U_PLAY_TIME, Long.toString(time + 60));
+                        Long time = Objects.requireNonNull(DBHandler.get(player.uuid(), Table.PLAY_TIME));
+                        DBHandler.update(p.uuid(), Table.PLAY_TIME, time + 60);
                     } catch (Throwable t) {
                         Log.err(t);
                     }
@@ -159,17 +159,17 @@ public class ThedimasPlugin extends Plugin {
             }
 
             try {
-                if (DBHandler.userExist(event.player.uuid())) {
-                    DBHandler.update(event.player.uuid(), database.Const.U_NAME, event.player.name);
-                    DBHandler.update(event.player.uuid(), database.Const.U_LOCALE, event.player.locale);
-                    DBHandler.update(event.player.uuid(), database.Const.U_IP, event.player.ip());
+                if (!DBHandler.userExist(event.player.uuid())) {
+                    DBHandler.update(event.player.uuid(), Table.NAME, event.player.name);
+                    DBHandler.update(event.player.uuid(), Table.LOCALE, event.player.locale);
+                    DBHandler.update(event.player.uuid(), Table.IP, event.player.ip());
 
-                    Boolean banned = DBHandler.get(event.player.uuid(), database.Const.U_BANNED, Boolean.class);
+                    Boolean banned = DBHandler.get(event.player.uuid(), Table.BANNED);
                     if(banned != null && banned) {
                         netServer.admins.banPlayer(event.player.uuid());
                         netServer.admins.banPlayerIP(event.player.ip());
                     } else {
-                        Boolean admin = DBHandler.get(event.player.uuid(), database.Const.U_ADMIN, Boolean.class);
+                        Boolean admin = DBHandler.get(event.player.uuid(), Table.ADMIN);
                         if (admin != null && admin) {
                             admins.put(event.player.uuid(), event.player.name);
                             event.player.admin = true;
@@ -258,10 +258,10 @@ public class ThedimasPlugin extends Plugin {
         //блок "баны"
         Events.on(EventType.PlayerBanEvent.class, event -> {
             try {
-                String ip = DBHandler.get(event.player.uuid(), database.Const.U_IP);
+                String ip = DBHandler.get(event.player.uuid(), Table.IP);
                 netServer.admins.banPlayer(event.player.uuid());
                 netServer.admins.banPlayerIP(event.player.ip());
-                DBHandler.update(event.player.uuid(), database.Const.U_BANNED, "1");
+                DBHandler.update(event.player.uuid(), Table.BANNED, true);
             } catch (SQLException e) {
                 Log.err(e.getMessage());
             }
@@ -271,10 +271,10 @@ public class ThedimasPlugin extends Plugin {
 
         Events.on(EventType.PlayerUnbanEvent.class, event -> {
             try {
-                String ip = DBHandler.get(event.player.uuid(), database.Const.U_IP);
+                String ip = DBHandler.get(event.player.uuid(), Table.IP);
                 netServer.admins.unbanPlayerID(event.player.uuid());
                 netServer.admins.unbanPlayerIP(event.player.ip());
-                DBHandler.update(event.player.uuid(), database.Const.U_BANNED, "0");
+                DBHandler.update(event.player.uuid(), Table.BANNED, false);
             } catch (SQLException e) {
                 Log.err(e.getMessage());
             }
@@ -399,7 +399,7 @@ public class ThedimasPlugin extends Plugin {
             String uuid = player != null ? player.uuid() : args[0];
 
             try {
-                Long time = DBHandler.get(uuid, database.Const.U_PLAY_TIME, Long.class);
+                Long time = DBHandler.get(uuid, Table.PLAY_TIME);
                 if (time != null) {
                     StringBuilder result = new StringBuilder(player != null ? player.name() : args[0]);
                     result.append("plays").append(longToTime(time));
@@ -502,7 +502,7 @@ public class ThedimasPlugin extends Plugin {
         handler.<Player>register("tr", "[off|auto|double|somelocale]", "Настроить переводчик чата.", (args, player) -> {
             String locale;
             try {
-                locale = DBHandler.get(player.uuid(), database.Const.U_TRANSLATOR);
+                locale = DBHandler.get(player.uuid(), Table.TRANSLATOR);
             } catch (Throwable t) {
                 player.sendMessage("[scarlet]Не получилось получить настройки языка.");
                 Log.err(t);
@@ -518,7 +518,7 @@ public class ThedimasPlugin extends Plugin {
             switch (mode) {
                 case "off" -> {
                     try {
-                        DBHandler.update(player.uuid(), database.Const.U_TRANSLATOR, "off");
+                        DBHandler.update(player.uuid(), Table.TRANSLATOR, "off");
                     } catch (Throwable t) {
                         Log.err(t);
                     }
@@ -526,7 +526,7 @@ public class ThedimasPlugin extends Plugin {
                 }
                 case "auto" -> {
                     try {
-                        DBHandler.update(player.uuid(), database.Const.U_TRANSLATOR, "auto");
+                        DBHandler.update(player.uuid(), Table.TRANSLATOR, "auto");
                     } catch (Throwable t) {
                         Log.err(t);
                     }
@@ -534,7 +534,7 @@ public class ThedimasPlugin extends Plugin {
                 }
                 case "double" -> {
                     try {
-                        DBHandler.update(player.uuid(), database.Const.U_TRANSLATOR, "double");
+                        DBHandler.update(player.uuid(), Table.TRANSLATOR, "double");
                     } catch (Throwable t) {
                         Log.err(t);
                     }
@@ -547,7 +547,7 @@ public class ThedimasPlugin extends Plugin {
                         return;
                     }
                     try {
-                        DBHandler.update(player.uuid(), database.Const.U_TRANSLATOR, target.toString());
+                        DBHandler.update(player.uuid(), Table.TRANSLATOR, target.toString());
                     } catch (Throwable t) {
                         Log.err(t);
                     }
@@ -665,7 +665,7 @@ public class ThedimasPlugin extends Plugin {
 
         handler.<Player>register("playtime", "commands.playtime.description", (args, player) -> {
             try {
-                Long time = DBHandler.get(player.uuid(), database.Const.U_PLAY_TIME, Long.class);
+                Long time = DBHandler.get(player.uuid(), Table.PLAY_TIME);
                 if (time != null) {
                     bundled(player, "commands.playtime.msg", longToTime(time));
                 }
@@ -867,7 +867,7 @@ public class ThedimasPlugin extends Plugin {
     private String translateChat(Player player, Player otherPlayer, String message) {
         String locale = otherPlayer.locale;
         try {
-            locale = DBHandler.get(otherPlayer.uuid(), database.Const.U_TRANSLATOR);
+            locale = DBHandler.get(otherPlayer.uuid(), Table.TRANSLATOR);
         } catch (Throwable t) {
             Log.err(t);
         }
