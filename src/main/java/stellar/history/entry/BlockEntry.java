@@ -1,4 +1,4 @@
-package history.entry;
+package stellar.history.entry;
 
 import arc.util.Nullable;
 import arc.util.Time;

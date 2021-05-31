@@ -1,8 +1,8 @@
-package util;
+package stellar.util;
 
 import arc.struct.ObjectMap;
 import arc.util.*;
-import main.Const;
+import stellar.Const;
 
 import java.text.MessageFormat;
 import java.util.*;

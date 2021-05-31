@@ -1,4 +1,4 @@
-package main;
+package stellar;
 
 import arc.files.Fi;
 import arc.struct.StringMap;

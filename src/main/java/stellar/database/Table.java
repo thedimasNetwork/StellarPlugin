@@ -1,4 +1,4 @@
-package database;
+package stellar.database;
 
 public class Table {
     public static final String U_TABLE = "users";

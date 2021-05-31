@@ -1,4 +1,4 @@
-package history.entry;
+package stellar.history.entry;
 
 import arc.math.geom.Point2;
 import arc.struct.StringMap;

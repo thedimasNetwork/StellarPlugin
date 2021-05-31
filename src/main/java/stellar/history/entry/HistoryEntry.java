@@ -1,4 +1,4 @@
-package history.entry;
+package stellar.history.entry;
 
 import java.util.concurrent.TimeUnit;
 

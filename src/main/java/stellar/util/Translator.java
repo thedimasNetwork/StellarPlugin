@@ -1,4 +1,4 @@
-package util;
+package stellar.util;
 
 import arc.util.serialization.Jval;
 

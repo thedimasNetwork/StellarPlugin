@@ -1,7 +1,7 @@
-package database;
+package stellar.database;
 
 import arc.util.Log;
-import main.PlayerData;
+import stellar.PlayerData;
 
 import java.sql.*;
 

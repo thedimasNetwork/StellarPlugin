@@ -1,4 +1,4 @@
-package history.struct;
+package stellar.history.struct;
 
 import arc.struct.*;
 import arc.util.Time;

@@ -1,4 +1,4 @@
-package main;
+package stellar;
 
 public class PlayerData {
     public String uuid;

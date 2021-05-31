@@ -1,4 +1,4 @@
-package main;
+package stellar;
 
 import arc.*;
 import arc.math.Mathf;
@@ -21,15 +21,15 @@ import mindustry.world.Block;
 import mindustry.world.Tile;
 import mindustry.world.blocks.logic.LogicBlock;
 
-import database.*;
-import history.entry.BlockEntry;
-import history.entry.ConfigEntry;
-import history.entry.HistoryEntry;
-import history.entry.RotateEntry;
-import history.struct.CacheSeq;
-import history.struct.Seqs;
-import util.Bundle;
-import util.Translator;
+import stellar.database.*;
+import stellar.history.entry.BlockEntry;
+import stellar.history.entry.ConfigEntry;
+import stellar.history.entry.HistoryEntry;
+import stellar.history.entry.RotateEntry;
+import stellar.history.struct.CacheSeq;
+import stellar.history.struct.Seqs;
+import stellar.util.Bundle;
+import stellar.util.Translator;
 
 import java.sql.SQLException;
 import java.text.MessageFormat;
