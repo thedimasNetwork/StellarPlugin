@@ -24,6 +24,10 @@ jar {
     from {
         configurations.runtimeClasspath.collect{ it.isDirectory() ? it : zipTree(it) }
     }
+
+    from("assets") {
+        include "**"
+    }
 }
 
 processResources {
@@ -32,6 +36,6 @@ processResources {
 
     filesMatching("**/plugin.json") {
         from it.file
-        filter { line -> line.replace("\$buildVersion", "$build") }
+        filter { line -> line.replace("%buildVersion%", build as String) }
     }
 }
