@@ -16,9 +16,10 @@ import mindustry.game.*;
 import mindustry.gen.*;
 import mindustry.mod.*;
 import mindustry.net.Administration;
-import mindustry.type.UnitType;
+import mindustry.type.*;
 import mindustry.world.Block;
 import mindustry.world.Tile;
+import mindustry.world.blocks.campaign.LaunchPad;
 import mindustry.world.blocks.logic.LogicBlock;
 
 import stellar.database.*;
@@ -95,7 +96,7 @@ public class ThedimasPlugin extends Plugin {
             locales = Seq.with(locales).and(new Locale("router")).toArray(Locale.class);
         }, Log::err);
 
-        Timer.schedule(() -> Groups.build.each(b -> b.block == Blocks.launchPad, building -> {
+        Timer.schedule(() -> Groups.build.each(b -> b.block instanceof LaunchPad, building -> {
             if (building.items.total() == 100 && building.power.status > 0.95) {
                 building.items.each((item, amount) -> {
                     // TODO: сделать проверку, влезает ли предмет в ядро
@@ -129,7 +130,7 @@ public class ThedimasPlugin extends Plugin {
             if(interval.get(1, 3600)){ // 1 минута
                 for (Player p : Groups.player) {
                     try {
-                        Long time = Objects.requireNonNull(DBHandler.get(player.uuid(), Table.PLAY_TIME));
+                        Long time = DBHandler.get(p.uuid(), Table.PLAY_TIME);
                         DBHandler.update(p.uuid(), Table.PLAY_TIME, time + 60);
                     } catch (Throwable t) {
                         Log.err(t);
