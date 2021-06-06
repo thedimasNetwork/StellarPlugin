@@ -98,19 +98,23 @@ public class ThedimasPlugin extends Plugin {
 
         Timer.schedule(() -> Groups.build.each(b -> b.block instanceof LaunchPad, building -> {
             if (building.items.total() == 100 && building.power.status > 0.95) {
-                building.items.each((item, amount) -> {
-                    // TODO: сделать проверку, влезает ли предмет в ядро
-                    state.teams.cores(building.team).first().items.add(item, amount);
-                });
+                Building core = building.closestCore();
+                if (core == null) {
+                    return;
+                }
+
+                for(int i = 0; i < building.items.length(); i++){
+                    Item item = content.items().get(i);
+                    if (building.items.has(item) && !core.acceptItem(building, item)) return;
+                }
 
                 Call.clearItems(building);
 
                 float thisX = building.x;
                 float thisY = building.y;
 
-                // TODO: искать ближайшее ядро
-                float coreX = state.teams.cores(building.team).first().x;
-                float coreY = state.teams.cores(building.team).first().y;
+                float coreX = core.x;
+                float coreY = core.y;
 
                 float a = Math.abs(thisX - coreX);
                 float b = Math.abs(thisY - coreY);
