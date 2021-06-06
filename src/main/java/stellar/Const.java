@@ -5,7 +5,7 @@ import arc.struct.StringMap;
 import arc.util.Structs;
 import mindustry.Vars;
 
-import java.util.Locale;
+import java.util.*;
 
 public class Const {
     public static final String JOIN_LOG_FORMAT = "{0} has joined the server | locale: {1} | IP: {2}";
@@ -51,7 +51,8 @@ public class Const {
 
     static {
         Fi[] files = Vars.mods.list().find(mod -> mod.main instanceof ThedimasPlugin).root.child("bundles").list();
-        supportedLocales = new Locale[files.length];
+        supportedLocales = new Locale[files.length + 1];
+        supportedLocales[supportedLocales.length - 1] = new Locale("router"); // router
 
         for (int i = 0; i < files.length; i++) {
             String code = files[i].nameWithoutExtension();

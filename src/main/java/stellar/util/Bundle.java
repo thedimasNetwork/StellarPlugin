@@ -1,6 +1,6 @@
 package stellar.util;
 
-import arc.struct.ObjectMap;
+import arc.struct.*;
 import arc.util.*;
 import stellar.Const;
 
@@ -9,19 +9,15 @@ import java.util.*;
 
 public class Bundle {
 
-    private static final ObjectMap<Locale, ResourceBundle> bundles = new ObjectMap<>();
+    private static final ObjectMap<Locale, StringMap> bundles = new ObjectMap<>();
 
     private static final ObjectMap<Locale, MessageFormat> formats = new ObjectMap<>();
 
     private Bundle() {}
 
     public static String get(String key, Locale locale) {
-        try {
-            ResourceBundle bundle = getOrLoad(locale);
-            return bundle.containsKey(key) ? bundle.getString(key) : "???" + key + "???";
-        } catch (MissingResourceException t) {
-            return key;
-        }
+        StringMap bundle = getOrLoad(locale);
+        return bundle != null && bundle.containsKey(key) ? bundle.get(key) : "???" + key + "???";
     }
 
     public static boolean has(String key, Locale locale) {
@@ -43,11 +39,24 @@ public class Bundle {
         return format.format(values);
     }
 
-    private static ResourceBundle getOrLoad(Locale locale) {
-        ResourceBundle bundle = bundles.get(locale);
-        if (bundle == null && Structs.contains(Const.supportedLocales, locale)) {
-            bundles.put(locale, bundle = ResourceBundle.getBundle("bundles.bundle", locale));
+    private static StringMap getOrLoad(Locale locale) {
+        StringMap bundle = bundles.get(locale);
+        if (bundle == null && locale.getDisplayName().equals("router")) { // router
+            StringMap router = new StringMap();
+            getOrLoad(Const.defaultLocale()).each((k, v) -> router.put(k, "router"));
+            bundles.put(locale, bundle = router);
+        } else if (bundle == null && Structs.contains(Const.supportedLocales, locale)) {
+            bundles.put(locale, bundle = load(locale));
         }
         return bundle != null ? bundle : bundles.get(Const.defaultLocale());
+    }
+
+    private static StringMap load(Locale locale) {
+        StringMap properties = new StringMap();
+        ResourceBundle bundle = ResourceBundle.getBundle("bundles.bundle", locale);
+        for(String s : bundle.keySet()){
+            properties.put(s, bundle.getString(s));
+        }
+        return properties;
     }
 }

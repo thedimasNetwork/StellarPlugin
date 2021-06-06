@@ -94,6 +94,7 @@ public class ThedimasPlugin extends Plugin {
 
             Arrays.sort(locales, Structs.comparing(l -> l.getDisplayName(l), String.CASE_INSENSITIVE_ORDER));
             locales = Seq.with(locales).and(new Locale("router")).toArray(Locale.class);
+            Log.debug("locales: @", Arrays.toString(Const.supportedLocales));
         }, Log::err);
 
         Timer.schedule(() -> Groups.build.each(b -> b.block instanceof LaunchPad, building -> {
