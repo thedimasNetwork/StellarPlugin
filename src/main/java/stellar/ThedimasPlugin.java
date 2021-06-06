@@ -127,10 +127,11 @@ public class ThedimasPlugin extends Plugin {
         }), 0, 0.1F);
 
         Events.run(EventType.Trigger.update, () -> {
-            if(interval.get(1, 3600)){ // 1 минута
+            if (interval.get(1, 3600)) { // 1 минута
                 for (Player p : Groups.player) {
                     try {
                         Long time = DBHandler.get(p.uuid(), Table.PLAY_TIME);
+                        Objects.requireNonNull(time, "time");
                         DBHandler.update(p.uuid(), Table.PLAY_TIME, time + 60);
                     } catch (Throwable t) {
                         Log.err(t);
@@ -500,18 +501,18 @@ public class ThedimasPlugin extends Plugin {
             player.sendMessage(result.toString());
         });
 
-        handler.<Player>register("tr", "[off|auto|double|somelocale]", "Настроить переводчик чата.", (args, player) -> {
+        handler.<Player>register("tr", "[off|auto|double|somelocale]", "commands.tr.description", (args, player) -> {
             String locale;
             try {
                 locale = DBHandler.get(player.uuid(), Table.TRANSLATOR);
             } catch (Throwable t) {
-                player.sendMessage("[scarlet]Не получилось получить настройки языка.");
+                bundled(player, "commands.tr.error");
                 Log.err(t);
                 return;
             }
 
             if (args.length == 0) {
-                player.sendMessage("[sky]Текущий язык переводчика: " + locale);
+                bundled(player, "commands.tr.current", locale);
                 return;
             }
 
@@ -523,7 +524,7 @@ public class ThedimasPlugin extends Plugin {
                     } catch (Throwable t) {
                         Log.err(t);
                     }
-                    player.sendMessage("[sky]Перевод чата выключен.");
+                    bundled(player, "commands.tr.disabled");
                 }
                 case "auto" -> {
                     try {
@@ -531,7 +532,7 @@ public class ThedimasPlugin extends Plugin {
                     } catch (Throwable t) {
                         Log.err(t);
                     }
-                    player.sendMessage("[sky]Перевод чата установлен в автоматический режим.");
+                    bundled(player, "commands.tr.auto");
                 }
                 case "double" -> {
                     try {
@@ -539,12 +540,12 @@ public class ThedimasPlugin extends Plugin {
                     } catch (Throwable t) {
                         Log.err(t);
                     }
-                    player.sendMessage("[sky]Перевод чата установлен в автоматический режим c отображением оригинального сообщения.");
+                    bundled(player, "commands.tr.double");
                 }
                 default -> {
                     Locale target = Structs.find(locales, l -> mode.equalsIgnoreCase(l.toString()));
                     if (target == null) {
-                        player.sendMessage("[sky]Список доступных локализаций:\n" + Const.LocaleListHolder.LOCALE_LIST);
+                        bundled(player, "commands.tr.list", Const.LocaleListHolder.LOCALE_LIST);
                         return;
                     }
                     try {
@@ -552,7 +553,7 @@ public class ThedimasPlugin extends Plugin {
                     } catch (Throwable t) {
                         Log.err(t);
                     }
-                    player.sendMessage("[sky]Язык переводчика установлен на: " + target);
+                    bundled(player, "commands.tr.set", target);
                 }
             }
         });
