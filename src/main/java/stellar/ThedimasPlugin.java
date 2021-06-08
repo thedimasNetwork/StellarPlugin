@@ -68,7 +68,7 @@ public class ThedimasPlugin extends Plugin {
 
     @Override
     public void init() {
-        Log.info("thedimasPlugin launched!");
+        Log.info("ThedimasPlugin launched!");
 
         state.serverPaused = true;
 
@@ -94,7 +94,7 @@ public class ThedimasPlugin extends Plugin {
 
             Arrays.sort(locales, Structs.comparing(l -> l.getDisplayName(l), String.CASE_INSENSITIVE_ORDER));
             locales = Seq.with(locales).and(new Locale("router")).toArray(Locale.class);
-            Log.debug("locales: @", Arrays.toString(Const.supportedLocales));
+            Log.debug("Locales: @", Arrays.toString(Const.supportedLocales));
         }, Log::err);
 
         Timer.schedule(() -> Groups.build.each(b -> b.block instanceof LaunchPad, building -> {
@@ -150,7 +150,7 @@ public class ThedimasPlugin extends Plugin {
         Events.on(EventType.PlayerJoin.class, event -> {
             if (Groups.player.size() >= 1 && autoPause && state.serverPaused) {
                 state.serverPaused = false;
-                Log.info("auto-pause: " + Groups.player.size() + " player(s) connected -> Game unpaused...");
+                Log.info("auto-pause: @ player(s) connected -> Game unpaused...", Groups.player.size());
             }
 
             Log.info(MessageFormat.format(Const.JOIN_LOG_FORMAT, event.player.name, event.player.locale, event.player.con.address));
@@ -197,14 +197,14 @@ public class ThedimasPlugin extends Plugin {
             }
         });
 
-        Events.on(EventType.ServerLoadEvent.class, event -> Log.info("thedimasPlugin: Server loaded"));
+        Events.on(EventType.ServerLoadEvent.class, event -> Log.info("ThedimasPlugin: Server loaded"));
 
         Events.on(EventType.GameOverEvent.class, e -> votesRTV.clear());
 
         Events.on(EventType.PlayerLeave.class, event -> {
             if (Groups.player.size() - 1 < 1 && autoPause) {
                 state.serverPaused = true;
-                Log.info("auto-pause: " + (Groups.player.size() - 1) + " player connected -> Game paused...");
+                Log.info("auto-pause: @ player connected -> Game paused...", Groups.player.size() - 1);
             }
 
             if(votesRTV.contains(event.player.uuid())) {
@@ -294,7 +294,7 @@ public class ThedimasPlugin extends Plugin {
         Events.on(EventType.WorldLoadEvent.class, event -> {
             if (Groups.player.size() > 0 && autoPause) {
                 state.serverPaused = false;
-                Log.info("auto-pause: " + Groups.player.size() + " player(s) connected -> Game unpaused...");
+                Log.info("auto-pause: @ player(s) connected -> Game unpaused...", Groups.player.size());
             }
 
             history = new CacheSeq[world.width()][world.height()];
@@ -351,21 +351,21 @@ public class ThedimasPlugin extends Plugin {
                 boolean detailed = activeHistoryPlayers.get(event.player.uuid());
 
                 StringBuilder result = new StringBuilder();
-                result.append(MessageFormat.format("[orange]-- История Блока ([lightgray]{0}[gray],[lightgray]{1}[orange]) --", x, y)).append("\n");
+                Locale locale = findLocale(event.player.locale);
+                result.append(Bundle.format("history.page", locale, x, y)).append("\n");
 
                 entries.cleanUp();
                 if (entries.isEmpty()) {
-                    result.append("[royal]* [lightgray]записи отсутствуют\n");
+                    result.append(Bundle.get("history.empty", locale)).append("\n");
                 }
 
                 for (int i = 0; i < entries.size && i < Const.LIST_PAGE_SIZE; i++) {
                     HistoryEntry entry = entries.get(i);
 
-                    result.append(entry.getMessage());
+                    result.append(entry.getMessage(locale));
                     if (detailed) {
-                        result.append(" [lightgray]").append(entry.getLastAccessTime(TimeUnit.MINUTES)).append(" минут назад");
+                        result.append(Bundle.format("history.last-access-time", locale, entry.getLastAccessTime(TimeUnit.MINUTES)));
                     }
-
                     result.append("\n");
                 }
 
@@ -395,13 +395,13 @@ public class ThedimasPlugin extends Plugin {
                     }
                 } catch (SQLException e) {
                     Log.err(e.getMessage());
-                    Log.err(MessageFormat.format("Unable to export data of player {0} ({1})", Strings.stripColors(info.lastName), Strings.stripColors(info.id)));
+                    Log.err("Unable to export data of player @ (@)", Strings.stripColors(info.lastName), Strings.stripColors(info.id));
                 }
             }
             Log.info(MessageFormat.format("Successfully exported {0} players", exported));
         });
 
-        handler.register("playtime", "<player/uuid>", "Check player playtime", (args) -> {
+        handler.register("playtime", "<player/uuid>", "Check player playtime", args -> {
             Playerc player = Groups.player.find(p -> p.name.equals(args[0]));
             String uuid = player != null ? player.uuid() : args[0];
 
@@ -431,14 +431,14 @@ public class ThedimasPlugin extends Plugin {
                 Log.info("Авто-пауза выключена");
 
                 Vars.state.serverPaused = false;
-                Log.info("auto-pause: " + Groups.player.size() + " игрок(ов) онлайн -> Игра снята с паузы...");
+                Log.info("auto-pause: @ игрок(ов) онлайн -> Игра снята с паузы...", Groups.player.size());
             } else if (args[0].equalsIgnoreCase("on")) {
                 autoPause = true;
                 Log.info("Авто-пауза включена");
 
                 if (Groups.player.size() < 1 && autoPause) {
                     Vars.state.serverPaused = true;
-                    Log.info("auto-pause: " + Groups.player.size() + " игроков онлайн -> Игра поставлена на паузу...");
+                    Log.info("auto-pause: @ игроков онлайн -> Игра поставлена на паузу...", Groups.player.size());
                 }
             } else {
                 Log.info("auto-pause: некорректное действие");
@@ -452,7 +452,7 @@ public class ThedimasPlugin extends Plugin {
         handler.<Player>register("a", "<text...>", "commands.admin.a.description", (args, player) -> {
             if (!admins.containsKey(player.uuid())) {
                 bundled(player, "commands.access-denied");
-                Log.info(MessageFormat.format("{0} попытался отправить сообщение админам", Strings.stripColors(player.name)));
+                Log.info("@ попытался отправить сообщение админам", Strings.stripColors(player.name));
                 return;
             }
 
@@ -618,7 +618,7 @@ public class ThedimasPlugin extends Plugin {
             Vars.net.pingHost(ip, port, host -> Call.connect(player.con, ip, port), e -> player.sendMessage("[scarlet]Сервер оффлайн"));
         });
 
-        handler.<Player>register("history", "[page] [detailed]", "Посмотреть историю блока", (args, player) -> {
+        handler.<Player>register("history", "[page] [detailed]", "commands.history.description", (args, player) -> {
             boolean detailed = args.length == 2 && Structs.contains(Const.BOOL_VALUES.split(", "), args[1].toLowerCase());
 
             if (args.length > 0 && activeHistoryPlayers.containsKey(player.uuid())) {
@@ -629,6 +629,7 @@ public class ThedimasPlugin extends Plugin {
 
                 int mouseX = Mathf.clamp(Mathf.round(player.mouseX / 8), 1, world.width());
                 int mouseY = Mathf.clamp(Mathf.round(player.mouseY / 8), 1, world.height());
+                Locale locale = findLocale(player.locale);
 
                 CacheSeq<HistoryEntry> entries = getHistorySeq(mouseX, mouseY);
 
@@ -641,17 +642,17 @@ public class ThedimasPlugin extends Plugin {
                 }
 
                 StringBuilder result = new StringBuilder();
-                result.append(MessageFormat.format("[orange]-- История Блока ([lightgray]{0}[gray],[lightgray]{1}[orange]) Страница [lightgray]{2}[gray]/[lightgray]{3}[orange] --", mouseX, mouseY, page + 1, pages)).append("\n");
+                result.append(Bundle.format("commands.history.page", locale, mouseX, mouseY, page + 1, pages)).append("\n");
 
                 if (entries.isEmpty()) {
-                    result.append("[royal]* [lightgray]записи отсутствуют\n");
+                    result.append(Bundle.get("history.empty", locale)).append("\n");
                 }
 
                 for (int i = 6 * page; i < Math.min(6 * (page + 1), entries.size); i++) {
                     HistoryEntry entry = entries.get(i);
-                    result.append(entry.getMessage());
+                    result.append(entry.getMessage(locale));
                     if (detailed) {
-                        result.append(" [lightgray]").append(entry.getLastAccessTime(TimeUnit.MINUTES)).append(" минут назад");
+                        result.append(Bundle.format("history.last-access-time", locale, entry.getLastAccessTime(TimeUnit.MINUTES)));
                     }
                     result.append("\n");
                 }
@@ -659,14 +660,14 @@ public class ThedimasPlugin extends Plugin {
                 player.sendMessage(result.toString());
             } else if (activeHistoryPlayers.containsKey(player.uuid())) {
                 activeHistoryPlayers.remove(player.uuid());
-                player.sendMessage("[lightgray]История [orange]выключена");
+                bundled(player, "commands.history.detailed.disabled");
             } else if (args.length == 2) {
                 activeHistoryPlayers.put(player.uuid(), detailed);
-                String msg = detailed ? "[lightgray]Подробная история" : "[lightgray]История";
-                player.sendMessage(msg + " [orange]включена[]. Нажмите на тайл для просмотра информации");
+                String msg = detailed ? "commands.history.detailed" : "commands.history.default";
+                bundled(player, "commands.history.enabled", msg);
             } else {
                 activeHistoryPlayers.put(player.uuid(), false);
-                player.sendMessage("[lightgray]История [orange]включена[]. Нажмите на тайл для просмотра информации");
+                bundled(player, "commands.history.disabled");
             }
         });
 
@@ -682,7 +683,7 @@ public class ThedimasPlugin extends Plugin {
         });
 
         // блок "для админов"
-        handler.<Player>register("admin", "Изменить свой статус", (args, player) -> {
+        handler.<Player>register("admin", "commands.admin.admin.description", (args, player) -> {
             if (!admins.containsKey(player.uuid())) {
                 bundled(player, "commands.access-denied");
             } else {
@@ -690,7 +691,7 @@ public class ThedimasPlugin extends Plugin {
             }
         });
 
-        handler.<Player>register("name", "[name...]","Изменить свое имя", (args, player) -> {
+        handler.<Player>register("name", "[name...]","commands.admin.name.description", (args, player) -> {
             if (!admins.containsKey(player.uuid())) {
                 bundled(player, "commands.access-denied");
                 return;
@@ -699,15 +700,15 @@ public class ThedimasPlugin extends Plugin {
             if (args.length == 0) {
                 player.name(admins.get(player.uuid()));
                 String playerName = NetClient.colorizeName(player.id, player.name);
-                player.sendMessage("[green]Ваше имя сброшено. Текущее имя - []" + playerName);
+                bundled(player, "commands.admin.name.reset", playerName);
             } else {
                 player.name(args[0]);
                 String playerName = NetClient.colorizeName(player.id, player.name);
-                player.sendMessage("[green]Ваше имя изменено. Текущее имя - []" + playerName);
+                bundled(player, "commands.admin.name.update", playerName);
             }
         });
 
-        handler.<Player>register("spawn", "<unit> [count] [team]", "Заспавнить юнитов", (args, player) -> {
+        handler.<Player>register("spawn", "<unit> [count] [team]", "commands.admin.unit.description", (args, player) -> {
             if (!admins.containsKey(player.uuid())) {
                 bundled(player, "commands.access-denied");
                 return;
@@ -715,30 +716,32 @@ public class ThedimasPlugin extends Plugin {
 
             UnitType unit = Vars.content.units().find(b -> b.name.equalsIgnoreCase(args[0]));
             if (unit == null) {
-                player.sendMessage("[scarlet]Юнит не найден! Доступные юниты:\n\n" + Const.UNIT_LIST + "\n");
+                bundled(player, "commands.admin.unit.notfound", Const.UNIT_LIST);
                 return;
             }
 
             int count = args.length > 1 && Strings.canParseInt(args[1]) ? Strings.parseInt(args[1]) : 1;
             if (count > 24) {
-                player.sendMessage("[scarlet]Нельзя заспавнить больше 24 юнитов!");
+                bundled(player, "commands.admin.unit.under-limit");
                 return;
             }
+
             if (count < 1) {
-                player.sendMessage("[scarlet]Нельзя заспавнить меньше 1 юнита!");
+                bundled(player, "commands.admin.unit.negative-count");
                 return;
             }
 
             Team team = args.length > 2 ? Structs.find(Team.baseTeams, t -> t.name.equalsIgnoreCase(args[2])) : player.team();
             if (team == null) {
-                player.sendMessage("[scarlet]Неверная команда. Возможные варианты:\n" + Const.TEAM_LIST);
+                bundled(player, "commands.admin.unit.team-notfound", Const.TEAM_LIST);
                 return;
             }
 
             for (int i = 0; count > i; i++) {
                 unit.spawn(team, player.x, player.y);
             }
-            player.sendMessage("[green]Ты заспавнил [accent]" + count + " " + unit + " [green]для команды [#" + team.color.toString().substring(0, 6) + "]" + team);
+
+            bundled(player, "commands.admin.unit.text", count, unit, team.color.toString().substring(0, 6), team);
         });
 
         handler.<Player>register("team", "<team> [username...]", "Изменить команду", (args, player) -> {
@@ -746,11 +749,13 @@ public class ThedimasPlugin extends Plugin {
                 bundled(player, "commands.access-denied");
                 return;
             }
+
             Team team = Structs.find(Team.baseTeams, t -> t.name.equalsIgnoreCase(args[0]));
             if (team == null) {
                 player.sendMessage("[scarlet]Неверная команда. Возможные варианты:\n" + Const.TEAM_LIST);
                 return;
             }
+
             if (args.length == 1) {
                 player.team(team);
                 player.sendMessage("Ваша команда изменена. Новая команда - [#" + team.color + "]" + team);
@@ -865,7 +870,7 @@ public class ThedimasPlugin extends Plugin {
         // конец блока
     }
 
-    public String longToTime(Long seconds) {
+    public String longToTime(long seconds) {
         long min = seconds / 60;
         long hour = min / 60;
         return String.format("%d:%02d:%02d", hour, min % 60, seconds % 60);

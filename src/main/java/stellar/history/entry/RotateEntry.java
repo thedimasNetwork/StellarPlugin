@@ -4,8 +4,10 @@ import arc.util.Time;
 import mindustry.core.NetClient;
 import mindustry.gen.Player;
 import mindustry.world.Block;
+import stellar.util.Bundle;
 
 import java.text.MessageFormat;
+import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 public class RotateEntry implements HistoryEntry {
@@ -24,8 +26,8 @@ public class RotateEntry implements HistoryEntry {
     }
 
     @Override
-    public String getMessage() {
-        return MessageFormat.format("[slate]\uE823 {0}[lightgray] повернул [orange]{1} [orange]{2}", name, block.name, sides[rotation]);
+    public String getMessage(Locale locale) {
+        return Bundle.format("history.rotate.text", locale, name, block.name, sides[rotation]);
     }
 
     @Override

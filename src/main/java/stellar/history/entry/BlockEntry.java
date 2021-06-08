@@ -7,8 +7,10 @@ import mindustry.game.EventType.BlockBuildEndEvent;
 import mindustry.gen.Player;
 import mindustry.gen.Unit;
 import mindustry.world.Block;
+import stellar.util.Bundle;
 
 import java.text.MessageFormat;
+import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 public class BlockEntry implements HistoryEntry {
@@ -31,15 +33,16 @@ public class BlockEntry implements HistoryEntry {
     }
 
     @Override
-    public String getMessage() {
+    public String getMessage(Locale locale) {
         if (breaking) {
-            return name != null ? MessageFormat.format("[scarlet]- {0}[lightgray] сломал этот блок", name) :
-                    MessageFormat.format("[scarlet]- [lightgray]юнит [orange]{0}[lightgray] сломал этот блок", unit.type);
+            return name != null ? Bundle.format("history.block.broke", locale, name) :
+                    Bundle.format("history.block.unit.broke", locale, unit.type);
         }
-        String base = name != null ? MessageFormat.format("[green]+ {0}[lightgray] поставил [orange]{1}", name, block) :
-                MessageFormat.format("[green]+ [lightgray]юнит [orange]{0}[lightgray] поставил [lightgray]{1}", unit.type, block);
+
+        String base = name != null ? Bundle.format("history.block.build", locale, name, block) :
+                Bundle.format("history.block.unit.build", locale, unit.type, block);
         if (block.rotate) {
-            base += MessageFormat.format("[lightgray] ([orange]{0}[lightgray])", RotateEntry.sides[rotation]);
+            base += Bundle.format("history.block.rotate", locale, RotateEntry.sides[rotation]);
         }
         return base;
     }

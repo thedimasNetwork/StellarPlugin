@@ -9,8 +9,11 @@ import mindustry.entities.units.UnitCommand;
 import mindustry.game.EventType.ConfigEvent;
 import mindustry.type.*;
 import mindustry.world.*;
+import mindustry.world.blocks.defense.Door;
+import stellar.util.Bundle;
 
 import java.text.MessageFormat;
+import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 import static mindustry.Vars.world;
@@ -203,8 +206,6 @@ public class ConfigEntry implements HistoryEntry {
         );
     }
 
-    private static final String[] commands = {"атаковать", "отступать", "ждать"};
-
     public final long lastAccessTime = Time.millis();
     public final String name;
     public final Block block;
@@ -219,56 +220,55 @@ public class ConfigEntry implements HistoryEntry {
     }
 
     @Override
-    public String getMessage() {
+    public String getMessage(Locale locale) {
         if (block.configurations.containsKey(Integer.class) && block.configurations.containsKey(Point2[].class)) {
             int data = (int) value;
             Tile tile = world.tile(data);
             if (tile == null) {
-                return "[orange]~ [lightgray]<unknown>";
+                return Bundle.get("history.unknown", locale);
             }
 
             if (connect) {
-                return MessageFormat.format("[orange]~ {0} [scarlet]соединил[lightgray] этот [orange]{1}[lightgray] к x: {2}, y: {3}", name, block, tile.x, tile.y);
+                return Bundle.format("history.config.connect", locale, name, block, tile.x, tile.y);
             }
 
-            return MessageFormat.format("[orange]~ {0} [scarlet]отсоединил[lightgray] этот [orange]{1}[lightgray] от x: {2}, y: {3}", name, block, tile.x, tile.y);
+            return Bundle.format("history.config.disconnect", locale, name, block, tile.x, tile.y);
         }
 
-        if (block == Blocks.door || block == Blocks.doorLarge) {
+        if (block instanceof Door) {
             boolean data = (boolean) value;
-            return data ? MessageFormat.format("[orange]~ {0}[lightgray] открыл [orange]{1}", name, block) :
-                    MessageFormat.format("[orange]~ {0}[lightgray] закрыл [orange]{1}", name, block);
+            return Bundle.format(data ? "history.config.open" : "history.config.close", locale, name, block);
         }
 
         if (block == Blocks.switchBlock) {
             boolean data = (boolean) value;
-            return data ? MessageFormat.format("[orange]~ {0}[lightgray] включил [orange]переключатель", name) :
-                    MessageFormat.format("[orange]~ {0}[lightgray] выключил [orange]переключатель", name);
+            return Bundle.format(data ? "history.config.on" : "history.config.off", locale, name);
         }
 
         if (block == Blocks.commandCenter) {
-            return MessageFormat.format("[orange]~ {0}[lightgray] приказал юнитам [orange]{1}", name, commands[((UnitCommand) value).ordinal()]);
+            String[] commands = Bundle.get("history.config.commands", locale).split(",");
+            return Bundle.format("history.config.command", locale, name, commands[((UnitCommand) value).ordinal()]);
         }
 
         if (block == Blocks.liquidSource) {
             Liquid liquid = (Liquid) value;
             if (liquid == null) {
-                return MessageFormat.format("[orange]~ {0}[lightgray] изменил конфиг на дефолт", name);
+                return Bundle.format("history.config.default", locale, name);
             }
 
-            return MessageFormat.format("[orange]~ {0}[lightgray] изменил конфиг на [white]{1}", name, icons.get(liquid.name));
+            return Bundle.format("history.config.update", locale, name, icons.get(liquid.name));
         }
 
         if (block == Blocks.unloader || block == Blocks.sorter || block == Blocks.invertedSorter || block == Blocks.itemSource) {
             Item item = (Item) value;
             if (item == null) {
-                return MessageFormat.format("[orange]~ {0}[lightgray] изменил конфиг на дефолт", name);
+                return Bundle.format("history.config.default", locale, name);
             }
 
-            return MessageFormat.format("[orange]~ {0}[lightgray] изменил конфиг на [white]{1}", name, icons.get(item.name));
+            return Bundle.format("history.config.update", locale, name, icons.get(item.name));
         }
 
-        return "[orange]~ [lightgray]<unknown>";
+        return Bundle.get("history.unknown", locale);
     }
 
     @Override
