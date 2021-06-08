@@ -231,7 +231,7 @@ public class ThedimasPlugin extends Plugin {
                     target.team().cores().contains(c -> event.tile.dst(c.x, c.y) < 300)) {
                 String playerName = NetClient.colorizeName(event.player.id, event.player.name);
                 bundled("events.deposit.thorium-in-reactor", playerName, building.tileX(), building.tileY());
-                Log.info(MessageFormat.format("{0} положил торий в реактор ({1}, {2})", target.name, building.tileX(), building.tileY()));
+                Log.info("@ положил торий в реактор (@, @)", target.name, building.tileX(), building.tileY());
             }
         });
 
@@ -243,7 +243,7 @@ public class ThedimasPlugin extends Plugin {
                 String playerName = NetClient.colorizeName(player.id, player.name);
                 if (interval.get(0, 300)) {
                     bundled("events.build-select.reactor-near-core", playerName, event.tile.x, event.tile.y);
-                    Log.info(MessageFormat.format("{0} начал строить ториевый реактор близко к ядру ({1}, {2})", player.name, event.tile.x, event.tile.y));
+                    Log.info("@ начал строить ториевый реактор близко к ядру (@, @)", player.name, event.tile.x, event.tile.y);
                 }
             }
         });
@@ -581,9 +581,9 @@ public class ThedimasPlugin extends Plugin {
         handler.<Player>register("version", "commands.version.description", (arg, player) -> bundled(player, "commands.version.msg",
                 mods.list().find(l -> l.main instanceof ThedimasPlugin).meta.version));
 
-        handler.<Player>register("discord", "Получить ссылку на Discord сервер", (args, player) -> player.sendMessage("https://discord.gg/RkbFYXFU9E"));
+        handler.<Player>register("discord", "commands.discord.description", (args, player) -> player.sendMessage("https://discord.gg/RkbFYXFU9E"));
 
-        handler.<Player>register("rules", "Посмотреть список правил", (args, player) -> {
+        handler.<Player>register("rules", "commands.rules.description", (args, player) -> {
             if (player.locale.startsWith("uk")) {
                 player.sendMessage(Const.RULES_UK);
             } else if (player.locale.startsWith("ru")) {
@@ -593,7 +593,7 @@ public class ThedimasPlugin extends Plugin {
             }
         });
 
-        handler.<Player>register("hub", "Подключиться к Хабу", (args, player) -> {
+        handler.<Player>register("hub", "commands.hub.description", (args, player) -> {
             String[] address = Const.SERVER_ADDRESS.get("hub").split(":");
             String ip = address[0];
             int port = Integer.parseInt(address[1]);
@@ -601,21 +601,22 @@ public class ThedimasPlugin extends Plugin {
             Call.connect(player.con, ip, port);
         });
 
-        handler.<Player>register("connect", "[list|server...]", "Подключиться к другому серверу", (args, player) -> {
+        handler.<Player>register("connect", "[list|server...]", "commands.connect.description", (args, player) -> {
             if (args.length == 0 || args[0].equalsIgnoreCase("list")) {
-                player.sendMessage("[sky]Список доступных серверов:\n" + Const.SERVER_LIST);
+                bundled(player, "commands.connect.list", Const.SERVER_LIST);
                 return;
             }
+
             String serverName = args[0].toLowerCase();
             if (!Const.SERVER_ADDRESS.containsKey(serverName)) {
-                player.sendMessage("[scarlet]Такого сервера не существует. Доступные сервера:\n" + Const.SERVER_LIST);
+                bundled(player, "commands.connect.server-notfound", Const.SERVER_LIST);
                 return;
             }
 
             String[] address = Const.SERVER_ADDRESS.get(serverName).split(":");
             String ip = address[0];
             int port = Integer.parseInt(address[1]);
-            Vars.net.pingHost(ip, port, host -> Call.connect(player.con, ip, port), e -> player.sendMessage("[scarlet]Сервер оффлайн"));
+            Vars.net.pingHost(ip, port, host -> Call.connect(player.con, ip, port), e -> bundled(player, "commands.connect.serve-offline"));
         });
 
         handler.<Player>register("history", "[page] [detailed]", "commands.history.description", (args, player) -> {
@@ -744,7 +745,7 @@ public class ThedimasPlugin extends Plugin {
             bundled(player, "commands.admin.unit.text", count, unit, team.color.toString().substring(0, 6), team);
         });
 
-        handler.<Player>register("team", "<team> [username...]", "Изменить команду", (args, player) -> {
+        handler.<Player>register("team", "<team> [username...]", "commands.admin.team.description", (args, player) -> {
             if (!admins.containsKey(player.uuid())) {
                 bundled(player, "commands.access-denied");
                 return;
@@ -752,23 +753,23 @@ public class ThedimasPlugin extends Plugin {
 
             Team team = Structs.find(Team.baseTeams, t -> t.name.equalsIgnoreCase(args[0]));
             if (team == null) {
-                player.sendMessage("[scarlet]Неверная команда. Возможные варианты:\n" + Const.TEAM_LIST);
+                bundled(player, "commands.admin.team.notfound", Const.TEAM_LIST);
                 return;
             }
 
             if (args.length == 1) {
                 player.team(team);
-                player.sendMessage("Ваша команда изменена. Новая команда - [#" + team.color + "]" + team);
+                bundled(player, "commands.admin.team.changed", team.color, team);
             } else {
                 Player otherPlayer = Groups.player.find(p -> Strings.stripGlyphs(Strings.stripColors(p.name())).equalsIgnoreCase(args[1]));
                 if (otherPlayer != null) {
                     otherPlayer.team(team);
-                    otherPlayer.sendMessage("Вашу команду изменили на [#" + team.color + "]" + team);
+                    bundled(otherPlayer, "commands.admin.team.updated", team.color, team);
 
                     String otherPlayerName = NetClient.colorizeName(otherPlayer.id, otherPlayer.name);
-                    player.sendMessage("Вы изменили команду игрока " + otherPlayerName + " []на [#" + team.color + "]" + team);
+                    bundled(player, "commands.admin.team.successful-updated", otherPlayer, team.color, team);
                 } else {
-                    player.sendMessage("[scarlet]Игрока с таким ником нет на сервере");
+                    bundled(player, "commands.admin.team.player-notfound");
                 }
             }
         });
@@ -783,7 +784,7 @@ public class ThedimasPlugin extends Plugin {
                 player.unit().kill();
                 bundled(player, "commands.admin.kill.suicide");
 
-                Log.info(MessageFormat.format("{0} убил сам себя", Strings.stripColors(player.name)));
+                Log.info("@ убил сам себя", Strings.stripColors(player.name));
                 return;
             }
 
@@ -793,7 +794,7 @@ public class ThedimasPlugin extends Plugin {
                 String otherPlayerName = NetClient.colorizeName(otherPlayer.id, otherPlayer.name);
                 bundled(player, "commands.admin.kill.kill-another", otherPlayerName);
 
-                Log.info(MessageFormat.format("{0} убил {1}", Strings.stripColors(player.name), Strings.stripColors(otherPlayerName)));
+                Log.info("@ убил @", Strings.stripColors(player.name), Strings.stripColors(otherPlayerName));
             } else {
                 player.sendMessage("[scarlet]Игрока с таким ником нет на сервере");
             }
@@ -807,20 +808,20 @@ public class ThedimasPlugin extends Plugin {
 
             if (args.length == 0) {
                 Groups.unit.each(Unitc::kill);
-                player.sendMessage("[scarlet]Ты убил их всех... За что, Джонни?");
+                bundled(player, "commands.admin.killall.text");
 
-                Log.info(MessageFormat.format("{0} убил всех...", Strings.stripColors(player.name)));
+                Log.info("@ убил всех...", Strings.stripColors(player.name));
             } else {
                 Team team = Structs.find(Team.baseTeams, t -> t.name.equalsIgnoreCase(args[0]));
                 if (team == null) {
-                    player.sendMessage("[scarlet]Неверная команда. Возможные варианты:\n" + Const.TEAM_LIST);
+                    bundled(player, "commands.admin.killall.team-notfound", Const.TEAM_LIST);
                     return;
                 }
 
                 Groups.unit.each(u -> u.team == team, Unitc::kill); // Надеюсь, оно работает
-                player.sendMessage("[scarlet]Ты убил всех с команды [#" + team.color + "]" + team + "... Их призраки буду преследовать тебя вечно!");
+                bundled(player, "commands.admin.killall.text-teamed", team.color, team);
 
-                Log.info(MessageFormat.format("{0} убил всех с команды {1}...", Strings.stripColors(player.name), team));
+                Log.info("@ убил всех с команды @...", Strings.stripColors(player.name), team);
             }
         });
 
@@ -846,7 +847,7 @@ public class ThedimasPlugin extends Plugin {
 
             bundled(player, tile.block() == core, "commands.admin.core.success", "commands.admin.core.failed");
 
-            Log.info(MessageFormat.format("{0} заспавнил ядро ({1}, {2})", Strings.stripColors(player.name), tile.x, tile.y));
+            Log.info("@ заспавнил ядро (@, @)", Strings.stripColors(player.name), tile.x, tile.y);
         });
 
         handler.<Player>register("pause", "commands.admin.pause.description", (args, player) -> {
@@ -855,7 +856,7 @@ public class ThedimasPlugin extends Plugin {
                 return;
             }
             Vars.state.serverPaused = !Vars.state.serverPaused;
-            Log.info(MessageFormat.format("{0} поставил игру на паузу", Strings.stripColors(player.name)));
+            Log.info("@ поставил игру на паузу", Strings.stripColors(player.name));
         });
 
         handler.<Player>register("end", "commands.admin.end.description", (args, player) -> {
@@ -865,7 +866,7 @@ public class ThedimasPlugin extends Plugin {
             }
 
             Events.fire(new EventType.GameOverEvent(Team.crux));
-            Log.info(MessageFormat.format("{0} сменил карту принудительно", Strings.stripColors(player.name)));
+            Log.info("@ сменил карту принудительно", Strings.stripColors(player.name));
         });
         // конец блока
     }
