@@ -1,7 +1,7 @@
 package stellar;
 
 import arc.*;
-import arc.math.Mathf;
+import arc.math.*;
 import arc.struct.ObjectMap;
 import arc.struct.Seq;
 import arc.util.*;
@@ -104,7 +104,7 @@ public class ThedimasPlugin extends Plugin {
                     return;
                 }
 
-                for(int i = 0; i < building.items.length(); i++){
+                for (int i = 0; i < building.items.length(); i++) {
                     Item item = content.items().get(i);
                     if (building.items.has(item) && !core.acceptItem(building, item)) return;
                 }
@@ -121,7 +121,7 @@ public class ThedimasPlugin extends Plugin {
                 float b = Math.abs(thisY - coreY);
                 float c = (float) Math.hypot(a, b);
 
-                float angle = (float) Math.atan((thisY - coreY) / (thisX - coreX));
+                float angle = Angles.angle(thisX, thisY, coreX, coreY);
 
                 BulletType bullet = Bullets.artilleryDense;
                 float baseSpeed = bullet.speed;
