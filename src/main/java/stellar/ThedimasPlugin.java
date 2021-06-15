@@ -106,28 +106,31 @@ public class ThedimasPlugin extends Plugin {
 
                 for (int i = 0; i < building.items.length(); i++) {
                     Item item = content.items().get(i);
-                    if (building.items.has(item) && !core.acceptItem(building, item)) return;
+                    if (building.items.has(item) && !core.acceptItem(building, item)) {
+                        return;
+                    }
                 }
-
-                Call.clearItems(building);
 
                 float thisX = building.x;
                 float thisY = building.y;
-
                 float coreX = core.x;
                 float coreY = core.y;
+
+                float angle = Angles.angle(thisX, thisY, coreX, coreY);
 
                 float a = Math.abs(thisX - coreX);
                 float b = Math.abs(thisY - coreY);
                 float c = (float) Math.hypot(a, b);
 
-                float angle = Angles.angle(thisX, thisY, coreX, coreY);
-
                 BulletType bullet = Bullets.artilleryDense;
                 float baseSpeed = bullet.speed;
                 float baseLifetime = bullet.lifetime;
 
-                Call.createBullet(bullet, building.team, thisX, thisY, angle, 0F, 1F, c / baseSpeed / baseLifetime);
+                float lifetime = c / baseSpeed / baseLifetime;
+
+                Call.clearItems(building);
+                Call.createBullet(bullet, building.team, thisX, thisY, angle, 0F, 1F, lifetime);
+                Timer.schedule(() -> building.items.each((item, amount) -> core.items.add(item, amount)), lifetime * 60);
             }
         }), 0, 0.1F);
 
