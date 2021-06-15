@@ -704,7 +704,7 @@ public class ThedimasPlugin extends Plugin {
             }
 
             try {
-                Long time = DBHandler.get(player.uuid(), field));
+                Long time = DBHandler.get(player.uuid(), field);
                 if (time != null) {
                     // TODO: изменить бандл (учитывать выбранный сервер)
                     bundled(player, "commands.playtime.msg", longToTime(time));
