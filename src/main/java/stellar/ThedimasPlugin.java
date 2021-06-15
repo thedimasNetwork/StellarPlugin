@@ -23,6 +23,8 @@ import mindustry.world.blocks.campaign.LaunchPad;
 import mindustry.world.blocks.logic.LogicBlock;
 
 import stellar.database.*;
+import stellar.database.tables.Playtime;
+import stellar.database.tables.Users;
 import stellar.history.entry.BlockEntry;
 import stellar.history.entry.ConfigEntry;
 import stellar.history.entry.HistoryEntry;
@@ -69,6 +71,8 @@ public class ThedimasPlugin extends Plugin {
     @Override
     public void init() {
         Log.info("ThedimasPlugin launched!");
+
+        Core.settings.put(Const.SERVER_NAME_SETTING, Const.DEFAULT_SERVER_NAME);
 
         state.serverPaused = true;
 
@@ -138,9 +142,9 @@ public class ThedimasPlugin extends Plugin {
             if (interval.get(1, 3600)) { // 1 минута
                 for (Player p : Groups.player) {
                     try {
-                        Long time = DBHandler.get(p.uuid(), Table.PLAY_TIME);
+                        Long time = DBHandler.get(p.uuid(), Users.PLAY_TIME);
                         Objects.requireNonNull(time, "time");
-                        DBHandler.update(p.uuid(), Table.PLAY_TIME, time + 60);
+                        DBHandler.update(p.uuid(), Users.PLAY_TIME, time + 60);
                     } catch (Throwable t) {
                         Log.err(t);
                     }
@@ -170,16 +174,16 @@ public class ThedimasPlugin extends Plugin {
 
             try {
                 if (!DBHandler.userExist(event.player.uuid())) {
-                    DBHandler.update(event.player.uuid(), Table.NAME, event.player.name);
-                    DBHandler.update(event.player.uuid(), Table.LOCALE, event.player.locale);
-                    DBHandler.update(event.player.uuid(), Table.IP, event.player.ip());
+                    DBHandler.update(event.player.uuid(), Users.NAME, event.player.name);
+                    DBHandler.update(event.player.uuid(), Users.LOCALE, event.player.locale);
+                    DBHandler.update(event.player.uuid(), Users.IP, event.player.ip());
 
-                    Boolean banned = DBHandler.get(event.player.uuid(), Table.BANNED);
+                    Boolean banned = DBHandler.get(event.player.uuid(), Users.BANNED);
                     if(banned != null && banned) {
                         netServer.admins.banPlayer(event.player.uuid());
                         netServer.admins.banPlayerIP(event.player.ip());
                     } else {
-                        Boolean admin = DBHandler.get(event.player.uuid(), Table.ADMIN);
+                        Boolean admin = DBHandler.get(event.player.uuid(), Users.ADMIN);
                         if (admin != null && admin) {
                             admins.put(event.player.uuid(), event.player.name);
                             event.player.admin = true;
@@ -268,10 +272,10 @@ public class ThedimasPlugin extends Plugin {
         //блок "баны"
         Events.on(EventType.PlayerBanEvent.class, event -> {
             try {
-                String ip = DBHandler.get(event.player.uuid(), Table.IP);
+                String ip = DBHandler.get(event.player.uuid(), Users.IP);
                 netServer.admins.banPlayer(event.player.uuid());
                 netServer.admins.banPlayerIP(event.player.ip());
-                DBHandler.update(event.player.uuid(), Table.BANNED, true);
+                DBHandler.update(event.player.uuid(), Users.BANNED, true);
             } catch (SQLException e) {
                 Log.err(e.getMessage());
             }
@@ -281,10 +285,10 @@ public class ThedimasPlugin extends Plugin {
 
         Events.on(EventType.PlayerUnbanEvent.class, event -> {
             try {
-                String ip = DBHandler.get(event.player.uuid(), Table.IP);
+                String ip = DBHandler.get(event.player.uuid(), Users.IP);
                 netServer.admins.unbanPlayerID(event.player.uuid());
                 netServer.admins.unbanPlayerIP(event.player.ip());
-                DBHandler.update(event.player.uuid(), Table.BANNED, false);
+                DBHandler.update(event.player.uuid(), Users.BANNED, false);
             } catch (SQLException e) {
                 Log.err(e.getMessage());
             }
@@ -409,7 +413,7 @@ public class ThedimasPlugin extends Plugin {
             String uuid = player != null ? player.uuid() : args[0];
 
             try {
-                Long time = DBHandler.get(uuid, Table.PLAY_TIME);
+                Long time = DBHandler.get(uuid, Users.PLAY_TIME);
                 if (time != null) {
                     StringBuilder result = new StringBuilder(player != null ? player.name() : args[0]);
                     result.append("plays").append(longToTime(time));
@@ -512,7 +516,7 @@ public class ThedimasPlugin extends Plugin {
         handler.<Player>register("tr", "[off|auto|double|somelocale]", "commands.tr.description", (args, player) -> {
             String locale;
             try {
-                locale = DBHandler.get(player.uuid(), Table.TRANSLATOR);
+                locale = DBHandler.get(player.uuid(), Users.TRANSLATOR);
             } catch (Throwable t) {
                 bundled(player, "commands.tr.error");
                 Log.err(t);
@@ -528,7 +532,7 @@ public class ThedimasPlugin extends Plugin {
             switch (mode) {
                 case "off" -> {
                     try {
-                        DBHandler.update(player.uuid(), Table.TRANSLATOR, "off");
+                        DBHandler.update(player.uuid(), Users.TRANSLATOR, "off");
                     } catch (Throwable t) {
                         Log.err(t);
                     }
@@ -536,7 +540,7 @@ public class ThedimasPlugin extends Plugin {
                 }
                 case "auto" -> {
                     try {
-                        DBHandler.update(player.uuid(), Table.TRANSLATOR, "auto");
+                        DBHandler.update(player.uuid(), Users.TRANSLATOR, "auto");
                     } catch (Throwable t) {
                         Log.err(t);
                     }
@@ -544,7 +548,7 @@ public class ThedimasPlugin extends Plugin {
                 }
                 case "double" -> {
                     try {
-                        DBHandler.update(player.uuid(), Table.TRANSLATOR, "double");
+                        DBHandler.update(player.uuid(), Users.TRANSLATOR, "double");
                     } catch (Throwable t) {
                         Log.err(t);
                     }
@@ -557,7 +561,7 @@ public class ThedimasPlugin extends Plugin {
                         return;
                     }
                     try {
-                        DBHandler.update(player.uuid(), Table.TRANSLATOR, target.toString());
+                        DBHandler.update(player.uuid(), Users.TRANSLATOR, target.toString());
                     } catch (Throwable t) {
                         Log.err(t);
                     }
@@ -675,10 +679,28 @@ public class ThedimasPlugin extends Plugin {
             }
         });
 
-        handler.<Player>register("playtime", "commands.playtime.description", (args, player) -> {
+        handler.<Player>register("playtime", "[server...]", "commands.playtime.description", (args, player) -> {
+            if (args.length > 0 && Core.settings.getString(Const.SERVER_NAME_SETTING).equals(Const.DEFAULT_SERVER_NAME)) {
+                player.sendMessage("Ошибка. Сервер не найден.");
+                return;
+            }
+
+            String serverName;
+            if (args.length > 0) {
+                serverName = args[0].toLowerCase();
+                if (!Const.SERVER_ADDRESS.containsKey(serverName)) {
+                    // TODO: исправить бандл
+                    bundled(player, "commands.connect.server-notfound", Const.SERVER_LIST);
+                    return;
+                }
+            } else {
+                serverName = Core.settings.getString(Const.SERVER_NAME_SETTING);
+            }
+
             try {
-                Long time = DBHandler.get(player.uuid(), Table.PLAY_TIME);
+                Long time = DBHandler.get(player.uuid(), Playtime.FIELDS.get(serverName.replace(" ", "_")));
                 if (time != null) {
+                    // TODO: изменить бандл (учитывать выбранный сервер)
                     bundled(player, "commands.playtime.msg", longToTime(time));
                 }
             } catch (Throwable t) {
@@ -883,7 +905,7 @@ public class ThedimasPlugin extends Plugin {
     private String translateChat(Player player, Player otherPlayer, String message) {
         String locale = otherPlayer.locale;
         try {
-            locale = DBHandler.get(otherPlayer.uuid(), Table.TRANSLATOR);
+            locale = DBHandler.get(otherPlayer.uuid(), Users.TRANSLATOR);
         } catch (Throwable t) {
             Log.err(t);
         }

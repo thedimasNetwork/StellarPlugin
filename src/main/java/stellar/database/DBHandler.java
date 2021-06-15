@@ -2,6 +2,8 @@ package stellar.database;
 
 import arc.util.Log;
 import stellar.PlayerData;
+import stellar.database.tables.Playtime;
+import stellar.database.tables.Users;
 
 import java.sql.*;
 
@@ -36,8 +38,10 @@ public class DBHandler {
     }
 
     public static void save(PlayerData data) throws SQLException {
-        preparedExecute("INSERT INTO " + Table.U_TABLE + " (" + Table.U_ALL + ") VALUES (" + Table.U_ALL_RAW + ")",
+        preparedExecute("INSERT INTO " + Users.U_TABLE + " (" + Users.U_ALL + ") VALUES (" + Users.U_ALL_RAW + ")",
                 data.uuid, data.ip, escapeString(data.name), data.locale, data.translator, data.playTime, data.admin, data.banned);
+        preparedExecute("INSERT INTO " + Playtime.P_TABLE + " (" + Playtime.UUID + ") VALUES (?)", data.uuid);
+
     }
 
     private static String escapeString(String text) {
@@ -45,25 +49,25 @@ public class DBHandler {
     }
 
     public static boolean userExist(String uuid) throws SQLException {
-        String select = "SELECT * FROM " + Table.U_TABLE + " WHERE " + Table.U_UUID + "=?";
+        String select = "SELECT * FROM " + Users.U_TABLE + " WHERE " + Users.U_UUID + "=?";
         try (PreparedStatement prSt = getDbConnection().prepareStatement(select)) {
             prSt.setString(1, uuid);
             return prSt.executeQuery().next();
         }
     }
 
-    public static <T> T get(String uuid, Field<T> row) throws SQLException {
-        String select = "SELECT " + row.getName() + " FROM " + Table.U_TABLE + " WHERE " + Table.U_UUID + "=?";
+    public static <T> T get(String uuid, Field<T> column) throws SQLException {
+        String select = "SELECT " + column.getName() + " FROM " + column.getTable() + " WHERE " + Users.U_UUID + "=?";
         try (PreparedStatement prSt = getDbConnection().prepareStatement(select)) {
             prSt.setString(1, uuid);
 
             ResultSet res = prSt.executeQuery();
-            return res.next() ? res.getObject(1, row.getType()) : null;
+            return res.next() ? res.getObject(1, column.getType()) : null;
         }
     }
 
     public static PlayerData get(String uuid) throws SQLException {
-        String select = "SELECT " + Table.U_ALL + " FROM " + Table.U_TABLE + " WHERE " + Table.U_UUID + "=?";
+        String select = "SELECT " + Users.U_ALL + " FROM " + Users.U_TABLE + " WHERE " + Users.U_UUID + "=?";
         try (PreparedStatement prSt = getDbConnection().prepareStatement(select)) {
             prSt.setString(1, uuid);
 
@@ -85,7 +89,7 @@ public class DBHandler {
     }
 
     public static <T> void update(String uuid, Field<T> column, T value) throws SQLException {
-        preparedExecute("UPDATE " + Table.U_TABLE + " SET " + column.getName() + "=? WHERE " + Table.U_UUID + "=?",
+        preparedExecute("UPDATE " + column.getName() + " SET " + column.getName() + "=? WHERE " + Users.U_UUID + "=?",
                 escapeString(String.valueOf(value)), uuid);
     }
 }
