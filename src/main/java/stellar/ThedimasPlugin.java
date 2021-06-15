@@ -684,25 +684,27 @@ public class ThedimasPlugin extends Plugin {
         });
 
         handler.<Player>register("playtime", "[server...]", "commands.playtime.description", (args, player) -> {
-            if (args.length > 0 && Core.settings.getString(Const.SERVER_NAME_SETTING).equals(Const.DEFAULT_SERVER_NAME)) {
-                player.sendMessage("Ошибка. Сервер не найден.");
-                return;
-            }
-
             String serverName;
             if (args.length > 0) {
-                serverName = args[0].toLowerCase();
-                if (!Const.SERVER_ADDRESS.containsKey(serverName)) {
-                    // TODO: исправить бандл
-                    bundled(player, "commands.connect.server-notfound", Const.SERVER_LIST);
+                if (Core.settings.getString(Const.SERVER_NAME_SETTING).equals(Const.DEFAULT_SERVER_NAME)) {
+                    player.sendMessage("Ошибка. Сервер не найден.");
                     return;
                 }
+                serverName = args[0].toLowerCase();
             } else {
                 serverName = Core.settings.getString(Const.SERVER_NAME_SETTING);
             }
 
+            Field<Long> field = Playtime.FIELDS.get(serverName.toLowerCase());
+
+            if (field == null) {
+                // TODO: исправить бандл
+                bundled(player, "commands.connect.server-notfound", Const.SERVER_LIST);
+                return;
+            }
+
             try {
-                Long time = DBHandler.get(player.uuid(), Playtime.FIELDS.get(serverName.replace(" ", "_")));
+                Long time = DBHandler.get(player.uuid(), field));
                 if (time != null) {
                     // TODO: изменить бандл (учитывать выбранный сервер)
                     bundled(player, "commands.playtime.msg", longToTime(time));

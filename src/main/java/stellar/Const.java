@@ -94,14 +94,14 @@ public class Const {
             + "Sandbox\n"
             + "Survival\n"
             + "Attack\n"
-            + "Hex PvP\n"
+            + "Hex_PvP\n"
             + "Annexation\n"
-            + "Campaign maps\n"
+            + "Campaign_maps\n"
             + "Anarchy\n"
-            + "Castle wars\n"
-            + "Crawler arena\n"
+            + "Castle_wars\n"
+            + "Crawler_arena\n"
             + "MS:GO\n"
-            + "Zone capture";
+            + "Zone_capture";
 
     public static final StringMap SERVER_ADDRESS = StringMap.of(
             "hub", "play.thedimas.pp.ua:6567",
@@ -113,10 +113,10 @@ public class Const {
             "anarchy", "play.thedimas.pp.ua:6506",
             "campaign maps", "play.thedimas.pp.ua:6507",
             "ms:go", "play.thedimas.pp.ua:6508",
-            "hex pvp", "play.thedimas.pp.ua:6509",
-            "castle wars", "play.thedimas.pp.ua:6510",
-            "crawler arena", "play.thedimas.pp.ua:6511",
-            "zone capture", "play.thedimas.pp.ua:6512");
+            "hex_pvp", "play.thedimas.pp.ua:6509",
+            "castle_wars", "play.thedimas.pp.ua:6510",
+            "crawler_arena", "play.thedimas.pp.ua:6511",
+            "zone_capture", "play.thedimas.pp.ua:6512");
 
     public static final String RULES_UK
             = "1. Не спамити/флудити в чат\n"
