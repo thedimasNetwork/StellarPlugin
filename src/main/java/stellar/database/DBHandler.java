@@ -89,7 +89,7 @@ public class DBHandler {
     }
 
     public static <T> void update(String uuid, Field<T> column, T value) throws SQLException {
-        preparedExecute("UPDATE " + column.getName() + " SET " + column.getName() + "=? WHERE " + Users.U_UUID + "=?",
+        preparedExecute("UPDATE " + column.getTable() + " SET " + column.getName() + "=? WHERE " + Users.U_UUID + "=?",
                 escapeString(String.valueOf(value)), uuid);
     }
 }

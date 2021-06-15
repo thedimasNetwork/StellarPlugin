@@ -8,7 +8,7 @@ import mindustry.Vars;
 import java.util.*;
 
 public class Const {
-    public static final String SERVER_NAME_SETTING = "server name";
+    public static final String SERVER_NAME_SETTING = "server_name";
     public static final String DEFAULT_SERVER_NAME = "untitled";
 
     public static final String JOIN_LOG_FORMAT = "{0} has joined the server | locale: {1} | IP: {2}";

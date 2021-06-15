@@ -140,14 +140,18 @@ public class ThedimasPlugin extends Plugin {
 
         Events.run(EventType.Trigger.update, () -> {
             if (interval.get(1, 3600)) { // 1 минута
-                for (Player p : Groups.player) {
-                    try {
-                        Long time = DBHandler.get(p.uuid(), Playtime.FIELDS.get(Const.SERVER_NAME_SETTING));
-                        Objects.requireNonNull(time, "time");
-                        DBHandler.update(p.uuid(), Playtime.FIELDS.get(Const.SERVER_NAME_SETTING), time + 60);
-                    } catch (Throwable t) {
-                        Log.err(t);
+                if (Playtime.FIELDS.containsKey(Core.settings.getString(Const.SERVER_NAME_SETTING))) {
+                    for (Player p : Groups.player) {
+                        try {
+                            Long time = DBHandler.get(p.uuid(), Playtime.FIELDS.get(Const.SERVER_NAME_SETTING));
+                            Objects.requireNonNull(time, "time");
+                            DBHandler.update(p.uuid(), Playtime.FIELDS.get(Const.SERVER_NAME_SETTING), time + 60);
+                        } catch (Throwable t) {
+                            Log.err(t);
+                        }
                     }
+                } else {
+                    Log.err("Имя сервера не существует в базе данных!");
                 }
             }
         });
@@ -173,7 +177,7 @@ public class ThedimasPlugin extends Plugin {
             }
 
             try {
-                if (!DBHandler.userExist(event.player.uuid())) {
+                if (DBHandler.userExist(event.player.uuid())) {
                     DBHandler.update(event.player.uuid(), Users.NAME, event.player.name);
                     DBHandler.update(event.player.uuid(), Users.LOCALE, event.player.locale);
                     DBHandler.update(event.player.uuid(), Users.IP, event.player.ip());
