@@ -684,7 +684,7 @@ public class ThedimasPlugin extends Plugin {
         });
 
         handler.<Player>register("playtime", "[server...]", "commands.playtime.description", (args, player) -> {
-            if (args.length > 0 && Core.settings.getString(Const.SERVER_NAME_SETTING).equals(Const.DEFAULT_SERVER_NAME)) {
+            if (args.length > 0 && !Core.settings.getString(Const.SERVER_NAME_SETTING).equals(Const.DEFAULT_SERVER_NAME)) {
                 player.sendMessage("Ошибка. Сервер не найден.");
                 return;
             }
