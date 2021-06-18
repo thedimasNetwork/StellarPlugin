@@ -151,7 +151,8 @@ public class ThedimasPlugin extends Plugin {
                 if (Playtime.FIELDS.containsKey(Core.settings.getString(Const.SERVER_NAME_SETTING))) {
                     for (Player p : Groups.player) {
                         try {
-                            Long time = DBHandler.get(p.uuid(), Playtime.FIELDS.get(Const.SERVER_NAME_SETTING));
+                            String serverName = Core.settings.getString(Const.SERVER_NAME_SETTING);
+                            Long time = DBHandler.get(p.uuid(), Playtime.FIELDS.get(serverName.toLowerCase()));
                             Objects.requireNonNull(time, "time");
                             DBHandler.update(p.uuid(), Playtime.FIELDS.get(Const.SERVER_NAME_SETTING), time + 60);
                         } catch (Throwable t) {
@@ -681,25 +682,23 @@ public class ThedimasPlugin extends Plugin {
         handler.<Player>register("playtime", "[server...]", "commands.playtime.description", (args, player) -> {
             String serverName;
             if (args.length > 0) {
-                if (Core.settings.getString(Const.SERVER_NAME_SETTING).equals(Const.DEFAULT_SERVER_NAME)) {
-                    player.sendMessage("Ошибка. Сервер не найден.");
-                    return;
-                }
                 serverName = args[0].toLowerCase();
             } else {
-                serverName = Core.settings.getString(Const.SERVER_NAME_SETTING);
+                serverName = Core.settings.getString(Const.SERVER_NAME_SETTING).toLowerCase();
+                if (serverName.equals(Const.DEFAULT_SERVER_NAME)) {
+                    player.sendMessage("[scarlet]Ошибка! Обратитесь, пожалуйста, к администрации.");
+                    return;
+                }
             }
 
-            Field<Long> field = Playtime.FIELDS.get(serverName.toLowerCase());
-
-            if (field == null) {
-                // TODO: исправить бандл
+            if (!Playtime.FIELDS.containsKey(serverName)) {
+                // TODO: исправить key в бандле
                 bundled(player, "commands.connect.server-notfound", Const.SERVER_LIST);
                 return;
             }
 
             try {
-                Long time = DBHandler.get(player.uuid(), field);
+                Long time = DBHandler.get(player.uuid(), Playtime.FIELDS.get(serverName));
                 if (time != null) {
                     // TODO: изменить бандл (учитывать выбранный сервер)
                     bundled(player, "commands.playtime.msg", longToTime(time));
