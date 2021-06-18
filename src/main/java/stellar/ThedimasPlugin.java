@@ -166,7 +166,7 @@ public class ThedimasPlugin extends Plugin {
         });
         // -------------------------------------------------------------------------------------------------- //
 
-        // -------------------------------------------ПРИСОЕДИНЕНИЕ------------------------------------------ //
+        // --------------------------------------------ПОДКЛЮЧЕНИЕ------------------------------------------- //
         Events.on(EventType.PlayerJoin.class, event -> {
             if (Groups.player.size() >= 1 && autoPause && state.serverPaused) {
                 state.serverPaused = false;
@@ -192,9 +192,9 @@ public class ThedimasPlugin extends Plugin {
                     DBHandler.update(event.player.uuid(), Users.IP, event.player.ip());
 
                     Boolean banned = DBHandler.get(event.player.uuid(), Users.BANNED);
-                    if(banned != null && banned) {
+                    Objects.requireNonNull(banned, "banned");
+                    if(banned) {
                         netServer.admins.banPlayer(event.player.uuid());
-                        netServer.admins.banPlayerIP(event.player.ip());
                     } else {
                         Boolean admin = DBHandler.get(event.player.uuid(), Users.ADMIN);
                         if (admin != null && admin) {
@@ -288,29 +288,37 @@ public class ThedimasPlugin extends Plugin {
         // -----------------------------------------------БАНЫ----------------------------------------------- //
         Events.on(EventType.PlayerBanEvent.class, event -> {
             try {
-                String ip = DBHandler.get(event.player.uuid(), Users.IP);
-                netServer.admins.banPlayer(event.player.uuid());
-                netServer.admins.banPlayerIP(event.player.ip());
                 DBHandler.update(event.player.uuid(), Users.BANNED, true);
             } catch (SQLException e) {
                 Log.err(e.getMessage());
             }
         });
 
-        Events.on(EventType.PlayerIpBanEvent.class, event -> netServer.admins.banPlayerIP(event.ip));
+        Events.on(EventType.PlayerIpBanEvent.class, event -> {
+            try {
+                String uuid = Groups.player.find(p -> p.ip().equalsIgnoreCase(event.ip)).uuid();
+                DBHandler.update(uuid, Users.BANNED, true);
+            } catch (SQLException e) {
+                Log.err(e.getMessage());
+            }
+        });
 
         Events.on(EventType.PlayerUnbanEvent.class, event -> {
             try {
-                String ip = DBHandler.get(event.player.uuid(), Users.IP);
-                netServer.admins.unbanPlayerID(event.player.uuid());
-                netServer.admins.unbanPlayerIP(event.player.ip());
                 DBHandler.update(event.player.uuid(), Users.BANNED, false);
             } catch (SQLException e) {
                 Log.err(e.getMessage());
             }
         });
 
-        Events.on(EventType.PlayerIpUnbanEvent.class, event -> netServer.admins.unbanPlayerIP(event.ip));
+        Events.on(EventType.PlayerIpUnbanEvent.class, event -> {
+            try {
+                String uuid = Groups.player.find(p -> p.ip().equalsIgnoreCase(event.ip)).uuid();
+                DBHandler.update(uuid, Users.BANNED, false);
+            } catch (SQLException e) {
+                Log.err(e.getMessage());
+            }
+        });
         // -------------------------------------------------------------------------------------------------- //
 
         // ----------------------------------------------ИСТОРИЯ--------------------------------------------- //
