@@ -197,7 +197,8 @@ public class ThedimasPlugin extends Plugin {
                         netServer.admins.banPlayer(event.player.uuid());
                     } else {
                         Boolean admin = DBHandler.get(event.player.uuid(), Users.ADMIN);
-                        if (admin != null && admin) {
+                        Objects.requireNonNull(admin, "admin");
+                        if (admin) {
                             admins.put(event.player.uuid(), event.player.name);
                             event.player.admin = true;
                         }
@@ -214,6 +215,42 @@ public class ThedimasPlugin extends Plugin {
                 }
             } catch (SQLException e) {
                 Log.err(e);
+            }
+        });
+        // -------------------------------------------------------------------------------------------------- //
+
+        // -----------------------------------------------БАНЫ----------------------------------------------- //
+        Events.on(EventType.PlayerBanEvent.class, event -> {
+            try {
+                DBHandler.update(event.player.uuid(), Users.BANNED, true);
+            } catch (SQLException e) {
+                Log.err(e.getMessage());
+            }
+        });
+
+        Events.on(EventType.PlayerIpBanEvent.class, event -> {
+            try {
+                String uuid = Groups.player.find(p -> p.ip().equalsIgnoreCase(event.ip)).uuid();
+                DBHandler.update(uuid, Users.BANNED, true);
+            } catch (SQLException e) {
+                Log.err(e.getMessage());
+            }
+        });
+
+        Events.on(EventType.PlayerUnbanEvent.class, event -> {
+            try {
+                DBHandler.update(event.player.uuid(), Users.BANNED, false);
+            } catch (SQLException e) {
+                Log.err(e.getMessage());
+            }
+        });
+
+        Events.on(EventType.PlayerIpUnbanEvent.class, event -> {
+            try {
+                String uuid = Groups.player.find(p -> p.ip().equalsIgnoreCase(event.ip)).uuid();
+                DBHandler.update(uuid, Users.BANNED, false);
+            } catch (SQLException e) {
+                Log.err(e.getMessage());
             }
         });
         // -------------------------------------------------------------------------------------------------- //
@@ -285,45 +322,9 @@ public class ThedimasPlugin extends Plugin {
         });
         // -------------------------------------------------------------------------------------------------- //
 
-        // -----------------------------------------------БАНЫ----------------------------------------------- //
-        Events.on(EventType.PlayerBanEvent.class, event -> {
-            try {
-                DBHandler.update(event.player.uuid(), Users.BANNED, true);
-            } catch (SQLException e) {
-                Log.err(e.getMessage());
-            }
-        });
-
-        Events.on(EventType.PlayerIpBanEvent.class, event -> {
-            try {
-                String uuid = Groups.player.find(p -> p.ip().equalsIgnoreCase(event.ip)).uuid();
-                DBHandler.update(uuid, Users.BANNED, true);
-            } catch (SQLException e) {
-                Log.err(e.getMessage());
-            }
-        });
-
-        Events.on(EventType.PlayerUnbanEvent.class, event -> {
-            try {
-                DBHandler.update(event.player.uuid(), Users.BANNED, false);
-            } catch (SQLException e) {
-                Log.err(e.getMessage());
-            }
-        });
-
-        Events.on(EventType.PlayerIpUnbanEvent.class, event -> {
-            try {
-                String uuid = Groups.player.find(p -> p.ip().equalsIgnoreCase(event.ip)).uuid();
-                DBHandler.update(uuid, Users.BANNED, false);
-            } catch (SQLException e) {
-                Log.err(e.getMessage());
-            }
-        });
-        // -------------------------------------------------------------------------------------------------- //
-
         // ----------------------------------------------ИСТОРИЯ--------------------------------------------- //
         Events.on(EventType.WorldLoadEvent.class, event -> {
-            if (Groups.player.size() > 0 && autoPause) {
+            if (Groups.player.size() > 0 && autoPause) { // автопауза
                 state.serverPaused = false;
                 Log.info("auto-pause: @ player(s) connected -> Game unpaused...", Groups.player.size());
             }
