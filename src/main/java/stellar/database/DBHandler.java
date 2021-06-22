@@ -39,7 +39,7 @@ public class DBHandler {
 
     public static void save(PlayerData data) throws SQLException {
         preparedExecute("INSERT INTO " + Users.U_TABLE + " (" + Users.U_ALL + ") VALUES (" + Users.U_ALL_RAW + ")",
-                data.uuid, data.ip, escapeString(data.name), data.locale, data.translator, data.playTime, data.admin, data.banned);
+                data.uuid, data.ip, escapeString(data.name), data.locale, data.translator, data.admin, data.banned);
         preparedExecute("INSERT INTO " + Playtime.P_TABLE + " (" + Playtime.UUID + ") VALUES (?)", data.uuid);
 
     }
@@ -75,14 +75,13 @@ public class DBHandler {
             data.next();
 
             PlayerData result = new PlayerData();
-            result.uuid = data.getString(1);
-            result.ip = data.getString(2);
-            result.name = data.getString(3);
-            result.locale = data.getString(4);
-            result.translator = data.getString(5);
-            result.playTime = data.getLong(6);
-            result.admin = data.getBoolean(7);
-            result.banned = data.getBoolean(8);
+            result.uuid = data.getString(Users.U_UUID);
+            result.ip = data.getString(Users.U_IP);
+            result.name = data.getString(Users.U_NAME);
+            result.locale = data.getString(Users.U_LOCALE);
+            result.translator = data.getString(Users.U_TRANSLATOR);
+            result.admin = data.getBoolean(Users.U_ADMIN);
+            result.banned = data.getBoolean(Users.U_BANNED);
 
             return result;
         }

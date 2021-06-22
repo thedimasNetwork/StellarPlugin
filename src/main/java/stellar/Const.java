@@ -11,8 +11,9 @@ public class Const {
     public static final String SERVER_NAME_SETTING = "server_name";
     public static final String DEFAULT_SERVER_NAME = "untitled";
 
-    public static final String JOIN_LOG_FORMAT = "{0} has joined the server | locale: {1} | IP: {2}";
-    public static final String CHAT_LOG_FORMAT = "{0}: {1} | {2}";
+    public static final String JOIN_LOG_FORMAT = "@ has joined the server | locale: @ | IP: @";
+    public static final String CHAT_LOG_FORMAT = "@: @ | @";
+
     public static final String CHAT_FORMAT = "<{0}> {1}[white]: {2}";
     public static final String CHAT_FORMAT_DETAILED = CHAT_FORMAT + " [gray]({3}[gray])";
 
@@ -72,36 +73,34 @@ public class Const {
 
     public static final String TEAM_LIST = "[white][yellow]sharded[], [red]crux[], [green]green[], [purple]purple[], [blue]blue[], [gray]derelict[]";
 
-    public static final String UNIT_LIST
-            = "[white]Ground:\n"
-            + "[accent]dagger [](\uF800), [accent]mace [](\uF7FF), [accent]fortress [](\uF7FE), [accent]scepter [](\uF7DB), [accent]reign [](\uF7DA)\n"
-            + "[purple]crawler [](\uF7FA), [purple]atrax [](\uF7F9), [purple]spiroct [](\uF7F8), [purple]arkyid [](\uF7F7), [purple]toxopid [](\uF7DE)\n"
-            + "[lime]nova [](\uF7FD), [lime]pulsar [](\uF7FC), [lime]quasar [](\uF7FB), [lime]vela [](\uF7C1), [lime]corvus [](\uF7C0)\n"
+    public static final String UNIT_LIST = """
+            [white]Ground:
+            [accent]dagger [](\uF800), [accent]mace [](\uF7FF), [accent]fortress [](\uF7FE), [accent]scepter [](\uF7DB), [accent]reign [](\uF7DA)
+            [purple]crawler [](\uF7FA), [purple]atrax [](\uF7F9), [purple]spiroct [](\uF7F8), [purple]arkyid [](\uF7F7), [purple]toxopid [](\uF7DE)
+            [lime]nova [](\uF7FD), [lime]pulsar [](\uF7FC), [lime]quasar [](\uF7FB), [lime]vela [](\uF7C1), [lime]corvus [](\uF7C0)
+            [white]Air:
+            [accent]flare [](\uF7F6), [accent]horizon [](\uF7F5), [accent]zenith [](\uF7F4), [accent]antumbra [](\uF7F3), [accent]eclipse [](\uF7F2)
+            [lime]mono [](\uF7F1), [lime]poly [](\uF7F0), [lime]mega [](\uF7EF), [lime]quad [](\uF7C3), [lime]oct [](\uF7C2)
+            [white]Naval:
+            [accent]risso [](\uF7E7), [accent]minke [](\uF7ED), [accent]bryde [](\uF7EC), [accent]sei [](\uF7C4), [accent]omura [](\uF7C6)
+            [white]Core:
+            [accent]alpha [](\uF7EB), [accent]beta [](\uF7EA), [accent]gamma [](\uF7E9)[]""";
 
-            + "[white]Air:\n"
-            + "[accent]flare [](\uF7F6), [accent]horizon [](\uF7F5), [accent]zenith [](\uF7F4), [accent]antumbra [](\uF7F3), [accent]eclipse [](\uF7F2)\n"
-            + "[lime]mono [](\uF7F1), [lime]poly [](\uF7F0), [lime]mega [](\uF7EF), [lime]quad [](\uF7C3), [lime]oct [](\uF7C2)\n"
-
-            + "[white]Naval:\n"
-            + "[accent]risso [](\uF7E7), [accent]minke [](\uF7ED), [accent]bryde [](\uF7EC), [accent]sei [](\uF7C4), [accent]omura [](\uF7C6)\n"
-
-            + "[white]Core:\n"
-            + "[accent]alpha [](\uF7EB), [accent]beta [](\uF7EA), [accent]gamma [](\uF7E9)[]";
-
-    public static final String SERVER_LIST
-            = "[]Hub\n"
-            + "PvP\n"
-            + "Sandbox\n"
-            + "Survival\n"
-            + "Attack\n"
-            + "Hex_PvP\n"
-            + "Annexation\n"
-            + "Campaign_maps\n"
-            + "Anarchy\n"
-            + "Castle_wars\n"
-            + "Crawler_arena\n"
-            + "MS:GO\n"
-            + "Zone_capture";
+    public static final String SERVER_LIST = """
+            []Hub
+            PvP
+            Sandbox
+            Survival
+            Attack
+            Hex_PvP
+            Annexation
+            Campaign_maps
+            Anarchy
+            Castle_wars
+            Crawler_arena
+            MS:GO
+            Zone_capture
+            """;
 
     public static final StringMap SERVER_ADDRESS = StringMap.of(
             "hub", "play.thedimas.pp.ua:6567",
@@ -118,11 +117,12 @@ public class Const {
             "crawler_arena", "play.thedimas.pp.ua:6511",
             "zone_capture", "play.thedimas.pp.ua:6512");
 
-    public static final String RULES_UK
-            = "1. Не спамити/флудити в чат\n"
-            + "2. Не ображати інших учасників сервера\n"
-            + "3. Не бути гріфером\n"
-            + "[scarlet]4. Не будувати NSFW (18+) схеми[]\n";
+    public static final String RULES_UK = """
+            1. Не спамити/флудити в чат
+            2. Не ображати інших учасників сервера
+            3. Не бути гріфером
+            [scarlet]4. Не будувати NSFW (18+) схеми[]
+            """;
 
     public static final String WELCOME_UK
             = "[white]Привіт, подорожній!\n"
@@ -132,11 +132,12 @@ public class Const {
             + "\nЯкщо ти їх забув, то можеш ввести комманду [accent]/rules[]\n"
             + "Докладні правила ти можеш знайти на нашому Discord сервері";
 
-    public static final String RULES_RU
-            = "1. Не спамить/флудить в чат\n"
-            + "2. Не оскорблять других участников сервера\n"
-            + "3. Не быть грифером\n"
-            + "[scarlet]4. Не строить NSFW (18+) схемы[]\n";
+    public static final String RULES_RU = """
+            1. Не спамить/флудить в чат
+            2. Не оскорблять других участников сервера
+            3. Не быть грифером
+            [scarlet]4. Не строить NSFW (18+) схемы[]
+            """;
 
     public static final String WELCOME_RU
             = "[white]Привет, путник!\n"
@@ -146,11 +147,12 @@ public class Const {
             + "\nЕсли ты их забыл, то можешь ввести комманду [accent]/rules[]\n"
             + "Подробные правила ты можешь найти на нашем Discord сервере";
 
-    public static final String RULES_EN
-            = "1. Don't spam/flood in the chat\n"
-            + "2. Don't insult another players\n"
-            + "3. Don't grief\n"
-            + "[scarlet]4. Don't build NSFW (18+) schemes[]\n";
+    public static final String RULES_EN = """
+            1. Don't spam/flood in the chat
+            2. Don't insult another players
+            3. Don't grief
+            [scarlet]4. Don't build NSFW (18+) schemes[]
+            """;
 
     public static final String WELCOME_EN
             = "[white]Hi, traveller!\n"

@@ -78,6 +78,7 @@ public class ThedimasPlugin extends Plugin {
 
         netServer.admins.addChatFilter((player, message) -> null);
 
+        // ---------------------------------------ЗАГРУЗКА ЛОКАЛИЗАЦИЙ--------------------------------------- //
         Core.net.httpGet(ghApi + "/search/code?q=name+repo:Anuken/Mindustry+filename:bundle&per_page=100", res -> {
             Jval json = Jval.read(res.getResultAsString());
             Seq<String> names = json.get("items").asArray().map(obj -> obj.getString("name"))
@@ -100,6 +101,10 @@ public class ThedimasPlugin extends Plugin {
             locales = Seq.with(locales).and(new Locale("router")).toArray(Locale.class);
             Log.debug("Locales: @", Arrays.toString(Const.supportedLocales));
         }, Log::err);
+        // -------------------------------------------------------------------------------------------------- //
+
+        // -----------------------------------------ПУСКОВАЯ ПЛОЩАДКА---------------------------------------- //
+        Events.on(EventType.PlayEvent.class, event -> state.rules.revealedBlocks.add(Blocks.launchPad));
 
         Timer.schedule(() -> Groups.build.each(b -> b.block instanceof LaunchPad, building -> {
             if (building.items.total() == 100 && building.power.status > 0.95) {
@@ -134,16 +139,20 @@ public class ThedimasPlugin extends Plugin {
 
                 Call.clearItems(building);
                 Call.createBullet(bullet, building.team, thisX, thisY, angle, 0F, 1F, lifetime);
-                Timer.schedule(() -> building.items.each((item, amount) -> core.items.add(item, amount)), lifetime * 60);
+                Timer.schedule(() -> building.items.each((item, amount) -> core.items.add(item, amount)),
+                        lifetime * 60);
             }
         }), 0, 0.1F);
+        // -------------------------------------------------------------------------------------------------- //
 
+        // ---------------------------------------ОБНОВЛЕНИЕ ПЛЕЙТАЙМА--------------------------------------- //
         Events.run(EventType.Trigger.update, () -> {
             if (interval.get(1, 3600)) { // 1 минута
                 if (Playtime.FIELDS.containsKey(Core.settings.getString(Const.SERVER_NAME_SETTING))) {
                     for (Player p : Groups.player) {
                         try {
-                            Long time = DBHandler.get(p.uuid(), Playtime.FIELDS.get(Const.SERVER_NAME_SETTING));
+                            String serverName = Core.settings.getString(Const.SERVER_NAME_SETTING);
+                            Long time = DBHandler.get(p.uuid(), Playtime.FIELDS.get(serverName.toLowerCase()));
                             Objects.requireNonNull(time, "time");
                             DBHandler.update(p.uuid(), Playtime.FIELDS.get(Const.SERVER_NAME_SETTING), time + 60);
                         } catch (Throwable t) {
@@ -155,16 +164,16 @@ public class ThedimasPlugin extends Plugin {
                 }
             }
         });
+        // -------------------------------------------------------------------------------------------------- //
 
-        Events.on(EventType.PlayEvent.class, event -> state.rules.revealedBlocks.add(Blocks.launchPad));
-
+        // --------------------------------------------ПОДКЛЮЧЕНИЕ------------------------------------------- //
         Events.on(EventType.PlayerJoin.class, event -> {
             if (Groups.player.size() >= 1 && autoPause && state.serverPaused) {
                 state.serverPaused = false;
                 Log.info("auto-pause: @ player(s) connected -> Game unpaused...", Groups.player.size());
             }
 
-            Log.info(MessageFormat.format(Const.JOIN_LOG_FORMAT, event.player.name, event.player.locale, event.player.con.address));
+            Log.info(Const.JOIN_LOG_FORMAT, event.player.name, event.player.locale, event.player.con.address);
             String playerName = NetClient.colorizeName(event.player.id, event.player.name);
             bundled("events.join.player-join", playerName);
 
@@ -183,12 +192,13 @@ public class ThedimasPlugin extends Plugin {
                     DBHandler.update(event.player.uuid(), Users.IP, event.player.ip());
 
                     Boolean banned = DBHandler.get(event.player.uuid(), Users.BANNED);
-                    if(banned != null && banned) {
+                    Objects.requireNonNull(banned, "banned");
+                    if(banned) {
                         netServer.admins.banPlayer(event.player.uuid());
-                        netServer.admins.banPlayerIP(event.player.ip());
                     } else {
                         Boolean admin = DBHandler.get(event.player.uuid(), Users.ADMIN);
-                        if (admin != null && admin) {
+                        Objects.requireNonNull(admin, "admin");
+                        if (admin) {
                             admins.put(event.player.uuid(), event.player.name);
                             event.player.admin = true;
                         }
@@ -207,11 +217,45 @@ public class ThedimasPlugin extends Plugin {
                 Log.err(e);
             }
         });
+        // -------------------------------------------------------------------------------------------------- //
 
-        Events.on(EventType.ServerLoadEvent.class, event -> Log.info("ThedimasPlugin: Server loaded"));
+        // -----------------------------------------------БАНЫ----------------------------------------------- //
+        Events.on(EventType.PlayerBanEvent.class, event -> {
+            try {
+                DBHandler.update(event.player.uuid(), Users.BANNED, true);
+            } catch (SQLException e) {
+                Log.err(e.getMessage());
+            }
+        });
 
-        Events.on(EventType.GameOverEvent.class, e -> votesRTV.clear());
+        Events.on(EventType.PlayerIpBanEvent.class, event -> {
+            try {
+                String uuid = Groups.player.find(p -> p.ip().equalsIgnoreCase(event.ip)).uuid();
+                DBHandler.update(uuid, Users.BANNED, true);
+            } catch (SQLException e) {
+                Log.err(e.getMessage());
+            }
+        });
 
+        Events.on(EventType.PlayerUnbanEvent.class, event -> {
+            try {
+                DBHandler.update(event.player.uuid(), Users.BANNED, false);
+            } catch (SQLException e) {
+                Log.err(e.getMessage());
+            }
+        });
+
+        Events.on(EventType.PlayerIpUnbanEvent.class, event -> {
+            try {
+                String uuid = Groups.player.find(p -> p.ip().equalsIgnoreCase(event.ip)).uuid();
+                DBHandler.update(uuid, Users.BANNED, false);
+            } catch (SQLException e) {
+                Log.err(e.getMessage());
+            }
+        });
+        // -------------------------------------------------------------------------------------------------- //
+
+        // ---------------------------------------------ОТКЛЮЧЕНИЕ------------------------------------------- //
         Events.on(EventType.PlayerLeave.class, event -> {
             if (Groups.player.size() - 1 < 1 && autoPause) {
                 state.serverPaused = true;
@@ -232,8 +276,13 @@ public class ThedimasPlugin extends Plugin {
             String playerName = NetClient.colorizeName(event.player.id, event.player.name);
             bundled("events.leave.player-leave", playerName);
         });
+        // -------------------------------------------------------------------------------------------------- //
 
-        // блок "торийки"
+        Events.on(EventType.ServerLoadEvent.class, event -> Log.info("ThedimasPlugin: Server loaded"));
+
+        Events.on(EventType.GameOverEvent.class, e -> votesRTV.clear());
+
+        // ----------------------------------------------ТОРИЙКИ--------------------------------------------- //
         Events.on(EventType.DepositEvent.class, event -> {
             Player target = event.player;
             Building building = event.tile;
@@ -258,9 +307,9 @@ public class ThedimasPlugin extends Plugin {
                 }
             }
         });
-        // конец блока
+        // -------------------------------------------------------------------------------------------------- //
 
-        // блок "чат"
+        // ------------------------------------------------ЧАТ----------------------------------------------- //
         Events.on(EventType.PlayerChatEvent.class, event -> {
             if (!event.message.startsWith("/")) {
                 Groups.player.each(otherPlayer -> {
@@ -268,42 +317,14 @@ public class ThedimasPlugin extends Plugin {
                     otherPlayer.sendMessage(msg);
                 });
 
-                Log.info(MessageFormat.format(Const.CHAT_LOG_FORMAT, Strings.stripColors(event.player.name), Strings.stripColors(event.message), event.player.locale));
+                Log.info(Const.CHAT_LOG_FORMAT, Strings.stripColors(event.player.name), Strings.stripColors(event.message), event.player.locale);
             }
         });
-        // конец блока
+        // -------------------------------------------------------------------------------------------------- //
 
-        //блок "баны"
-        Events.on(EventType.PlayerBanEvent.class, event -> {
-            try {
-                String ip = DBHandler.get(event.player.uuid(), Users.IP);
-                netServer.admins.banPlayer(event.player.uuid());
-                netServer.admins.banPlayerIP(event.player.ip());
-                DBHandler.update(event.player.uuid(), Users.BANNED, true);
-            } catch (SQLException e) {
-                Log.err(e.getMessage());
-            }
-        });
-
-        Events.on(EventType.PlayerIpBanEvent.class, event -> netServer.admins.banPlayerIP(event.ip));
-
-        Events.on(EventType.PlayerUnbanEvent.class, event -> {
-            try {
-                String ip = DBHandler.get(event.player.uuid(), Users.IP);
-                netServer.admins.unbanPlayerID(event.player.uuid());
-                netServer.admins.unbanPlayerIP(event.player.ip());
-                DBHandler.update(event.player.uuid(), Users.BANNED, false);
-            } catch (SQLException e) {
-                Log.err(e.getMessage());
-            }
-        });
-
-        Events.on(EventType.PlayerIpUnbanEvent.class, event -> netServer.admins.unbanPlayerIP(event.ip));
-        // конец блока
-
-        // блок "история"
+        // ----------------------------------------------ИСТОРИЯ--------------------------------------------- //
         Events.on(EventType.WorldLoadEvent.class, event -> {
-            if (Groups.player.size() > 0 && autoPause) {
+            if (Groups.player.size() > 0 && autoPause) { // автопауза
                 state.serverPaused = false;
                 Log.info("auto-pause: @ player(s) connected -> Game unpaused...", Groups.player.size());
             }
@@ -383,7 +404,7 @@ public class ThedimasPlugin extends Plugin {
                 event.player.sendMessage(result.toString());
             }
         });
-        // конец блока
+        // -------------------------------------------------------------------------------------------------- //
     }
 
     @Override
@@ -410,24 +431,6 @@ public class ThedimasPlugin extends Plugin {
                 }
             }
             Log.info(MessageFormat.format("Successfully exported {0} players", exported));
-        });
-
-        handler.register("playtime", "<player/uuid>", "Check player playtime", args -> {
-            Playerc player = Groups.player.find(p -> p.name.equals(args[0]));
-            String uuid = player != null ? player.uuid() : args[0];
-
-            try {
-                Long time = DBHandler.get(uuid, Users.PLAY_TIME);
-                if (time != null) {
-                    StringBuilder result = new StringBuilder(player != null ? player.name() : args[0]);
-                    result.append("plays").append(longToTime(time));
-                    Log.info(result);
-                } else {
-                    Log.warn("Player/uuid not found!");
-                }
-            } catch (Throwable t) {
-                Log.err(t);
-            }
         });
 
         handler.register("auto-pause", "[on|off]", "Pause game with 0 people online", args -> {
@@ -459,6 +462,7 @@ public class ThedimasPlugin extends Plugin {
 
     @Override
     public void registerClientCommands(CommandHandler handler) {
+        // ------------------------------------------------ЧАТ----------------------------------------------- //
         handler.removeCommand("a");
         handler.<Player>register("a", "<text...>", "commands.admin.a.description", (args, player) -> {
             if (!admins.containsKey(player.uuid())) {
@@ -473,7 +477,7 @@ public class ThedimasPlugin extends Plugin {
                 otherPlayer.sendMessage("<[scarlet]A[]>" + msg);
             });
 
-            Log.info("<A>" + MessageFormat.format(Const.CHAT_LOG_FORMAT, Strings.stripColors(player.name), Strings.stripColors(message), player.locale));
+            Log.info("<A>" + Const.CHAT_LOG_FORMAT, Strings.stripColors(player.name), Strings.stripColors(message), player.locale);
         });
 
         handler.removeCommand("t");
@@ -484,8 +488,9 @@ public class ThedimasPlugin extends Plugin {
                 otherPlayer.sendMessage("<[#" + player.team().color + "]T[]>" + msg);
             });
 
-            Log.info("<T>" + MessageFormat.format(Const.CHAT_LOG_FORMAT, Strings.stripColors(player.name), Strings.stripColors(message), player.locale));
+            Log.info("<T>" + Const.CHAT_LOG_FORMAT, Strings.stripColors(player.name), Strings.stripColors(message), player.locale);
         });
+        // -------------------------------------------------------------------------------------------------- //
 
         handler.removeCommand("help");
         handler.<Player>register("help", "[page]", "commands.help.description", (args, player) -> {
@@ -686,25 +691,23 @@ public class ThedimasPlugin extends Plugin {
         handler.<Player>register("playtime", "[server...]", "commands.playtime.description", (args, player) -> {
             String serverName;
             if (args.length > 0) {
-                if (Core.settings.getString(Const.SERVER_NAME_SETTING).equals(Const.DEFAULT_SERVER_NAME)) {
-                    player.sendMessage("Ошибка. Сервер не найден.");
-                    return;
-                }
                 serverName = args[0].toLowerCase();
             } else {
-                serverName = Core.settings.getString(Const.SERVER_NAME_SETTING);
+                serverName = Core.settings.getString(Const.SERVER_NAME_SETTING).toLowerCase();
+                if (serverName.equals(Const.DEFAULT_SERVER_NAME)) {
+                    player.sendMessage("[scarlet]Ошибка! Обратитесь, пожалуйста, к администрации.");
+                    return;
+                }
             }
 
-            Field<Long> field = Playtime.FIELDS.get(serverName.toLowerCase());
-
-            if (field == null) {
-                // TODO: исправить бандл
+            if (!Playtime.FIELDS.containsKey(serverName)) {
+                // TODO: исправить key в бандле
                 bundled(player, "commands.connect.server-notfound", Const.SERVER_LIST);
                 return;
             }
 
             try {
-                Long time = DBHandler.get(player.uuid(), field);
+                Long time = DBHandler.get(player.uuid(), Playtime.FIELDS.get(serverName));
                 if (time != null) {
                     // TODO: изменить бандл (учитывать выбранный сервер)
                     bundled(player, "commands.playtime.msg", longToTime(time));
@@ -756,9 +759,7 @@ public class ThedimasPlugin extends Plugin {
             if (count > 24) {
                 bundled(player, "commands.admin.unit.under-limit");
                 return;
-            }
-
-            if (count < 1) {
+            } else if (count < 1) {
                 bundled(player, "commands.admin.unit.negative-count");
                 return;
             }
@@ -773,7 +774,7 @@ public class ThedimasPlugin extends Plugin {
                 unit.spawn(team, player.x, player.y);
             }
 
-            bundled(player, "commands.admin.unit.text", count, unit, team.color.toString().substring(0, 6), team);
+            bundled(player, "commands.admin.unit.text", count, unit, team.color, team);
         });
 
         handler.<Player>register("team", "<team> [username...]", "commands.admin.team.description", (args, player) -> {
