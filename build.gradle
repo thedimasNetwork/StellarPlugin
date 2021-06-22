@@ -1,11 +1,17 @@
-apply plugin: "java"
+import groovy.json.*
 
-version '1.0'
+apply plugin: 'java'
 
 sourceCompatibility = 15
 
 compileJava.options.encoding = "UTF-8"
 compileTestJava.options.encoding = "UTF-8"
+
+ext {
+    def json = new JsonSlurper()
+    def modFile = file("${sourceSets.main.resources.srcDirs.last()}/plugin.json")
+    mod = json.parseText(modFile.text)
+}
 
 repositories {
     mavenCentral()
@@ -25,7 +31,7 @@ jar {
         configurations.runtimeClasspath.collect{ it.isDirectory() ? it : zipTree(it) }
     }
 
-    from("assets/") {
+    from("assets/bundles/$mod.name/") {
         include "**"
     }
 }

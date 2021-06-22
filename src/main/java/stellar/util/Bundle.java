@@ -53,7 +53,7 @@ public class Bundle {
 
     private static StringMap load(Locale locale) {
         StringMap properties = new StringMap();
-        ResourceBundle bundle = ResourceBundle.getBundle("bundles.bundle", locale);
+        ResourceBundle bundle = ResourceBundle.getBundle("bundle", locale);
         for (String s : bundle.keySet()) {
             properties.put(s, bundle.getString(s));
         }
