@@ -19,14 +19,14 @@ jobs:
       with:
         java-version: '15'
         distribution: 'adopt'
-    - name: Set up env
-      run: echo "BUILD_VERSION=`git rev-list --count origin/master`" >> $GITHUB_ENV
     - name: Initialize submodules
       run: git submodule update --remote
+    - name: Set up env
+      run: echo "BUILD_VERSION=`git rev-list --count --all`" >> $GITHUB_ENV
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
     - name: Build with Gradle
-      run: ./gradlew clean jar -Dorg.gradle.daemon=false -PbuildVersion="${{ env.BUILD_VERSION }}"
+      run: ./gradlew jar -Dorg.gradle.daemon=false -PbuildVersion="${{ env.BUILD_VERSION }}"
     - name: Upload artifacts
       uses: actions/upload-artifact@v2
       with:
