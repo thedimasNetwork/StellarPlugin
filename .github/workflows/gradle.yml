@@ -19,8 +19,6 @@ jobs:
       with:
         java-version: '15'
         distribution: 'adopt'
-    - name: Initialize submodules
-      run: git submodule update --remote
     - name: Set up env
       run: echo "BUILD_VERSION=`git rev-list --count --all`" >> $GITHUB_ENV
     - name: Grant execute permission for gradlew
