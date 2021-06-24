@@ -2,7 +2,7 @@ package stellar;
 
 import arc.files.Fi;
 import arc.struct.StringMap;
-import arc.util.Structs;
+import arc.util.*;
 import mindustry.Vars;
 
 import java.util.*;
@@ -60,15 +60,10 @@ public class Const {
 
         for (int i = 0; i < files.length; i++) {
             String code = files[i].nameWithoutExtension();
-            code = code.substring("bundle_".length());
-
-            if (code.contains("_")) {
-                String[] codes = code.split("_");
-                supportedLocales[i] = new Locale(codes[1], codes[2]);
-            } else {
-                supportedLocales[i] = new Locale(code);
-            }
+            supportedLocales[i] = ThedimasPlugin.parseLocale(code.substring("bundle_".length()));
         }
+
+        Log.debug("Loaded locales: @", Arrays.toString(supportedLocales));
     }
 
     public static final String TEAM_LIST = "[white][yellow]sharded[], [red]crux[], [green]green[], [purple]purple[], [blue]blue[], [gray]derelict[]";

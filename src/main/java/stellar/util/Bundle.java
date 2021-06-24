@@ -21,7 +21,8 @@ public class Bundle {
     }
 
     public static boolean has(String key, Locale locale) {
-        return getOrLoad(locale).containsKey(key);
+        StringMap props = getOrLoad(locale);
+        return props != null && props.containsKey(key);
     }
 
     public static String format(String key, Locale locale, Object... values) {

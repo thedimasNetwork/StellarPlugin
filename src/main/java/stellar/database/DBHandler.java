@@ -41,7 +41,6 @@ public class DBHandler {
         preparedExecute("INSERT INTO " + Users.U_TABLE + " (" + Users.U_ALL + ") VALUES (" + Users.U_ALL_RAW + ")",
                 data.uuid, data.ip, escapeString(data.name), data.locale, data.translator, data.admin, data.banned);
         preparedExecute("INSERT INTO " + Playtime.P_TABLE + " (" + Playtime.UUID + ") VALUES (?)", data.uuid);
-
     }
 
     private static String escapeString(String text) {

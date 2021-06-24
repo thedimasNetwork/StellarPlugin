@@ -2,7 +2,7 @@ package stellar.database.tables;
 
 import stellar.database.Field;
 
-import java.util.HashMap;
+import java.util.*;
 
 public class Playtime {
     public static final String P_TABLE = "users";
@@ -36,7 +36,7 @@ public class Playtime {
     public static final Field<Long> CRAWLER_ARENA = new Field<>(P_CRAWLER_ARENA, Long.class, P_TABLE);
     public static final Field<Long> ZONE_CAPTURE = new Field<>(P_ZONE_CAPTURE, Long.class, P_TABLE);
 
-    public static final HashMap<String, Field<Long>> FIELDS = new HashMap<>();
+    public static final Map<String, Field<Long>> FIELDS = new HashMap<>();
 
     static {
         FIELDS.put(P_HUB, HUB);

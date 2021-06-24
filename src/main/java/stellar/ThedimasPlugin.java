@@ -34,7 +34,6 @@ import stellar.history.struct.Seqs;
 import stellar.util.Bundle;
 import stellar.util.Translator;
 
-import java.net.http.HttpClient;
 import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.time.*;
@@ -90,18 +89,12 @@ public class ThedimasPlugin extends Plugin {
 
             locales = new Locale[names.size];
             for (int i = 0; i < locales.length; i++) {
-                String code = names.get(i);
-                if (code.contains("_")) {
-                    String[] codes = code.split("_");
-                    locales[i] = new Locale(codes[0], codes[1]);
-                } else {
-                    locales[i] = new Locale(code);
-                }
+                locales[i] = parseLocale(names.get(i));
             }
 
             Arrays.sort(locales, Structs.comparing(l -> l.getDisplayName(l), String.CASE_INSENSITIVE_ORDER));
             locales = Seq.with(locales).and(new Locale("router")).toArray(Locale.class);
-            Log.debug("Locales: @", Arrays.toString(Const.supportedLocales));
+            Log.debug("Fetched locales: @", Arrays.toString(Const.supportedLocales));
         }, Log::err);
         // -------------------------------------------------------------------------------------------------- //
 
@@ -150,10 +143,10 @@ public class ThedimasPlugin extends Plugin {
         // ---------------------------------------ОБНОВЛЕНИЕ ПЛЕЙТАЙМА--------------------------------------- //
         Events.run(EventType.Trigger.update, () -> {
             if (interval.get(1, 3600)) { // 1 минута
-                if (Playtime.FIELDS.containsKey(Core.settings.getString(Const.SERVER_NAME_SETTING))) {
+                String serverName = Core.settings.getString(Const.SERVER_NAME_SETTING);
+                if (Playtime.FIELDS.containsKey(serverName)) {
                     for (Player p : Groups.player) {
                         try {
-                            String serverName = Core.settings.getString(Const.SERVER_NAME_SETTING);
                             Long time = DBHandler.get(p.uuid(), Playtime.FIELDS.get(serverName.toLowerCase()));
                             Objects.requireNonNull(time, "time");
                             DBHandler.update(p.uuid(), Playtime.FIELDS.get(Const.SERVER_NAME_SETTING), time + 60);
@@ -194,13 +187,11 @@ public class ThedimasPlugin extends Plugin {
                     DBHandler.update(event.player.uuid(), Users.IP, event.player.ip());
 
                     Boolean banned = DBHandler.get(event.player.uuid(), Users.BANNED);
-                    Objects.requireNonNull(banned, "banned");
-                    if(banned) {
+                    if(banned != null && banned) {
                         netServer.admins.banPlayer(event.player.uuid());
                     } else {
                         Boolean admin = DBHandler.get(event.player.uuid(), Users.ADMIN);
-                        Objects.requireNonNull(admin, "admin");
-                        if (admin) {
+                        if (admin != null && admin) {
                             admins.put(event.player.uuid(), event.player.name);
                             event.player.admin = true;
                         }
@@ -970,7 +961,7 @@ public class ThedimasPlugin extends Plugin {
         Groups.player.each(p -> bundled(p, key, values));
     }
 
-    private static Locale parseLocale(String code) {
+    protected static Locale parseLocale(String code) {
         if (code.contains("_")) {
             String[] codes = code.split("_");
             return new Locale(codes[0], codes[1]);
@@ -979,9 +970,8 @@ public class ThedimasPlugin extends Plugin {
     }
 
     private static Locale findLocale(String code) {
-        Locale currentlyLocale = parseLocale(code);
         Locale locale = Structs.find(Const.supportedLocales, l -> l.toString().equals(code) ||
-                l.equals(currentlyLocale));
+                code.startsWith(l.toString()));
         return locale != null ? locale : Const.defaultLocale();
     }
 }
