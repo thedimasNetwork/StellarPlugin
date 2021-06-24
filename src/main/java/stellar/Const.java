@@ -8,9 +8,6 @@ import mindustry.Vars;
 import java.util.*;
 
 public class Const {
-    public static final String SERVER_NAME_SETTING = "server_name";
-    public static final String DEFAULT_SERVER_NAME = "untitled";
-
     public static final String JOIN_LOG_FORMAT = "@ has joined the server | locale: @ | IP: @";
     public static final String CHAT_LOG_FORMAT = "@: @ | @";
 
@@ -22,6 +19,21 @@ public class Const {
     public static final float LIST_PAGE_SIZE = 6f;
 
     public static final String BOOL_VALUES = "1, on, yes, true, вкл, да";
+
+    public static final StringMap SERVER_NAMES = StringMap.of(
+            "[#e6bd74]\uE829[] [#f92672]thedimas [#e6bd74]\uE810[#a6e22e]HUB[#e6bd74]\uE810[]", "hub",
+            "[#e6bd74]\uE829[] [#f92672]thedimas [#e6bd74]\uE86B[#a6e22e]Survival[#e6bd74]\uE86B[]", "survival",
+            "[#e6bd74]\uE829[] [#f92672]thedimas [#e6bd74]\uE86E[#a6e22e]Attack[#e6bd74]\uE86E[]", "attack",
+            "[#e6bd74]\uE829[] [#f92672]thedimas [#e6bd74]\uE87C[#a6e22e]Sandbox[#e6bd74]\uE87C[]", "sandbox",
+            "[#e6bd74]\uE829[] [#f92672]thedimas [#e6bd74]\uE861[#a6e22e]PvP[#e6bd74]\uE861[]", "pvp",
+            "[#e6bd74]\uE829[] [#f92672]thedimas [#e6bd74]\uE861[#a6e22e]Annexation[#e6bd74]\uE861[]", "annexation",
+            "[#e6bd74]\uE829[] [#f92672]thedimas [#e6bd74]\uE876[#a6e22e]Anarchy[#e6bd74]\uE876[]", "anarchy",
+            "[#e6bd74]\uE829[] [#f92672]thedimas [#e6bd74]\uE873[#a6e22e]Campaign maps[#e6bd74]\uE873[]", "campaign_maps",
+            "[#e6bd74]\uE829[] [#f92672]thedimas [#e6bd74]\uF018[#a6e22e]MS:GO[#e6bd74]\uF018[]", "ms:go",
+            "[#e6bd74]\uE829[] [#f92672]thedimas [#e6bd74]\uE861[#a6e22e]Hex PvP[#e6bd74]\uE861[]", "hex_pvp",
+            "[#e6bd74]\uE829[] [#f92672]thedimas [#e6bd74]\uE807[#a6e22e]Castle Wars[#e6bd74]\uE807[]", "castle_wars",
+            "[#e6bd74]\uE829[] [#f92672]thedimas [#e6bd74]\uE871[#a6e22e]Crawler Arena[#e6bd74]\uE871[]", "crawler_arena",
+            "[#e6bd74]\uE829[] [#f92672]thedimas [#e6bd74]\uE853[#a6e22e]Zone Capture[#e6bd74]\uE853[]", "zone_capture");
 
     // для отложенной инициализации
     // это нужно из-за того, что Vars.locale инициализируется _не очень вовремя_
@@ -106,7 +118,7 @@ public class Const {
             "pvp", "play.thedimas.pp.ua:6504",
             "annexation", "play.thedimas.pp.ua:6505",
             "anarchy", "play.thedimas.pp.ua:6506",
-            "campaign maps", "play.thedimas.pp.ua:6507",
+            "campaign_maps", "play.thedimas.pp.ua:6507",
             "ms:go", "play.thedimas.pp.ua:6508",
             "hex_pvp", "play.thedimas.pp.ua:6509",
             "castle_wars", "play.thedimas.pp.ua:6510",

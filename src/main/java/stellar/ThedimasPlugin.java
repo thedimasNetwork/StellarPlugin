@@ -73,8 +73,6 @@ public class ThedimasPlugin extends Plugin {
     public void init() {
         Log.info("ThedimasPlugin launched!");
 
-        Core.settings.put(Const.SERVER_NAME_SETTING, Const.DEFAULT_SERVER_NAME);
-
         state.serverPaused = true;
 
         netServer.admins.addChatFilter((player, message) -> null);
@@ -143,13 +141,13 @@ public class ThedimasPlugin extends Plugin {
         // ---------------------------------------ОБНОВЛЕНИЕ ПЛЕЙТАЙМА--------------------------------------- //
         Events.run(EventType.Trigger.update, () -> {
             if (interval.get(1, 3600)) { // 1 минута
-                String serverName = Core.settings.getString(Const.SERVER_NAME_SETTING);
+                String serverName = Const.SERVER_NAMES.get((String) Administration.Config.name.get());
                 if (Playtime.FIELDS.containsKey(serverName)) {
                     for (Player p : Groups.player) {
                         try {
-                            Long time = DBHandler.get(p.uuid(), Playtime.FIELDS.get(serverName.toLowerCase()));
+                            Long time = DBHandler.get(p.uuid(), Playtime.FIELDS.get(serverName));
                             Objects.requireNonNull(time, "time");
-                            DBHandler.update(p.uuid(), Playtime.FIELDS.get(Const.SERVER_NAME_SETTING), time + 60);
+                            DBHandler.update(p.uuid(), Playtime.FIELDS.get(serverName), time + 60);
                         } catch (Throwable t) {
                             Log.err(t);
                         }
@@ -639,7 +637,7 @@ public class ThedimasPlugin extends Plugin {
 
             String serverName = args[0].toLowerCase();
             if (!Const.SERVER_ADDRESS.containsKey(serverName)) {
-                bundled(player, "commands.connect.server-notfound", Const.SERVER_LIST);
+                bundled(player, "commands.server-notfound", Const.SERVER_LIST);
                 return;
             }
 
@@ -707,24 +705,18 @@ public class ThedimasPlugin extends Plugin {
             if (args.length > 0) {
                 serverName = args[0].toLowerCase();
             } else {
-                serverName = Core.settings.getString(Const.SERVER_NAME_SETTING).toLowerCase();
-                if (serverName.equals(Const.DEFAULT_SERVER_NAME)) {
-                    player.sendMessage("[scarlet]Ошибка! Обратитесь, пожалуйста, к администрации.");
-                    return;
-                }
+                serverName = Const.SERVER_NAMES.get((String) Administration.Config.name.get());
             }
 
             if (!Playtime.FIELDS.containsKey(serverName)) {
-                // TODO: исправить key в бандле
-                bundled(player, "commands.connect.server-notfound", Const.SERVER_LIST);
+                bundled(player, "commands.playtime.server-notfound", Const.SERVER_LIST);
                 return;
             }
 
             try {
                 Long time = DBHandler.get(player.uuid(), Playtime.FIELDS.get(serverName));
                 if (time != null) {
-                    // TODO: изменить бандл (учитывать выбранный сервер)
-                    bundled(player, "commands.playtime.msg", longToTime(time));
+                    bundled(player, "commands.playtime.msg", serverName, longToTime(time));
                 }
             } catch (Throwable t) {
                 Log.err(t);

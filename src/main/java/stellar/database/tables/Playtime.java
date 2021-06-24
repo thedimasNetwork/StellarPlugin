@@ -5,7 +5,7 @@ import stellar.database.Field;
 import java.util.*;
 
 public class Playtime {
-    public static final String P_TABLE = "users";
+    public static final String P_TABLE = "playtime";
     public static final String P_UUID = "uuid";
     public static final String P_HUB = "hub";
     public static final String P_SURVIVAL = "survival";
