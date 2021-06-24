@@ -46,6 +46,7 @@ import static mindustry.Vars.*;
 public class ThedimasPlugin extends Plugin {
 
     private boolean autoPause = true;
+    private boolean rtv = true;
 
     private final Interval interval = new Interval(2);
 
@@ -434,29 +435,33 @@ public class ThedimasPlugin extends Plugin {
         });
 
         handler.register("auto-pause", "[on|off]", "Pause game with 0 people online", args -> {
-            if (args.length == 0) {
-                if (autoPause) {
-                    Log.info("Авто-пауза включена");
-                } else {
-                    Log.info("Авто-пауза выключена");
-                }
-            } else if (args[0].equalsIgnoreCase("off")) {
-                autoPause = false;
-                Log.info("Авто-пауза выключена");
-
-                Vars.state.serverPaused = false;
-                Log.info("auto-pause: @ игрок(ов) онлайн -> Игра снята с паузы...", Groups.player.size());
-            } else if (args[0].equalsIgnoreCase("on")) {
-                autoPause = true;
-                Log.info("Авто-пауза включена");
-
+            if (args.length > 0 && (args[0].equalsIgnoreCase("on") || args[0].equalsIgnoreCase("off"))) {
+                autoPause = args[0].equalsIgnoreCase("on") || !args[0].equalsIgnoreCase("off");
                 if (Groups.player.size() < 1 && autoPause) {
                     Vars.state.serverPaused = true;
                     Log.info("auto-pause: @ игроков онлайн -> Игра поставлена на паузу...", Groups.player.size());
+                } else if (!autoPause) {
+                    Vars.state.serverPaused = false;
+                    Log.info("auto-pause: @ игрок(ов) онлайн -> Игра снята с паузы...", Groups.player.size());
                 }
-            } else {
+                return;
+            } else if (args.length > 0) {
                 Log.info("auto-pause: некорректное действие");
             }
+            Log.info(autoPause ? "Авто-пауза включена" : "Авто-пауза выключена");
+        });
+
+        handler.register("rtv", "[on|off]", "disable or enable RTV", args -> {
+            if (args.length > 0 && (args[0].equalsIgnoreCase("on") || args[0].equalsIgnoreCase("off"))) {
+                rtv = args[0].equalsIgnoreCase("on") || !args[0].equalsIgnoreCase("off");
+                if (!rtv && votesRTV.size() > 0) {
+                    votesRTV.clear();
+                    bundled("commands.rtv.votes-clear");
+                }
+            } else if (args.length > 0){
+                Log.info("RTV: некорректное действие");
+            }
+            Log.info(rtv ? "RTV включен" : "RTV выключен");
         });
     }
 
@@ -579,7 +584,25 @@ public class ThedimasPlugin extends Plugin {
             }
         });
 
-        handler.<Player>register("rtv", "commands.rtv.description", (arg, player) -> {
+        handler.<Player>register("rtv", "[on|off]", "commands.rtv.description", (args, player) -> {
+            if (args.length > 0) {
+                if (!admins.containsKey(player.uuid())) {
+                    bundled(player, "commands.rtv.access-denied");
+                    return;
+                } else {
+                    rtv = !args[0].equalsIgnoreCase("off");
+                    if (!rtv && votesRTV.size() > 0) {
+                        votesRTV.clear();
+                        bundled("commands.rtv.votes-clear");
+                    }
+                }
+            }
+
+            if (!rtv) {
+                bundled(player,"commands.rtv.disabled");
+                return;
+            }
+
             votesRTV.add(player.uuid());
             int cur = votesRTV.size();
             int req = (int) Math.ceil(Const.VOTES_RATIO * Groups.player.size());
