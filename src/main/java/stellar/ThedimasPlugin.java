@@ -34,7 +34,6 @@ import stellar.history.struct.Seqs;
 import stellar.util.Bundle;
 import stellar.util.Translator;
 
-import java.net.http.HttpClient;
 import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.time.*;
@@ -90,13 +89,7 @@ public class ThedimasPlugin extends Plugin {
 
             locales = new Locale[names.size];
             for (int i = 0; i < locales.length; i++) {
-                String code = names.get(i);
-                if (code.contains("_")) {
-                    String[] codes = code.split("_");
-                    locales[i] = new Locale(codes[0], codes[1]);
-                } else {
-                    locales[i] = new Locale(code);
-                }
+                locales[i] = parseLocale(names.get(i));
             }
 
             Arrays.sort(locales, Structs.comparing(l -> l.getDisplayName(l), String.CASE_INSENSITIVE_ORDER));
@@ -970,7 +963,7 @@ public class ThedimasPlugin extends Plugin {
         Groups.player.each(p -> bundled(p, key, values));
     }
 
-    private static Locale parseLocale(String code) {
+    protected static Locale parseLocale(String code) {
         if (code.contains("_")) {
             String[] codes = code.split("_");
             return new Locale(codes[0], codes[1]);
@@ -979,9 +972,8 @@ public class ThedimasPlugin extends Plugin {
     }
 
     private static Locale findLocale(String code) {
-        Locale currentlyLocale = parseLocale(code);
         Locale locale = Structs.find(Const.supportedLocales, l -> l.toString().equals(code) ||
-                l.equals(currentlyLocale));
+                code.startsWith(l.toString()));
         return locale != null ? locale : Const.defaultLocale();
     }
 }

@@ -31,7 +31,7 @@ jar {
         configurations.runtimeClasspath.collect{ it.isDirectory() ? it : zipTree(it) }
     }
 
-    from("assets/bundles/$mod.name/") {
+    from("assets/$mod.name/") {
         include "**"
     }
 }
