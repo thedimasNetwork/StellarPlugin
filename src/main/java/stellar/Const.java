@@ -55,6 +55,7 @@ public class Const {
 
     static {
         Fi[] files = Vars.mods.list().find(mod -> mod.main instanceof ThedimasPlugin).root.child("bundles").list();
+        System.out.println(Arrays.toString(files));
         supportedLocales = new Locale[files.length + 1];
         supportedLocales[supportedLocales.length - 1] = new Locale("router"); // router
 
