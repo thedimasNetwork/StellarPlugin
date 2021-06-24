@@ -34,6 +34,7 @@ import stellar.history.struct.Seqs;
 import stellar.util.Bundle;
 import stellar.util.Translator;
 
+import java.net.http.HttpClient;
 import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.time.*;
@@ -589,12 +590,11 @@ public class ThedimasPlugin extends Plugin {
                 if (!admins.containsKey(player.uuid())) {
                     bundled(player, "commands.rtv.access-denied");
                     return;
-                } else {
-                    rtv = !args[0].equalsIgnoreCase("off");
-                    if (!rtv && votesRTV.size() > 0) {
-                        votesRTV.clear();
-                        bundled("commands.rtv.votes-clear");
-                    }
+                }
+                rtv = !args[0].equalsIgnoreCase("off");
+                if (!rtv && votesRTV.size() > 0) {
+                    votesRTV.clear();
+                    bundled("commands.rtv.votes-clear");
                 }
             }
 
@@ -970,8 +970,18 @@ public class ThedimasPlugin extends Plugin {
         Groups.player.each(p -> bundled(p, key, values));
     }
 
+    private static Locale parseLocale(String code) {
+        if (code.contains("_")) {
+            String[] codes = code.split("_");
+            return new Locale(codes[0], codes[1]);
+        }
+        return new Locale(code);
+    }
+
     private static Locale findLocale(String code) {
-        Locale locale = Structs.find(Const.supportedLocales, l -> l.toString().equals(code));
+        Locale currentlyLocale = parseLocale(code);
+        Locale locale = Structs.find(Const.supportedLocales, l -> l.toString().equals(code) ||
+                l.equals(currentlyLocale));
         return locale != null ? locale : Const.defaultLocale();
     }
 }
