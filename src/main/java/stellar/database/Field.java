@@ -45,10 +45,6 @@ public class Field<T> {
 
     @Override
     public String toString() {
-        return "Field{" +
-                "table='" + table + '\'' +
-                ", name='" + name + '\'' +
-                ", type=" + type +
-                '}';
+        return name;
     }
 }
