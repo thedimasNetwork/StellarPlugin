@@ -1,6 +1,7 @@
 package stellar;
 
 import arc.*;
+import arc.graphics.Color;
 import arc.math.*;
 import arc.struct.ObjectMap;
 import arc.struct.Seq;
@@ -11,7 +12,6 @@ import mindustry.Vars;
 import mindustry.content.*;
 import mindustry.content.Items;
 import mindustry.core.NetClient;
-import mindustry.entities.bullet.BulletType;
 import mindustry.game.*;
 import mindustry.gen.*;
 import mindustry.mod.*;
@@ -113,27 +113,9 @@ public class ThedimasPlugin extends Plugin {
                     }
                 }
 
-                float thisX = building.x;
-                float thisY = building.y;
-                float coreX = core.x;
-                float coreY = core.y;
-
-                float angle = Angles.angle(thisX, thisY, coreX, coreY);
-
-                float a = Math.abs(thisX - coreX);
-                float b = Math.abs(thisY - coreY);
-                float c = (float) Math.hypot(a, b);
-
-                BulletType bullet = Bullets.artilleryDense;
-                float baseSpeed = bullet.speed;
-                float baseLifetime = bullet.lifetime;
-
-                float lifetime = c / baseSpeed / baseLifetime;
-
+                Call.effect(Fx.padlaunch, building.tile.drawx(), building.tile.drawy(), 0, Color.white);
+                building.items.each((item, amount) -> core.items.add(item, amount));
                 Call.clearItems(building);
-                Call.createBullet(bullet, building.team, thisX, thisY, angle, 0F, 1F, lifetime);
-                Timer.schedule(() -> building.items.each((item, amount) -> core.items.add(item, amount)),
-                        lifetime * 60);
             }
         }), 0, 0.1F);
         // -------------------------------------------------------------------------------------------------- //
