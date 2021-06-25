@@ -715,8 +715,12 @@ public class ThedimasPlugin extends Plugin {
 
             try {
                 Long time = DBHandler.get(player.uuid(), Playtime.FIELDS.get(serverName));
-                if (time != null) {
-                    bundled(player, "commands.playtime.msg", serverName, longToTime(time));
+                Objects.requireNonNull(time, "time in playtime command");
+                for (ObjectMap.Entry<String, String> entry : Const.SERVER_NAMES.entries()) {
+                    if (serverName.equals(entry.value)) {
+                        bundled(player, "commands.playtime.msg", entry.key, longToTime(time));
+                        break;
+                    }
                 }
             } catch (Throwable t) {
                 Log.err(t);
