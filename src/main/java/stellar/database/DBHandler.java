@@ -1,6 +1,6 @@
 package stellar.database;
 
-import arc.util.Log;
+import arc.util.*;
 import stellar.PlayerData;
 import stellar.database.tables.Playtime;
 import stellar.database.tables.Users;
@@ -55,6 +55,7 @@ public class DBHandler {
         }
     }
 
+    @Nullable
     public static <T> T get(String uuid, Field<T> column) throws SQLException {
         String select = "SELECT " + column.getName() + " FROM " + column.getTable() + " WHERE " + Users.U_UUID + "=?";
         try (PreparedStatement prSt = getDbConnection().prepareStatement(select)) {

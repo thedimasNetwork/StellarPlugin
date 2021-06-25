@@ -146,8 +146,8 @@ public class ThedimasPlugin extends Plugin {
                     for (Player p : Groups.player) {
                         try {
                             Long time = DBHandler.get(p.uuid(), Playtime.FIELDS.get(serverName));
-                            Objects.requireNonNull(time, "time");
-                            DBHandler.update(p.uuid(), Playtime.FIELDS.get(serverName), time + 60);
+                            long computed = (time != null ? time : 0) + 60;
+                            DBHandler.update(p.uuid(), Playtime.FIELDS.get(serverName), computed);
                         } catch (Throwable t) {
                             Log.err("Failed to update playtime for player '" + p.uuid() + "'", t);
                         }
@@ -507,7 +507,7 @@ public class ThedimasPlugin extends Plugin {
 
             for (int i = 6 * page; i < Math.min(6 * (page + 1), handler.getCommandList().size); i++) {
                 CommandHandler.Command command = handler.getCommandList().get(i);
-                if (command.description.startsWith("commands.admin") && !player.admin) continue; // скипаем админские команды
+                if (command.description.startsWith("commands.admin") && !player.admin) continue; // скипаем админские команды если игрок не аднми
                 result.append("[orange] /").append(command.text).append("[white] ")
                         .append(command.paramText)
                         .append("[lightgray] - ")
@@ -715,10 +715,9 @@ public class ThedimasPlugin extends Plugin {
 
             try {
                 Long time = DBHandler.get(player.uuid(), Playtime.FIELDS.get(serverName));
-                Objects.requireNonNull(time, "time in playtime command");
                 for (ObjectMap.Entry<String, String> entry : Const.SERVER_NAMES.entries()) {
                     if (serverName.equals(entry.value)) {
-                        bundled(player, "commands.playtime.msg", entry.key, longToTime(time));
+                        bundled(player, "commands.playtime.msg", entry.key, longToTime(time != null ? time : 0L));
                         break;
                     }
                 }
@@ -842,7 +841,7 @@ public class ThedimasPlugin extends Plugin {
             }
         });
 
-        handler.<Player>register("killall", "[team]", "Убить ВСЕХ", (args, player) -> {
+        handler.<Player>register("killall", "[team]", "commands.admin.killall.description", (args, player) -> {
             if (!admins.containsKey(player.uuid())) {
                 bundled(player, "commands.access-denied");
                 return;
