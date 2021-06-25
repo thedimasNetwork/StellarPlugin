@@ -141,7 +141,7 @@ public class ThedimasPlugin extends Plugin {
         // ---------------------------------------ОБНОВЛЕНИЕ ПЛЕЙТАЙМА--------------------------------------- //
         Events.run(EventType.Trigger.update, () -> {
             if (interval.get(1, 3600)) { // 1 минута
-                String serverName = Const.SERVER_NAMES.get((String) Administration.Config.name.get());
+                String serverName = Const.SERVER_NAMES.get(Administration.Config.name.string());
                 if (Playtime.FIELDS.containsKey(serverName)) {
                     for (Player p : Groups.player) {
                         try {
@@ -149,7 +149,7 @@ public class ThedimasPlugin extends Plugin {
                             Objects.requireNonNull(time, "time");
                             DBHandler.update(p.uuid(), Playtime.FIELDS.get(serverName), time + 60);
                         } catch (Throwable t) {
-                            Log.err(t);
+                            Log.err("Failed to update playtime for player '" + p.uuid() + "'", t);
                         }
                     }
                 } else {
@@ -213,35 +213,35 @@ public class ThedimasPlugin extends Plugin {
         // -----------------------------------------------БАНЫ----------------------------------------------- //
         Events.on(EventType.PlayerBanEvent.class, event -> {
             try {
-                DBHandler.update(event.player.uuid(), Users.BANNED, true);
+                DBHandler.update(event.uuid, Users.BANNED, true);
             } catch (SQLException e) {
-                Log.err(e.getMessage());
+                Log.err("Failed to ban uuid for player '" + event.uuid + "'", e);
             }
         });
 
         Events.on(EventType.PlayerIpBanEvent.class, event -> {
+            String uuid = Groups.player.find(p -> p.ip().equalsIgnoreCase(event.ip)).uuid();
             try {
-                String uuid = Groups.player.find(p -> p.ip().equalsIgnoreCase(event.ip)).uuid();
                 DBHandler.update(uuid, Users.BANNED, true);
             } catch (SQLException e) {
-                Log.err(e.getMessage());
+                Log.err("Failed to ban ip for player '" + uuid + "'", e);
             }
         });
 
         Events.on(EventType.PlayerUnbanEvent.class, event -> {
             try {
-                DBHandler.update(event.player.uuid(), Users.BANNED, false);
+                DBHandler.update(event.uuid, Users.BANNED, false);
             } catch (SQLException e) {
-                Log.err(e.getMessage());
+                Log.err("Failed to unban uuid for player '" + event.uuid + "'", e);
             }
         });
 
         Events.on(EventType.PlayerIpUnbanEvent.class, event -> {
+            String uuid = Groups.player.find(p -> p.ip().equalsIgnoreCase(event.ip)).uuid();
             try {
-                String uuid = Groups.player.find(p -> p.ip().equalsIgnoreCase(event.ip)).uuid();
                 DBHandler.update(uuid, Users.BANNED, false);
             } catch (SQLException e) {
-                Log.err(e.getMessage());
+                Log.err("Failed to unban ip for player '" + uuid + "'", e);
             }
         });
         // -------------------------------------------------------------------------------------------------- //
