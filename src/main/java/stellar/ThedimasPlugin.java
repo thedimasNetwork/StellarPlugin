@@ -128,6 +128,9 @@ public class ThedimasPlugin extends Plugin {
                     for (Player p : Groups.player) {
                         try {
                             Long time = DBHandler.get(p.uuid(), Playtime.FIELDS.get(serverName));
+                            if (time == null) {
+                                Log.err("Player '" + p.uuid() + "' doesn't exists");
+                            }
                             long computed = (time != null ? time : 0) + 60;
                             DBHandler.update(p.uuid(), Playtime.FIELDS.get(serverName), computed);
                         } catch (Throwable t) {
@@ -135,7 +138,7 @@ public class ThedimasPlugin extends Plugin {
                         }
                     }
                 } else {
-                    Log.err("Имя сервера не существует в базе данных!");
+                    Log.err("Сервер @ не существует в базе данных!", serverName);
                 }
             }
         });
@@ -489,7 +492,8 @@ public class ThedimasPlugin extends Plugin {
 
             for (int i = 6 * page; i < Math.min(6 * (page + 1), handler.getCommandList().size); i++) {
                 CommandHandler.Command command = handler.getCommandList().get(i);
-                if (command.description.startsWith("commands.admin") && !player.admin) continue; // скипаем админские команды если игрок не аднми
+                // скипаем админские команды если игрок не админ
+                if (command.description.startsWith("commands.admin") && !player.admin) continue;
                 result.append("[orange] /").append(command.text).append("[white] ")
                         .append(command.paramText)
                         .append("[lightgray] - ")
@@ -697,6 +701,10 @@ public class ThedimasPlugin extends Plugin {
 
             try {
                 Long time = DBHandler.get(player.uuid(), Playtime.FIELDS.get(serverName));
+                if (time == null) {
+                    Log.err("Player '" + player.uuid() + "' doesn't exists");
+                }
+
                 for (ObjectMap.Entry<String, String> entry : Const.SERVER_NAMES.entries()) {
                     if (serverName.equals(entry.value)) {
                         bundled(player, "commands.playtime.msg", entry.key, longToTime(time != null ? time : 0L));
@@ -704,7 +712,7 @@ public class ThedimasPlugin extends Plugin {
                     }
                 }
             } catch (Throwable t) {
-                Log.err(t);
+                Log.err("Failed to get playtime for player '" + player.uuid() + "'", t);
             }
         });
 
