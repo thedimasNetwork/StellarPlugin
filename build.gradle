@@ -20,8 +20,7 @@ repositories {
 
 dependencies {
     compileOnly "com.github.Anuken.Mindustry:core:v127"
-    // TODO: удалить после релиза
-    implementation "com.github.Anuken.Arc:arc-core:fac3edcab52a31233b6f5c2ad0700c02eb24891a"
+    implementation "com.github.Anuken.Arc:arc-core:v127"
     runtimeOnly "mysql:mysql-connector-java:8.0.15"
 }
 
