@@ -110,19 +110,19 @@ public class Const {
             """;
 
     public static final StringMap SERVER_ADDRESS = StringMap.of(
-            "hub", "play.thedimas.pp.ua:6567",
-            "survival", "play.thedimas.pp.ua:6501",
-            "attack", "play.thedimas.pp.ua:6502",
-            "sandbox", "play.thedimas.pp.ua:6503",
-            "pvp", "play.thedimas.pp.ua:6504",
-            "annexation", "play.thedimas.pp.ua:6505",
-            "anarchy", "play.thedimas.pp.ua:6506",
-            "campaign_maps", "play.thedimas.pp.ua:6507",
-            "ms:go", "play.thedimas.pp.ua:6508",
-            "hex_pvp", "play.thedimas.pp.ua:6509",
-            "castle_wars", "play.thedimas.pp.ua:6510",
-            "crawler_arena", "play.thedimas.pp.ua:6511",
-            "zone_capture", "play.thedimas.pp.ua:6512");
+            "hub",              "v7.thedimas.pp.ua:6567",
+            "survival",         "v7.thedimas.pp.ua:6501",
+            "attack",           "v7.thedimas.pp.ua:6502",
+            "sandbox",          "v7.thedimas.pp.ua:6503",
+            "pvp",              "v7.thedimas.pp.ua:6504",
+            "annexation",       "v7.thedimas.pp.ua:6505",
+            "anarchy",          "v7.thedimas.pp.ua:6506",
+            "campaign_maps",    "v7.thedimas.pp.ua:6507",
+            "ms:go",            "v7.thedimas.pp.ua:6508",
+            "hex_pvp",          "v7.thedimas.pp.ua:6509",
+            "castle_wars",      "v7.thedimas.pp.ua:6510",
+            "crawler_arena",    "v7.thedimas.pp.ua:6511",
+            "zone_capture",     "v7.thedimas.pp.ua:6512");
 
     public static final String RULES_UK = """
             1. Не спамити/флудити в чат
