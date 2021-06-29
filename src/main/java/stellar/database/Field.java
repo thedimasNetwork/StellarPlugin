@@ -40,7 +40,7 @@ public class Field<T> {
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, type, type);
+        return Objects.hash(name, type, table);
     }
 
     @Override

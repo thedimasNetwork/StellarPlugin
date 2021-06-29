@@ -663,7 +663,7 @@ public class ThedimasPlugin extends Plugin {
                     result.append(Bundle.get("history.empty", locale)).append("\n");
                 }
 
-                for (int i = 6 * page; i < Math.min(6 * (page + 1), entries.size); i++) {
+                for (int i = 6 * page; i < Math.min(Const.LIST_PAGE_SIZE * (page + 1), entries.size); i++) {
                     HistoryEntry entry = entries.get(i);
                     result.append(entry.getMessage(locale));
                     if (detailed) {
