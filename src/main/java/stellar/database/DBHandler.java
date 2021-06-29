@@ -66,13 +66,16 @@ public class DBHandler {
         }
     }
 
+    @Nullable
     public static PlayerData get(String uuid) throws SQLException {
         String select = "SELECT " + Users.U_ALL + " FROM " + Users.U_TABLE + " WHERE " + Users.U_UUID + "=?";
         try (PreparedStatement prSt = getDbConnection().prepareStatement(select)) {
             prSt.setString(1, uuid);
 
             ResultSet data = prSt.executeQuery();
-            data.next();
+            if (!data.next()) {
+                return null;
+            }
 
             PlayerData result = new PlayerData();
             result.uuid = data.getString(Users.U_UUID);

@@ -6,7 +6,6 @@ import mindustry.gen.Player;
 import mindustry.world.Block;
 import stellar.util.Bundle;
 
-import java.text.MessageFormat;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
@@ -17,7 +16,7 @@ public class RotateEntry implements HistoryEntry {
     public final String name;
     public final Block block;
     public final int rotation;
-    public long lastAccessTime = Time.millis();
+    public long timestamp = Time.millis();
 
     public RotateEntry(Player player, Block block, int rotation) {
         this.name = NetClient.colorizeName(player.id, player.name);
@@ -31,7 +30,7 @@ public class RotateEntry implements HistoryEntry {
     }
 
     @Override
-    public long getLastAccessTime(TimeUnit unit) {
-        return unit.convert(Time.timeSinceMillis(lastAccessTime), TimeUnit.MILLISECONDS);
+    public long getTimestamp(TimeUnit unit) {
+        return unit.convert(Time.timeSinceMillis(timestamp), TimeUnit.MILLISECONDS);
     }
 }

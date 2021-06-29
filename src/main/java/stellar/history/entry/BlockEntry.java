@@ -9,13 +9,12 @@ import mindustry.gen.Unit;
 import mindustry.world.Block;
 import stellar.util.Bundle;
 
-import java.text.MessageFormat;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 public class BlockEntry implements HistoryEntry {
 
-    public final long lastAccessTime = Time.millis();
+    public final long timestamp = Time.millis();
     @Nullable
     public final String name;
     public final Unit unit;
@@ -48,7 +47,7 @@ public class BlockEntry implements HistoryEntry {
     }
 
     @Override
-    public long getLastAccessTime(TimeUnit unit) {
-        return unit.convert(Time.timeSinceMillis(lastAccessTime), TimeUnit.MILLISECONDS);
+    public long getTimestamp(TimeUnit unit) {
+        return unit.convert(Time.timeSinceMillis(timestamp), TimeUnit.MILLISECONDS);
     }
 }

@@ -372,7 +372,7 @@ public class ThedimasPlugin extends Plugin {
 
                     result.append(entry.getMessage(locale));
                     if (detailed) {
-                        result.append(Bundle.format("history.last-access-time", locale, entry.getLastAccessTime(TimeUnit.MINUTES)));
+                        result.append(Bundle.format("history.timestamp", locale, entry.getTimestamp(TimeUnit.MINUTES)));
                     }
                     result.append("\n");
                 }
@@ -667,7 +667,7 @@ public class ThedimasPlugin extends Plugin {
                     HistoryEntry entry = entries.get(i);
                     result.append(entry.getMessage(locale));
                     if (detailed) {
-                        result.append(Bundle.format("history.last-access-time", locale, entry.getLastAccessTime(TimeUnit.MINUTES)));
+                        result.append(Bundle.format("history.timestamp", locale, entry.getTimestamp(TimeUnit.MINUTES)));
                     }
                     result.append("\n");
                 }
@@ -691,7 +691,7 @@ public class ThedimasPlugin extends Plugin {
             if (args.length > 0) {
                 serverName = args[0].toLowerCase();
             } else {
-                serverName = Const.SERVER_NAMES.get((String) Administration.Config.name.get());
+                serverName = Const.SERVER_NAMES.get(Administration.Config.name.string());
             }
 
             if (!Playtime.FIELDS.containsKey(serverName)) {

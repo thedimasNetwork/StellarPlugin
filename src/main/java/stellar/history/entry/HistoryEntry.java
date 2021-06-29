@@ -7,5 +7,5 @@ public interface HistoryEntry{
 
     String getMessage(Locale locale);
 
-    long getLastAccessTime(TimeUnit unit);
+    long getTimestamp(TimeUnit unit);
 }

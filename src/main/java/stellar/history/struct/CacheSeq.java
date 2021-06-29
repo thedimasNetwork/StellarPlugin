@@ -78,8 +78,8 @@ public class CacheSeq<T> extends Seq<T> {
     }
 
     static class ValueReference<T> {
-        private long writeTime;
-        private T value;
+        private final long writeTime;
+        private final T value;
 
         public ValueReference(long writeTime, T value) {
             this.writeTime = writeTime;

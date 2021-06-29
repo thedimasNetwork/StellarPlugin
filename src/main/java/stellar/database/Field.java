@@ -35,12 +35,12 @@ public class Field<T> {
             return false;
         }
         Field<?> row = (Field<?>) o;
-        return this.name.equals(row.name) && this.type.equals(row.type) && this.table.equals(row.table);
+        return this.name.equals(row.name) && type.equals(row.type) && table.equals(row.table);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, type);
+        return Objects.hash(name, type, type);
     }
 
     @Override
