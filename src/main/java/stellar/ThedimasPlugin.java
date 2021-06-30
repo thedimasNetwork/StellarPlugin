@@ -9,6 +9,7 @@ import arc.util.*;
 import arc.util.Timer;
 import arc.util.serialization.Jval;
 import mindustry.Vars;
+import mindustry.ai.formations.Formation;
 import mindustry.content.*;
 import mindustry.content.Items;
 import mindustry.core.NetClient;
@@ -17,8 +18,7 @@ import mindustry.gen.*;
 import mindustry.mod.*;
 import mindustry.net.Administration;
 import mindustry.type.*;
-import mindustry.world.Block;
-import mindustry.world.Tile;
+import mindustry.world.*;
 import mindustry.world.blocks.campaign.LaunchPad;
 import mindustry.world.blocks.logic.LogicBlock;
 
@@ -317,6 +317,8 @@ public class ThedimasPlugin extends Plugin {
         });
 
         Events.on(EventType.BlockBuildEndEvent.class, event -> {
+            if (event.tile.build == null) return; // игнорируем ломание/строительство блоков по типу валунов
+
             HistoryEntry historyEntry = new BlockEntry(event);
             Seq<Tile> linkedTile = event.tile.getLinkedTiles(new Seq<>());
             for (Tile tile : linkedTile) {
