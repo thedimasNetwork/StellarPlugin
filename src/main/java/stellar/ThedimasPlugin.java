@@ -707,12 +707,7 @@ public class ThedimasPlugin extends Plugin {
                     Log.err("Player '" + player.uuid() + "' doesn't exists");
                 }
 
-                for (ObjectMap.Entry<String, String> entry : Const.SERVER_NAMES.entries()) {
-                    if (serverName.equals(entry.value)) {
-                        bundled(player, "commands.playtime.msg", entry.key, longToTime(time != null ? time : 0L));
-                        break;
-                    }
-                }
+                bundled(player, "commands.playtime.msg", Const.SERVER_NAMES.findKey(serverName, false), longToTime(time != null ? time : 0L));
             } catch (Throwable t) {
                 Log.err("Failed to get playtime for player '" + player.uuid() + "'", t);
             }
