@@ -9,7 +9,6 @@ import arc.util.*;
 import arc.util.Timer;
 import arc.util.serialization.Jval;
 import mindustry.Vars;
-import mindustry.ai.formations.Formation;
 import mindustry.content.*;
 import mindustry.content.Items;
 import mindustry.core.NetClient;
@@ -737,6 +736,45 @@ public class ThedimasPlugin extends Plugin {
                 String playerName = NetClient.colorizeName(player.id, player.name);
                 bundled(player, "commands.admin.name.update", playerName);
             }
+        });
+
+        handler.<Player>register("tp", "<x> <y>", "commands.admin.unit.description", (args, player) -> {
+            if (!admins.containsKey(player.uuid())) {
+                bundled(player, "commands.access-denied");
+                return;
+            }
+            if (!Strings.canParseInt(args[0]) || !Strings.canParseFloat(args[1])) {
+                player.sendMessage("[scarlet]Неверный формат числа!");
+                return;
+            }
+
+            float x = Float.parseFloat(args[0]);
+            float y = Float.parseFloat(args[1]);
+
+            if (x > world.width() || x < 0 || y > world.height() || y < 0) {
+                player.sendMessage("[scarlet]Телепортироваться за границы мира - не самая лучшая идея.");
+                return;
+            }
+
+            Tile tile = world.tileWorld(x * 8, y * 8);
+            if (!player.unit().isFlying() && (tile.solid() || tile.isDarkened())) {
+                player.sendMessage("[scarlet]Переместиться в блок не получится!");
+                return;
+            }
+
+            Unit oldUnit = player.unit();
+            UnitType type = player.unit().type;
+            float health = oldUnit.health;
+            float ammo = oldUnit.ammo;
+            boolean spawnedByCore = oldUnit.spawnedByCore;
+
+            player.unit().kill();
+            player.unit(type.spawn(player.team(), x * 8, y * 8));
+            player.unit().health = health;
+            player.unit().ammo = ammo;
+            player.unit().spawnedByCore = spawnedByCore;
+
+            player.snapSync();
         });
 
         handler.<Player>register("spawn", "<unit> [count] [team]", "commands.admin.unit.description", (args, player) -> {
