@@ -738,7 +738,7 @@ public class ThedimasPlugin extends Plugin {
             }
         });
 
-        handler.<Player>register("tp", "<x> <y>", "commands.admin.unit.description", (args, player) -> {
+        handler.<Player>register("tp", "<x> <y>", "commands.admin.tp.description", (args, player) -> {
             if (!admins.containsKey(player.uuid())) {
                 bundled(player, "commands.access-denied");
                 return;
