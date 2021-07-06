@@ -154,13 +154,10 @@ public class ThedimasPlugin extends Plugin {
             String playerName = NetClient.colorizeName(event.player.id, event.player.name);
             bundled("events.join.player-join", playerName);
 
-            if (event.player.locale.startsWith("uk")) {
-                Call.infoMessage(event.player.con, Const.WELCOME_UK);
-            } else if (event.player.locale.startsWith("ru")) {
-                Call.infoMessage(event.player.con, Const.WELCOME_RU);
-            } else {
-                Call.infoMessage(event.player.con, Const.WELCOME_EN);
-            }
+            Locale locale = findLocale(event.player.locale);
+            String rules = Bundle.get("rules", locale);
+            String welcome = Bundle.format("welcome", locale, rules);
+            Call.infoMessage(event.player.con, welcome);
 
             try {
                 if (DBHandler.userExist(event.player.uuid())) {
@@ -598,15 +595,7 @@ public class ThedimasPlugin extends Plugin {
 
         handler.<Player>register("discord", "commands.discord.description", (args, player) -> player.sendMessage("https://discord.gg/RkbFYXFU9E"));
 
-        handler.<Player>register("rules", "commands.rules.description", (args, player) -> {
-            if (player.locale.startsWith("uk")) {
-                player.sendMessage(Const.RULES_UK);
-            } else if (player.locale.startsWith("ru")) {
-                player.sendMessage(Const.RULES_RU);
-            } else {
-                player.sendMessage(Const.RULES_EN);
-            }
-        });
+        handler.<Player>register("rules", "commands.rules.description", (args, player) -> bundled(player, "rules"));
 
         handler.<Player>register("hub", "commands.hub.description", (args, player) -> {
             String[] address = Const.SERVER_ADDRESS.get("hub").split(":");
