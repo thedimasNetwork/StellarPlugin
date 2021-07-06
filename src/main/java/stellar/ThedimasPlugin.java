@@ -76,7 +76,7 @@ public class ThedimasPlugin extends Plugin {
 
         netServer.admins.addChatFilter((player, message) -> null);
 
-        // ---------------------------------------ЗАГРУЗКА ЛОКАЛИЗАЦИЙ--------------------------------------- //
+        // region загрузка локализаций
         Core.net.httpGet(ghApi + "/search/code?q=name+repo:Anuken/Mindustry+filename:bundle&per_page=100", res -> {
             Jval json = Jval.read(res.getResultAsString());
             Seq<String> names = json.get("items").asArray().map(obj -> obj.getString("name"))
@@ -93,9 +93,9 @@ public class ThedimasPlugin extends Plugin {
             locales = Seq.with(locales).and(new Locale("router")).toArray(Locale.class);
             Log.debug("Fetched locales: @", Arrays.toString(Const.supportedLocales));
         }, Log::err);
-        // -------------------------------------------------------------------------------------------------- //
+        // endregion
 
-        // -----------------------------------------ПУСКОВАЯ ПЛОЩАДКА---------------------------------------- //
+        // region пусковая площадка
         Events.on(EventType.PlayEvent.class, event -> state.rules.revealedBlocks.add(Blocks.launchPad));
 
         Timer.schedule(() -> Groups.build.each(b -> b.block instanceof LaunchPad, building -> {
@@ -117,9 +117,9 @@ public class ThedimasPlugin extends Plugin {
                 Call.clearItems(building);
             }
         }), 0, 0.1F);
-        // -------------------------------------------------------------------------------------------------- //
+        // endregion
 
-        // ---------------------------------------ОБНОВЛЕНИЕ ПЛЕЙТАЙМА--------------------------------------- //
+        //region обновление плейтайма
         Events.run(EventType.Trigger.update, () -> {
             if (interval.get(1, 3600)) { // 1 минута
                 String serverName = Const.SERVER_NAMES.get(Administration.Config.name.string());
@@ -141,9 +141,9 @@ public class ThedimasPlugin extends Plugin {
                 }
             }
         });
-        // -------------------------------------------------------------------------------------------------- //
+        // endregion
 
-        // --------------------------------------------ПОДКЛЮЧЕНИЕ------------------------------------------- //
+        // region подключение
         Events.on(EventType.PlayerJoin.class, event -> {
             if (Groups.player.size() >= 1 && autoPause && state.serverPaused) {
                 state.serverPaused = false;
@@ -189,9 +189,9 @@ public class ThedimasPlugin extends Plugin {
                 Log.err(e);
             }
         });
-        // -------------------------------------------------------------------------------------------------- //
+        // endregion
 
-        // -----------------------------------------------БАНЫ----------------------------------------------- //
+        // region баны
         Events.on(EventType.PlayerBanEvent.class, event -> {
             try {
                 DBHandler.update(event.uuid, Users.BANNED, true);
@@ -225,9 +225,9 @@ public class ThedimasPlugin extends Plugin {
                 Log.err("Failed to unban ip for player '" + uuid + "'", e);
             }
         });
-        // -------------------------------------------------------------------------------------------------- //
+        // endregion
 
-        // ---------------------------------------------ОТКЛЮЧЕНИЕ------------------------------------------- //
+        // region отключение
         Events.on(EventType.PlayerLeave.class, event -> {
             if (Groups.player.size() - 1 < 1 && autoPause) {
                 state.serverPaused = true;
@@ -248,13 +248,13 @@ public class ThedimasPlugin extends Plugin {
             String playerName = NetClient.colorizeName(event.player.id, event.player.name);
             bundled("events.leave.player-leave", playerName);
         });
-        // -------------------------------------------------------------------------------------------------- //
+        // endregion
 
         Events.on(EventType.ServerLoadEvent.class, event -> Log.info("ThedimasPlugin: Server loaded"));
 
         Events.on(EventType.GameOverEvent.class, e -> votesRTV.clear());
 
-        // ----------------------------------------------ТОРИЙКИ--------------------------------------------- //
+        // region ториевые реакторы
         Events.on(EventType.DepositEvent.class, event -> {
             Player target = event.player;
             Building building = event.tile;
@@ -279,9 +279,9 @@ public class ThedimasPlugin extends Plugin {
                 }
             }
         });
-        // -------------------------------------------------------------------------------------------------- //
+        // endregion
 
-        // ------------------------------------------------ЧАТ----------------------------------------------- //
+        // region чат
         Events.on(EventType.PlayerChatEvent.class, event -> {
             if (!event.message.startsWith("/")) {
                 Groups.player.each(otherPlayer -> {
@@ -292,9 +292,8 @@ public class ThedimasPlugin extends Plugin {
                 Log.info(Const.CHAT_LOG_FORMAT, Strings.stripColors(event.player.name), Strings.stripColors(event.message), event.player.locale);
             }
         });
-        // -------------------------------------------------------------------------------------------------- //
+        // endregion
 
-        // ----------------------------------------------ИСТОРИЯ--------------------------------------------- //
         Events.on(EventType.WorldLoadEvent.class, event -> {
             if (Groups.player.size() > 0 && autoPause) { // автопауза
                 state.serverPaused = false;
@@ -304,6 +303,7 @@ public class ThedimasPlugin extends Plugin {
             history = new CacheSeq[world.width()][world.height()];
         });
 
+        // region история
         netServer.admins.addActionFilter(action -> {
             if (action.type == Administration.ActionType.rotate) {
                 HistoryEntry entry = new RotateEntry(action.player, action.tile.build.block, action.rotation);
@@ -378,7 +378,7 @@ public class ThedimasPlugin extends Plugin {
                 event.player.sendMessage(result.toString());
             }
         });
-        // -------------------------------------------------------------------------------------------------- //
+        // endregion
     }
 
     @Override
@@ -440,7 +440,7 @@ public class ThedimasPlugin extends Plugin {
 
     @Override
     public void registerClientCommands(CommandHandler handler) {
-        // ------------------------------------------------ЧАТ----------------------------------------------- //
+        // region чат
         handler.removeCommand("a");
         handler.<Player>register("a", "<text...>", "commands.admin.a.description", (args, player) -> {
             if (!admins.containsKey(player.uuid())) {
@@ -468,7 +468,7 @@ public class ThedimasPlugin extends Plugin {
 
             Log.info("<T>" + Const.CHAT_LOG_FORMAT, Strings.stripColors(player.name), Strings.stripColors(message), player.locale);
         });
-        // -------------------------------------------------------------------------------------------------- //
+        // endregion
 
         handler.removeCommand("help");
         handler.<Player>register("help", "[page]", "commands.help.description", (args, player) -> {
@@ -701,7 +701,7 @@ public class ThedimasPlugin extends Plugin {
             }
         });
 
-        // блок "для админов"
+        // region for admins
         handler.<Player>register("admin", "commands.admin.admin.description", (args, player) -> {
             if (!admins.containsKey(player.uuid())) {
                 bundled(player, "commands.access-denied");
@@ -923,7 +923,7 @@ public class ThedimasPlugin extends Plugin {
             Events.fire(new EventType.GameOverEvent(Team.crux));
             Log.info("@ сменил карту принудительно", Strings.stripColors(player.name));
         });
-        // конец блока
+        // endregion
     }
 
     public String longToTime(long seconds) {
