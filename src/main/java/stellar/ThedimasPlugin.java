@@ -401,7 +401,7 @@ public class ThedimasPlugin extends Plugin {
                     }
                 } catch (SQLException e) {
                     Log.err(e.getMessage());
-                    Log.err("Unable to export data of player @ (@)", Strings.stripColors(info.lastName), Strings.stripColors(info.id));
+                    Log.err("Unable to export data of player @ (@)", Strings.stripColors(info.lastName), info.id);
                 }
             }
             Log.info(MessageFormat.format("Successfully exported {0} players", exported));
@@ -476,9 +476,11 @@ public class ThedimasPlugin extends Plugin {
                 bundled(player, "commands.page-not-int");
                 return;
             }
+
             Locale locale = findLocale(player.locale);
+            int hiddenCommandsCount = player.admin ? 0 : handler.getCommandList().count(c -> c.description.startsWith("commands.admin"));
+            int pages = Mathf.ceil(handler.getCommandList().size / Const.LIST_PAGE_SIZE - hiddenCommandsCount / Const.LIST_PAGE_SIZE);
             int page = args.length > 0 ? Strings.parseInt(args[0]) : 1;
-            int pages = Mathf.ceil(handler.getCommandList().size / Const.LIST_PAGE_SIZE);
 
             if (--page >= pages || page < 0) {
                 bundled(player, "commands.under-page", pages);
@@ -488,10 +490,10 @@ public class ThedimasPlugin extends Plugin {
             StringBuilder result = new StringBuilder();
             result.append(Bundle.format("commands.help.page", locale, page + 1, pages)).append("\n\n");
 
-            for (int i = 6 * page; i < Math.min(6 * (page + 1), handler.getCommandList().size); i++) {
+            handler.getCommandList().sort(c -> c.description.startsWith("commands.admin") ? 1 : -1);
+
+            for (int i = 6 * page; i < Math.min(6 * (page + 1), handler.getCommandList().size - hiddenCommandsCount); i++) {
                 CommandHandler.Command command = handler.getCommandList().get(i);
-                // скипаем админские команды если игрок не админ
-                if (command.description.startsWith("commands.admin") && !player.admin) continue;
                 result.append("[orange] /").append(command.text).append("[white] ")
                         .append(command.paramText)
                         .append("[lightgray] - ")
@@ -732,7 +734,7 @@ public class ThedimasPlugin extends Plugin {
                 bundled(player, "commands.access-denied");
                 return;
             }
-            if (!Strings.canParseInt(args[0]) || !Strings.canParseFloat(args[1])) {
+            if (!Strings.canParseFloat(args[0]) || !Strings.canParseFloat(args[1])) {
                 player.sendMessage("[scarlet]Неверный формат числа!");
                 return;
             }
