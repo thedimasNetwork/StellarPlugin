@@ -16,6 +16,7 @@ import mindustry.game.*;
 import mindustry.gen.*;
 import mindustry.mod.*;
 import mindustry.net.Administration;
+import mindustry.net.Packets;
 import mindustry.type.*;
 import mindustry.world.*;
 import mindustry.world.blocks.campaign.LaunchPad;
@@ -143,7 +144,25 @@ public class ThedimasPlugin extends Plugin {
         });
         // endregion
 
-        // region подключение
+        // region PlayerConnect
+        Events.on(EventType.PlayerConnect.class, event -> {
+            String uuid = event.player.uuid();
+            try {
+                if (DBHandler.userExist(uuid)) {
+                    Boolean banned = DBHandler.get(uuid, Users.BANNED);
+                    if(banned != null) {
+                        if (banned) {
+                            event.player.kick(Packets.KickReason.banned);
+                        }
+                    }
+                }
+            } catch (SQLException e) {
+                Log.err(e);
+            }
+        });
+        // endregion
+
+        // region PlayerJoin
         Events.on(EventType.PlayerJoin.class, event -> {
             if (Groups.player.size() >= 1 && autoPause && state.serverPaused) {
                 state.serverPaused = false;
@@ -165,15 +184,10 @@ public class ThedimasPlugin extends Plugin {
                     DBHandler.update(event.player.uuid(), Users.LOCALE, event.player.locale);
                     DBHandler.update(event.player.uuid(), Users.IP, event.player.ip());
 
-                    Boolean banned = DBHandler.get(event.player.uuid(), Users.BANNED);
-                    if(banned != null && banned) {
-                        netServer.admins.banPlayer(event.player.uuid());
-                    } else {
-                        Boolean admin = DBHandler.get(event.player.uuid(), Users.ADMIN);
-                        if (admin != null && admin) {
-                            admins.put(event.player.uuid(), event.player.name);
-                            event.player.admin = true;
-                        }
+                    Boolean admin = DBHandler.get(event.player.uuid(), Users.ADMIN);
+                    if (admin != null && admin) {
+                        admins.put(event.player.uuid(), event.player.name);
+                        event.player.admin = true;
                     }
                 } else {
                     PlayerData data = new PlayerData();
