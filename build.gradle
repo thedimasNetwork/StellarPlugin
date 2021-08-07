@@ -22,6 +22,7 @@ dependencies {
     compileOnly "com.github.Anuken.Mindustry:core:v127"
     compileOnly "com.github.Anuken.Arc:arc-core:v127"
     runtimeOnly "mysql:mysql-connector-java:8.0.15"
+    implementation "com.github.thedimasNetwork:DiscordWebhook:v1.5"
 }
 
 jar {

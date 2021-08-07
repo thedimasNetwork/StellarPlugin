@@ -32,6 +32,7 @@ import stellar.history.entry.RotateEntry;
 import stellar.history.struct.CacheSeq;
 import stellar.history.struct.Seqs;
 import stellar.util.Bundle;
+import stellar.util.DiscordLogger.DiscordLogger;
 import stellar.util.Translator;
 
 import java.sql.SQLException;
@@ -130,15 +131,18 @@ public class ThedimasPlugin extends Plugin {
                             Long time = DBHandler.get(p.uuid(), Playtime.FIELDS.get(serverName));
                             if (time == null) {
                                 Log.err("Player '" + p.uuid() + "' doesn't exists");
+                                DiscordLogger.err("Player '" + p.uuid() + "' doesn't exists");
                             }
                             long computed = (time != null ? time : 0) + 60;
                             DBHandler.update(p.uuid(), Playtime.FIELDS.get(serverName), computed);
                         } catch (Throwable t) {
                             Log.err("Failed to update playtime for player '" + p.uuid() + "'", t);
+                            DiscordLogger.err("Failed to update playtime for player '" + p.uuid() + "'", t);
                         }
                     }
                 } else {
                     Log.err("Сервер @ не существует в базе данных!", serverName);
+                    DiscordLogger.err("Сервер" + serverName + "не существует в базе данных!");
                 }
             }
         });
@@ -158,6 +162,7 @@ public class ThedimasPlugin extends Plugin {
                 }
             } catch (SQLException e) {
                 Log.err(e);
+                DiscordLogger.err(e);
             }
         });
         // endregion
@@ -201,6 +206,7 @@ public class ThedimasPlugin extends Plugin {
                 }
             } catch (SQLException e) {
                 Log.err(e);
+                DiscordLogger.err(e);
             }
         });
         // endregion
@@ -211,6 +217,7 @@ public class ThedimasPlugin extends Plugin {
                 DBHandler.update(event.uuid, Users.BANNED, true);
             } catch (SQLException e) {
                 Log.err("Failed to ban uuid for player '" + event.uuid + "'", e);
+                DiscordLogger.err("Failed to ban uuid for player '" + event.uuid + "'", e);
             }
         });
 
@@ -220,6 +227,7 @@ public class ThedimasPlugin extends Plugin {
                 DBHandler.update(uuid, Users.BANNED, true);
             } catch (SQLException e) {
                 Log.err("Failed to ban ip for player '" + uuid + "'", e);
+                DiscordLogger.err("Failed to ban ip for player '" + uuid + "'", e);
             }
         });
 
@@ -228,6 +236,7 @@ public class ThedimasPlugin extends Plugin {
                 DBHandler.update(event.uuid, Users.BANNED, false);
             } catch (SQLException e) {
                 Log.err("Failed to unban uuid for player '" + event.uuid + "'", e);
+                DiscordLogger.err("Failed to unban uuid for player '" + event.uuid + "'", e);
             }
         });
 
@@ -237,6 +246,7 @@ public class ThedimasPlugin extends Plugin {
                 DBHandler.update(uuid, Users.BANNED, false);
             } catch (SQLException e) {
                 Log.err("Failed to unban ip for player '" + uuid + "'", e);
+                DiscordLogger.err("Failed to unban ip for player '" + uuid + "'", e);
             }
         });
         // endregion
@@ -524,6 +534,7 @@ public class ThedimasPlugin extends Plugin {
             } catch (Throwable t) {
                 bundled(player, "commands.tr.error");
                 Log.err(t);
+                DiscordLogger.err(t);
                 return;
             }
 
@@ -539,6 +550,7 @@ public class ThedimasPlugin extends Plugin {
                         DBHandler.update(player.uuid(), Users.TRANSLATOR, "off");
                     } catch (Throwable t) {
                         Log.err(t);
+                        DiscordLogger.err(t);
                     }
                     bundled(player, "commands.tr.disabled");
                 }
@@ -547,6 +559,7 @@ public class ThedimasPlugin extends Plugin {
                         DBHandler.update(player.uuid(), Users.TRANSLATOR, "auto");
                     } catch (Throwable t) {
                         Log.err(t);
+                        DiscordLogger.err(t);
                     }
                     bundled(player, "commands.tr.auto");
                 }
@@ -555,6 +568,7 @@ public class ThedimasPlugin extends Plugin {
                         DBHandler.update(player.uuid(), Users.TRANSLATOR, "double");
                     } catch (Throwable t) {
                         Log.err(t);
+                        DiscordLogger.err(t);
                     }
                     bundled(player, "commands.tr.double");
                 }
@@ -568,6 +582,7 @@ public class ThedimasPlugin extends Plugin {
                         DBHandler.update(player.uuid(), Users.TRANSLATOR, target.toString());
                     } catch (Throwable t) {
                         Log.err(t);
+                        DiscordLogger.err(t);
                     }
                     bundled(player, "commands.tr.set", target);
                 }
@@ -954,6 +969,7 @@ public class ThedimasPlugin extends Plugin {
             locale = DBHandler.get(otherPlayer.uuid(), Users.TRANSLATOR);
         } catch (Throwable t) {
             Log.err(t);
+            DiscordLogger.err(t);
         }
 
         String translated = message;
