@@ -1,4 +1,4 @@
-package stellar.util.DiscordLogger;
+package stellar.util.logger;
 
 import java.awt.*;
 

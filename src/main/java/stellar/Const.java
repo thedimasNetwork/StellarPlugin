@@ -65,7 +65,7 @@ public class Const {
         }
     }
 
-    // языки для которых есть перевод
+    // языки для которых у нас есть перевод
     public static final Locale[] supportedLocales;
 
     public static Locale defaultLocale() {

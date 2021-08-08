@@ -1,11 +1,15 @@
-package stellar.util.DiscordLogger;
+package stellar.util.logger;
 
 import arc.util.Log;
+import arc.util.Nullable;
+import arc.util.Strings;
 import stellar.Const;
 import webhook.Webhook;
 import webhook.embed.Embed;
+import webhook.http.Part;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 
 @SuppressWarnings("unused")
@@ -15,7 +19,7 @@ public class DiscordLogger {
         log(level, text, null);
     }
 
-    public static void log(LogLevel level, String text, File file) {
+    public static void log(LogLevel level, String text, @Nullable Throwable th) {
         Embed embed = new Embed();
         if (text != null) {
             embed.addField(level.name, text);
@@ -28,8 +32,10 @@ public class DiscordLogger {
             new Webhook(Const.WEBHOOK_LOG_URL)
                     .addEmbed(embed)
                     .execute();
-            if (file != null) {
-                Webhook.sendFile(Const.WEBHOOK_LOG_URL, file);
+            if (th != null) {
+                Webhook.sendMultipart(Const.WEBHOOK_LOG_URL, Part.ofBytes("file0", "text/plain",
+                        Strings.getStackTrace(th).getBytes(StandardCharsets.UTF_8),
+                        "StackTrace" + Instant.now().toEpochMilli() + ".txt"));
             }
         } catch (IOException | InterruptedException e) {
             Log.err(e);
@@ -61,11 +67,7 @@ public class DiscordLogger {
     }
 
     public static void err(String text, Throwable th) {
-        File file = getStackTraceFile(th);
-        log(LogLevel.ERR, text, file);
-        if (!file.delete()) {
-            file.deleteOnExit();
-        }
+        log(LogLevel.ERR, text, th);
     }
 
     public static void errTag(String tag, String text) {
@@ -78,23 +80,5 @@ public class DiscordLogger {
 
     public static void debugTag(String tag, String text) {
         log(LogLevel.DEBUG, "[" + tag + "] " + text);
-    }
-
-    private static String getStackTrace(Throwable th) {
-        StringWriter sw = new StringWriter();
-        PrintWriter pw = new PrintWriter(sw);
-        th.printStackTrace(pw);
-        return sw.toString();
-    }
-
-    private static File getStackTraceFile(Throwable th) {
-        File file = new File(Const.PLUGIN_FOLDER, "StackTrace" + Instant.now().toEpochMilli() + ".txt");
-        try (FileWriter writer = new FileWriter(file, false)) {
-            writer.write(getStackTrace(th));
-            writer.flush();
-        } catch (IOException e) {
-            Log.err(e);
-        }
-        return file;
     }
 }
