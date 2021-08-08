@@ -32,7 +32,7 @@ import stellar.history.entry.RotateEntry;
 import stellar.history.struct.CacheSeq;
 import stellar.history.struct.Seqs;
 import stellar.util.Bundle;
-import stellar.util.DiscordLogger.DiscordLogger;
+import stellar.util.logger.DiscordLogger;
 import stellar.util.Translator;
 
 import java.sql.SQLException;
@@ -55,8 +55,10 @@ public class ThedimasPlugin extends Plugin {
 
     private CacheSeq<HistoryEntry>[][] history;
 
+    // uuid -> enable
     private final Map<String, Boolean> activeHistoryPlayers = new HashMap<>();
 
+    // uuid -> name
     private final Map<String, String> admins = new HashMap<>();
 
     private CacheSeq<HistoryEntry> getHistorySeq(int x, int y) {
