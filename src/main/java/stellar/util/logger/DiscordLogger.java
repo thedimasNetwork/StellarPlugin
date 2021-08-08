@@ -1,6 +1,5 @@
 package stellar.util.logger;
 
-import arc.util.Log;
 import arc.util.Nullable;
 import arc.util.Strings;
 import stellar.Const;
@@ -8,7 +7,6 @@ import webhook.Webhook;
 import webhook.embed.Embed;
 import webhook.http.Part;
 
-import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 
@@ -28,17 +26,14 @@ public class DiscordLogger {
         }
         embed.setColor(level.color);
 
-        try {
-            new Webhook(Const.WEBHOOK_LOG_URL)
-                    .addEmbed(embed)
-                    .execute();
-            if (th != null) {
-                Webhook.sendMultipart(Const.WEBHOOK_LOG_URL, Part.ofBytes("file0", "text/plain",
-                        Strings.getStackTrace(th).getBytes(StandardCharsets.UTF_8),
-                        "StackTrace" + Instant.now().toEpochMilli() + ".txt"));
-            }
-        } catch (IOException | InterruptedException e) {
-            Log.err(e);
+        new Webhook(Const.WEBHOOK_LOG_URL)
+                .addEmbed(embed)
+                .execute();
+
+        if (th != null) {
+            Webhook.sendMultipart(Const.WEBHOOK_LOG_URL, Part.ofBytes("file0", "text/plain",
+                    Strings.getStackTrace(th).getBytes(StandardCharsets.UTF_8),
+                    "StackTrace" + Instant.now().toEpochMilli() + ".txt"));
         }
     }
 
@@ -63,7 +58,7 @@ public class DiscordLogger {
     }
 
     public static void err(Throwable th) {
-        err(null, th);
+        log(LogLevel.ERR, null, th);
     }
 
     public static void err(String text, Throwable th) {
