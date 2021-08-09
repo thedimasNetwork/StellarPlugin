@@ -656,7 +656,7 @@ public class ThedimasPlugin extends Plugin {
             String[] address = Const.SERVER_ADDRESS.get(serverName).split(":");
             String ip = address[0];
             int port = Integer.parseInt(address[1]);
-            Vars.net.pingHost(ip, port, host -> Call.connect(player.con, ip, port), e -> bundled(player, "commands.connect.serve-offline"));
+            Vars.net.pingHost(ip, port, host -> Call.connect(player.con, ip, port), e -> bundled(player, "commands.connect.server-offline"));
         });
 
         handler.<Player>register("history", "[page] [detailed]", "commands.history.description", (args, player) -> {
