@@ -291,6 +291,7 @@ public class ThedimasPlugin extends Plugin {
                 String playerName = NetClient.colorizeName(event.player.id, event.player.name);
                 bundled("events.deposit.thorium-in-reactor", playerName, building.tileX(), building.tileY());
                 Log.info("@ положил торий в реактор (@, @)", target.name, building.tileX(), building.tileY());
+                DiscordLogger.warn(String.format("%s положил торий в реактор (%f, %f)", player.name, event.tile.x, event.tile.y));
             }
         });
 
@@ -303,6 +304,7 @@ public class ThedimasPlugin extends Plugin {
                 if (interval.get(0, 300)) {
                     bundled("events.build-select.reactor-near-core", playerName, event.tile.x, event.tile.y);
                     Log.info("@ начал строить ториевый реактор близко к ядру (@, @)", player.name, event.tile.x, event.tile.y);
+                    DiscordLogger.warn(String.format("%s начал строить ториевый реактор близко к ядру (%d, %d)", player.name, event.tile.x, event.tile.y));
                 }
             }
         });
@@ -832,6 +834,7 @@ public class ThedimasPlugin extends Plugin {
             }
 
             bundled(player, "commands.admin.unit.text", count, unit, team.color, team);
+            DiscordLogger.info(String.format("%s заспавнил %d %s для команды %s", player.name, count, unit.name, team));
         });
 
         handler.<Player>register("team", "<team> [username...]", "commands.admin.team.description", (args, player) -> {
@@ -900,6 +903,7 @@ public class ThedimasPlugin extends Plugin {
                 bundled(player, "commands.admin.killall.text");
 
                 Log.info("@ убил всех...", Strings.stripColors(player.name));
+                DiscordLogger.info(String.format("%s убил всех...", player.name));
             } else {
                 Team team = Structs.find(Team.baseTeams, t -> t.name.equalsIgnoreCase(args[0]));
                 if (team == null) {
@@ -911,6 +915,7 @@ public class ThedimasPlugin extends Plugin {
                 bundled(player, "commands.admin.killall.text-teamed", team.color, team);
 
                 Log.info("@ убил всех с команды @...", Strings.stripColors(player.name), team);
+                DiscordLogger.info(String.format("%s убил всех с команды %s...", player.name, team));
             }
         });
 
@@ -955,7 +960,8 @@ public class ThedimasPlugin extends Plugin {
             }
 
             Events.fire(new EventType.GameOverEvent(Team.crux));
-            Log.info("@ сменил карту принудительно", Strings.stripColors(player.name));
+            Log.info("@ сменил карту", Strings.stripColors(player.name));
+            DiscordLogger.info(String.format("%s сменил карту", player.name));
         });
         // endregion
     }
