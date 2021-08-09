@@ -38,7 +38,7 @@ public class Const {
             "[#e6bd74]\uE829[] [#f92672]thedimas [#e6bd74]\uE861[#a6e22e]Annexation[#e6bd74]\uE861[]", "annexation",
             "[#e6bd74]\uE829[] [#f92672]thedimas [#e6bd74]\uE876[#a6e22e]Anarchy[#e6bd74]\uE876[]", "anarchy",
             "[#e6bd74]\uE829[] [#f92672]thedimas [#e6bd74]\uE873[#a6e22e]Campaign maps[#e6bd74]\uE873[]", "campaign_maps",
-            "[#e6bd74]\uE829[] [#f92672]thedimas [#e6bd74]\uF018[#a6e22e]MS:GO[#e6bd74]\uF018[]", "ms:go",
+            "[#e6bd74]\uE829[] [#f92672]thedimas [#e6bd74]\uF018[#a6e22e]MS:GO[#e6bd74]\uF018[]", "ms_go",
             "[#e6bd74]\uE829[] [#f92672]thedimas [#e6bd74]\uE861[#a6e22e]Hex PvP[#e6bd74]\uE861[]", "hex_pvp",
             "[#e6bd74]\uE829[] [#f92672]thedimas [#e6bd74]\uE807[#a6e22e]Castle Wars[#e6bd74]\uE807[]", "castle_wars",
             "[#e6bd74]\uE829[] [#f92672]thedimas [#e6bd74]\uE871[#a6e22e]Crawler Arena[#e6bd74]\uE871[]", "crawler_arena",

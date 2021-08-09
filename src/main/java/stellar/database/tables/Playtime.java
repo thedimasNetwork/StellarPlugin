@@ -15,7 +15,7 @@ public class Playtime {
     public static final String P_ANNEXATION = "annexation";
     public static final String P_ANARCHY = "anarchy";
     public static final String P_CAMPAIGN_MAPS = "campaign_maps";
-    public static final String P_MS_GO = "ms:go";
+    public static final String P_MS_GO = "ms_go";
     public static final String P_HEX_PVP = "hex_pvp";
     public static final String P_CASTLE_WARS = "castle_wars";
     public static final String P_CRAWLER_ARENA = "crawler_arena";
