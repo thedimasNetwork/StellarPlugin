@@ -1,9 +1,11 @@
 package stellar;
 
+import arc.Core;
 import arc.files.Fi;
 import arc.struct.StringMap;
 import arc.util.*;
 import mindustry.Vars;
+import mindustry.net.Administration;
 
 import java.util.*;
 
@@ -41,6 +43,8 @@ public class Const {
             "[#e6bd74]\uE829[] [#f92672]thedimas [#e6bd74]\uE807[#a6e22e]Castle Wars[#e6bd74]\uE807[]", "castle_wars",
             "[#e6bd74]\uE829[] [#f92672]thedimas [#e6bd74]\uE871[#a6e22e]Crawler Arena[#e6bd74]\uE871[]", "crawler_arena",
             "[#e6bd74]\uE829[] [#f92672]thedimas [#e6bd74]\uE853[#a6e22e]Zone Capture[#e6bd74]\uE853[]", "zone_capture");
+
+    public static final String SERVER_NAME = SERVER_NAMES.get(Administration.Config.name.string());
 
     // для отложенной инициализации
     // это нужно из-за того, что Vars.locale инициализируется _не очень вовремя_
