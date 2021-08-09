@@ -268,6 +268,7 @@ public class ThedimasPlugin extends Plugin {
                 bundled("commands.rtv.leave", playerName, cur, req);
             }
 
+            admins.remove(event.player.uuid());
             activeHistoryPlayers.remove(event.player.uuid());
 
             Log.info(event.player.name + " has disconnected from the server");
