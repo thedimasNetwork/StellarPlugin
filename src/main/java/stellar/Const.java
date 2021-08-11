@@ -121,17 +121,17 @@ public class Const {
             """;
 
     public static final StringMap SERVER_ADDRESS = StringMap.of(
-            "hub",              "v7.thedimas.pp.ua:6567",
-            "survival",         "v7.thedimas.pp.ua:6501",
-            "attack",           "v7.thedimas.pp.ua:6502",
-            "sandbox",          "v7.thedimas.pp.ua:6503",
-            "pvp",              "v7.thedimas.pp.ua:6504",
-            "annexation",       "v7.thedimas.pp.ua:6505",
-            "anarchy",          "v7.thedimas.pp.ua:6506",
-            "campaign_maps",    "v7.thedimas.pp.ua:6507",
-            "ms:go",            "v7.thedimas.pp.ua:6508",
-            "hex_pvp",          "v7.thedimas.pp.ua:6509",
-            "castle_wars",      "v7.thedimas.pp.ua:6510",
-            "crawler_arena",    "v7.thedimas.pp.ua:6511",
-            "zone_capture",     "v7.thedimas.pp.ua:6512");
+            "hub",              "thedimas.pp.ua:6567",
+            "survival",         "thedimas.pp.ua:6501",
+            "attack",           "thedimas.pp.ua:6502",
+            "sandbox",          "thedimas.pp.ua:6503",
+            "pvp",              "thedimas.pp.ua:6504",
+            "annexation",       "thedimas.pp.ua:6505",
+            "anarchy",          "thedimas.pp.ua:6506",
+            "campaign_maps",    "thedimas.pp.ua:6507",
+            "ms:go",            "thedimas.pp.ua:6508",
+            "hex_pvp",          "thedimas.pp.ua:6509",
+            "castle_wars",      "thedimas.pp.ua:6510",
+            "crawler_arena",    "thedimas.pp.ua:6511",
+            "zone_capture",     "thedimas.pp.ua:6512");
 }
