@@ -1,6 +1,5 @@
 package stellar;
 
-import arc.Core;
 import arc.files.Fi;
 import arc.struct.StringMap;
 import arc.util.*;
@@ -14,9 +13,9 @@ import static mindustry.Vars.mods;
 public class Const {
 
     public static final String PLUGIN_FOLDER = "config/mods/" + mods.list().find(l -> l.main instanceof ThedimasPlugin).meta.name + "/";
+    public static final String PLUGIN_VERSION = mods.list().find(l -> l.main instanceof ThedimasPlugin).meta.version;
 
     public static final String WEBHOOK_LOG_URL = "https://discord.com/api/webhooks/871815826481762344/JcjvKIczuLRxpiMdItCttzU1TOqT7b2vkuDJl5Sj1etcMnmKDLy7RRWMC7Cj_KO4akvv";
-
     public static final String JOIN_LOG_FORMAT = "@ has joined the server | locale: @ | IP: @";
     public static final String CHAT_LOG_FORMAT = "@: @ | @";
 
@@ -50,6 +49,7 @@ public class Const {
     // это нужно из-за того, что Vars.locale инициализируется _не очень вовремя_
     // (из-за асинхронного запроса)
     public static class LocaleListHolder {
+
         public static final String LOCALE_LIST;
 
         static {
@@ -69,7 +69,7 @@ public class Const {
         }
     }
 
-    // языки для которых у нас есть перевод
+    // языки, для которых у нас есть перевод
     public static final Locale[] supportedLocales;
 
     public static Locale defaultLocale() {

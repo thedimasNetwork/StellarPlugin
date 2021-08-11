@@ -126,25 +126,24 @@ public class ThedimasPlugin extends Plugin {
         //region обновление плейтайма
         Events.run(EventType.Trigger.update, () -> {
             if (interval.get(1, 3600)) { // 1 минута
-                String serverName = Const.SERVER_NAMES.get(Administration.Config.name.string());
-                if (Playtime.FIELDS.containsKey(serverName)) {
+                if (Playtime.FIELDS.containsKey(Const.SERVER_NAME)) {
                     for (Player p : Groups.player) {
                         try {
-                            Long time = DBHandler.get(p.uuid(), Playtime.FIELDS.get(serverName));
+                            Long time = DBHandler.get(p.uuid(), Playtime.FIELDS.get(Const.SERVER_NAME));
                             if (time == null) {
                                 Log.err("Player '" + p.uuid() + "' doesn't exists");
                                 DiscordLogger.err("Player '" + p.uuid() + "' doesn't exists");
                             }
                             long computed = (time != null ? time : 0) + 60;
-                            DBHandler.update(p.uuid(), Playtime.FIELDS.get(serverName), computed);
+                            DBHandler.update(p.uuid(), Playtime.FIELDS.get(Const.SERVER_NAME), computed);
                         } catch (Throwable t) {
                             Log.err("Failed to update playtime for player '" + p.uuid() + "'", t);
                             DiscordLogger.err("Failed to update playtime for player '" + p.uuid() + "'", t);
                         }
                     }
                 } else {
-                    Log.err("Сервер @ не существует в базе данных!", serverName);
-                    DiscordLogger.err("Сервер" + serverName + "не существует в базе данных!");
+                    Log.err("Сервер @ не существует в базе данных!", Const.SERVER_NAME);
+                    DiscordLogger.err("Сервер " + Const.SERVER_NAME + " не существует в базе данных!");
                 }
             }
         });
@@ -156,7 +155,7 @@ public class ThedimasPlugin extends Plugin {
             try {
                 if (DBHandler.userExist(uuid)) {
                     Boolean banned = DBHandler.get(uuid, Users.BANNED);
-                    if(banned != null) {
+                    if (banned != null) {
                         if (banned) {
                             event.player.kick(Packets.KickReason.banned);
                         }
@@ -260,7 +259,7 @@ public class ThedimasPlugin extends Plugin {
                 Log.info("auto-pause: @ player connected -> Game paused...", Groups.player.size() - 1);
             }
 
-            if(votesRTV.contains(event.player.uuid())) {
+            if (votesRTV.contains(event.player.uuid())) {
                 votesRTV.remove(event.player.uuid());
                 int cur = votesRTV.size();
                 int req = (int) Math.ceil(Const.VOTES_RATIO * Groups.player.size());
@@ -286,23 +285,25 @@ public class ThedimasPlugin extends Plugin {
             Player target = event.player;
             Building building = event.tile;
 
-            if(building.block() == Blocks.thoriumReactor && event.item == Items.thorium &&
-                    target.team().cores().contains(c -> event.tile.dst(c.x, c.y) < 300)) {
+            if (building.block() == Blocks.thoriumReactor && event.item == Items.thorium
+                    && target.team().cores().contains(c -> event.tile.dst(c.x, c.y) < 300)) {
                 String playerName = NetClient.colorizeName(event.player.id, event.player.name);
                 bundled("events.deposit.thorium-in-reactor", playerName, building.tileX(), building.tileY());
+
                 Log.info("@ положил торий в реактор (@, @)", target.name, building.tileX(), building.tileY());
                 DiscordLogger.warn(String.format("%s положил торий в реактор (%f, %f)", player.name, event.tile.x, event.tile.y));
             }
         });
 
         Events.on(EventType.BuildSelectEvent.class, event -> {
-            if (!event.breaking && event.builder != null && event.builder.buildPlan() != null &&
-                    event.builder.buildPlan().block == Blocks.thoriumReactor && event.builder.isPlayer() &&
-                    event.team.cores().contains(c -> event.tile.dst(c.x, c.y) < 300)) {
+            if (!event.breaking && event.builder != null && event.builder.buildPlan() != null
+                    && event.builder.buildPlan().block == Blocks.thoriumReactor && event.builder.isPlayer()
+                    && event.team.cores().contains(c -> event.tile.dst(c.x, c.y) < 300)) {
                 Player player = event.builder.getPlayer();
                 String playerName = NetClient.colorizeName(player.id, player.name);
                 if (interval.get(0, 300)) {
                     bundled("events.build-select.reactor-near-core", playerName, event.tile.x, event.tile.y);
+
                     Log.info("@ начал строить ториевый реактор близко к ядру (@, @)", player.name, event.tile.x, event.tile.y);
                     DiscordLogger.warn(String.format("%s начал строить ториевый реактор близко к ядру (%d, %d)", player.name, event.tile.x, event.tile.y));
                 }
@@ -424,7 +425,7 @@ public class ThedimasPlugin extends Plugin {
                 data.banned = info.banned;
 
                 try {
-                    if(!DBHandler.userExist(info.id)) {
+                    if (!DBHandler.userExist(info.id)) {
                         DBHandler.save(data);
                         exported++;
                     }
@@ -460,7 +461,7 @@ public class ThedimasPlugin extends Plugin {
                     votesRTV.clear();
                     bundled("commands.rtv.votes-clear");
                 }
-            } else if (args.length > 0){
+            } else if (args.length > 0) {
                 Log.info("RTV: некорректное действие");
             }
             Log.info(rtv ? "RTV включен" : "RTV выключен");
@@ -608,7 +609,7 @@ public class ThedimasPlugin extends Plugin {
             }
 
             if (!rtv) {
-                bundled(player,"commands.rtv.disabled");
+                bundled(player, "commands.rtv.disabled");
                 return;
             }
 
@@ -626,8 +627,7 @@ public class ThedimasPlugin extends Plugin {
             }
         });
 
-        handler.<Player>register("version", "commands.version.description", (arg, player) -> bundled(player, "commands.version.msg",
-                mods.list().find(l -> l.main instanceof ThedimasPlugin).meta.version));
+        handler.<Player>register("version", "commands.version.description", (arg, player) -> bundled(player, "commands.version.msg", Const.PLUGIN_VERSION));
 
         handler.<Player>register("discord", "commands.discord.description", (args, player) -> player.sendMessage("https://discord.gg/RkbFYXFU9E"));
 
@@ -746,7 +746,7 @@ public class ThedimasPlugin extends Plugin {
             }
         });
 
-        handler.<Player>register("name", "[name...]","commands.admin.name.description", (args, player) -> {
+        handler.<Player>register("name", "[name...]", "commands.admin.name.description", (args, player) -> {
             if (!admins.containsKey(player.uuid())) {
                 bundled(player, "commands.access-denied");
                 return;
@@ -937,9 +937,9 @@ public class ThedimasPlugin extends Plugin {
             }
 
             Tile tile = player.tileOn();
-            Call.constructFinish(tile, core, player.unit(), (byte)0, player.team(), false);
+            Call.constructFinish(tile, core, player.unit(), (byte) 0, player.team(), false);
 
-            bundled(player, tile.block() == core, "commands.admin.core.success", "commands.admin.core.failed");
+            bundled(player, tile.block() == core ? "commands.admin.core.success" : "commands.admin.core.failed");
 
             Log.info("@ заспавнил ядро (@, @)", Strings.stripColors(player.name), tile.x, tile.y);
         });
