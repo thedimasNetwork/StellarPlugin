@@ -853,13 +853,13 @@ public class ThedimasPlugin extends Plugin {
                 player.team(team);
                 bundled(player, "commands.admin.team.changed", team.color, team);
             } else {
-                Player otherPlayer = Groups.player.find(p -> Strings.stripGlyphs(Strings.stripColors(p.name())).equalsIgnoreCase(args[1]));
+                Player otherPlayer = findPlayer(args[1]);
                 if (otherPlayer != null) {
                     otherPlayer.team(team);
                     bundled(otherPlayer, "commands.admin.team.updated", team.color, team);
 
                     String otherPlayerName = NetClient.colorizeName(otherPlayer.id, otherPlayer.name);
-                    bundled(player, "commands.admin.team.successful-updated", otherPlayer, team.color, team);
+                    bundled(player, "commands.admin.team.successful-updated", otherPlayer.name, team.color, team);
                 } else {
                     bundled(player, "commands.admin.team.player-notfound");
                 }
@@ -880,7 +880,7 @@ public class ThedimasPlugin extends Plugin {
                 return;
             }
 
-            Player otherPlayer = Groups.player.find(p -> Strings.stripGlyphs(Strings.stripColors(p.name())).equalsIgnoreCase(args[0]));
+            Player otherPlayer = findPlayer(args[0]);
             if (otherPlayer != null) {
                 otherPlayer.unit().kill();
                 String otherPlayerName = NetClient.colorizeName(otherPlayer.id, otherPlayer.name);
@@ -964,6 +964,29 @@ public class ThedimasPlugin extends Plugin {
             DiscordLogger.info(String.format("%s сменил карту", player.name));
         });
         // endregion
+    }
+
+    private static Player findPlayer(String name) {
+        String replacedName = name.replace('_', ' ');
+        return Groups.player.find(p -> name.equals(Strings.stripColors(p.name))
+                || name.equals(stripColorsAndGlyphs(p.name))
+                || replacedName.equals(Strings.stripColors(p.name))
+                || replacedName.equals(stripColorsAndGlyphs(p.name)));
+    }
+
+    public static String stripColorsAndGlyphs(String str) {
+        str = Strings.stripColors(str);
+
+        // because Strings.stripGlyphs() not working in 126
+        StringBuilder out = new StringBuilder(str.length());
+        for (int i = 0; i < str.length(); i++) {
+            int c = str.charAt(i);
+            if (c >= 0xE000 && c <= 0xF8FF) {
+                continue;
+            }
+            out.append((char) c);
+        }
+        return out.toString();
     }
 
     public String longToTime(long seconds) {
