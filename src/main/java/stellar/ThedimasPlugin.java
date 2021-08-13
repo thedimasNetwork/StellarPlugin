@@ -55,6 +55,8 @@ public class ThedimasPlugin extends Plugin {
 
     private CacheSeq<HistoryEntry>[][] history;
 
+    private final String[] pirates = {"valve", "igruhaorg", "tuttop"};
+
     // uuid -> enable
     private final Map<String, Boolean> activeHistoryPlayers = new HashMap<>();
 
@@ -152,6 +154,7 @@ public class ThedimasPlugin extends Plugin {
         // region PlayerConnect
         Events.on(EventType.PlayerConnect.class, event -> {
             String uuid = event.player.uuid();
+            String name = event.player.name;
             try {
                 if (DBHandler.userExist(uuid)) {
                     Boolean banned = DBHandler.get(uuid, Users.BANNED);
@@ -164,6 +167,13 @@ public class ThedimasPlugin extends Plugin {
             } catch (SQLException e) {
                 Log.err(e);
                 DiscordLogger.err(e);
+            }
+
+            for(String pirate : pirates){
+                if(name.toLowerCase().contains(pirate)){
+                    event.player.con.kick(Bundle.get("events.join.player-pirate", ThedimasPlugin.findLocale(event.player.locale)));
+                    break;
+                }
             }
         });
         // endregion
