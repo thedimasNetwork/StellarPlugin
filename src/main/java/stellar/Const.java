@@ -45,6 +45,8 @@ public class Const {
 
     public static final String SERVER_NAME = SERVER_NAMES.get(Administration.Config.name.string());
 
+    public static final String[] pirates = {"valve", "igruhaorg", "tuttop", "freetp.org", "freetp"};
+
     // для отложенной инициализации
     // это нужно из-за того, что Vars.locale инициализируется _не очень вовремя_
     // (из-за асинхронного запроса)

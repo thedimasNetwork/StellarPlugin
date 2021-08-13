@@ -55,8 +55,6 @@ public class ThedimasPlugin extends Plugin {
 
     private CacheSeq<HistoryEntry>[][] history;
 
-    private final String[] pirates = {"valve", "igruhaorg", "tuttop", "freetp.org", "freetp"};
-
     // uuid -> enable
     private final Map<String, Boolean> activeHistoryPlayers = new HashMap<>();
 
@@ -169,7 +167,7 @@ public class ThedimasPlugin extends Plugin {
                 DiscordLogger.err(e);
             }
 
-            for(String pirate : pirates){
+            for(String pirate : Const.pirates){
                 if(name.toLowerCase().contains(pirate)){
                     event.player.con.kick(Bundle.get("events.join.player-pirate", ThedimasPlugin.findLocale(event.player.locale)));
                     break;
