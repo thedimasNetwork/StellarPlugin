@@ -55,7 +55,7 @@ public class ThedimasPlugin extends Plugin {
 
     private CacheSeq<HistoryEntry>[][] history;
 
-    private final String[] pirates = {"valve", "igruhaorg", "tuttop"};
+    private final String[] pirates = {"valve","igruhaorg","tuttop", "freetp.org", "freetp"};
 
     // uuid -> enable
     private final Map<String, Boolean> activeHistoryPlayers = new HashMap<>();
