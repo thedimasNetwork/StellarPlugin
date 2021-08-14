@@ -231,7 +231,13 @@ public class ThedimasPlugin extends Plugin {
         });
 
         Events.on(EventType.PlayerIpBanEvent.class, event -> {
-            String uuid = Groups.player.find(p -> p.ip().equalsIgnoreCase(event.ip)).uuid();
+            Player target = Groups.player.find(p -> p.ip().equalsIgnoreCase(event.ip));
+            if (target == null) {
+                Log.err("No player with ip '@' found.", event.ip);
+                return;
+            }
+
+            String uuid = target.uuid();
             try {
                 DBHandler.update(uuid, Users.BANNED, true);
             } catch (SQLException e) {
@@ -250,7 +256,13 @@ public class ThedimasPlugin extends Plugin {
         });
 
         Events.on(EventType.PlayerIpUnbanEvent.class, event -> {
-            String uuid = Groups.player.find(p -> p.ip().equalsIgnoreCase(event.ip)).uuid();
+            Player target = Groups.player.find(p -> p.ip().equalsIgnoreCase(event.ip));
+            if (target == null) {
+                Log.err("No player with ip '@' found.", event.ip);
+                return;
+            }
+
+            String uuid = target.uuid();
             try {
                 DBHandler.update(uuid, Users.BANNED, false);
             } catch (SQLException e) {
