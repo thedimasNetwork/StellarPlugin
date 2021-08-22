@@ -1,7 +1,9 @@
 package stellar.history.entry;
 
 import arc.math.geom.Point2;
+import arc.struct.Seq;
 import arc.struct.StringMap;
+import arc.util.Pack;
 import arc.util.Time;
 import mindustry.content.Blocks;
 import mindustry.core.NetClient;
@@ -10,6 +12,7 @@ import mindustry.game.EventType.ConfigEvent;
 import mindustry.type.*;
 import mindustry.world.*;
 import mindustry.world.blocks.defense.Door;
+import mindustry.world.blocks.power.PowerNode;
 import stellar.util.Bundle;
 
 import java.util.Locale;
@@ -214,14 +217,35 @@ public class ConfigEntry implements HistoryEntry {
     public ConfigEntry(ConfigEvent event, boolean connect) {
         this.name = NetClient.colorizeName(event.player.id, event.player.name);
         this.block = event.tile.block;
-        this.value = event.value;
+        this.value = getConfig(event);
         this.connect = connect;
+    }
+
+    private Object getConfig(ConfigEvent event) {
+        if (block.configurations.containsKey(Integer.class) &&
+                (block.configurations.containsKey(Point2[].class) ||
+                block.configurations.containsKey(Point2.class))) {
+            int count;
+            if (block instanceof PowerNode) {
+                count = event.tile != null ? event.tile.getPowerConnections(new Seq<>()).size : 0;
+            } else {
+                count = event.tile != null ? (int) event.value : -1;
+            }
+
+            return Pack.longInt(count, (int) event.value);
+        }
+        return event.value;
     }
 
     @Override
     public String getMessage(Locale locale) {
-        if (block.configurations.containsKey(Integer.class) && block.configurations.containsKey(Point2[].class)) {
-            int data = (int) value;
+        if (block.configurations.containsKey(Integer.class) &&
+                (block.configurations.containsKey(Point2[].class) || block.configurations.containsKey(Point2.class))) {
+            int data = Pack.rightInt((long) value);
+            if (data < 0) {
+                return Bundle.get("history.config.default", locale);
+            }
+
             Tile tile = world.tile(data);
             if (tile == null) {
                 return Bundle.get("history.unknown", locale);
