@@ -136,5 +136,4 @@ public class Const {
             "zone_capture",     "[#e6bd74]\uE829[] [#f92672]thedimas [#e6bd74]\uE853[#a6e22e]Zone Capture[#e6bd74]\uE853[]");
 
     public static final String SERVER_COLUMN_NAME = Const.SERVER_ADDRESS.findKey("thedimas.pp.ua:" + Administration.Config.port.num(), false);
-
 }

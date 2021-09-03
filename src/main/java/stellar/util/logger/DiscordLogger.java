@@ -2,6 +2,7 @@ package stellar.util.logger;
 
 import arc.util.Nullable;
 import arc.util.Strings;
+import mindustry.net.Administration;
 import stellar.Const;
 import webhook.Webhook;
 import webhook.embed.Embed;
@@ -25,7 +26,7 @@ public class DiscordLogger {
             embed.setTitle(level.name);
         }
         embed.setColor(level.color)
-                .setFooter(Const.SERVER_NAME, null)
+                .setFooter(Administration.Config.name.string(), null)
                 .setTimestamp(Instant.now().toString());
 
         new Webhook(Const.WEBHOOK_LOG_URL)
