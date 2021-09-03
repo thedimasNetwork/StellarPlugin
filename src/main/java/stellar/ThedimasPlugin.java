@@ -792,7 +792,7 @@ public class ThedimasPlugin extends Plugin {
                 return;
             }
             if (!Strings.canParseFloat(args[0]) || !Strings.canParseFloat(args[1])) {
-                player.sendMessage("[scarlet]Неверный формат числа!");
+                bundled(player, "commands.incorrect-format.number");
                 return;
             }
 
@@ -800,13 +800,13 @@ public class ThedimasPlugin extends Plugin {
             float y = Float.parseFloat(args[1]);
 
             if (x > world.width() || x < 0 || y > world.height() || y < 0) {
-                player.sendMessage("[scarlet]Телепортироваться за границы мира - не самая лучшая идея.");
+                bundled(player, "commands.admin.tp.out-of-map");
                 return;
             }
 
             Tile tile = world.tileWorld(x * 8, y * 8);
             if (!player.unit().isFlying() && (tile.solid() || tile.isDarkened())) {
-                player.sendMessage("[scarlet]Переместиться в блок не получится!");
+                bundled(player, "commands.admin.tp.in-block");
                 return;
             }
 
