@@ -127,24 +127,24 @@ public class ThedimasPlugin extends Plugin {
         //region обновление плейтайма
         Events.run(EventType.Trigger.update, () -> {
             if (interval.get(1, 3600)) { // 1 минута
-                if (Playtime.FIELDS.containsKey(Const.SERVER_NAME)) {
+                if (Playtime.FIELDS.containsKey(Const.SERVER_COLUMN_NAME)) {
                     for (Player p : Groups.player) {
                         try {
-                            Long time = DBHandler.get(p.uuid(), Playtime.FIELDS.get(Const.SERVER_NAME));
+                            Long time = DBHandler.get(p.uuid(), Playtime.FIELDS.get(Const.SERVER_COLUMN_NAME));
                             if (time == null) {
                                 Log.err("Player '" + p.uuid() + "' doesn't exists");
                                 DiscordLogger.err("Player '" + p.uuid() + "' doesn't exists");
                             }
                             long computed = (time != null ? time : 0) + 60;
-                            DBHandler.update(p.uuid(), Playtime.FIELDS.get(Const.SERVER_NAME), computed);
+                            DBHandler.update(p.uuid(), Playtime.FIELDS.get(Const.SERVER_COLUMN_NAME), computed);
                         } catch (Throwable t) {
                             Log.err("Failed to update playtime for player '" + p.uuid() + "'", t);
                             DiscordLogger.err("Failed to update playtime for player '" + p.uuid() + "'", t);
                         }
                     }
                 } else {
-                    Log.err("Сервер @ не существует в базе данных!", Const.SERVER_NAME);
-                    DiscordLogger.err("Сервер " + Const.SERVER_NAME + " не существует в базе данных!");
+                    Log.err("Сервер @ не существует в базе данных!", Const.SERVER_COLUMN_NAME);
+                    DiscordLogger.err("Сервер " + Const.SERVER_COLUMN_NAME + " не существует в базе данных!");
                 }
             }
         });
@@ -168,8 +168,8 @@ public class ThedimasPlugin extends Plugin {
                 DiscordLogger.err(e);
             }
 
-            for(String pirate : Const.pirates){
-                if(name.toLowerCase().contains(pirate)){
+            for (String pirate : Const.PIRATES) {
+                if (name.toLowerCase().contains(pirate)) {
                     event.player.con.kick(Bundle.get("events.join.player-pirate", ThedimasPlugin.findLocale(event.player.locale)));
                     break;
                 }
@@ -388,8 +388,8 @@ public class ThedimasPlugin extends Plugin {
                 Seq<Building> conns = event.tile.getPowerConnections(new Seq<>());
                 connect = lastConfigEntry.value instanceof Long &&
                         (conns.any() && event.tile.block instanceof PowerNode &&
-                        conns.size > Pack.leftInt((Long) lastConfigEntry.value) ||
-                        event.value instanceof Integer && (int) event.value >= 0);
+                                conns.size > Pack.leftInt((Long) lastConfigEntry.value) ||
+                                event.value instanceof Integer && (int) event.value >= 0);
             }
 
             HistoryEntry entry = new ConfigEntry(event, connect);
@@ -736,25 +736,24 @@ public class ThedimasPlugin extends Plugin {
         });
 
         handler.<Player>register("playtime", "[server...]", "commands.playtime.description", (args, player) -> {
-            String serverName;
+            String serverColumnName;
             if (args.length > 0) {
-                serverName = args[0].toLowerCase();
+                serverColumnName = args[0].toLowerCase();
             } else {
-                serverName = Const.SERVER_NAMES.get(Administration.Config.name.string());
+                serverColumnName = Const.SERVER_COLUMN_NAME;
             }
 
-            if (!Playtime.FIELDS.containsKey(serverName)) {
+            if (!Playtime.FIELDS.containsKey(serverColumnName)) {
                 bundled(player, "commands.playtime.server-notfound", Const.SERVER_LIST);
                 return;
             }
 
             try {
-                Long time = DBHandler.get(player.uuid(), Playtime.FIELDS.get(serverName));
+                Long time = DBHandler.get(player.uuid(), Playtime.FIELDS.get(serverColumnName));
                 if (time == null) {
                     Log.err("Player '" + player.uuid() + "' doesn't exists");
                 }
-
-                bundled(player, "commands.playtime.msg", Const.SERVER_NAMES.findKey(serverName, false), longToTime(time != null ? time : 0L));
+                bundled(player, "commands.playtime.msg", Const.SERVER_NAMES.get(serverColumnName), longToTime(time != null ? time : 0L));
             } catch (Throwable t) {
                 Log.err("Failed to get playtime for player '" + player.uuid() + "'", t);
             }
