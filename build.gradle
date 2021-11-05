@@ -20,7 +20,9 @@ repositories {
 
 dependencies {
     compileOnly "com.github.Anuken.Mindustry:core:v126.2"
-    compileOnly "com.github.Anuken.Arc:arc-core:v126.2"
+    // TODO: удалить после перехода на V7
+    implementation "com.github.Anuken.Arc:arc-core:fac3edcab52a31233b6f5c2ad0700c02eb24891a"
+
     runtimeOnly "mysql:mysql-connector-java:8.0.25"
     implementation "com.github.thedimasNetwork:DiscordWebhook:v1.6"
 }
