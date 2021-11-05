@@ -49,6 +49,7 @@ public class ThedimasPlugin extends Plugin {
 
     private boolean autoPause = true;
     private boolean rtv = true;
+    private int waves = 0;
 
     private final Interval interval = new Interval(2);
 
@@ -299,7 +300,7 @@ public class ThedimasPlugin extends Plugin {
 
         Events.on(EventType.ServerLoadEvent.class, event -> Log.info("ThedimasPlugin: Server loaded"));
 
-        Events.on(EventType.GameOverEvent.class, e -> votesRTV.clear());
+        Events.on(EventType.GameOverEvent.class, event -> votesRTV.clear());
 
         // region ториевые реакторы
         Events.on(EventType.DepositEvent.class, event -> {
@@ -429,6 +430,105 @@ public class ThedimasPlugin extends Plugin {
                 }
 
                 event.player.sendMessage(result.toString());
+            }
+        });
+        // endregion
+
+        // region опыт
+        Events.on(EventType.GameOverEvent.class, event -> {
+            Gamemode gamemode = state.rules.mode();
+            Team winner = event.winner;
+            switch (gamemode) {
+                case pvp -> {
+                    for (Player p : Groups.player) {
+                        int currExp;
+                        try {
+                            currExp = DBHandler.get(p.uuid(), Users.EXP);
+                        } catch (SQLException e) {
+                            Log.err(e);
+                            continue;
+                        }
+                        if (p.team() == winner) {
+                            try {
+                                DBHandler.update(p.uuid(), Users.EXP, currExp + 1000);
+                            } catch (SQLException | NullPointerException e) {
+                                Log.err(e);
+                            }
+                        } else if (p.team() != Team.derelict) {
+                            try {
+                                DBHandler.update(p.uuid(), Users.EXP, (currExp < 200) ? currExp - 200 : 0);
+                            } catch (SQLException | NullPointerException e) {
+                                Log.err(e);
+                            }
+                        }
+                    }
+                }
+                case attack -> {
+                    for (Player p : Groups.player) {
+                        int currExp;
+                        try {
+                            currExp = DBHandler.get(p.uuid(), Users.EXP);
+                        } catch (SQLException e) {
+                            Log.err(e);
+                            continue;
+                        }
+                        try {
+                            if (winner == Team.sharded) {
+                                DBHandler.update(p.uuid(), Users.EXP, currExp + 500);
+                            } else if (winner != Team.derelict) {
+                                DBHandler.update(p.uuid(), Users.EXP, (currExp < 100) ? currExp - 100 : 0);
+                            }
+                        } catch (SQLException e) {
+                            Log.err(e);
+                        }
+                    }
+                }
+                case survival -> {
+                    if (waves > 25) {
+                        for (Player p : Groups.player) {
+                            int currExp;
+                            try {
+                                currExp = DBHandler.get(p.uuid(), Users.EXP);
+                                DBHandler.update(p.uuid(), Users.EXP, currExp + waves * 10);
+                            } catch (SQLException e) {
+                                Log.err(e);
+                            }
+                        }
+                    }
+                }
+            }
+            waves = 0;
+        });
+
+        Events.on(EventType.WaveEvent.class, event -> {
+            waves++;
+            Gamemode gamemode = state.rules.mode();
+            switch (gamemode) {
+                case survival -> {
+                    for (Player p : Groups.player) {
+                        int currExp;
+                        try {
+                            currExp = DBHandler.get(p.uuid(), Users.EXP);
+                            DBHandler.update(p.uuid(), Users.EXP, currExp + 10 * waves%10==0 ? 10 : 1);
+                        } catch (SQLException e) {
+                            Log.err(e);
+                        }
+                    }
+                }
+                case attack -> {
+                    if (!(waves>10)) {
+                        break;
+                    }
+                    for (Player p : Groups.player) {
+                        int currExp;
+                        try {
+                            currExp = DBHandler.get(p.uuid(), Users.EXP);
+                            DBHandler.update(p.uuid(), Users.EXP, (currExp < 10) ? currExp - 10 : 0);
+                        } catch (SQLException e) {
+                            Log.err(e);
+                        }
+                    }
+                }
             }
         });
         // endregion
@@ -646,7 +746,7 @@ public class ThedimasPlugin extends Plugin {
             if (cur >= req) {
                 votesRTV.clear();
                 bundled("commands.rtv.passed");
-                Events.fire(new EventType.GameOverEvent(Team.crux));
+                Events.fire(new EventType.GameOverEvent(Team.derelict));
             }
         });
 
