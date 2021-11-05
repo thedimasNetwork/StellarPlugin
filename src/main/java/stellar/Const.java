@@ -106,19 +106,19 @@ public class Const {
             """;
 
     public static final StringMap SERVER_ADDRESS = StringMap.of(
-            "hub",              "thedimas.pp.ua:6567",
-            "survival",         "thedimas.pp.ua:6501",
-            "attack",           "thedimas.pp.ua:6502",
-            "sandbox",          "thedimas.pp.ua:6503",
-            "pvp",              "thedimas.pp.ua:6504",
-            "annexation",       "thedimas.pp.ua:6505",
-            "anarchy",          "thedimas.pp.ua:6506",
-            "campaign_maps",    "thedimas.pp.ua:6507",
-            "ms_go",            "thedimas.pp.ua:6508",
-            "hex_pvp",          "thedimas.pp.ua:6509",
-            "castle_wars",      "thedimas.pp.ua:6510",
-            "crawler_arena",    "thedimas.pp.ua:6511",
-            "zone_capture",     "thedimas.pp.ua:6512");
+            "hub",              "play.thedimas.pp.ua:6567",
+            "survival",         "play.thedimas.pp.ua:6501",
+            "attack",           "play.thedimas.pp.ua:6502",
+            "sandbox",          "play.thedimas.pp.ua:6503",
+            "pvp",              "play.thedimas.pp.ua:6504",
+            "annexation",       "play.thedimas.pp.ua:6505",
+            "anarchy",          "play.thedimas.pp.ua:6506",
+            "campaign_maps",    "play.thedimas.pp.ua:6507",
+            "ms_go",            "play.thedimas.pp.ua:6508",
+            "hex_pvp",          "play.thedimas.pp.ua:6509",
+            "castle_wars",      "play.thedimas.pp.ua:6510",
+            "crawler_arena",    "play.thedimas.pp.ua:6511",
+            "zone_capture",     "play.thedimas.pp.ua:6512");
 
     public static final StringMap SERVER_NAMES = StringMap.of(
             "hub",              "[#e6bd74]\uE829[] [#f92672]thedimas [#e6bd74]\uE810[#a6e22e]HUB[#e6bd74]\uE810[]",
