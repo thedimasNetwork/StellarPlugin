@@ -1089,6 +1089,7 @@ public class ThedimasPlugin extends Plugin {
             int exp = 0;
             try {
                 exp = DBHandler.get(player.uuid(), Users.EXP);
+                player.sendMessage(Integer.toString(exp));
             } catch (SQLException e) {
                 Log.err(e);
                 return;
