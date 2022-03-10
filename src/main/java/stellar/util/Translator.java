@@ -26,7 +26,6 @@ public class Translator {
                 response.append(inputLine);
             }
         }
-        return Jval.read(response.toString()).get("sentences").asArray()
-                .firstOpt().getString("trans");
+        return response.substring(2, response.length() - 2);
     }
 }

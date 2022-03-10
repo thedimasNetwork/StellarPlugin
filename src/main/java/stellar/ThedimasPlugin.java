@@ -1085,6 +1085,15 @@ public class ThedimasPlugin extends Plugin {
             Log.info("@ сменил карту", Strings.stripColors(player.name));
             DiscordLogger.info(String.format("%s сменил карту", player.name));
         });
+        handler.<Player>register("score", "Get current score. [red]NOT TESTED[]", (args, player) -> {
+            int exp = 0;
+            try {
+                exp = DBHandler.get(player.uuid(), Users.EXP);
+            } catch (SQLException e) {
+                Log.err(e);
+                return;
+            }
+        });
         // endregion
     }
 
