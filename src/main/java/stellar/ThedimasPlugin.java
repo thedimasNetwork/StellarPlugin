@@ -191,7 +191,7 @@ public class ThedimasPlugin extends Plugin {
 
             Locale locale = findLocale(event.player.locale);
             String rules = Bundle.get("rules", locale);
-            String welcome = Bundle.format("welcome", locale, rules);
+            String welcome = Bundle.format("welcome", locale, rules, Const.DISCORD_INVITE);
             Call.infoMessage(event.player.con, welcome);
 
             try {
@@ -844,7 +844,7 @@ public class ThedimasPlugin extends Plugin {
             }
 
             if (!Playtime.FIELDS.containsKey(serverColumnName)) {
-                bundled(player, "commands.playtime.server-notfound", Const.SERVER_LIST);
+                bundled(player, "commands.server-notfound", Const.SERVER_LIST);
                 return;
             }
 
@@ -1089,8 +1089,7 @@ public class ThedimasPlugin extends Plugin {
             int exp = 0;
             try {
                 exp = DBHandler.get(player.uuid(), Users.EXP);
-                bundled(player, "commands.score.description", exp);
-                player.sendMessage(Integer.toString(exp));
+                bundled(player, "commands.score.msg", exp);
             } catch (SQLException e) {
                 Log.err(e);
                 return;

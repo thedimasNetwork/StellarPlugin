@@ -30,6 +30,8 @@ public class Const {
 
     public static final String[] PIRATES = {"valve", "igruhaorg", "tuttop", "freetp.org", "freetp"};
 
+    public static final String DISCORD_INVITE = "https://discord.gg/RkbFYXFU9E";
+
     // для отложенной инициализации
     // это нужно из-за того, что Vars.locale инициализируется _не очень вовремя_
     // (из-за асинхронного запроса)
