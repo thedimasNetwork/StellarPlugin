@@ -83,12 +83,12 @@ public class ThedimasPlugin extends Plugin {
         netServer.admins.addChatFilter((player, message) -> null);
 
         // region загрузка локализаций
-        Core.net.httpGet(ghApi + "/search/code?q=name+repo:Anuken/Mindustry+filename:bundle&per_page=100", res -> {
+        Http.get(ghApi + "/search/code?q=name+repo:Anuken/Mindustry+filename:bundle&per_page=100", res -> {
             Jval json = Jval.read(res.getResultAsString());
             Seq<String> names = json.get("items").asArray().map(obj -> obj.getString("name"))
                     .filter(str -> str.endsWith(".properties") && !str.equals("bundle.properties"))
                     .map(str -> str.substring("bundle".length() + 1, str.lastIndexOf('.')))
-                    .and("en");
+                    .add("en");
 
             locales = new Locale[names.size];
             for (int i = 0; i < locales.length; i++) {
@@ -96,7 +96,7 @@ public class ThedimasPlugin extends Plugin {
             }
 
             Arrays.sort(locales, Structs.comparing(l -> l.getDisplayName(l), String.CASE_INSENSITIVE_ORDER));
-            locales = Seq.with(locales).and(new Locale("router")).toArray(Locale.class);
+            locales = Seq.with(locales).add(new Locale("router")).toArray(Locale.class);
             Log.debug("Fetched locales: @", Arrays.toString(Const.supportedLocales));
         }, Log::err);
         // endregion
@@ -186,7 +186,7 @@ public class ThedimasPlugin extends Plugin {
             }
 
             Log.info(Const.JOIN_LOG_FORMAT, event.player.name, event.player.locale, event.player.con.address);
-            String playerName = NetClient.colorizeName(event.player.id, event.player.name);
+            String playerName = event.player.coloredName();
             bundled("events.join.player-join", playerName);
 
             Locale locale = findLocale(event.player.locale);
@@ -285,7 +285,7 @@ public class ThedimasPlugin extends Plugin {
                 votesRTV.remove(event.player.uuid());
                 int cur = votesRTV.size();
                 int req = (int) Math.ceil(Const.VOTES_RATIO * Groups.player.size());
-                String playerName = NetClient.colorizeName(event.player.id, event.player.name);
+                String playerName = event.player.coloredName();
                 bundled("commands.rtv.leave", playerName, cur, req);
             }
 
@@ -293,7 +293,7 @@ public class ThedimasPlugin extends Plugin {
             activeHistoryPlayers.remove(event.player.uuid());
 
             Log.info(event.player.name + " has disconnected from the server");
-            String playerName = NetClient.colorizeName(event.player.id, event.player.name);
+            String playerName = event.player.coloredName();
             bundled("events.leave.player-leave", playerName);
         });
         // endregion
@@ -309,7 +309,7 @@ public class ThedimasPlugin extends Plugin {
 
             if (building.block() == Blocks.thoriumReactor && event.item == Items.thorium
                     && target.team().cores().contains(c -> event.tile.dst(c.x, c.y) < 300)) {
-                String playerName = NetClient.colorizeName(event.player.id, event.player.name);
+                String playerName = event.player.coloredName();
                 bundled("events.deposit.thorium-in-reactor", playerName, building.tileX(), building.tileY());
 
                 Log.info("@ положил торий в реактор (@, @)", target.name, building.tileX(), building.tileY());
@@ -322,7 +322,7 @@ public class ThedimasPlugin extends Plugin {
                     && event.builder.buildPlan().block == Blocks.thoriumReactor && event.builder.isPlayer()
                     && event.team.cores().contains(c -> event.tile.dst(c.x, c.y) < 300)) {
                 Player player = event.builder.getPlayer();
-                String playerName = NetClient.colorizeName(player.id, player.name);
+                String playerName = player.coloredName();
                 if (interval.get(0, 300)) {
                     bundled("events.build-select.reactor-near-core", playerName, event.tile.x, event.tile.y);
 
@@ -740,7 +740,7 @@ public class ThedimasPlugin extends Plugin {
             int cur = votesRTV.size();
             int req = (int) Math.ceil(Const.VOTES_RATIO * Groups.player.size());
 
-            String playerName = NetClient.colorizeName(player.id, player.name);
+            String playerName = player.coloredName();
             bundled("commands.rtv.vote", playerName, cur, req);
 
             if (cur >= req) {
@@ -868,7 +868,7 @@ public class ThedimasPlugin extends Plugin {
             }
         });
 
-        handler.<Player>register("name", "[name...]", "commands.admin.name.description", (args, player) -> {
+        handler.<Player>register("name", "<name...>", "commands.admin.name.description", (args, player) -> {
             if (!admins.containsKey(player.uuid())) {
                 bundled(player, "commands.access-denied");
                 return;
@@ -876,11 +876,11 @@ public class ThedimasPlugin extends Plugin {
 
             if (args.length == 0) {
                 player.name(admins.get(player.uuid()));
-                String playerName = NetClient.colorizeName(player.id, player.name);
+                String playerName = player.coloredName();
                 bundled(player, "commands.admin.name.reset", playerName);
             } else {
                 player.name(args[0]);
-                String playerName = NetClient.colorizeName(player.id, player.name);
+                String playerName = player.coloredName();
                 bundled(player, "commands.admin.name.update", playerName);
             }
         });
@@ -980,7 +980,7 @@ public class ThedimasPlugin extends Plugin {
                     otherPlayer.team(team);
                     bundled(otherPlayer, "commands.admin.team.updated", team.color, team);
 
-                    String otherPlayerName = NetClient.colorizeName(otherPlayer.id, otherPlayer.name);
+                    String otherPlayerName = otherPlayer.coloredName();
                     bundled(player, "commands.admin.team.successful-updated", otherPlayer.name, team.color, team);
                 } else {
                     bundled(player, "commands.admin.team.player-notfound");
@@ -1005,7 +1005,7 @@ public class ThedimasPlugin extends Plugin {
             Player otherPlayer = findPlayer(args[0]);
             if (otherPlayer != null) {
                 otherPlayer.unit().kill();
-                String otherPlayerName = NetClient.colorizeName(otherPlayer.id, otherPlayer.name);
+                String otherPlayerName = otherPlayer.coloredName();
                 bundled(player, "commands.admin.kill.kill-another", otherPlayerName);
 
                 Log.info("@ убил @", Strings.stripColors(player.name), Strings.stripColors(otherPlayerName));
@@ -1147,7 +1147,7 @@ public class ThedimasPlugin extends Plugin {
         }
 
         String prefix = player.admin() ? "\uE82C" : "\uE872";
-        String playerName = NetClient.colorizeName(player.id, player.name);
+        String playerName = player.coloredName();
 
         return MessageFormat.format("double".equals(locale) ? Const.CHAT_FORMAT_DETAILED : Const.CHAT_FORMAT,
                 prefix, playerName, translated, message);
