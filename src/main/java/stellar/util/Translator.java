@@ -1,7 +1,5 @@
 package stellar.util;
 
-import arc.util.serialization.Jval;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -12,14 +10,18 @@ import java.nio.charset.StandardCharsets;
 
 public class Translator {
     public static String translate(String text, String langTo, String langFrom) throws IOException {
-        String urlStr = "https://clients5.google.com/translate_a/t?client=dict-chrome-ex&dt=t&ie=UTF-8&oe=UTF-8" +
-                "&q=" + URLEncoder.encode(text, StandardCharsets.UTF_8) +
+        // Второй вариант переводчика но запрос парсить сложнее
+        // * Url:  https://translate.googleapis.com/translate_a/single?client=gtx&sl=ru_RU&tl=en_US&dt=t&q=Привет
+        // * Resp: [[["Hi","Привет",null,null,10]],null,"ru",null,null,null,null,[]]
+        String urlStr = "https://clients5.google.com/translate_a/t?client=dict-chrome-ex&dt=t" +
                 "&tl=" + langTo +
-                "&sl=" + langFrom; // use "&sl=auto" for automatic translations
-        URL url = new URL(urlStr);
+                "&sl=" + langFrom + // use "&sl=auto" for automatic translations
+                "&q=" + URLEncoder.encode(text, StandardCharsets.UTF_8);
+
+                URL url = new URL(urlStr);
         StringBuilder response = new StringBuilder();
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
-        con.setRequestProperty("User-Agent", "Mozilla/5.0");
+        con.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko");
         try (BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream(), StandardCharsets.UTF_8))) {
             String inputLine;
             while ((inputLine = in.readLine()) != null) {
