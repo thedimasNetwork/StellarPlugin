@@ -19,7 +19,7 @@ public class RotateEntry implements HistoryEntry {
     public long timestamp = Time.millis();
 
     public RotateEntry(Player player, Block block, int rotation) {
-        this.name = NetClient.colorizeName(player.id, player.name);
+        this.name = player.coloredName();
         this.block = block;
         this.rotation = rotation;
     }

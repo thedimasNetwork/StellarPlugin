@@ -26,7 +26,7 @@ public class DiscordLogger {
             embed.setTitle(level.name);
         }
         embed.setColor(level.color)
-                .setFooter(Administration.Config.name.string(), null)
+                .setFooter(Administration.Config.serverName.string(), null)
                 .setTimestamp(Instant.now().toString());
 
         new Webhook(Const.WEBHOOK_LOG_URL)

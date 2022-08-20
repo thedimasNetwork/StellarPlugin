@@ -17,9 +17,9 @@ public class CacheSeq<T> extends Seq<T> {
     }
 
     @Override
-    public void add(T e) {
+    public Seq<T> add(T e) {
         if (e == null) {
-            return;
+            return null;
         }
 
         super.add(e);
@@ -27,6 +27,7 @@ public class CacheSeq<T> extends Seq<T> {
 
         cleanUpBySize();
         cleanUp();
+        return this;
     }
 
     @Override
