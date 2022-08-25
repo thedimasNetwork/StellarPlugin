@@ -19,7 +19,7 @@ import static mindustry.Vars.world;
 
 public class ConfigEntry implements HistoryEntry {
 
-    private StringMap icons;
+    private final StringMap icons = new StringMap();
 
     public final long timestamp = Time.millis();
     public final String name;
@@ -28,23 +28,16 @@ public class ConfigEntry implements HistoryEntry {
     public final boolean connect;
 
     public ConfigEntry(ConfigEvent event, boolean connect) {
-        this.name = event.player.coloredName();
-        this.block = event.tile.block;
-        this.value = getConfig(event);
-        this.connect = connect;
-    }
-
-    private StringMap getIcons() {
-        if (icons != null) {
-            return icons;
-        }
         Http.get("https://raw.githubusercontent.com/Anuken/Mindustry/v137/core/assets/icons/icons.properties", resp -> {
             for (String line : resp.getResultAsString().split("\n")) {
                 String[] arr = line.split("\\|")[0].split("=");
                 icons.put(arr[1], String.valueOf((char) Integer.parseInt(arr[0])));
             }
         });
-        return icons;
+        this.name = event.player.coloredName();
+        this.block = event.tile.block;
+        this.value = getConfig(event);
+        this.connect = connect;
     }
 
     private Object getConfig(ConfigEvent event) {
@@ -65,7 +58,6 @@ public class ConfigEntry implements HistoryEntry {
 
     @Override
     public String getMessage(Locale locale) {
-        StringMap icons = getIcons();
         if (block.configurations.containsKey(Integer.class) &&
                 (block.configurations.containsKey(Point2[].class) || block.configurations.containsKey(Point2.class))) {
             int data = Pack.rightInt((long) value);
