@@ -47,7 +47,7 @@ import static mindustry.Vars.*;
 public class ThedimasPlugin extends Plugin {
 
     public boolean autoPause = true;
-    public boolean rtv = true;
+    public boolean rtv = Core.settings.getBool("rtv", true);
     private int waves = 0;
 
     private final Interval interval = new Interval(2);
@@ -78,7 +78,6 @@ public class ThedimasPlugin extends Plugin {
         Log.info("ThedimasPlugin launched!");
 
         state.serverPaused = true;
-
         netServer.admins.addChatFilter((player, message) -> null);
 
         // region загрузка локализаций

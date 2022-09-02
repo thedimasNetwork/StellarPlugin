@@ -1,5 +1,6 @@
 package stellar.command;
 
+import arc.Core;
 import arc.struct.ObjectMap;
 import arc.util.CommandHandler;
 import arc.util.Log;
@@ -64,7 +65,9 @@ public class ServerCommands {
 
         handler.register("rtv", "[on|off]", "disable or enable RTV", args -> {
             if (args.length > 0 && (args[0].equalsIgnoreCase("on") || args[0].equalsIgnoreCase("off"))) {
-                plugin.rtv = args[0].equalsIgnoreCase("on") || !args[0].equalsIgnoreCase("off");
+                boolean enabled = args[0].equalsIgnoreCase("on") || !args[0].equalsIgnoreCase("off");
+                plugin.rtv = enabled;
+                Core.settings.put("rtv", enabled);
                 if (!plugin.rtv && plugin.votesRTV.size() > 0) {
                     plugin.votesRTV.clear();
                     ThedimasPlugin.bundled("commands.rtv.votes-clear");
