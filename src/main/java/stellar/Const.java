@@ -12,6 +12,7 @@ import static mindustry.Vars.mods;
 
 public class Const {
 
+    public static final String PLUGIN_NAME = "ThedimasMindustryPlugin";
     public static final String PLUGIN_FOLDER = "config/mods/" + mods.list().find(l -> l.main instanceof ThedimasPlugin).meta.name + "/";
     public static final String PLUGIN_VERSION = mods.list().find(l -> l.main instanceof ThedimasPlugin).meta.version;
 

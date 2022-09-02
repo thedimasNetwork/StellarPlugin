@@ -3,7 +3,6 @@ package stellar;
 import arc.*;
 import arc.graphics.Color;
 import arc.math.*;
-import arc.struct.ObjectMap;
 import arc.struct.Seq;
 import arc.util.*;
 import arc.util.Timer;
@@ -11,7 +10,6 @@ import arc.util.serialization.Jval;
 import mindustry.Vars;
 import mindustry.content.*;
 import mindustry.content.Items;
-import mindustry.core.NetClient;
 import mindustry.game.*;
 import mindustry.gen.*;
 import mindustry.mod.*;
@@ -21,8 +19,8 @@ import mindustry.type.*;
 import mindustry.world.*;
 import mindustry.world.blocks.campaign.LaunchPad;
 import mindustry.world.blocks.logic.LogicBlock;
-
 import mindustry.world.blocks.power.PowerNode;
+
 import stellar.database.*;
 import stellar.database.tables.Playtime;
 import stellar.database.tables.Users;
@@ -35,6 +33,7 @@ import stellar.history.struct.Seqs;
 import stellar.util.Bundle;
 import stellar.util.logger.DiscordLogger;
 import stellar.util.Translator;
+import stellar.command.*;
 
 import java.sql.SQLException;
 import java.text.MessageFormat;
@@ -47,13 +46,13 @@ import static mindustry.Vars.*;
 @SuppressWarnings({"unused", "unchecked"})
 public class ThedimasPlugin extends Plugin {
 
-    private boolean autoPause = true;
-    private boolean rtv = true;
+    public boolean autoPause = true;
+    public boolean rtv = true;
     private int waves = 0;
 
     private final Interval interval = new Interval(2);
 
-    private final Set<String> votesRTV = new HashSet<>();
+    public final Set<String> votesRTV = new HashSet<>();
 
     private CacheSeq<HistoryEntry>[][] history;
 
@@ -536,59 +535,7 @@ public class ThedimasPlugin extends Plugin {
 
     @Override
     public void registerServerCommands(CommandHandler handler) {
-        handler.register("export-players", "Export players into DB", args -> {
-            ObjectMap<String, Administration.PlayerInfo> playerList = Reflect.get(netServer.admins, "playerInfo");
-            int exported = 0;
-            for (Administration.PlayerInfo info : playerList.values()) {
-                PlayerData data = new PlayerData();
-                data.uuid = info.id;
-                data.ip = info.lastIP;
-                data.name = info.lastName;
-                data.admin = info.admin;
-                data.banned = info.banned;
-
-                try {
-                    if (!DBHandler.userExist(info.id)) {
-                        DBHandler.save(data);
-                        exported++;
-                    }
-                } catch (SQLException e) {
-                    Log.err(e.getMessage());
-                    Log.err("Unable to export data of player @ (@)", Strings.stripColors(info.lastName), info.id);
-                }
-            }
-            Log.info(MessageFormat.format("Successfully exported {0} players", exported));
-        });
-
-        handler.register("auto-pause", "[on|off]", "Pause game with 0 people online", args -> {
-            if (args.length > 0 && (args[0].equalsIgnoreCase("on") || args[0].equalsIgnoreCase("off"))) {
-                autoPause = args[0].equalsIgnoreCase("on") || !args[0].equalsIgnoreCase("off");
-                if (Groups.player.size() < 1 && autoPause) {
-                    Vars.state.serverPaused = true;
-                    Log.info("auto-pause: @ игроков онлайн -> Игра поставлена на паузу...", Groups.player.size());
-                } else if (!autoPause) {
-                    Vars.state.serverPaused = false;
-                    Log.info("auto-pause: @ игрок(ов) онлайн -> Игра снята с паузы...", Groups.player.size());
-                }
-                return;
-            } else if (args.length > 0) {
-                Log.info("auto-pause: некорректное действие");
-            }
-            Log.info(autoPause ? "Авто-пауза включена" : "Авто-пауза выключена");
-        });
-
-        handler.register("rtv", "[on|off]", "disable or enable RTV", args -> {
-            if (args.length > 0 && (args[0].equalsIgnoreCase("on") || args[0].equalsIgnoreCase("off"))) {
-                rtv = args[0].equalsIgnoreCase("on") || !args[0].equalsIgnoreCase("off");
-                if (!rtv && votesRTV.size() > 0) {
-                    votesRTV.clear();
-                    bundled("commands.rtv.votes-clear");
-                }
-            } else if (args.length > 0) {
-                Log.info("RTV: некорректное действие");
-            }
-            Log.info(rtv ? "RTV включен" : "RTV выключен");
-        });
+        ServerCommands.load(handler);
     }
 
     @Override

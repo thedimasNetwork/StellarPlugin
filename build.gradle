@@ -19,8 +19,8 @@ repositories {
 }
 
 dependencies {
-    compileOnly "com.github.Anuken.Mindustry:core:v137"
-    implementation "com.github.Anuken.Arc:arc-core:v137"
+    compileOnly "com.github.Anuken.Mindustry:core:v138"
+    implementation "com.github.Anuken.Arc:arc-core:v138"
 
     runtimeOnly "mysql:mysql-connector-java:8.0.25"
     implementation "com.github.thedimasNetwork:DiscordWebhook:v1.6"
