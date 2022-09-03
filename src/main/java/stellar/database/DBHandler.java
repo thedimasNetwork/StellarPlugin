@@ -1,6 +1,7 @@
 package stellar.database;
 
-import arc.util.*;
+import arc.util.Log;
+import arc.util.Nullable;
 import stellar.PlayerData;
 import stellar.database.tables.Playtime;
 import stellar.database.tables.Users;
@@ -39,12 +40,20 @@ public class DBHandler {
 
     public static void save(PlayerData data) throws SQLException {
         preparedExecute("INSERT INTO " + Users.U_TABLE + " (" + Users.U_ALL + ") VALUES (" + Users.U_ALL_RAW + ")",
-                data.uuid, data.ip, escapeString(data.name), data.locale, data.translator, data.admin, data.banned, data.exp);
-        preparedExecute("INSERT INTO " + Playtime.P_TABLE + " (" + Playtime.P_UUID + ") VALUES (?)", data.uuid);
+                data.getUuid(),
+                data.getIp(),
+                escapeString(data.getName()),
+                data.getLocale(),
+                data.getTranslator(),
+                data.isAdmin(),
+                data.isBanned(),
+                data.getExp());
+
+        preparedExecute("INSERT INTO " + Playtime.P_TABLE + " (" + Playtime.P_UUID + ") VALUES (?)", data.getUuid());
     }
 
     private static String escapeString(String text) {
-        return text.replace("&", "&amp").replace("\"","&quot").replace("'","&apos");
+        return text.replace("&", "&amp").replace("\"", "&quot").replace("'", "&apos");
     }
 
     public static boolean userExist(String uuid) throws SQLException {
@@ -77,17 +86,16 @@ public class DBHandler {
                 return null;
             }
 
-            PlayerData result = new PlayerData();
-            result.uuid = data.getString(Users.U_UUID);
-            result.ip = data.getString(Users.U_IP);
-            result.name = data.getString(Users.U_NAME);
-            result.locale = data.getString(Users.U_LOCALE);
-            result.translator = data.getString(Users.U_TRANSLATOR);
-            result.admin = data.getBoolean(Users.U_ADMIN);
-            result.banned = data.getBoolean(Users.U_BANNED);
-            result.exp = data.getInt(Users.U_EXP);
-
-            return result;
+            return PlayerData.builder()
+                    .uuid(data.getString(Users.U_UUID))
+                    .ip(data.getString(Users.U_IP))
+                    .name(data.getString(Users.U_NAME))
+                    .locale(data.getString(Users.U_LOCALE))
+                    .translator(data.getString(Users.U_TRANSLATOR))
+                    .admin(data.getBoolean(Users.U_ADMIN))
+                    .banned(data.getBoolean(Users.U_BANNED))
+                    .exp(data.getInt(Users.U_EXP))
+                    .build();
         }
     }
 
@@ -95,4 +103,5 @@ public class DBHandler {
         preparedExecute("UPDATE " + column.getTable() + " SET " + column.getName() + "=? WHERE " + Users.U_UUID + "=?",
                 value instanceof Boolean ? value : escapeString(String.valueOf(value)), uuid);
     }
+
 }

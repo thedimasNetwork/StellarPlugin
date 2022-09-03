@@ -1,28 +1,27 @@
 package stellar;
 
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Data;
+import lombok.experimental.FieldDefaults;
+
+@Data
+@Builder
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class PlayerData {
-    public String uuid;
-    public String ip;
-    public String name;
-    public String locale;
-    public String translator;
-    public boolean admin;
-    public boolean banned;
-    public int exp;
 
-    public PlayerData() {
-        translator = "double";
-        banned = false;
+    String uuid;
+    String ip;
+    String name;
+    String locale;
+    String translator;
+    boolean admin;
+    boolean banned;
+    int exp;
+
+    public static PlayerDataBuilder builder() {
+        return new PlayerDataBuilder()
+                .translator("double");
     }
 
-    public PlayerData(String uuid, String ip, String name, String locale, String translator, boolean admin, boolean banned, int exp) {
-        this.uuid = uuid;
-        this.ip = ip;
-        this.name = name;
-        this.locale = locale;
-        this.translator = translator;
-        this.admin = admin;
-        this.banned = banned;
-        this.exp = exp;
-    }
 }

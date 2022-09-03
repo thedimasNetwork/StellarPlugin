@@ -19,17 +19,20 @@ repositories {
 }
 
 dependencies {
+    annotationProcessor 'org.projectlombok:lombok:1.18.24'
+    compileOnly 'org.projectlombok:lombok:1.18.24'
+
     compileOnly "com.github.Anuken.Mindustry:core:v138"
     implementation "com.github.Anuken.Arc:arc-core:v138"
 
-    runtimeOnly "mysql:mysql-connector-java:8.0.25"
     implementation "com.github.thedimasNetwork:DiscordWebhook:v1.6"
+    runtimeOnly 'mysql:mysql-connector-java:8.0.30'
 }
 
 jar {
     archiveFileName = "${project.archivesBaseName}.jar"
     from {
-        configurations.runtimeClasspath.collect{ it.isDirectory() ? it : zipTree(it) }
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
     }
 
     from("assets/$mod.name/") {

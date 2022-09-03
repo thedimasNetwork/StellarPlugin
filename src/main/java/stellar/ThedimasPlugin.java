@@ -1,27 +1,33 @@
 package stellar;
 
-import arc.*;
+import arc.Core;
+import arc.Events;
 import arc.graphics.Color;
-import arc.math.*;
 import arc.struct.Seq;
 import arc.util.*;
-import arc.util.Timer;
 import arc.util.serialization.Jval;
-import mindustry.Vars;
-import mindustry.content.*;
+import mindustry.content.Blocks;
+import mindustry.content.Fx;
 import mindustry.content.Items;
-import mindustry.game.*;
-import mindustry.gen.*;
-import mindustry.mod.*;
+import mindustry.game.EventType;
+import mindustry.game.Gamemode;
+import mindustry.game.Team;
+import mindustry.gen.Building;
+import mindustry.gen.Call;
+import mindustry.gen.Groups;
+import mindustry.gen.Player;
+import mindustry.mod.Plugin;
 import mindustry.net.Administration;
 import mindustry.net.Packets;
-import mindustry.type.*;
-import mindustry.world.*;
+import mindustry.type.Item;
+import mindustry.world.Tile;
 import mindustry.world.blocks.campaign.LaunchPad;
 import mindustry.world.blocks.logic.LogicBlock;
 import mindustry.world.blocks.power.PowerNode;
-
-import stellar.database.*;
+import stellar.command.AdminCommands;
+import stellar.command.PlayerCommands;
+import stellar.command.ServerCommands;
+import stellar.database.DBHandler;
 import stellar.database.tables.Playtime;
 import stellar.database.tables.Users;
 import stellar.history.entry.BlockEntry;
@@ -29,16 +35,13 @@ import stellar.history.entry.ConfigEntry;
 import stellar.history.entry.HistoryEntry;
 import stellar.history.entry.RotateEntry;
 import stellar.history.struct.CacheSeq;
-import stellar.history.struct.Seqs;
 import stellar.util.Bundle;
-import stellar.util.logger.DiscordLogger;
 import stellar.util.Translator;
-import stellar.command.*;
+import stellar.util.logger.DiscordLogger;
 
 import java.sql.SQLException;
-import java.text.MessageFormat;
-import java.time.*;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 import static mindustry.Vars.*;
@@ -46,38 +49,17 @@ import static mindustry.Vars.*;
 @SuppressWarnings({"unused", "unchecked"})
 public class ThedimasPlugin extends Plugin {
 
-    public boolean autoPause = true;
-    public boolean rtv = true;
     private int waves = 0;
 
     private final Interval interval = new Interval(2);
-
-    public final Set<String> votesRTV = new HashSet<>();
-
-    public CacheSeq<HistoryEntry>[][] history;
-
-    // uuid -> enable
-    public final Map<String, Boolean> activeHistoryPlayers = new HashMap<>();
-
-    // uuid -> name
-    public final Map<String, String> admins = new HashMap<>();
-
-    public CacheSeq<HistoryEntry> getHistorySeq(int x, int y) {
-        CacheSeq<HistoryEntry> seq = history[x][y];
-        if (seq == null) {
-            history[x][y] = seq = Seqs.newBuilder()
-                    .maximumSize(15)
-                    .expireAfterWrite(Duration.ofMillis(1800000L))
-                    .build();
-        }
-        return seq;
-    }
 
     @Override
     public void init() {
         Log.info("ThedimasPlugin launched!");
 
-        state.serverPaused = true;
+        if (Core.settings.getBool("autoPause")) {
+            state.serverPaused = true;
+        }
         netServer.admins.addChatFilter((player, message) -> null);
 
         // region загрузка локализаций
@@ -123,7 +105,7 @@ public class ThedimasPlugin extends Plugin {
         }), 0, 0.1F);
         // endregion
 
-        //region обновление плейтайма
+        // region обновление плейтайма
         Events.run(EventType.Trigger.update, () -> {
             if (interval.get(1, 3600)) { // 1 минута
                 if (Playtime.FIELDS.containsKey(Const.SERVER_COLUMN_NAME)) {
@@ -178,7 +160,7 @@ public class ThedimasPlugin extends Plugin {
 
         // region PlayerJoin
         Events.on(EventType.PlayerJoin.class, event -> {
-            if (Groups.player.size() >= 1 && autoPause && state.serverPaused) {
+            if (Groups.player.size() >= 1 && Core.settings.getBool("autoPause") && state.serverPaused) {
                 state.serverPaused = false;
                 Log.info("auto-pause: @ player(s) connected -> Game unpaused...", Groups.player.size());
             }
@@ -200,16 +182,17 @@ public class ThedimasPlugin extends Plugin {
 
                     Boolean admin = DBHandler.get(event.player.uuid(), Users.ADMIN);
                     if (admin != null && admin) {
-                        admins.put(event.player.uuid(), event.player.name);
+                        Variables.admins.put(event.player.uuid(), event.player.name);
                         event.player.admin = true;
                     }
                 } else {
-                    PlayerData data = new PlayerData();
-                    data.uuid = event.player.uuid();
-                    data.ip = event.player.ip();
-                    data.name = event.player.name();
-                    data.locale = event.player.locale;
-                    data.admin = event.player.admin;
+                    PlayerData data = PlayerData.builder()
+                            .uuid(event.player.uuid())
+                            .ip(event.player.ip())
+                            .name(event.player.name())
+                            .locale(event.player.locale())
+                            .admin(event.player.admin())
+                            .build();
 
                     DBHandler.save(data);
                 }
@@ -274,21 +257,21 @@ public class ThedimasPlugin extends Plugin {
 
         // region отключение
         Events.on(EventType.PlayerLeave.class, event -> {
-            if (Groups.player.size() - 1 < 1 && autoPause) {
+            if (Groups.player.size() - 1 < 1 && Core.settings.getBool("autoPause")) {
                 state.serverPaused = true;
                 Log.info("auto-pause: @ player connected -> Game paused...", Groups.player.size() - 1);
             }
 
-            if (votesRTV.contains(event.player.uuid())) {
-                votesRTV.remove(event.player.uuid());
-                int cur = votesRTV.size();
+            if (Variables.votesRTV.contains(event.player.uuid())) {
+                Variables.votesRTV.remove(event.player.uuid());
+                int cur = Variables.votesRTV.size();
                 int req = (int) Math.ceil(Const.VOTES_RATIO * Groups.player.size());
                 String playerName = event.player.coloredName();
                 bundled("commands.rtv.leave", playerName, cur, req);
             }
 
-            admins.remove(event.player.uuid());
-            activeHistoryPlayers.remove(event.player.uuid());
+            Variables.admins.remove(event.player.uuid());
+            Variables.activeHistoryPlayers.remove(event.player.uuid());
 
             Log.info(event.player.name + " has disconnected from the server");
             String playerName = event.player.coloredName();
@@ -298,7 +281,7 @@ public class ThedimasPlugin extends Plugin {
 
         Events.on(EventType.ServerLoadEvent.class, event -> Log.info("ThedimasPlugin: Server loaded"));
 
-        Events.on(EventType.GameOverEvent.class, event -> votesRTV.clear());
+        Events.on(EventType.GameOverEvent.class, event -> Variables.votesRTV.clear());
 
         // region ториевые реакторы
         Events.on(EventType.DepositEvent.class, event -> {
@@ -335,7 +318,7 @@ public class ThedimasPlugin extends Plugin {
         Events.on(EventType.PlayerChatEvent.class, event -> {
             if (!event.message.startsWith("/")) {
                 Groups.player.each(otherPlayer -> {
-                    String msg = translateChat(event.player, otherPlayer, event.message);
+                    String msg = Translator.translateChat(event.player, otherPlayer, event.message);
                     otherPlayer.sendMessage(msg);
                 });
 
@@ -345,30 +328,32 @@ public class ThedimasPlugin extends Plugin {
         // endregion
 
         Events.on(EventType.WorldLoadEvent.class, event -> {
-            if (Groups.player.size() > 0 && autoPause) { // автопауза
+            if (Groups.player.size() > 0 && Core.settings.getBool("autoPause")) { // автопауза
                 state.serverPaused = false;
                 Log.info("auto-pause: @ player(s) connected -> Game unpaused...", Groups.player.size());
             }
 
-            history = new CacheSeq[world.width()][world.height()];
+            Variables.history = new CacheSeq[world.width()][world.height()];
         });
 
         // region история
         netServer.admins.addActionFilter(action -> {
             if (action.type == Administration.ActionType.rotate) {
                 HistoryEntry entry = new RotateEntry(action.player, action.tile.build.block, action.rotation);
-                getHistorySeq(action.tile.x, action.tile.y).add(entry);
+                Variables.getHistorySeq(action.tile.x, action.tile.y).add(entry);
             }
             return true;
         });
 
         Events.on(EventType.BlockBuildEndEvent.class, event -> {
-            if (event.tile.build == null) return; // игнорируем ломание/строительство блоков по типу валунов
+            if (event.tile.build == null) {
+                return; // игнорируем ломание/строительство блоков по типу валунов
+            }
 
             HistoryEntry historyEntry = new BlockEntry(event);
             Seq<Tile> linkedTile = event.tile.getLinkedTiles(new Seq<>());
             for (Tile tile : linkedTile) {
-                getHistorySeq(tile.x, tile.y).add(historyEntry);
+                Variables.getHistorySeq(tile.x, tile.y).add(historyEntry);
             }
         });
 
@@ -377,7 +362,7 @@ public class ThedimasPlugin extends Plugin {
                 return;
             }
 
-            CacheSeq<HistoryEntry> entries = getHistorySeq(event.tile.tileX(), event.tile.tileY());
+            CacheSeq<HistoryEntry> entries = Variables.getHistorySeq(event.tile.tileX(), event.tile.tileY());
             boolean connect = true;
 
             HistoryEntry last = entries.peek();
@@ -395,18 +380,18 @@ public class ThedimasPlugin extends Plugin {
 
             Seq<Tile> linkedTile = event.tile.tile.getLinkedTiles(new Seq<>());
             for (Tile tile : linkedTile) {
-                getHistorySeq(tile.x, tile.y).add(entry);
+                Variables.getHistorySeq(tile.x, tile.y).add(entry);
             }
         });
 
         Events.on(EventType.TapEvent.class, event -> {
-            if (activeHistoryPlayers.containsKey(event.player.uuid())) {
+            if (Variables.activeHistoryPlayers.containsKey(event.player.uuid())) {
                 int x = event.tile.x;
                 int y = event.tile.y;
 
-                CacheSeq<HistoryEntry> entries = getHistorySeq(x, y);
+                CacheSeq<HistoryEntry> entries = Variables.getHistorySeq(x, y);
 
-                boolean detailed = activeHistoryPlayers.get(event.player.uuid());
+                boolean detailed = Variables.activeHistoryPlayers.get(event.player.uuid());
 
                 StringBuilder result = new StringBuilder();
                 Locale locale = findLocale(event.player.locale);
@@ -507,14 +492,14 @@ public class ThedimasPlugin extends Plugin {
                         int currExp;
                         try {
                             currExp = DBHandler.get(p.uuid(), Users.EXP);
-                            DBHandler.update(p.uuid(), Users.EXP, currExp + 10 * waves%10==0 ? 10 : 1);
+                            DBHandler.update(p.uuid(), Users.EXP, currExp + 10 * waves % 10 == 0 ? 10 : 1);
                         } catch (SQLException e) {
                             Log.err(e);
                         }
                     }
                 }
                 case attack -> {
-                    if (!(waves>10)) {
+                    if (!(waves > 10)) {
                         break;
                     }
                     for (Player p : Groups.player) {
@@ -566,38 +551,6 @@ public class ThedimasPlugin extends Plugin {
         return out.toString();
     }
 
-    public String longToTime(long seconds) {
-        long min = seconds / 60;
-        long hour = min / 60;
-        return String.format("%d:%02d:%02d", hour, min % 60, seconds % 60);
-    }
-
-    public String translateChat(Player player, Player otherPlayer, String message) {
-        String locale = otherPlayer.locale;
-        try {
-            locale = DBHandler.get(otherPlayer.uuid(), Users.TRANSLATOR);
-        } catch (Throwable t) {
-            Log.err(t);
-            DiscordLogger.err(t);
-        }
-
-        String translated = message;
-        if (!otherPlayer.locale.equals(player.locale()) && !"off".equals(locale)) {
-            try {
-                String targetLocale = "auto".equals(locale) || "double".equals(locale) ? otherPlayer.locale : locale;
-                translated = Translator.translate(message, targetLocale, "auto");
-            } catch (Throwable t) {
-                Log.err(t);
-            }
-        }
-
-        String prefix = player.admin() ? "\uE82C" : "\uE872";
-        String playerName = player.coloredName();
-
-        return MessageFormat.format("double".equals(locale) ? Const.CHAT_FORMAT_DETAILED : Const.CHAT_FORMAT,
-                prefix, playerName, translated, message);
-    }
-
     public static void bundled(Player player, boolean condition, String keyTrue, String keyFalse, Object... values) {
         String key = condition ? keyTrue : keyFalse;
         player.sendMessage(Bundle.format(key, findLocale(player.locale), values));
@@ -611,7 +564,7 @@ public class ThedimasPlugin extends Plugin {
         Groups.player.each(p -> bundled(p, key, values));
     }
 
-    protected static Locale parseLocale(String code) {
+    public static Locale parseLocale(String code) {
         if (code.contains("_")) {
             String[] codes = code.split("_");
             return new Locale(codes[0], codes[1]);
@@ -624,4 +577,5 @@ public class ThedimasPlugin extends Plugin {
                 code.startsWith(l.toString()));
         return locale != null ? locale : Const.defaultLocale();
     }
+
 }

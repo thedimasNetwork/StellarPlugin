@@ -15,17 +15,18 @@ import mindustry.world.Block;
 import mindustry.world.Tile;
 import stellar.Const;
 import stellar.ThedimasPlugin;
+import stellar.Variables;
+import stellar.util.Translator;
 import stellar.util.logger.DiscordLogger;
 
 import static mindustry.Vars.world;
 
 public class AdminCommands {
-    public static void load(CommandHandler handler) {
-        ThedimasPlugin plugin = (ThedimasPlugin) Vars.mods.getMod(Const.PLUGIN_NAME).main;
-        
-        handler.removeCommand("a");
-        handler.<Player>register("a", "<text...>", "commands.admin.a.description", (args, player) -> {
-            if (!plugin.admins.containsKey(player.uuid())) {
+
+    public static void load(CommandHandler commandHandler) {
+        commandHandler.removeCommand("a");
+        commandHandler.<Player>register("a", "<text...>", "commands.admin.a.description", (args, player) -> {
+            if (!Variables.admins.containsKey(player.uuid())) {
                 ThedimasPlugin.bundled(player, "commands.access-denied");
                 Log.info("@ попытался отправить сообщение админам", Strings.stripColors(player.name));
                 return;
@@ -33,29 +34,29 @@ public class AdminCommands {
 
             String message = args[0];
             Groups.player.each(Player::admin, otherPlayer -> {
-                String msg = plugin.translateChat(player, otherPlayer, message);
+                String msg = Translator.translateChat(player, otherPlayer, message);
                 otherPlayer.sendMessage("<[scarlet]A[]>" + msg);
             });
 
             Log.info("<A>" + Const.CHAT_LOG_FORMAT, Strings.stripColors(player.name), Strings.stripColors(message), player.locale);
         });
 
-        handler.<Player>register("admin", "commands.admin.admin.description", (args, player) -> {
-            if (!plugin.admins.containsKey(player.uuid())) {
+        commandHandler.<Player>register("admin", "commands.admin.admin.description", (args, player) -> {
+            if (!Variables.admins.containsKey(player.uuid())) {
                 ThedimasPlugin.bundled(player, "commands.access-denied");
             } else {
                 player.admin = !player.admin;
             }
         });
 
-        handler.<Player>register("name", "<name...>", "commands.admin.name.description", (args, player) -> {
-            if (!plugin.admins.containsKey(player.uuid())) {
+        commandHandler.<Player>register("name", "<name...>", "commands.admin.name.description", (args, player) -> {
+            if (!Variables.admins.containsKey(player.uuid())) {
                 ThedimasPlugin.bundled(player, "commands.access-denied");
                 return;
             }
 
             if (args.length == 0) {
-                player.name(plugin.admins.get(player.uuid()));
+                player.name(Variables.admins.get(player.uuid()));
                 String playerName = player.coloredName();
                 ThedimasPlugin.bundled(player, "commands.admin.name.reset", playerName);
             } else {
@@ -65,8 +66,8 @@ public class AdminCommands {
             }
         });
 
-        handler.<Player>register("tp", "<x> <y>", "commands.admin.tp.description", (args, player) -> {
-            if (!plugin.admins.containsKey(player.uuid())) {
+        commandHandler.<Player>register("tp", "<x> <y>", "commands.admin.tp.description", (args, player) -> {
+            if (!Variables.admins.containsKey(player.uuid())) {
                 ThedimasPlugin.bundled(player, "commands.access-denied");
                 return;
             }
@@ -104,8 +105,8 @@ public class AdminCommands {
             player.snapSync();
         });
 
-        handler.<Player>register("spawn", "<unit> [count] [team]", "commands.admin.unit.description", (args, player) -> {
-            if (!plugin.admins.containsKey(player.uuid())) {
+        commandHandler.<Player>register("spawn", "<unit> [count] [team]", "commands.admin.unit.description", (args, player) -> {
+            if (!Variables.admins.containsKey(player.uuid())) {
                 ThedimasPlugin.bundled(player, "commands.access-denied");
                 return;
             }
@@ -139,8 +140,8 @@ public class AdminCommands {
             DiscordLogger.info(String.format("%s заспавнил %d %s для команды %s", player.name, count, unit.name, team));
         });
 
-        handler.<Player>register("team", "<team> [username...]", "commands.admin.team.description", (args, player) -> {
-            if (!plugin.admins.containsKey(player.uuid())) {
+        commandHandler.<Player>register("team", "<team> [username...]", "commands.admin.team.description", (args, player) -> {
+            if (!Variables.admins.containsKey(player.uuid())) {
                 ThedimasPlugin.bundled(player, "commands.access-denied");
                 return;
             }
@@ -160,7 +161,7 @@ public class AdminCommands {
                     otherPlayer.team(team);
                     ThedimasPlugin.bundled(otherPlayer, "commands.admin.team.updated", team.color, team);
 
-                    String otherPlayerName = otherPlayer.coloredName();
+                    String otherPlayerName = otherPlayer.coloredName(); // ???
                     ThedimasPlugin.bundled(player, "commands.admin.team.successful-updated", otherPlayer.name, team.color, team);
                 } else {
                     ThedimasPlugin.bundled(player, "commands.admin.team.player-notfound");
@@ -168,8 +169,8 @@ public class AdminCommands {
             }
         });
 
-        handler.<Player>register("kill", "[username...]", "commands.admin.kill.description", (args, player) -> {
-            if (!plugin.admins.containsKey(player.uuid())) {
+        commandHandler.<Player>register("kill", "[username...]", "commands.admin.kill.description", (args, player) -> {
+            if (!Variables.admins.containsKey(player.uuid())) {
                 ThedimasPlugin.bundled(player, "commands.access-denied");
                 return;
             }
@@ -194,8 +195,8 @@ public class AdminCommands {
             }
         });
 
-        handler.<Player>register("killall", "[team]", "commands.admin.killall.description", (args, player) -> {
-            if (!plugin.admins.containsKey(player.uuid())) {
+        commandHandler.<Player>register("killall", "[team]", "commands.admin.killall.description", (args, player) -> {
+            if (!Variables.admins.containsKey(player.uuid())) {
                 ThedimasPlugin.bundled(player, "commands.access-denied");
                 return;
             }
@@ -221,8 +222,8 @@ public class AdminCommands {
             }
         });
 
-        handler.<Player>register("core", "<small|medium|big>", "commands.admin.core.description", (args, player) -> {
-            if (!plugin.admins.containsKey(player.uuid())) {
+        commandHandler.<Player>register("core", "<small|medium|big>", "commands.admin.core.description", (args, player) -> {
+            if (!Variables.admins.containsKey(player.uuid())) {
                 ThedimasPlugin.bundled(player, "commands.access-denied");
                 return;
             }
@@ -246,8 +247,8 @@ public class AdminCommands {
             Log.info("@ заспавнил ядро (@, @)", Strings.stripColors(player.name), tile.x, tile.y);
         });
 
-        handler.<Player>register("pause", "commands.admin.pause.description", (args, player) -> {
-            if (!plugin.admins.containsKey(player.uuid())) {
+        commandHandler.<Player>register("pause", "commands.admin.pause.description", (args, player) -> {
+            if (!Variables.admins.containsKey(player.uuid())) {
                 ThedimasPlugin.bundled(player, "commands.access-denied");
                 return;
             }
@@ -255,8 +256,8 @@ public class AdminCommands {
             Log.info("@ поставил игру на паузу", Strings.stripColors(player.name));
         });
 
-        handler.<Player>register("end", "commands.admin.end.description", (args, player) -> {
-            if (!plugin.admins.containsKey(player.uuid())) {
+        commandHandler.<Player>register("end", "commands.admin.end.description", (args, player) -> {
+            if (!Variables.admins.containsKey(player.uuid())) {
                 ThedimasPlugin.bundled(player, "commands.access-denied");
                 return;
             }
@@ -266,4 +267,5 @@ public class AdminCommands {
             DiscordLogger.info(String.format("%s сменил карту", player.name));
         });
     }
+
 }

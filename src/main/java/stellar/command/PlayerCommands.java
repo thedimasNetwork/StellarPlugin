@@ -1,5 +1,6 @@
 package stellar.command;
 
+import arc.Core;
 import arc.Events;
 import arc.math.Mathf;
 import arc.util.CommandHandler;
@@ -14,12 +15,14 @@ import mindustry.gen.Groups;
 import mindustry.gen.Player;
 import stellar.Const;
 import stellar.ThedimasPlugin;
+import stellar.Variables;
 import stellar.database.DBHandler;
 import stellar.database.tables.Playtime;
 import stellar.database.tables.Users;
 import stellar.history.entry.HistoryEntry;
 import stellar.history.struct.CacheSeq;
 import stellar.util.Bundle;
+import stellar.util.Translator;
 import stellar.util.logger.DiscordLogger;
 
 import java.sql.SQLException;
@@ -29,31 +32,31 @@ import java.util.concurrent.TimeUnit;
 import static mindustry.Vars.locales;
 import static mindustry.Vars.world;
 
-public class PlayerCommands {
-    public static void load(CommandHandler handler) {
-        ThedimasPlugin plugin = (ThedimasPlugin) Vars.mods.getMod(Const.PLUGIN_NAME).main;
 
-        handler.removeCommand("t");
-        handler.<Player>register("t", "<text...>", "commands.t.description", (args, player) -> {
+public class PlayerCommands {
+
+    public static void load(CommandHandler commandHandler) {
+        commandHandler.removeCommand("t");
+        commandHandler.<Player>register("t", "<text...>", "commands.t.description", (args, player) -> {
             String message = args[0];
             Groups.player.each(o -> o.team() == player.team(), otherPlayer -> {
-                String msg = plugin.translateChat(player, otherPlayer, message);
+                String msg = Translator.translateChat(player, otherPlayer, message);
                 otherPlayer.sendMessage("<[#" + player.team().color + "]T[]>" + msg);
             });
 
             Log.info("<T>" + Const.CHAT_LOG_FORMAT, Strings.stripColors(player.name), Strings.stripColors(message), player.locale);
         });
 
-        handler.removeCommand("help");
-        handler.<Player>register("help", "[page]", "commands.help.description", (args, player) -> {
+        commandHandler.removeCommand("help");
+        commandHandler.<Player>register("help", "[page]", "commands.help.description", (args, player) -> {
             if (args.length > 0 && !Strings.canParseInt(args[0])) {
                 ThedimasPlugin.bundled(player, "commands.page-not-int");
                 return;
             }
 
             Locale locale = ThedimasPlugin.findLocale(player.locale);
-            int hiddenCommandsCount = player.admin ? 0 : handler.getCommandList().count(c -> c.description.startsWith("commands.admin"));
-            int pages = Mathf.ceil(handler.getCommandList().size / Const.LIST_PAGE_SIZE - hiddenCommandsCount / Const.LIST_PAGE_SIZE);
+            int hiddenCommandsCount = player.admin ? 0 : commandHandler.getCommandList().count(c -> c.description.startsWith("commands.admin"));
+            int pages = Mathf.ceil(commandHandler.getCommandList().size / Const.LIST_PAGE_SIZE - hiddenCommandsCount / Const.LIST_PAGE_SIZE);
             int page = args.length > 0 ? Strings.parseInt(args[0]) : 1;
 
             if (--page >= pages || page < 0) {
@@ -64,10 +67,10 @@ public class PlayerCommands {
             StringBuilder result = new StringBuilder();
             result.append(Bundle.format("commands.help.page", locale, page + 1, pages)).append("\n\n");
 
-            handler.getCommandList().sort(c -> c.description.startsWith("commands.admin") ? 1 : -1);
+            commandHandler.getCommandList().sort(c -> c.description.startsWith("commands.admin") ? 1 : -1);
 
-            for (int i = 6 * page; i < Math.min(6 * (page + 1), handler.getCommandList().size - hiddenCommandsCount); i++) {
-                CommandHandler.Command command = handler.getCommandList().get(i);
+            for (int i = 6 * page; i < Math.min(6 * (page + 1), commandHandler.getCommandList().size - hiddenCommandsCount); i++) {
+                CommandHandler.Command command = commandHandler.getCommandList().get(i);
                 result.append("[orange] /").append(command.text).append("[white] ")
                         .append(command.paramText)
                         .append("[lightgray] - ")
@@ -77,7 +80,7 @@ public class PlayerCommands {
             player.sendMessage(result.toString());
         });
 
-        handler.<Player>register("tr", "[off|auto|double|somelocale]", "commands.tr.description", (args, player) -> {
+        commandHandler.<Player>register("tr", "[off|auto|double|somelocale]", "commands.tr.description", (args, player) -> {
             String locale;
             try {
                 locale = DBHandler.get(player.uuid(), Users.TRANSLATOR);
@@ -139,45 +142,48 @@ public class PlayerCommands {
             }
         });
 
-        handler.<Player>register("rtv", "[on|off]", "commands.rtv.description", (args, player) -> {
+        commandHandler.<Player>register("rtv", "[on|off]", "commands.rtv.description", (args, player) -> {
+            boolean rtvEnabled = Core.settings.getBool("rtv");
+
             if (args.length > 0) {
-                if (!plugin.admins.containsKey(player.uuid())) {
+                if (!Variables.admins.containsKey(player.uuid())) {
                     ThedimasPlugin.bundled(player, "commands.rtv.access-denied");
                     return;
                 }
-                plugin.rtv = !args[0].equalsIgnoreCase("off");
-                if (!plugin.rtv && plugin.votesRTV.size() > 0) {
-                    plugin.votesRTV.clear();
+                rtvEnabled = !args[0].equalsIgnoreCase("off");
+                Core.settings.put("rtv", rtvEnabled);
+                if (!rtvEnabled && Variables.votesRTV.size() > 0) {
+                    Variables.votesRTV.clear();
                     ThedimasPlugin.bundled("commands.rtv.votes-clear");
                 }
             }
 
-            if (!plugin.rtv) {
+            if (!rtvEnabled) {
                 ThedimasPlugin.bundled(player, "commands.rtv.disabled");
                 return;
             }
 
-            plugin.votesRTV.add(player.uuid());
-            int cur = plugin.votesRTV.size();
+            Variables.votesRTV.add(player.uuid());
+            int cur = Variables.votesRTV.size();
             int req = (int) Math.ceil(Const.VOTES_RATIO * Groups.player.size());
 
             String playerName = player.coloredName();
             ThedimasPlugin.bundled("commands.rtv.vote", playerName, cur, req);
 
             if (cur >= req) {
-                plugin.votesRTV.clear();
+                Variables.votesRTV.clear();
                 ThedimasPlugin.bundled("commands.rtv.passed");
                 Events.fire(new EventType.GameOverEvent(Team.derelict));
             }
         });
 
-        handler.<Player>register("version", "commands.version.description", (arg, player) -> ThedimasPlugin.bundled(player, "commands.version.msg", Const.PLUGIN_VERSION));
+        commandHandler.<Player>register("version", "commands.version.description", (arg, player) -> ThedimasPlugin.bundled(player, "commands.version.msg", Const.PLUGIN_VERSION));
 
-        handler.<Player>register("discord", "commands.discord.description", (args, player) -> Call.openURI(player.con, "https://discord.gg/RkbFYXFU9E"));
+        commandHandler.<Player>register("discord", "commands.discord.description", (args, player) -> Call.openURI(player.con, "https://discord.gg/RkbFYXFU9E"));
 
-        handler.<Player>register("rules", "commands.rules.description", (args, player) -> ThedimasPlugin.bundled(player, "rules"));
+        commandHandler.<Player>register("rules", "commands.rules.description", (args, player) -> ThedimasPlugin.bundled(player, "rules"));
 
-        handler.<Player>register("hub", "commands.hub.description", (args, player) -> {
+        commandHandler.<Player>register("hub", "commands.hub.description", (args, player) -> {
             String[] address = Const.SERVER_ADDRESS.get("hub").split(":");
             String ip = address[0];
             int port = Integer.parseInt(address[1]);
@@ -185,7 +191,7 @@ public class PlayerCommands {
             Call.connect(player.con, ip, port);
         });
 
-        handler.<Player>register("connect", "[list|server...]", "commands.connect.description", (args, player) -> {
+        commandHandler.<Player>register("connect", "[list|server...]", "commands.connect.description", (args, player) -> {
             if (args.length == 0 || args[0].equalsIgnoreCase("list")) {
                 ThedimasPlugin.bundled(player, "commands.connect.list", Const.SERVER_LIST);
                 return;
@@ -203,10 +209,10 @@ public class PlayerCommands {
             Vars.net.pingHost(ip, port, host -> Call.connect(player.con, ip, port), e -> ThedimasPlugin.bundled(player, "commands.connect.server-offline"));
         });
 
-        handler.<Player>register("history", "[page] [detailed]", "commands.history.description", (args, player) -> {
+        commandHandler.<Player>register("history", "[page] [detailed]", "commands.history.description", (args, player) -> {
             boolean detailed = args.length == 2 && Structs.contains(Const.BOOL_VALUES.split(", "), args[1].toLowerCase());
 
-            if (args.length > 0 && plugin.activeHistoryPlayers.containsKey(player.uuid())) {
+            if (args.length > 0 && Variables.activeHistoryPlayers.containsKey(player.uuid())) {
                 if (!Strings.canParseInt(args[0])) {
                     ThedimasPlugin.bundled(player, "commands.page-not-int");
                     return;
@@ -216,7 +222,7 @@ public class PlayerCommands {
                 int mouseY = Mathf.clamp(Mathf.round(player.mouseY / 8), 1, world.height());
                 Locale locale = ThedimasPlugin.findLocale(player.locale);
 
-                CacheSeq<HistoryEntry> entries = plugin.getHistorySeq(mouseX, mouseY);
+                CacheSeq<HistoryEntry> entries = Variables.getHistorySeq(mouseX, mouseY);
 
                 int page = Integer.parseInt(args[0]) - 1;
                 int pages = Mathf.ceil(entries.size / Const.LIST_PAGE_SIZE);
@@ -243,20 +249,20 @@ public class PlayerCommands {
                 }
 
                 player.sendMessage(result.toString());
-            } else if (plugin.activeHistoryPlayers.containsKey(player.uuid())) {
-                plugin.activeHistoryPlayers.remove(player.uuid());
+            } else if (Variables.activeHistoryPlayers.containsKey(player.uuid())) {
+                Variables.activeHistoryPlayers.remove(player.uuid());
                 ThedimasPlugin.bundled(player, "commands.history.detailed.disabled");
             } else if (args.length == 2) {
-                plugin.activeHistoryPlayers.put(player.uuid(), detailed);
+                Variables.activeHistoryPlayers.put(player.uuid(), detailed);
                 String msg = detailed ? "commands.history.detailed" : "commands.history.default";
                 ThedimasPlugin.bundled(player, "commands.history.enabled", msg);
             } else {
-                plugin.activeHistoryPlayers.put(player.uuid(), false);
+                Variables.activeHistoryPlayers.put(player.uuid(), false);
                 ThedimasPlugin.bundled(player, "commands.history.disabled");
             }
         });
 
-        handler.<Player>register("playtime", "[server...]", "commands.playtime.description", (args, player) -> {
+        commandHandler.<Player>register("playtime", "[server...]", "commands.playtime.description", (args, player) -> {
             String serverColumnName;
             if (args.length > 0) {
                 serverColumnName = args[0].toLowerCase();
@@ -274,20 +280,26 @@ public class PlayerCommands {
                 if (time == null) {
                     Log.err("Player '" + player.uuid() + "' doesn't exists");
                 }
-                ThedimasPlugin.bundled(player, "commands.playtime.msg", Const.SERVER_NAMES.get(serverColumnName), plugin.longToTime(time != null ? time : 0L));
+                ThedimasPlugin.bundled(player, "commands.playtime.msg", Const.SERVER_NAMES.get(serverColumnName), longToTime(time != null ? time : 0L));
             } catch (Throwable t) {
                 Log.err("Failed to get playtime for player '" + player.uuid() + "'", t);
             }
         });
 
-        handler.<Player>register("score", "commands.score.description", (args, player) -> {
-            int exp = 0;
+        commandHandler.<Player>register("score", "commands.score.description", (args, player) -> {
             try {
-                exp = DBHandler.get(player.uuid(), Users.EXP);
+                int exp = DBHandler.get(player.uuid(), Users.EXP);
                 ThedimasPlugin.bundled(player, "commands.score.msg", exp);
             } catch (SQLException e) {
                 Log.err(e);
             }
         });
     }
+
+    private static String longToTime(long seconds) {
+        long min = seconds / 60;
+        long hour = min / 60;
+        return String.format("%d:%02d:%02d", hour, min % 60, seconds % 60);
+    }
+
 }

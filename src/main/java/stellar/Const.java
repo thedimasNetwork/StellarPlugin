@@ -2,17 +2,18 @@ package stellar;
 
 import arc.files.Fi;
 import arc.struct.StringMap;
-import arc.util.*;
+import arc.util.Log;
+import arc.util.Structs;
 import mindustry.Vars;
 import mindustry.net.Administration;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Locale;
 
 import static mindustry.Vars.mods;
 
 public class Const {
 
-    public static final String PLUGIN_NAME = "ThedimasMindustryPlugin";
     public static final String PLUGIN_FOLDER = "config/mods/" + mods.list().find(l -> l.main instanceof ThedimasPlugin).meta.name + "/";
     public static final String PLUGIN_VERSION = mods.list().find(l -> l.main instanceof ThedimasPlugin).meta.version;
 
