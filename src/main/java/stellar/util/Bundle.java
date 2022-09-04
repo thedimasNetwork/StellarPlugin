@@ -27,6 +27,10 @@ public class Bundle {
 
     public static String format(String key, Locale locale, Object... values) {
         String pattern = get(key, locale);
+        if (values.length == 0) {
+            return pattern;
+        }
+
         MessageFormat format = formats.get(locale);
         if (!Structs.contains(Const.supportedLocales, locale)) {
             format = formats.get(Const.defaultLocale(), () -> new MessageFormat(pattern, Const.defaultLocale()));
@@ -42,14 +46,18 @@ public class Bundle {
 
     private static StringMap getOrLoad(Locale locale) {
         StringMap bundle = bundles.get(locale);
-        if (bundle == null && locale.getDisplayName().equals("router")) { // router
-            StringMap router = new StringMap();
-            getOrLoad(Const.defaultLocale()).each((k, v) -> router.put(k, "router"));
-            bundles.put(locale, bundle = router);
-        } else if (bundle == null && Structs.contains(Const.supportedLocales, locale)) {
-            bundles.put(locale, bundle = load(locale));
+        if (bundle == null) {
+            if (locale.getDisplayName().equals("router")) {
+                StringMap router = new StringMap();
+                getOrLoad(Const.defaultLocale()).each((k, v) -> router.put(k, "router"));
+                bundles.put(locale, bundle = router);
+            } else if (Structs.contains(Const.supportedLocales, locale)) {
+                bundles.put(locale, bundle = load(locale));
+            } else {
+                bundle = getOrLoad(Const.defaultLocale());
+            }
         }
-        return bundle != null ? bundle : bundles.get(Const.defaultLocale());
+        return bundle;
     }
 
     private static StringMap load(Locale locale) {
