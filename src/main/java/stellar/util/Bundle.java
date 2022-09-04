@@ -17,12 +17,12 @@ public class Bundle {
 
     public static String get(String key, Locale locale) {
         StringMap bundle = getOrLoad(locale);
-        return bundle != null && bundle.containsKey(key) ? bundle.get(key) : "???" + key + "???";
+        return bundle.containsKey(key) ? bundle.get(key) : "???" + key + "???";
     }
 
     public static boolean has(String key, Locale locale) {
         StringMap props = getOrLoad(locale);
-        return props != null && props.containsKey(key);
+        return props.containsKey(key);
     }
 
     public static String format(String key, Locale locale, Object... values) {
