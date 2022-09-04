@@ -1,5 +1,7 @@
 package stellar;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import stellar.history.entry.HistoryEntry;
 import stellar.history.struct.CacheSeq;
 import stellar.history.struct.Seqs;
@@ -11,6 +13,7 @@ import java.util.Map;
 import java.util.Set;
 
 public class Variables {
+    public static Config config;
 
     public static final Set<String> votesRTV = new HashSet<>();
 
@@ -21,7 +24,6 @@ public class Variables {
     public static final Map<String, String> admins = new HashMap<>();
 
     public static CacheSeq<HistoryEntry>[][] history;
-
     public static CacheSeq<HistoryEntry> getHistorySeq(int x, int y) {
         CacheSeq<HistoryEntry> seq = history[x][y];
         if (seq == null) {
@@ -32,5 +34,4 @@ public class Variables {
         }
         return seq;
     }
-
 }

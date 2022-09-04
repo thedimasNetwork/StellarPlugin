@@ -2,10 +2,14 @@ package stellar;
 
 import arc.Core;
 import arc.Events;
+import arc.files.Fi;
 import arc.graphics.Color;
 import arc.struct.Seq;
 import arc.util.*;
 import arc.util.serialization.Jval;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import mindustry.content.*;
 import mindustry.game.EventType;
 import mindustry.game.Gamemode;
@@ -30,6 +34,10 @@ import stellar.history.struct.CacheSeq;
 import stellar.util.*;
 import stellar.util.logger.DiscordLogger;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Locale;
@@ -44,9 +52,34 @@ public class ThedimasPlugin extends Plugin {
 
     private final Interval interval = new Interval(2);
 
+    private final ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
     @Override
     public void init() {
         Log.info("ThedimasPlugin launched!");
+
+        mapper.findAndRegisterModules();
+
+        if (!new Fi(Const.PLUGIN_FOLDER).exists()) {
+            try {
+                Files.createDirectory(Path.of(Const.PLUGIN_FOLDER));
+            } catch (IOException e) {
+                Log.err(e);
+            }
+        }
+
+        if (!new Fi(Const.PLUGIN_FOLDER + "plugin.yaml").exists()) {
+            InputStream is = getClass().getClassLoader().getResourceAsStream("plugin.yaml");
+            try {
+                Files.copy(is, Path.of(Const.PLUGIN_FOLDER + "plugin.yaml"));
+            } catch (IOException e) {
+                Log.err(e);
+            }
+        }
+        try {
+            Variables.config = mapper.readValue(Const.PLUGIN_FOLDER + "plugin.yaml", Config.class);
+        } catch (JsonProcessingException e) {
+            Log.err(e);
+        }
 
         if (Core.settings.getBool("autoPause")) {
             state.serverPaused = true;
