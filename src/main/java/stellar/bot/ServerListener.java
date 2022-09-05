@@ -28,6 +28,9 @@ public class ServerListener {
         });
 
         Events.on(EventType.PlayerChatEvent.class, event -> {
+            if (event.message.startsWith("/")) {
+                return;
+            }
             String name = ThedimasPlugin.stripColorsAndGlyphs(event.player.name);
             String text = ThedimasPlugin.stripColorsAndGlyphs(event.message);
             String msg = String.format("**%s**: %s", name, text);

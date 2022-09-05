@@ -3,6 +3,7 @@ package stellar.bot;
 import arc.util.Log;
 import net.dv8tion.jda.api.*;
 import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.messages.*;
 import net.dv8tion.jda.internal.entities.EntityBuilder;
 
@@ -25,6 +26,7 @@ public class Bot {
             jda = JDABuilder.createDefault(config.bot.token) // don't use the deprecated constructor
                     .setActivity(activity)
                     .addEventListeners(new DiscordListener()) // register your listener
+                    .enableIntents(GatewayIntent.MESSAGE_CONTENT)
                     .build()
                     .awaitReady();
             MessageRequest.setDefaultMentions(EnumSet.of(Message.MentionType.CHANNEL, Message.MentionType.EMOJI));
