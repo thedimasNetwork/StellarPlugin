@@ -38,6 +38,10 @@ public class Bot {
         ServerListener.listen();
     }
 
+    public static void shutdown() {
+        jda.shutdownNow();
+    }
+
     public static void sendEmbed(MessageEmbed embed) {
         channel.sendMessageEmbeds(embed).queue();
     }

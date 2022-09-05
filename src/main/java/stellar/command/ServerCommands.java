@@ -11,6 +11,7 @@ import mindustry.net.Administration;
 import stellar.PlayerData;
 import stellar.ThedimasPlugin;
 import stellar.Variables;
+import stellar.bot.Bot;
 import stellar.database.DBHandler;
 
 import java.sql.SQLException;
@@ -22,6 +23,13 @@ import static mindustry.Vars.state;
 public class ServerCommands {
 
     public static void load(CommandHandler commandHandler) {
+        commandHandler.removeCommand("exit");
+        commandHandler.register("exit", "Exit the server application", args -> {
+            Log.info("Shutting down server...");
+            Bot.shutdown();
+            Core.app.exit();
+        });
+
         commandHandler.register("export-players", "Export players into DB", args -> {
             ObjectMap<String, Administration.PlayerInfo> playerList = Reflect.get(netServer.admins, "playerInfo");
             int exported = 0;
