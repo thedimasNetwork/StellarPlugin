@@ -1,8 +1,14 @@
 webhookUrl: "WEBHOOK_URL"
 discordUrl: "https://discord.gg/RkbFYXFU9E"
+
 database:
   ip: "127.0.0.1"
   port: 3306
   user: "DB_USER"
   password: "DB_PASSWORD"
   name: "DB_NAME"
+
+bot:
+  token: "BOT_TOKEN"
+  channelId: 123456789012345678
+  main: false # used for bot RPC

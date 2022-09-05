@@ -25,6 +25,7 @@ import mindustry.world.blocks.campaign.LaunchPad;
 import mindustry.world.blocks.logic.LogicBlock;
 import mindustry.world.blocks.power.PowerNode;
 
+import stellar.bot.Bot;
 import stellar.command.*;
 import stellar.database.DBHandler;
 import stellar.database.tables.Playtime;
@@ -106,6 +107,8 @@ public class ThedimasPlugin extends Plugin {
             Log.debug("Fetched locales: @", Arrays.toString(Const.supportedLocales));
         }, Log::err);
         // endregion
+
+        Bot.load();
 
         // region пусковая площадка
         Events.on(EventType.PlayEvent.class, event -> state.rules.revealedBlocks.add(Blocks.launchPad));
