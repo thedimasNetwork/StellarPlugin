@@ -34,6 +34,7 @@ import stellar.history.struct.CacheSeq;
 import stellar.util.*;
 import stellar.util.logger.DiscordLogger;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -76,8 +77,8 @@ public class ThedimasPlugin extends Plugin {
             }
         }
         try {
-            Variables.config = mapper.readValue(Const.PLUGIN_FOLDER + "plugin.yaml", Config.class);
-        } catch (JsonProcessingException e) {
+            Variables.config = mapper.readValue(new File(Const.PLUGIN_FOLDER + "plugin.yaml"), Config.class);
+        } catch (IOException e) {
             Log.err(e);
         }
 
