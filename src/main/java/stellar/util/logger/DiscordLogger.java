@@ -3,13 +3,15 @@ package stellar.util.logger;
 import arc.util.Nullable;
 import arc.util.Strings;
 import mindustry.net.Administration;
-import stellar.Const;
+
 import webhook.Webhook;
 import webhook.embed.Embed;
 import webhook.http.Part;
 
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
+
+import static stellar.Variables.config;
 
 @SuppressWarnings("unused")
 public class DiscordLogger {
@@ -29,12 +31,12 @@ public class DiscordLogger {
                 .setFooter(Administration.Config.serverName.string(), null)
                 .setTimestamp(Instant.now().toString());
 
-        new Webhook(Const.WEBHOOK_LOG_URL)
+        new Webhook(config.webhookUrl)
                 .addEmbed(embed)
                 .execute();
 
         if (th != null) {
-            Webhook.sendMultipart(Const.WEBHOOK_LOG_URL, Part.ofBytes("file0", "text/plain",
+            Webhook.sendMultipart(config.webhookUrl, Part.ofBytes("file0", "text/plain",
                     Strings.getStackTrace(th).getBytes(StandardCharsets.UTF_8),
                     "StackTrace" + Instant.now().toEpochMilli() + ".txt"));
         }

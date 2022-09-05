@@ -45,6 +45,7 @@ import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 import static mindustry.Vars.*;
+import static stellar.Variables.config;
 
 @SuppressWarnings({"unused", "unchecked"})
 public class ThedimasPlugin extends Plugin {
@@ -196,7 +197,7 @@ public class ThedimasPlugin extends Plugin {
 
             Locale locale = findLocale(event.player.locale);
             String rules = Bundle.get("rules", locale);
-            String welcome = Bundle.format("welcome", locale, rules, Const.DISCORD_INVITE);
+            String welcome = Bundle.format("welcome", locale, rules, config.discordUrl);
             Call.infoMessage(event.player.con, welcome);
 
             try {

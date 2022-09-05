@@ -17,7 +17,6 @@ public class Const {
     public static final String PLUGIN_FOLDER = "config/mods/" + mods.list().find(l -> l.main instanceof ThedimasPlugin).meta.name + "/";
     public static final String PLUGIN_VERSION = mods.list().find(l -> l.main instanceof ThedimasPlugin).meta.version;
 
-    public static final String WEBHOOK_LOG_URL = "https://discord.com/api/webhooks/871815826481762344/JcjvKIczuLRxpiMdItCttzU1TOqT7b2vkuDJl5Sj1etcMnmKDLy7RRWMC7Cj_KO4akvv";
     public static final String JOIN_LOG_FORMAT = "@ has joined the server | locale: @ | IP: @";
     public static final String CHAT_LOG_FORMAT = "@: @ | @";
 
@@ -31,8 +30,6 @@ public class Const {
     public static final String BOOL_VALUES = "1, on, yes, true, вкл, да";
 
     public static final String[] PIRATES = {"valve", "igruhaorg", "tuttop", "freetp.org", "freetp"};
-
-    public static final String DISCORD_INVITE = "https://discord.gg/RkbFYXFU9E";
 
     // для отложенной инициализации
     // это нужно из-за того, что Vars.locale инициализируется _не очень вовремя_

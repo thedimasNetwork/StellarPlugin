@@ -2,26 +2,34 @@ package stellar.database;
 
 import arc.util.Log;
 import arc.util.Nullable;
+
 import stellar.PlayerData;
 import stellar.database.tables.Playtime;
 import stellar.database.tables.Users;
 
 import java.sql.*;
 
+import static stellar.Variables.config;
+
 public class DBHandler {
 
     private static Connection connection;
 
+    private static String getConnectionUrl() {
+        return "jdbc:mysql://" + config.database.ip + ":" + config.database.port + "/" + config.database.name;
+    }
+
     public static Connection getDbConnection() throws SQLException {
+
         if (connection == null) {
             try {
                 Class.forName("com.mysql.cj.jdbc.Driver");
-                connection = DriverManager.getConnection(Config.getConnectionUrl(), Config.DB_USER, Config.DB_PASS);
+                connection = DriverManager.getConnection(getConnectionUrl(), config.database.user, config.database.password);
             } catch (Throwable t) {
                 Log.err(t);
             }
         } else if (connection.isClosed()) {
-            connection = DriverManager.getConnection(Config.getConnectionUrl(), Config.DB_USER, Config.DB_PASS);
+            connection = DriverManager.getConnection(getConnectionUrl(), config.database.user, config.database.password);
         }
 
         return connection;

@@ -31,6 +31,7 @@ import java.util.concurrent.TimeUnit;
 
 import static mindustry.Vars.locales;
 import static mindustry.Vars.world;
+import static stellar.Variables.config;
 
 
 public class PlayerCommands {
@@ -179,7 +180,7 @@ public class PlayerCommands {
 
         commandHandler.<Player>register("version", "commands.version.description", (arg, player) -> ThedimasPlugin.bundled(player, "commands.version.msg", Const.PLUGIN_VERSION));
 
-        commandHandler.<Player>register("discord", "commands.discord.description", (args, player) -> Call.openURI(player.con, "https://discord.gg/RkbFYXFU9E"));
+        commandHandler.<Player>register("discord", "commands.discord.description", (args, player) -> Call.openURI(player.con, config.discordUrl));
 
         commandHandler.<Player>register("rules", "commands.rules.description", (args, player) -> ThedimasPlugin.bundled(player, "rules"));
 

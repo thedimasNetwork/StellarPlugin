@@ -1,4 +1,5 @@
 webhookUrl: "WEBHOOK_URL"
+discordUrl: "https://discord.gg/RkbFYXFU9E"
 database:
   ip: "127.0.0.1"
   port: 3306
