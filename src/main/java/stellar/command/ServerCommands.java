@@ -8,6 +8,7 @@ import arc.util.Reflect;
 import arc.util.Strings;
 import mindustry.gen.Groups;
 import mindustry.net.Administration;
+import mindustry.net.Packets;
 import stellar.PlayerData;
 import stellar.ThedimasPlugin;
 import stellar.Variables;
@@ -26,6 +27,7 @@ public class ServerCommands {
         commandHandler.removeCommand("exit");
         commandHandler.register("exit", "Exit the server application", args -> {
             Log.info("Shutting down server...");
+            Groups.player.each(e -> e.kick(Packets.KickReason.serverClose));
             Bot.shutdown();
             Core.app.exit();
         });

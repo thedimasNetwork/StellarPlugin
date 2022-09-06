@@ -3,6 +3,7 @@ package stellar.bot;
 import arc.util.Log;
 import net.dv8tion.jda.api.*;
 import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.messages.*;
 import net.dv8tion.jda.internal.entities.EntityBuilder;
@@ -35,6 +36,10 @@ public class Bot {
             Log.err(e);
         }
         ServerListener.listen();
+        jda.updateCommands().addCommands(
+                Commands.slash("info", "Информация про сервер"),
+                Commands.slash("players", "Игроки на сервере")
+        ).queue();
     }
 
     public static void shutdown() {
