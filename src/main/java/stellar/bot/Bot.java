@@ -38,7 +38,8 @@ public class Bot {
         ServerListener.listen();
         jda.updateCommands().addCommands(
                 Commands.slash("info", "Информация про сервер"),
-                Commands.slash("players", "Игроки на сервере")
+                Commands.slash("players", "Игроки на сервере"),
+                Commands.slash("host", "Информация про хост")
         ).queue();
     }
 
