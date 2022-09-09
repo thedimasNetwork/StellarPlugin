@@ -9,10 +9,13 @@ import arc.util.Strings;
 import mindustry.gen.Groups;
 import mindustry.net.Administration;
 import mindustry.net.Packets;
+import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.MessageEmbed;
 import stellar.PlayerData;
 import stellar.ThedimasPlugin;
 import stellar.Variables;
 import stellar.bot.Bot;
+import stellar.bot.Colors;
 import stellar.database.DBHandler;
 
 import java.sql.SQLException;
@@ -28,6 +31,12 @@ public class ServerCommands {
         commandHandler.register("exit", "Exit the server application", args -> {
             Log.info("Shutting down server...");
             Groups.player.each(e -> e.kick(Packets.KickReason.serverClose));
+
+            MessageEmbed embed = new EmbedBuilder()
+                    .setTitle("Сервер остановлен")
+                    .setColor(Colors.green)
+                    .build();
+            Bot.sendEmbed(embed);
             Bot.shutdown();
             Core.app.exit();
         });

@@ -9,6 +9,14 @@ import stellar.ThedimasPlugin;
 
 public class ServerListener {
     public static void listen() {
+        Events.on(EventType.ServerLoadEvent.class, event -> {
+            MessageEmbed embed = new EmbedBuilder()
+                    .setTitle("Сервер запущен")
+                    .setColor(Colors.green)
+                    .build();
+            Bot.sendEmbed(embed);
+        });
+
         Events.on(EventType.PlayerJoin.class, event -> {
             String name = ThedimasPlugin.stripColorsAndGlyphs(event.player.name);
             MessageEmbed embed = new EmbedBuilder()
