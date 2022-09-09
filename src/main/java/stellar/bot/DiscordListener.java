@@ -6,6 +6,7 @@ import arc.util.Log;
 import com.sun.management.OperatingSystemMXBean;
 import mindustry.gen.Call;
 import mindustry.gen.Groups;
+import mindustry.maps.Map;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -104,6 +105,18 @@ public class DiscordListener extends ListenerAdapter {
                         """, cpuLoad, ramUsage, ramTotal, ramLoad, diskUsage, diskTotal, diskLoad);
                 MessageEmbed embed = new EmbedBuilder()
                         .addField("Нагрузка на сервер", text, false)
+                        .setColor(0x7289DA)
+                        .setTimestamp(LocalDateTime.now())
+                        .build();
+                event.replyEmbeds(embed).queue();
+            }
+            case "maps" -> {
+                StringBuilder text = new StringBuilder();
+                for (Map map : maps.customMaps()) {
+                    text.append(map.name()).append("\n");
+                }
+                MessageEmbed embed = new EmbedBuilder()
+                        .addField("Карты на сервере", text.toString(), false)
                         .setColor(0x7289DA)
                         .setTimestamp(LocalDateTime.now())
                         .build();

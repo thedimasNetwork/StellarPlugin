@@ -39,7 +39,8 @@ public class Bot {
         jda.updateCommands().addCommands(
                 Commands.slash("info", "Информация про сервер"),
                 Commands.slash("players", "Игроки на сервере"),
-                Commands.slash("host", "Информация про хост")
+                Commands.slash("host", "Информация про хост"),
+                Commands.slash("maps", "Список карт на сервере")
         ).queue();
     }
 
