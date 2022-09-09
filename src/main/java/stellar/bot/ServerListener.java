@@ -13,7 +13,7 @@ public class ServerListener {
             String name = ThedimasPlugin.stripColorsAndGlyphs(event.player.name);
             MessageEmbed embed = new EmbedBuilder()
                     .setDescription(String.format("%s зашел на сервер", name))
-                    .setColor(0x43D581)
+                    .setColor(Colors.green)
                     .build();
             Bot.sendEmbed(embed);
         });
@@ -22,7 +22,7 @@ public class ServerListener {
             String name = ThedimasPlugin.stripColorsAndGlyphs(event.player.name);
             MessageEmbed embed = new EmbedBuilder()
                     .setDescription(String.format("%s покинул сервер", name))
-                    .setColor(0xF04747)
+                    .setColor(Colors.red)
                     .build();
             Bot.sendEmbed(embed);
         });

@@ -54,7 +54,7 @@ public class DiscordListener extends ListenerAdapter {
                     TPS **%s** | ОЗУ **%sМБ**""", state.map.name(), state.wave, Groups.player.size(), Groups.unit.size(), Core.graphics.getFramesPerSecond(), Core.app.getJavaHeap() / 1024 / 1024);
                 MessageEmbed embed = new EmbedBuilder()
                         .addField("Статус сервера", text, false)
-                        .setColor(0x7289DA)
+                        .setColor(Colors.blue)
                         .setTimestamp(LocalDateTime.now())
                         .build();
                 event.replyEmbeds(embed).queue();
@@ -67,7 +67,7 @@ public class DiscordListener extends ListenerAdapter {
                     });
                     MessageEmbed embed = new EmbedBuilder()
                             .addField("Игроки", players.toString(), false)
-                            .setColor(0x7289DA)
+                            .setColor(Colors.blue)
                             .setTimestamp(LocalDateTime.now())
                             .build();
                     event.replyEmbeds(embed).queue();
@@ -75,7 +75,7 @@ public class DiscordListener extends ListenerAdapter {
                 else {
                     MessageEmbed embed = new EmbedBuilder()
                             .setDescription("Никого нет")
-                            .setColor(0x7289DA)
+                            .setColor(Colors.blue)
                             .setTimestamp(LocalDateTime.now())
                             .build();
                     event.replyEmbeds(embed).queue();
@@ -105,7 +105,7 @@ public class DiscordListener extends ListenerAdapter {
                         """, cpuLoad, ramUsage, ramTotal, ramLoad, diskUsage, diskTotal, diskLoad);
                 MessageEmbed embed = new EmbedBuilder()
                         .addField("Нагрузка на сервер", text, false)
-                        .setColor(0x7289DA)
+                        .setColor(Colors.blue)
                         .setTimestamp(LocalDateTime.now())
                         .build();
                 event.replyEmbeds(embed).queue();
@@ -117,7 +117,7 @@ public class DiscordListener extends ListenerAdapter {
                 }
                 MessageEmbed embed = new EmbedBuilder()
                         .addField("Карты на сервере", text.toString(), false)
-                        .setColor(0x7289DA)
+                        .setColor(Colors.blue)
                         .setTimestamp(LocalDateTime.now())
                         .build();
                 event.replyEmbeds(embed).queue();
