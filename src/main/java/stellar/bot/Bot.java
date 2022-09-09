@@ -45,7 +45,7 @@ public class Bot {
     }
 
     public static void shutdown() {
-        jda.shutdownNow();
+        jda.shutdown();
     }
 
     public static void sendEmbed(MessageEmbed embed) {

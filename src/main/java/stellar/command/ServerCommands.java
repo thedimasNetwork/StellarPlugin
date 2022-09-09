@@ -34,7 +34,7 @@ public class ServerCommands {
 
             MessageEmbed embed = new EmbedBuilder()
                     .setTitle("Сервер остановлен")
-                    .setColor(Colors.green)
+                    .setColor(Colors.red)
                     .build();
             Bot.sendEmbed(embed);
             Bot.shutdown();

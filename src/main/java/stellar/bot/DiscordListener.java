@@ -89,7 +89,7 @@ public class DiscordListener extends ListenerAdapter {
                 long ramUsage = ramTotal - bean.getFreeMemorySize() / 1024 / 1024;
                 int ramLoad = (int)(100.0 * ramUsage / ramTotal);
                 long diskTotal = file.getTotalSpace() / 1024 / 1024 / 1024;
-                long diskUsage = file.getUsableSpace() / 1024 / 1024 / 1024;
+                long diskUsage = diskTotal - file.getUsableSpace() / 1024 / 1024 / 1024;
                 int diskLoad = (int)(100.0 * diskUsage / diskTotal);
 
                 DoubleSummaryStatistics s = new DoubleSummaryStatistics();

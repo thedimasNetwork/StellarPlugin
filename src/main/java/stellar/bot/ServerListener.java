@@ -17,6 +17,22 @@ public class ServerListener {
             Bot.sendEmbed(embed);
         });
 
+        Events.on(EventType.WorldLoadEvent.class, event -> {
+            MessageEmbed embed = new EmbedBuilder()
+                    .setTitle("Карта загружена")
+                    .setColor(Colors.purple)
+                    .build();
+            Bot.sendEmbed(embed);
+        });
+
+        Events.on(EventType.GameOverEvent.class, event -> {
+            MessageEmbed embed = new EmbedBuilder()
+                    .setTitle("Игра окончена")
+                    .setColor(Colors.purple)
+                    .build();
+            Bot.sendEmbed(embed);
+        });
+
         Events.on(EventType.PlayerJoin.class, event -> {
             String name = ThedimasPlugin.stripColorsAndGlyphs(event.player.name);
             MessageEmbed embed = new EmbedBuilder()
