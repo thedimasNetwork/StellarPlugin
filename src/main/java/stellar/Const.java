@@ -6,6 +6,7 @@ import arc.util.Log;
 import arc.util.Structs;
 import mindustry.Vars;
 import mindustry.net.Administration;
+import stellar.util.Bundle;
 
 import java.util.Arrays;
 import java.util.Locale;
@@ -69,7 +70,7 @@ public class Const {
 
         for (int i = 0; i < files.length; i++) {
             String code = files[i].nameWithoutExtension();
-            supportedLocales[i] = ThedimasPlugin.parseLocale(code.substring("bundle_".length()));
+            supportedLocales[i] = Bundle.parseLocale(code.substring("bundle_".length()));
         }
 
         Log.debug("Loaded locales: @", Arrays.toString(supportedLocales));
