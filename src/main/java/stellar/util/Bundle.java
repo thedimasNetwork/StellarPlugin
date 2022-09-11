@@ -2,12 +2,16 @@ package stellar.util;
 
 import arc.struct.*;
 import arc.util.*;
+import arc.util.serialization.Jval;
 import mindustry.gen.Groups;
 import mindustry.gen.Player;
 import stellar.Const;
 
 import java.text.MessageFormat;
 import java.util.*;
+
+import static mindustry.Vars.ghApi;
+import static mindustry.Vars.locales;
 
 public class Bundle {
 
@@ -16,6 +20,25 @@ public class Bundle {
     private static final ObjectMap<Locale, MessageFormat> formats = new ObjectMap<>();
 
     private Bundle() {}
+
+    static {
+        Http.get(ghApi + "/search/code?q=name+repo:Anuken/Mindustry+filename:bundle&per_page=100", res -> {
+            Jval json = Jval.read(res.getResultAsString());
+            Seq<String> names = json.get("items").asArray().map(obj -> obj.getString("name"))
+                    .filter(str -> str.endsWith(".properties") && !str.equals("bundle.properties"))
+                    .map(str -> str.substring("bundle".length() + 1, str.lastIndexOf('.')))
+                    .add("en");
+
+            locales = new Locale[names.size];
+            for (int i = 0; i < locales.length; i++) {
+                locales[i] = Bundle.parseLocale(names.get(i));
+            }
+
+            Arrays.sort(locales, Structs.comparing(l -> l.getDisplayName(l), String.CASE_INSENSITIVE_ORDER));
+            locales = Seq.with(locales).add(new Locale("router")).toArray(Locale.class);
+            Log.debug("Fetched locales: @", Arrays.toString(Const.supportedLocales));
+        }, Log::err);
+    }
 
     public static String get(String key, Locale locale) {
         StringMap bundle = getOrLoad(locale);

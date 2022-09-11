@@ -17,6 +17,7 @@ import stellar.Const;
 import stellar.ThedimasPlugin;
 import stellar.Variables;
 import stellar.util.Bundle;
+import stellar.util.Players;
 import stellar.util.Translator;
 import stellar.util.logger.DiscordLogger;
 
@@ -157,7 +158,7 @@ public class AdminCommands {
                 player.team(team);
                 Bundle.bundled(player, "commands.admin.team.changed", team.color, team);
             } else {
-                Player otherPlayer = ThedimasPlugin.findPlayer(args[1]);
+                Player otherPlayer = Players.findPlayer(args[1]);
                 if (otherPlayer != null) {
                     otherPlayer.team(team);
                     Bundle.bundled(otherPlayer, "commands.admin.team.updated", team.color, team);
@@ -184,7 +185,7 @@ public class AdminCommands {
                 return;
             }
 
-            Player otherPlayer = ThedimasPlugin.findPlayer(args[0]);
+            Player otherPlayer = Players.findPlayer(args[0]);
             if (otherPlayer != null) {
                 otherPlayer.unit().kill();
                 String otherPlayerName = otherPlayer.coloredName();

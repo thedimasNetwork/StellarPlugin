@@ -1,5 +1,6 @@
 package stellar;
 
+import arc.util.Interval;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import stellar.history.entry.HistoryEntry;
@@ -14,6 +15,8 @@ import java.util.Set;
 
 public class Variables {
     public static Config config;
+    public static final Interval interval = new Interval(2);
+    public static int waves = 0;
 
     public static final Set<String> votesRTV = new HashSet<>();
 
