@@ -31,7 +31,7 @@ dependencies {
     annotationProcessor "org.projectlombok:lombok:$lombokVersion"
     compileOnly "org.projectlombok:lombok:$lombokVersion"
 
-    compileOnly "com.github.Anuken.Mindustry:core:$mindustryVersion"
+    compileOnly "com.github.Anuken.Mindustry:core:$mindustryVersion" { exclude module: "flabel" }
     compileOnly "com.github.Anuken.Arc:arc-core:$mindustryVersion"
 
     implementation "com.github.thedimasNetwork:DiscordWebhook:$discordWebhookVersion"
