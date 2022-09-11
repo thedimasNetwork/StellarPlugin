@@ -2,6 +2,8 @@ package stellar.util;
 
 import arc.struct.*;
 import arc.util.*;
+import mindustry.gen.Groups;
+import mindustry.gen.Player;
 import stellar.Const;
 
 import java.text.MessageFormat;
@@ -67,5 +69,32 @@ public class Bundle {
             properties.put(s, bundle.getString(s));
         }
         return properties;
+    }
+
+    public static void bundled(Player player, boolean condition, String keyTrue, String keyFalse, Object... values) {
+        String key = condition ? keyTrue : keyFalse;
+        player.sendMessage(Bundle.format(key, findLocale(player.locale), values));
+    }
+
+    public static void bundled(Player player, String key, Object... values) {
+        player.sendMessage(Bundle.format(key, findLocale(player.locale), values));
+    }
+
+    public static void bundled(String key, Object... values) {
+        Groups.player.each(p -> bundled(p, key, values));
+    }
+
+    public static Locale parseLocale(String code) {
+        if (code.contains("_")) {
+            String[] codes = code.split("_");
+            return new Locale(codes[0], codes[1]);
+        }
+        return new Locale(code);
+    }
+
+    public static Locale findLocale(String code) {
+        Locale locale = Structs.find(Const.supportedLocales, l -> l.toString().equals(code) ||
+                code.startsWith(l.toString()));
+        return locale != null ? locale : Const.defaultLocale();
     }
 }

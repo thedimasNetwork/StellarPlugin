@@ -99,7 +99,7 @@ public class ThedimasPlugin extends Plugin {
 
             locales = new Locale[names.size];
             for (int i = 0; i < locales.length; i++) {
-                locales[i] = parseLocale(names.get(i));
+                locales[i] = Bundle.parseLocale(names.get(i));
             }
 
             Arrays.sort(locales, Structs.comparing(l -> l.getDisplayName(l), String.CASE_INSENSITIVE_ORDER));
@@ -180,7 +180,7 @@ public class ThedimasPlugin extends Plugin {
 
             for (String pirate : Const.PIRATES) {
                 if (name.toLowerCase().contains(pirate)) {
-                    event.player.con.kick(Bundle.get("events.join.player-pirate", ThedimasPlugin.findLocale(event.player.locale)));
+                    event.player.con.kick(Bundle.get("events.join.player-pirate", Bundle.findLocale(event.player.locale)));
                     break;
                 }
             }
@@ -196,9 +196,9 @@ public class ThedimasPlugin extends Plugin {
 
             Log.info(Const.JOIN_LOG_FORMAT, event.player.name, event.player.locale, event.player.con.address);
             String playerName = event.player.coloredName();
-            bundled("events.join.player-join", playerName);
+            Bundle.bundled("events.join.player-join", playerName);
 
-            Locale locale = findLocale(event.player.locale);
+            Locale locale = Bundle.findLocale(event.player.locale);
             String rules = Bundle.get("rules", locale);
             String welcome = Bundle.format("welcome", locale, rules, config.discordUrl);
             Call.infoMessage(event.player.con, welcome);
@@ -237,7 +237,8 @@ public class ThedimasPlugin extends Plugin {
             try {
                 DBHandler.update(event.uuid, Users.BANNED, true);
             } catch (SQLException e) {
-                Log.err("Failed to ban uuid for player '" + event.uuid + "'", e);
+                Log.err("Failed to ban uuid for player '@'", event.uuid);
+                Log.err(e);
                 DiscordLogger.err("Failed to ban uuid for player '" + event.uuid + "'", e);
             }
         });
@@ -253,7 +254,8 @@ public class ThedimasPlugin extends Plugin {
             try {
                 DBHandler.update(uuid, Users.BANNED, true);
             } catch (SQLException e) {
-                Log.err("Failed to ban ip for player '" + uuid + "'", e);
+                Log.err("Failed to ban ip for player '@'", event.ip);
+                Log.err(e);
                 DiscordLogger.err("Failed to ban ip for player '" + uuid + "'", e);
             }
         });
@@ -262,7 +264,8 @@ public class ThedimasPlugin extends Plugin {
             try {
                 DBHandler.update(event.uuid, Users.BANNED, false);
             } catch (SQLException e) {
-                Log.err("Failed to unban uuid for player '" + event.uuid + "'", e);
+                Log.err("Failed to unban uuid for player '@'", event.uuid);
+                Log.err(e);
                 DiscordLogger.err("Failed to unban uuid for player '" + event.uuid + "'", e);
             }
         });
@@ -278,7 +281,8 @@ public class ThedimasPlugin extends Plugin {
             try {
                 DBHandler.update(uuid, Users.BANNED, false);
             } catch (SQLException e) {
-                Log.err("Failed to unban ip for player '" + uuid + "'", e);
+                Log.err("Failed to unban ip for player '@'", uuid);
+                Log.err(e);
                 DiscordLogger.err("Failed to unban ip for player '" + uuid + "'", e);
             }
         });
@@ -296,15 +300,14 @@ public class ThedimasPlugin extends Plugin {
                 int cur = Variables.votesRTV.size();
                 int req = (int) Math.ceil(Const.VOTES_RATIO * Groups.player.size());
                 String playerName = event.player.coloredName();
-                bundled("commands.rtv.leave", playerName, cur, req);
+                Bundle.bundled("commands.rtv.leave", playerName, cur, req);
             }
 
             Variables.admins.remove(event.player.uuid());
             Variables.activeHistoryPlayers.remove(event.player.uuid());
-
-            Log.info(event.player.name + " has disconnected from the server");
+            Log.info("@ has disconnected from the server", event.player.name);
             String playerName = event.player.coloredName();
-            bundled("events.leave.player-leave", playerName);
+            Bundle.bundled("events.leave.player-leave", playerName);
         });
         // endregion
 
@@ -320,7 +323,7 @@ public class ThedimasPlugin extends Plugin {
             if (building.block() == Blocks.thoriumReactor && event.item == Items.thorium
                     && target.team().cores().contains(c -> event.tile.dst(c.x, c.y) < 300)) {
                 String playerName = event.player.coloredName();
-                bundled("events.deposit.thorium-in-reactor", playerName, building.tileX(), building.tileY());
+                Bundle.bundled("events.deposit.thorium-in-reactor", playerName, building.tileX(), building.tileY());
 
                 Log.info("@ положил торий в реактор (@, @)", target.name, building.tileX(), building.tileY());
                 DiscordLogger.warn(String.format("%s положил торий в реактор (%f, %f)", player.name, event.tile.x, event.tile.y));
@@ -334,7 +337,7 @@ public class ThedimasPlugin extends Plugin {
                 Player player = event.builder.getPlayer();
                 String playerName = player.coloredName();
                 if (interval.get(0, 300)) {
-                    bundled("events.build-select.reactor-near-core", playerName, event.tile.x, event.tile.y);
+                    Bundle.bundled("events.build-select.reactor-near-core", playerName, event.tile.x, event.tile.y);
 
                     Log.info("@ начал строить ториевый реактор близко к ядру (@, @)", player.name, event.tile.x, event.tile.y);
                     DiscordLogger.warn(String.format("%s начал строить ториевый реактор близко к ядру (%d, %d)", player.name, event.tile.x, event.tile.y));
@@ -423,7 +426,7 @@ public class ThedimasPlugin extends Plugin {
                 boolean detailed = Variables.activeHistoryPlayers.get(event.player.uuid());
 
                 StringBuilder result = new StringBuilder();
-                Locale locale = findLocale(event.player.locale);
+                Locale locale = Bundle.findLocale(event.player.locale);
                 result.append(Bundle.format("history.page", locale, x, y)).append("\n");
 
                 entries.cleanUp();
@@ -560,51 +563,8 @@ public class ThedimasPlugin extends Plugin {
     public static Player findPlayer(String name) {
         String replacedName = name.replace('_', ' ');
         return Groups.player.find(p -> name.equals(Strings.stripColors(p.name))
-                || name.equals(stripColorsAndGlyphs(p.name))
+                || name.equals(StringUtils.stripColorsAndGlyphs(p.name))
                 || replacedName.equals(Strings.stripColors(p.name))
-                || replacedName.equals(stripColorsAndGlyphs(p.name)));
+                || replacedName.equals(StringUtils.stripColorsAndGlyphs(p.name)));
     }
-
-    public static String stripColorsAndGlyphs(String str) {
-        str = Strings.stripColors(str);
-
-        // because Strings.stripGlyphs() not working in 126
-        StringBuilder out = new StringBuilder(str.length());
-        for (int i = 0; i < str.length(); i++) {
-            int c = str.charAt(i);
-            if (c >= 0xE000 && c <= 0xF8FF) {
-                continue;
-            }
-            out.append((char) c);
-        }
-        return out.toString();
-    }
-
-    public static void bundled(Player player, boolean condition, String keyTrue, String keyFalse, Object... values) {
-        String key = condition ? keyTrue : keyFalse;
-        player.sendMessage(Bundle.format(key, findLocale(player.locale), values));
-    }
-
-    public static void bundled(Player player, String key, Object... values) {
-        player.sendMessage(Bundle.format(key, findLocale(player.locale), values));
-    }
-
-    public static void bundled(String key, Object... values) {
-        Groups.player.each(p -> bundled(p, key, values));
-    }
-
-    public static Locale parseLocale(String code) {
-        if (code.contains("_")) {
-            String[] codes = code.split("_");
-            return new Locale(codes[0], codes[1]);
-        }
-        return new Locale(code);
-    }
-
-    public static Locale findLocale(String code) {
-        Locale locale = Structs.find(Const.supportedLocales, l -> l.toString().equals(code) ||
-                code.startsWith(l.toString()));
-        return locale != null ? locale : Const.defaultLocale();
-    }
-
 }

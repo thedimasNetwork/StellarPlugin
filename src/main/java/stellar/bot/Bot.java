@@ -24,6 +24,7 @@ public class Bot {
             if (config.bot.main) {
                 activity = EntityBuilder.createActivity("Mindustry на play.thedimas.pp.ua", config.discordUrl, Activity.ActivityType.PLAYING);
             }
+            Log.info("Building JDA...");
             jda = JDABuilder.createDefault(config.bot.token) // don't use the deprecated constructor
                     .setActivity(activity)
                     .addEventListeners(new DiscordListener()) // register your listener
@@ -32,6 +33,7 @@ public class Bot {
                     .awaitReady();
             MessageRequest.setDefaultMentions(EnumSet.of(Message.MentionType.CHANNEL, Message.MentionType.EMOJI));
             channel = jda.getTextChannelById(config.bot.channelId);
+            Log.info("JDA is ready!");
         } catch (InterruptedException | LoginException e) {
             Log.err(e);
         }
@@ -45,6 +47,7 @@ public class Bot {
     }
 
     public static void shutdown() {
+        Log.info("Shutting down bot...");
         jda.shutdown();
     }
 

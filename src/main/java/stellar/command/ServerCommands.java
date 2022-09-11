@@ -17,6 +17,7 @@ import stellar.Variables;
 import stellar.bot.Bot;
 import stellar.bot.Colors;
 import stellar.database.DBHandler;
+import stellar.util.Bundle;
 
 import java.sql.SQLException;
 import java.text.MessageFormat;
@@ -96,7 +97,7 @@ public class ServerCommands {
 
                 if (!rtvEnabled && Variables.votesRTV.size() > 0) {
                     Variables.votesRTV.clear();
-                    ThedimasPlugin.bundled("commands.rtv.votes-clear");
+                    Bundle.bundled("commands.rtv.votes-clear");
                 }
             } else if (args.length > 0) {
                 Log.info("RTV: некорректное действие");

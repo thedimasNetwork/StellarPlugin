@@ -6,6 +6,7 @@ import mindustry.game.EventType;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import stellar.ThedimasPlugin;
+import stellar.util.StringUtils;
 
 public class ServerListener {
     public static void listen() {
@@ -34,7 +35,7 @@ public class ServerListener {
         });
 
         Events.on(EventType.PlayerJoin.class, event -> {
-            String name = ThedimasPlugin.stripColorsAndGlyphs(event.player.name);
+            String name = StringUtils.stripColorsAndGlyphs(event.player.name);
             MessageEmbed embed = new EmbedBuilder()
                     .setDescription(String.format("%s зашел на сервер", name))
                     .setColor(Colors.green)
@@ -43,7 +44,7 @@ public class ServerListener {
         });
 
         Events.on(EventType.PlayerLeave.class, event -> {
-            String name = ThedimasPlugin.stripColorsAndGlyphs(event.player.name);
+            String name = StringUtils.stripColorsAndGlyphs(event.player.name);
             MessageEmbed embed = new EmbedBuilder()
                     .setDescription(String.format("%s покинул сервер", name))
                     .setColor(Colors.red)
@@ -55,8 +56,8 @@ public class ServerListener {
             if (event.message.startsWith("/")) {
                 return;
             }
-            String name = ThedimasPlugin.stripColorsAndGlyphs(event.player.name);
-            String text = ThedimasPlugin.stripColorsAndGlyphs(event.message);
+            String name = StringUtils.stripColorsAndGlyphs(event.player.name);
+            String text = StringUtils.stripColorsAndGlyphs(event.message);
             String msg = String.format("**%s**: %s", name, text);
             Bot.sendMessage(msg);
         });

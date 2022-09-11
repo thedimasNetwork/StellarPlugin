@@ -13,6 +13,7 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import stellar.ThedimasPlugin;
+import stellar.util.StringUtils;
 
 import java.io.File;
 import java.lang.management.ManagementFactory;
@@ -46,6 +47,7 @@ public class DiscordListener extends ListenerAdapter {
             // сообщение отсылаться не будет, ибо таких ботов будет запущено ~10
             return;
         }
+        Log.info("Got @ command from @", event.getName(), event.getMember().getUser().getName());
         switch (event.getName()) {
             case "info" -> {
                 String text = String.format("""
@@ -63,7 +65,7 @@ public class DiscordListener extends ListenerAdapter {
                 if (Groups.player.size() > 0) {
                     StringBuilder players = new StringBuilder();
                     Groups.player.each(p -> {
-                        players.append(ThedimasPlugin.stripColorsAndGlyphs(p.name)).append("\n");
+                        players.append(StringUtils.stripColorsAndGlyphs(p.name)).append("\n");
                     });
                     MessageEmbed embed = new EmbedBuilder()
                             .addField("Игроки", players.toString(), false)
