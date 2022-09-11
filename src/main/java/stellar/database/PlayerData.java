@@ -1,4 +1,4 @@
-package stellar;
+package stellar.database;
 
 import lombok.AccessLevel;
 import lombok.Builder;

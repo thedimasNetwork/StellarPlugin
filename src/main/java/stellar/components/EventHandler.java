@@ -13,7 +13,7 @@ import mindustry.gen.Groups;
 import mindustry.gen.Player;
 import mindustry.net.Packets;
 import stellar.Const;
-import stellar.PlayerData;
+import stellar.database.PlayerData;
 import stellar.Variables;
 import stellar.database.DBHandler;
 import stellar.database.tables.Users;

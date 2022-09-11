@@ -3,11 +3,12 @@ package stellar.database;
 import arc.util.Log;
 import arc.util.Nullable;
 
-import stellar.PlayerData;
 import stellar.database.tables.Playtime;
 import stellar.database.tables.Users;
 
 import java.sql.*;
+import java.util.HashSet;
+import java.util.Set;
 
 import static stellar.Variables.config;
 
@@ -104,6 +105,29 @@ public class DBHandler {
                     .banned(data.getBoolean(Users.U_BANNED))
                     .exp(data.getInt(Users.U_EXP))
                     .build();
+        }
+    }
+
+    public static Set<PlayerData> getByIp(String ip) throws SQLException {
+        Set<PlayerData> result = new HashSet<>();
+        String select = "SELECT " + Users.U_ALL + " FROM " + Users.U_TABLE + " WHERE " + Users.U_UUID + "=?";
+        try (PreparedStatement prSt = getDbConnection().prepareStatement(select)) {
+            prSt.setString(1, ip);
+
+            ResultSet data = prSt.executeQuery();
+            while (data.next()) {
+                result.add(PlayerData.builder()
+                        .uuid(data.getString(Users.U_UUID))
+                        .ip(data.getString(Users.U_IP))
+                        .name(data.getString(Users.U_NAME))
+                        .locale(data.getString(Users.U_LOCALE))
+                        .translator(data.getString(Users.U_TRANSLATOR))
+                        .admin(data.getBoolean(Users.U_ADMIN))
+                        .banned(data.getBoolean(Users.U_BANNED))
+                        .exp(data.getInt(Users.U_EXP))
+                        .build());
+            }
+            return result;
         }
     }
 
