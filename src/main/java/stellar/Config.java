@@ -25,8 +25,7 @@ public class Config {
         }
 
         if (!new Fi(Const.PLUGIN_FOLDER + "plugin.yaml").exists()) {
-            InputStream is = Config.class.getClassLoader().getResourceAsStream("plugin.yaml");
-            try {
+            try (InputStream is = Config.class.getClassLoader().getResourceAsStream("plugin.yaml")) {
                 Files.copy(is, Path.of(Const.PLUGIN_FOLDER + "plugin.yaml"));
             } catch (IOException e) {
                 Log.err(e);
@@ -58,4 +57,3 @@ public class Config {
     public Database database;
     public Bot bot;
 }
-
