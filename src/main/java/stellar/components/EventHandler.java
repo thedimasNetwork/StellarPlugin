@@ -2,9 +2,11 @@ package stellar.components;
 
 import arc.Core;
 import arc.Events;
+import arc.graphics.Color;
 import arc.util.Log;
 import arc.util.Strings;
 import mindustry.content.Blocks;
+import mindustry.content.Fx;
 import mindustry.content.Items;
 import mindustry.game.EventType;
 import mindustry.gen.Building;
@@ -17,6 +19,7 @@ import stellar.database.PlayerData;
 import stellar.Variables;
 import stellar.database.DBHandler;
 import stellar.database.tables.Users;
+import stellar.events.PlayerMoveEvent;
 import stellar.history.struct.CacheSeq;
 import stellar.util.Bundle;
 import stellar.util.Translator;
@@ -27,8 +30,7 @@ import java.util.Locale;
 
 import static mindustry.Vars.*;
 import static mindustry.Vars.world;
-import static stellar.Variables.config;
-import static stellar.Variables.interval;
+import static stellar.Variables.*;
 
 @SuppressWarnings({"unused", "unchecked"})
 public class EventHandler {
@@ -237,6 +239,31 @@ public class EventHandler {
 
                 Log.info(Const.CHAT_LOG_FORMAT, Strings.stripColors(event.player.name), Strings.stripColors(event.message), event.player.locale);
             }
+        });
+
+        // region PlayerMoveEvent
+        Events.run(EventType.Trigger.update, () -> {
+            for (Player player : Groups.player) {
+                if (PlayerMoveEvent.check(player)) {
+                    final int oldX = PlayerMoveEvent.getPlayerX(player);
+                    final int oldY = PlayerMoveEvent.getPlayerY(player);
+
+                    Events.fire(new PlayerMoveEvent(oldX, oldY, player));
+                }
+            }
+
+            PlayerMoveEvent.update();
+        });
+        // endregion
+
+        Events.on(PlayerMoveEvent.class, event -> {
+            if (!donaters.containsKey(event.player.uuid())) {
+                return;
+            }
+
+            float x = event.player.x;
+            float y = event.player.y;
+            Call.effect(Fx.smoke, x, y, 0, Color.white);
         });
     }
 }
