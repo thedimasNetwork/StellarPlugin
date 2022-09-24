@@ -84,7 +84,7 @@ public class EventHandler {
                     DBHandler.update(event.player.uuid(), Users.LOCALE, event.player.locale);
                     DBHandler.update(event.player.uuid(), Users.IP, event.player.ip());
 
-                    PlayerData data = DBHandler.get(player.uuid());
+                    PlayerData data = DBHandler.get(event.player.uuid());
 
                     assert data != null;
                     if (data.isAdmin()) {
