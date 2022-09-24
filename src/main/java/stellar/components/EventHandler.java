@@ -266,14 +266,15 @@ public class EventHandler {
         });
         // endregion
 
-        Events.on(PlayerMoveEvent.class, event -> {
+        Events.run(EventType.Trigger.update, () -> {
             /*if (!donaters.containsKey(event.player.uuid())) {
                 return;
             }*/
-
-            float x = event.player.x;
-            float y = event.player.y;
-            Call.effect(Fx.smoke, x, y, 0, Color.white);
+            Groups.player.each(p -> {
+                if (p.unit().moving()) {
+                    Call.effect(Fx.smoke, p.x, p.y, 0, Color.white);
+                }
+            });
         });
     }
 }
