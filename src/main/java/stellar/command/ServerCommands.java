@@ -6,6 +6,7 @@ import arc.util.CommandHandler;
 import arc.util.Log;
 import arc.util.Reflect;
 import arc.util.Strings;
+import mindustry.content.Fx;
 import mindustry.gen.Groups;
 import mindustry.net.Administration;
 import mindustry.net.Packets;
@@ -102,6 +103,15 @@ public class ServerCommands {
                 Log.info("RTV: некорректное действие");
             }
             Log.info(rtvEnabled ? "RTV включен" : "RTV выключен");
+        });
+        commandHandler.register("effect", "<effect>", "set new moving effect", args -> {
+            try {
+                Fx.class.getField(args[0]).get(null);
+            } catch (NoSuchFieldException | IllegalAccessException e) {
+                Log.err("Effect @ not found", args[0]);
+                return;
+            }
+            Core.settings.put("effect", args[0]);
         });
     }
 

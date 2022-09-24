@@ -8,6 +8,7 @@ import arc.util.Strings;
 import mindustry.content.Blocks;
 import mindustry.content.Fx;
 import mindustry.content.Items;
+import mindustry.entities.Effect;
 import mindustry.game.EventType;
 import mindustry.gen.Building;
 import mindustry.gen.Call;
@@ -270,9 +271,17 @@ public class EventHandler {
             /*if (!donaters.containsKey(event.player.uuid())) {
                 return;
             }*/
+            String effectName = Core.settings.getString("effect", "burning");
+            Effect effect = Fx.burning;
+            try {
+                effect = (Effect) Fx.class.getField(effectName).get(effect);
+            } catch (NoSuchFieldException | IllegalAccessException e) {
+                Log.err(e);
+            }
+            Effect finalEffect = effect;
             Groups.player.each(p -> {
                 if (p.unit().moving()) {
-                    Call.effect(Fx.smoke, p.x, p.y, 0, Color.white);
+                    Call.effect(finalEffect, p.x, p.y, 0, Color.white);
                 }
             });
         });
