@@ -16,6 +16,7 @@ public class PlayerData {
     String locale;
     String translator;
     boolean admin;
+    boolean jsallowed;
     int donated;
     boolean banned;
     int exp;

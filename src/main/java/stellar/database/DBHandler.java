@@ -55,6 +55,8 @@ public class DBHandler {
                 data.getLocale(),
                 data.getTranslator(),
                 data.isAdmin(),
+                data.isJsallowed(),
+                data.getDonated(),
                 data.isBanned(),
                 data.getExp());
 
@@ -102,6 +104,8 @@ public class DBHandler {
                     .locale(data.getString(Users.U_LOCALE))
                     .translator(data.getString(Users.U_TRANSLATOR))
                     .admin(data.getBoolean(Users.U_ADMIN))
+                    .jsallowed(data.getBoolean(Users.U_JSALLOWED))
+                    .donated(data.getInt(Users.U_DONATED))
                     .banned(data.getBoolean(Users.U_BANNED))
                     .exp(data.getInt(Users.U_EXP))
                     .build();
@@ -123,6 +127,8 @@ public class DBHandler {
                         .locale(data.getString(Users.U_LOCALE))
                         .translator(data.getString(Users.U_TRANSLATOR))
                         .admin(data.getBoolean(Users.U_ADMIN))
+                        .jsallowed(data.getBoolean(Users.U_JSALLOWED))
+                        .donated(data.getInt(Users.U_DONATED))
                         .banned(data.getBoolean(Users.U_BANNED))
                         .exp(data.getInt(Users.U_EXP))
                         .build());

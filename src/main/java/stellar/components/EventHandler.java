@@ -257,9 +257,9 @@ public class EventHandler {
         // endregion
 
         Events.on(PlayerMoveEvent.class, event -> {
-            if (!donaters.containsKey(event.player.uuid())) {
+            /*if (!donaters.containsKey(event.player.uuid())) {
                 return;
-            }
+            }*/
 
             float x = event.player.x;
             float y = event.player.y;

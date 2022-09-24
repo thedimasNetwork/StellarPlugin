@@ -26,6 +26,7 @@ public class Variables {
     // uuid -> name
     public static final Map<String, String> admins = new HashMap<>();
     public static final Map<String, String> donaters = new HashMap<>();
+    public static final Map<String, String> jsallowed = new HashMap<>();
 
     public static CacheSeq<HistoryEntry>[][] history;
     public static CacheSeq<HistoryEntry> getHistorySeq(int x, int y) {

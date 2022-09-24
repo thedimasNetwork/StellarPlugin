@@ -10,10 +10,12 @@ public class Users {
     public static final String U_LOCALE = "locale";
     public static final String U_TRANSLATOR = "translator";
     public static final String U_ADMIN = "admin";
+    public static final String U_JSALLOWED = "jsallowed";
+    public static final String U_DONATED = "donated";
     public static final String U_BANNED = "banned";
     public static final String U_EXP = "exp";
 
-    public static final String U_ALL = String.format("%s,%s,%s,%s,%s,%s,%s,%s", U_UUID, U_IP, U_NAME, U_LOCALE, U_TRANSLATOR, U_ADMIN, U_BANNED, U_EXP);
+    public static final String U_ALL = String.format("%s,%s,%s,%s,%s,%s,%s,%s,%s", U_UUID, U_IP, U_NAME, U_LOCALE, U_TRANSLATOR, U_ADMIN, U_JSALLOWED, U_BANNED, U_EXP);
     public static final String U_ALL_RAW = U_ALL.replaceAll("([a-zA-Z_])+", "?"); // заменяет все символы кроме ',' на '?'
 
     public static final Field<String> UUID = new Field<>(U_UUID, String.class, U_TABLE);
@@ -22,6 +24,8 @@ public class Users {
     public static final Field<String> LOCALE = new Field<>(U_LOCALE, String.class, U_TABLE);
     public static final Field<String> TRANSLATOR = new Field<>(U_TRANSLATOR, String.class, U_TABLE);
     public static final Field<Boolean> ADMIN = new Field<>(U_ADMIN, Boolean.class, U_TABLE);
+    public static final Field<Boolean> JSALLOWED = new Field<>(U_JSALLOWED, Boolean.class, U_TABLE);
+    public static final Field<Integer> DONATED = new Field<>(U_DONATED, Integer.class, U_TABLE);
     public static final Field<Boolean> BANNED = new Field<>(U_BANNED, Boolean.class, U_TABLE);
     public static final Field<Integer> EXP = new Field<>(U_EXP, Integer.class, U_TABLE);
 }
