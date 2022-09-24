@@ -14,7 +14,6 @@ import mindustry.type.UnitType;
 import mindustry.world.Block;
 import mindustry.world.Tile;
 import stellar.Const;
-import stellar.ThedimasPlugin;
 import stellar.Variables;
 import stellar.util.Bundle;
 import stellar.util.Players;
@@ -22,6 +21,7 @@ import stellar.util.Translator;
 import stellar.util.logger.DiscordLogger;
 
 import static mindustry.Vars.world;
+import static mindustry.Vars.mods;
 
 public class AdminCommands {
 
@@ -268,6 +268,26 @@ public class AdminCommands {
             Log.info("@ сменил карту", Strings.stripColors(player.name));
             DiscordLogger.info(String.format("%s сменил карту", player.name));
         });
+
+        commandHandler.<Player>register("js", "<code...>", "JS eval", (args, player) -> {
+            if (!Variables.admins.containsKey(player.uuid())) {
+                Bundle.bundled(player, "commands.access-denied");
+                return;
+            }
+            if (!Variables.jsallowed.containsKey(player.uuid())) {
+                Bundle.bundled(player, "В доступе к этой команде отказано. Для получения обратись к высшей администрации");
+                return;
+            }
+            String output = mods.getScripts().runConsole(args[0]);
+            boolean error = false;
+            try {
+                String errorName = output.substring(0, output.indexOf(' ') - 1);
+                Class.forName("org.mozilla.javascript." + errorName);
+            } catch (Exception ignored) {
+                error = true;
+            }
+            player.sendMessage("> " + (error ? "[#ff341c]" + output : output));
+        }); // TODO: использовать бандлы
     }
 
 }

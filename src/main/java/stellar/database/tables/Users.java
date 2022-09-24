@@ -15,7 +15,7 @@ public class Users {
     public static final String U_BANNED = "banned";
     public static final String U_EXP = "exp";
 
-    public static final String U_ALL = String.format("%s,%s,%s,%s,%s,%s,%s,%s,%s", U_UUID, U_IP, U_NAME, U_LOCALE, U_TRANSLATOR, U_ADMIN, U_JSALLOWED, U_BANNED, U_EXP);
+    public static final String U_ALL = String.format("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s", U_UUID, U_IP, U_NAME, U_LOCALE, U_TRANSLATOR, U_ADMIN, U_JSALLOWED, U_DONATED, U_BANNED, U_EXP);
     public static final String U_ALL_RAW = U_ALL.replaceAll("([a-zA-Z_])+", "?"); // заменяет все символы кроме ',' на '?'
 
     public static final Field<String> UUID = new Field<>(U_UUID, String.class, U_TABLE);

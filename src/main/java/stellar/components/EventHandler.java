@@ -84,10 +84,18 @@ public class EventHandler {
                     DBHandler.update(event.player.uuid(), Users.LOCALE, event.player.locale);
                     DBHandler.update(event.player.uuid(), Users.IP, event.player.ip());
 
-                    Boolean admin = DBHandler.get(event.player.uuid(), Users.ADMIN);
-                    if (admin != null && admin) {
+                    PlayerData data = DBHandler.get(player.uuid());
+
+                    assert data != null;
+                    if (data.isAdmin()) {
                         Variables.admins.put(event.player.uuid(), event.player.name);
                         event.player.admin = true;
+                    }
+                    if (data.isJsallowed()) {
+                        Variables.jsallowed.put(event.player.uuid(), event.player.name);
+                    }
+                    if (data.getDonated() > 0) {
+                        Variables.donaters.put(event.player.uuid(), event.player.name);
                     }
                 } else {
                     PlayerData data = PlayerData.builder()
@@ -179,6 +187,8 @@ public class EventHandler {
             }
 
             Variables.admins.remove(event.player.uuid());
+            Variables.jsallowed.remove(event.player.uuid());
+            Variables.donaters.remove(event.player.uuid());
             Variables.activeHistoryPlayers.remove(event.player.uuid());
             Log.info("@ has disconnected from the server", event.player.name);
             String playerName = event.player.coloredName();
