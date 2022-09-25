@@ -20,7 +20,6 @@ import stellar.database.PlayerData;
 import stellar.Variables;
 import stellar.database.DBHandler;
 import stellar.database.tables.Users;
-import stellar.events.PlayerMoveEvent;
 import stellar.history.struct.CacheSeq;
 import stellar.util.Bundle;
 import stellar.util.Translator;
@@ -251,21 +250,6 @@ public class EventHandler {
                 Log.info(Const.CHAT_LOG_FORMAT, Strings.stripColors(event.player.name), Strings.stripColors(event.message), event.player.locale);
             }
         });
-
-        // region PlayerMoveEvent
-        Events.run(EventType.Trigger.update, () -> {
-            for (Player player : Groups.player) {
-                if (PlayerMoveEvent.check(player)) {
-                    final int oldX = PlayerMoveEvent.getPlayerX(player);
-                    final int oldY = PlayerMoveEvent.getPlayerY(player);
-
-                    Events.fire(new PlayerMoveEvent(oldX, oldY, player));
-                }
-            }
-
-            PlayerMoveEvent.update();
-        });
-        // endregion
 
         Events.run(EventType.Trigger.update, () -> {
             /*if (!donaters.containsKey(event.player.uuid())) {
