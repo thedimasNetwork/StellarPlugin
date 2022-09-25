@@ -1,13 +1,17 @@
 package stellar.bot;
 
 import arc.Core;
+import arc.Events;
 import arc.math.Mathf;
 import arc.util.Log;
 import com.sun.management.OperatingSystemMXBean;
+import mindustry.game.EventType;
+import mindustry.game.Team;
 import mindustry.gen.Call;
 import mindustry.gen.Groups;
 import mindustry.maps.Map;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
@@ -119,6 +123,44 @@ public class DiscordListener extends ListenerAdapter {
                 }
                 MessageEmbed embed = new EmbedBuilder()
                         .addField("Карты на сервере", text.toString(), false)
+                        .setColor(Colors.blue)
+                        .setTimestamp(LocalDateTime.now())
+                        .build();
+                event.replyEmbeds(embed).queue();
+            }
+            case "skipwave" -> {
+                if (!event.getMember().hasPermission(Permission.ADMINISTRATOR)) {
+                    MessageEmbed embed = new EmbedBuilder()
+                            .setDescription("В доступе отказано")
+                            .setColor(Colors.red)
+                            .setTimestamp(LocalDateTime.now())
+                            .build();
+                    event.replyEmbeds(embed).queue();
+                    return;
+                }
+                logic.skipWave();
+                String text = String.format("Волна пропущена. Текущая волна %s на карте %s", state.wave, state.map.name());
+                MessageEmbed embed = new EmbedBuilder()
+                        .setDescription(text)
+                        .setColor(Colors.blue)
+                        .setTimestamp(LocalDateTime.now())
+                        .build();
+                event.replyEmbeds(embed).queue();
+            }
+            case "gameover" -> {
+                if (!event.getMember().hasPermission(Permission.ADMINISTRATOR)) {
+                    MessageEmbed embed = new EmbedBuilder()
+                            .setDescription("В доступе отказано")
+                            .setColor(Colors.red)
+                            .setTimestamp(LocalDateTime.now())
+                            .build();
+                    event.replyEmbeds(embed).queue();
+                    return;
+                }
+                Events.fire(new EventType.GameOverEvent(Team.crux));
+                String text = String.format("Игра окончена. Всего волн: %s на карте %s", state.wave, state.map.name());
+                MessageEmbed embed = new EmbedBuilder()
+                        .setDescription(text)
                         .setColor(Colors.blue)
                         .setTimestamp(LocalDateTime.now())
                         .build();

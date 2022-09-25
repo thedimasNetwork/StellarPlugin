@@ -42,7 +42,9 @@ public class Bot {
                 Commands.slash("info", "Информация про сервер"),
                 Commands.slash("players", "Игроки на сервере"),
                 Commands.slash("host", "Информация про хост"),
-                Commands.slash("maps", "Список карт на сервере")
+                Commands.slash("maps", "Список карт на сервере"),
+                Commands.slash("skipwave", "Пропустить волну"),
+                Commands.slash("gameover", "Принудительно завершить игру")
         ).queue();
     }
 
