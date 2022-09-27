@@ -58,11 +58,7 @@ public class DiscordListener extends ListenerAdapter {
                     Карта: **%s** | Волна: **%s**
                     Игроков: **%s** | Юнитов: **%s**
                     TPS **%s** | ОЗУ **%sМБ**""", state.map.name(), state.wave, Groups.player.size(), Groups.unit.size(), Core.graphics.getFramesPerSecond(), Core.app.getJavaHeap() / 1024 / 1024);
-                MessageEmbed embed = new EmbedBuilder()
-                        .addField("Статус сервера", text, false)
-                        .setColor(Colors.blue)
-                        .setTimestamp(LocalDateTime.now())
-                        .build();
+                MessageEmbed embed = Util.embedBuilder("Статус сервера", text, Colors.blue, LocalDateTime.now());
                 event.replyEmbeds(embed).queue();
             }
             case "players" -> {
@@ -109,11 +105,7 @@ public class DiscordListener extends ListenerAdapter {
                         ОЗУ: **%s/%s**МБ (**%s%%**)
                         Диск: **%s/%s**ГБ (**%s%%**)
                         """, cpuLoad, ramUsage, ramTotal, ramLoad, diskUsage, diskTotal, diskLoad);
-                MessageEmbed embed = new EmbedBuilder()
-                        .addField("Нагрузка на сервер", text, false)
-                        .setColor(Colors.blue)
-                        .setTimestamp(LocalDateTime.now())
-                        .build();
+                MessageEmbed embed = Util.embedBuilder("Нагрузка на хост", text, Colors.blue, LocalDateTime.now());
                 event.replyEmbeds(embed).queue();
             }
             case "maps" -> {
@@ -121,49 +113,29 @@ public class DiscordListener extends ListenerAdapter {
                 for (Map map : maps.customMaps()) {
                     text.append(map.name()).append("\n");
                 }
-                MessageEmbed embed = new EmbedBuilder()
-                        .addField("Карты на сервере", text.toString(), false)
-                        .setColor(Colors.blue)
-                        .setTimestamp(LocalDateTime.now())
-                        .build();
+                MessageEmbed embed = Util.embedBuilder("Карты на сервере", text.toString(), Colors.blue, LocalDateTime.now());
                 event.replyEmbeds(embed).queue();
             }
             case "skipwave" -> {
                 if (!event.getMember().hasPermission(Permission.ADMINISTRATOR)) {
-                    MessageEmbed embed = new EmbedBuilder()
-                            .setDescription("В доступе отказано")
-                            .setColor(Colors.red)
-                            .setTimestamp(LocalDateTime.now())
-                            .build();
+                    MessageEmbed embed = Util.embedBuilder("В доступе отказано", Colors.red);
                     event.replyEmbeds(embed).queue();
                     return;
                 }
                 logic.skipWave();
                 String text = String.format("Волна пропущена. Текущая волна %s на карте %s", state.wave, state.map.name());
-                MessageEmbed embed = new EmbedBuilder()
-                        .setDescription(text)
-                        .setColor(Colors.blue)
-                        .setTimestamp(LocalDateTime.now())
-                        .build();
+                MessageEmbed embed = Util.embedBuilder(text, Colors.green);
                 event.replyEmbeds(embed).queue();
             }
             case "gameover" -> {
                 if (!event.getMember().hasPermission(Permission.ADMINISTRATOR)) {
-                    MessageEmbed embed = new EmbedBuilder()
-                            .setDescription("В доступе отказано")
-                            .setColor(Colors.red)
-                            .setTimestamp(LocalDateTime.now())
-                            .build();
+                    MessageEmbed embed = Util.embedBuilder("В доступе отказано", Colors.red);
                     event.replyEmbeds(embed).queue();
                     return;
                 }
                 Events.fire(new EventType.GameOverEvent(Team.crux));
                 String text = String.format("Игра окончена. Всего волн: %s на карте %s", state.wave, state.map.name());
-                MessageEmbed embed = new EmbedBuilder()
-                        .setDescription(text)
-                        .setColor(Colors.blue)
-                        .setTimestamp(LocalDateTime.now())
-                        .build();
+                MessageEmbed embed = Util.embedBuilder(text, Colors.blue);
                 event.replyEmbeds(embed).queue();
             }
         }
