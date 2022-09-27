@@ -295,6 +295,15 @@ public class PlayerCommands {
                 Log.err(e);
             }
         });
+
+        commandHandler.<Player>register("info", "Получить информацию про игрока", (args, player) -> {
+            String message = String.format("""
+                    [yellow]Name[]: %s
+                    [yellow]UUID[]: %s
+                    [yellow]IP[]: [yellow]%s
+                    [yellow]Locale[]: %s""", player.name(), player.uuid(), player.con.address, player.locale());
+            player.sendMessage(message);
+        }); // TODO: использовать бандлы
     }
 
     private static String longToTime(long seconds) {
