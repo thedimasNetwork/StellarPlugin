@@ -255,7 +255,7 @@ public class EventHandler {
             /*if (!donaters.containsKey(event.player.uuid())) {
                 return;
             }*/
-            String effectName = Core.settings.getString("effect", "burning");
+            String effectName = Core.settings.getString("effect", "burning"); // TODO: перенести в конфиг файл
             Effect effect = Fx.burning;
             try {
                 effect = (Effect) Fx.class.getField(effectName).get(effect);
