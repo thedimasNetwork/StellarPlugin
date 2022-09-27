@@ -10,15 +10,22 @@ import mindustry.content.Blocks;
 import mindustry.game.EventType;
 import mindustry.game.Team;
 import mindustry.gen.*;
+import mindustry.net.Packets;
 import mindustry.type.UnitType;
 import mindustry.world.Block;
 import mindustry.world.Tile;
 import stellar.Const;
 import stellar.Variables;
+import stellar.bot.Bot;
+import stellar.database.DBHandler;
+import stellar.database.PlayerData;
+import stellar.database.tables.Users;
 import stellar.util.Bundle;
 import stellar.util.Players;
 import stellar.util.Translator;
 import stellar.util.logger.DiscordLogger;
+
+import java.sql.SQLException;
 
 import static mindustry.Vars.world;
 import static mindustry.Vars.mods;
@@ -288,6 +295,71 @@ public class AdminCommands {
             }
             player.sendMessage("> " + (error ? "[#ff341c]" + output : output));
         }); // TODO: использовать бандлы
+
+        commandHandler.removeCommand("ban");
+        commandHandler.<Player>register("ban", "<name...>", "Забанить игрока", (args, player) -> {
+            if (!Variables.admins.containsKey(player.uuid())) {
+                Bundle.bundled(player, "commands.access-denied");
+                return;
+            }
+
+            Player found = Players.findPlayer(args[0]);
+            if (found == null) {
+                player.sendMessage(String.format("[red]Игрок с ником %s не найден[]", args[0]));
+                return;
+            }
+            String uuid = found.uuid();
+
+            if (Variables.admins.containsValue(uuid)) {
+                player.sendMessage("[red]Игрок администратор[]");
+                return;
+            }
+
+            try {
+                DBHandler.update(uuid, Users.BANNED, true);
+                found.kick(Packets.KickReason.banned);
+                player.sendMessage(String.format("[lime]Игрок с ником %s забанен[]", args[0]));
+                Log.info("@ (@) has banned @ (@)", player.name(), player.uuid(), found.name(), found.uuid());
+                Bot.sendMessage(String.format("%s забанил игрока %s", player.name(), found.name()));
+            } catch (SQLException e) {
+                Log.err("Failed to ban uuid for player '@'", uuid);
+                Log.err(e);
+                DiscordLogger.err("Failed to ban uuid for player '" + uuid + "'", e);
+                player.sendMessage(String.format("[red]Не могу забанить игрока с ником %s[]", args[0]));
+            }
+        }); // TODO: использовать бандлы
+
+        commandHandler.removeCommand("unban");
+        commandHandler.<Player>register("unban", "<uuid>", "Разбанить игрока", (args, player) -> {
+            if (!Variables.admins.containsKey(player.uuid())) {
+                Bundle.bundled(player, "commands.access-denied");
+                return;
+            }
+
+            if (args[0].contains("'") || args[0].contains("\"")) {
+                player.sendMessage(String.format("[red]Невалидный айди![]", args[0]));
+                return;
+            }
+
+            try {
+                if (!DBHandler.userExist(args[0])) {
+                    player.sendMessage(String.format("[red]Игрок с айди %s не найден[]", args[0]));
+                    return;
+                }
+
+                DBHandler.update(args[0], Users.BANNED, false);
+                PlayerData data = DBHandler.get(args[0]);
+                player.sendMessage(String.format("[lime]Игрок с айди %s разбанен[]", args[0]));
+                Log.info("@ (@) has unbanned @ (@)", player.name(), player.uuid(), data.getName(), args[0]);
+                Bot.sendMessage(String.format("%s разбанил игрока %s", player.name(), data.getName()));
+            } catch (SQLException e) {
+                Log.err("Failed to unban uuid for player '@'", args[0]);
+                Log.err(e);
+                DiscordLogger.err("Failed to ban uuid for player '" + args[0] + "'", e);
+                player.sendMessage(String.format("[red]Не могу разбанить игрока с айди %s[]", args[0]));
+            }
+        }); // TODO: использовать бандлы
+
     }
 
 }
