@@ -11,44 +11,29 @@ import stellar.util.StringUtils;
 public class ServerListener {
     public static void listen() {
         Events.on(EventType.ServerLoadEvent.class, event -> {
-            MessageEmbed embed = new EmbedBuilder()
-                    .setTitle("Сервер запущен")
-                    .setColor(Colors.green)
-                    .build();
+            MessageEmbed embed = Util.embedBuilder("*Сервер запущен*", Colors.green);
             Bot.sendEmbed(embed);
         });
 
         Events.on(EventType.WorldLoadEvent.class, event -> {
-            MessageEmbed embed = new EmbedBuilder()
-                    .setTitle("Карта загружена")
-                    .setColor(Colors.purple)
-                    .build();
+            MessageEmbed embed = Util.embedBuilder("Карта загружена", Colors.purple);
             Bot.sendEmbed(embed);
         });
 
         Events.on(EventType.GameOverEvent.class, event -> {
-            MessageEmbed embed = new EmbedBuilder()
-                    .setTitle("Игра окончена")
-                    .setColor(Colors.purple)
-                    .build();
+            MessageEmbed embed = Util.embedBuilder("Игра окончена", Colors.purple);
             Bot.sendEmbed(embed);
         });
 
         Events.on(EventType.PlayerJoin.class, event -> {
             String name = StringUtils.stripColorsAndGlyphs(event.player.name);
-            MessageEmbed embed = new EmbedBuilder()
-                    .setDescription(String.format("%s зашел на сервер", name))
-                    .setColor(Colors.green)
-                    .build();
+            MessageEmbed embed = Util.embedBuilder(String.format("%s зашел на сервер", name), Colors.green);
             Bot.sendEmbed(embed);
         });
 
         Events.on(EventType.PlayerLeave.class, event -> {
             String name = StringUtils.stripColorsAndGlyphs(event.player.name);
-            MessageEmbed embed = new EmbedBuilder()
-                    .setDescription(String.format("%s покинул сервер", name))
-                    .setColor(Colors.red)
-                    .build();
+            MessageEmbed embed = Util.embedBuilder(String.format("%s покинул сервер", name), Colors.red);
             Bot.sendEmbed(embed);
         });
 

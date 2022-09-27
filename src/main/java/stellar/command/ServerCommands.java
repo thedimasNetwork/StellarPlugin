@@ -12,6 +12,7 @@ import mindustry.net.Administration;
 import mindustry.net.Packets;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
+import stellar.bot.Util;
 import stellar.database.PlayerData;
 import stellar.Variables;
 import stellar.bot.Bot;
@@ -33,10 +34,7 @@ public class ServerCommands {
             Log.info("Shutting down server...");
             Groups.player.each(e -> e.kick(Packets.KickReason.serverClose));
 
-            MessageEmbed embed = new EmbedBuilder()
-                    .setTitle("Сервер остановлен")
-                    .setColor(Colors.red)
-                    .build();
+            MessageEmbed embed = Util.embedBuilder("*Сервер остановлен*", Colors.red);
             Bot.sendEmbed(embed);
             Bot.shutdown();
             Core.app.exit();

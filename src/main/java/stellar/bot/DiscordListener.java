@@ -67,19 +67,11 @@ public class DiscordListener extends ListenerAdapter {
                     Groups.player.each(p -> {
                         players.append(StringUtils.stripColorsAndGlyphs(p.name)).append("\n");
                     });
-                    MessageEmbed embed = new EmbedBuilder()
-                            .addField("Игроки", players.toString(), false)
-                            .setColor(Colors.blue)
-                            .setTimestamp(LocalDateTime.now())
-                            .build();
+                    MessageEmbed embed = Util.embedBuilder("Игроки", players.toString(), Colors.blue, LocalDateTime.now());
                     event.replyEmbeds(embed).queue();
                 }
                 else {
-                    MessageEmbed embed = new EmbedBuilder()
-                            .setDescription("Никого нет")
-                            .setColor(Colors.blue)
-                            .setTimestamp(LocalDateTime.now())
-                            .build();
+                    MessageEmbed embed = Util.embedBuilder("Никого нет", Colors.blue, LocalDateTime.now());
                     event.replyEmbeds(embed).queue();
                 }
             }
