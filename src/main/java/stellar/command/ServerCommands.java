@@ -65,27 +65,6 @@ public class ServerCommands {
             Log.info(MessageFormat.format("Successfully exported {0} players", exported));
         });
 
-        commandHandler.register("auto-pause", "[on|off]", "Pause game with 0 people online", args -> {
-            boolean autoPauseEnabled = Core.settings.getBool("autoPause");
-
-            if (args.length > 0 && (args[0].equalsIgnoreCase("on") || args[0].equalsIgnoreCase("off"))) {
-                autoPauseEnabled = args[0].equalsIgnoreCase("on") || !args[0].equalsIgnoreCase("off");
-                Core.settings.put("autoPause", autoPauseEnabled);
-
-                if (Groups.player.size() < 1 && autoPauseEnabled) {
-                    state.serverPaused = true;
-                    Log.info("auto-pause: @ игроков онлайн -> Игра поставлена на паузу...", Groups.player.size());
-                } else if (!autoPauseEnabled) {
-                    state.serverPaused = false;
-                    Log.info("auto-pause: @ игрок(ов) онлайн -> Игра снята с паузы...", Groups.player.size());
-                }
-                return;
-            } else if (args.length > 0) {
-                Log.info("auto-pause: некорректное действие");
-            }
-            Log.info(autoPauseEnabled ? "Авто-пауза включена" : "Авто-пауза выключена");
-        });
-
         commandHandler.register("rtv", "[on|off]", "disable or enable RTV", args -> {
             boolean rtvEnabled = Core.settings.getBool("rtv");
 

@@ -18,10 +18,6 @@ public class ThedimasPlugin extends Plugin {
     @Override
     public void init() {
         Log.info("ThedimasPlugin launched!");
-
-        if (Core.settings.getBool("autoPause")) {
-            state.serverPaused = true;
-        }
         netServer.admins.addChatFilter((player, message) -> null);
 
         Config.load();

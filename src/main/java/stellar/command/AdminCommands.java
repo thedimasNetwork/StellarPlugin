@@ -256,15 +256,6 @@ public class AdminCommands {
             Log.info("@ заспавнил ядро (@, @)", Strings.stripColors(player.name), tile.x, tile.y);
         });
 
-        commandHandler.<Player>register("pause", "commands.admin.pause.description", (args, player) -> {
-            if (!Variables.admins.containsKey(player.uuid())) {
-                Bundle.bundled(player, "commands.access-denied");
-                return;
-            }
-            Vars.state.serverPaused = !Vars.state.serverPaused;
-            Log.info("@ поставил игру на паузу", Strings.stripColors(player.name));
-        });
-
         commandHandler.<Player>register("end", "commands.admin.end.description", (args, player) -> {
             if (!Variables.admins.containsKey(player.uuid())) {
                 Bundle.bundled(player, "commands.access-denied");

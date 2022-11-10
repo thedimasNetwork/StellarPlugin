@@ -64,11 +64,6 @@ public class EventHandler {
 
         // region PlayerJoin
         Events.on(EventType.PlayerJoin.class, event -> {
-            if (Groups.player.size() >= 1 && Core.settings.getBool("autoPause") && state.serverPaused) {
-                state.serverPaused = false;
-                Log.info("auto-pause: @ player(s) connected -> Game unpaused...", Groups.player.size());
-            }
-
             Log.info(Const.JOIN_LOG_FORMAT, event.player.name, event.player.locale, event.player.con.address);
             String playerName = event.player.coloredName();
             Bundle.bundled("events.join.player-join", playerName);
@@ -173,11 +168,6 @@ public class EventHandler {
 
         // region отключение
         Events.on(EventType.PlayerLeave.class, event -> {
-            if (Groups.player.size() - 1 < 1 && Core.settings.getBool("autoPause")) {
-                state.serverPaused = true;
-                Log.info("auto-pause: @ player connected -> Game paused...", Groups.player.size() - 1);
-            }
-
             if (Variables.votesRTV.contains(event.player.uuid())) {
                 Variables.votesRTV.remove(event.player.uuid());
                 int cur = Variables.votesRTV.size();
@@ -232,11 +222,6 @@ public class EventHandler {
         // endregion
 
         Events.on(EventType.WorldLoadEvent.class, event -> {
-            if (Groups.player.size() > 0 && Core.settings.getBool("autoPause")) { // автопауза
-                state.serverPaused = false;
-                Log.info("auto-pause: @ player(s) connected -> Game unpaused...", Groups.player.size());
-            }
-
             Variables.history = new CacheSeq[world.width()][world.height()];
         });
 
