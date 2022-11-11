@@ -3,9 +3,15 @@ package stellar.database;
 import arc.util.Log;
 import arc.util.Nullable;
 
+import stellar.database.entries.PlayerEntry;
 import stellar.database.tables.Playtime;
+import stellar.database.tables.Tables;
 import stellar.database.tables.Users;
+import stellar.database.types.Entry;
+import stellar.database.types.Field;
+import stellar.database.types.Table;
 
+import java.lang.reflect.InvocationTargetException;
 import java.sql.*;
 import java.util.HashSet;
 import java.util.Set;
@@ -47,20 +53,8 @@ public class DBHandler {
         }
     }
 
-    public static void save(PlayerData data) throws SQLException {
-        preparedExecute("INSERT INTO " + Users.U_TABLE + " (" + Users.U_ALL + ") VALUES (" + Users.U_ALL_RAW + ")",
-                data.getUuid(),
-                data.getIp(),
-                escapeString(data.getName()),
-                data.getLocale(),
-                data.getTranslator(),
-                data.isAdmin(),
-                data.isJsallowed(),
-                data.getDonated(),
-                data.isBanned(),
-                data.getExp());
+    public static void save(Entry data) throws SQLException {
 
-        preparedExecute("INSERT INTO " + Playtime.P_TABLE + " (" + Playtime.P_UUID + ") VALUES (?)", data.getUuid());
     }
 
     private static String escapeString(String text) {
@@ -68,7 +62,7 @@ public class DBHandler {
     }
 
     public static boolean userExist(String uuid) throws SQLException {
-        String select = "SELECT * FROM " + Users.U_TABLE + " WHERE " + Users.U_UUID + "=?";
+        String select = "SELECT * FROM " + Tables.users.title + " WHERE " + Tables.users.key.getName() + "=?";
         try (PreparedStatement prSt = getDbConnection().prepareStatement(select)) {
             prSt.setString(1, uuid);
             return prSt.executeQuery().next();
@@ -76,8 +70,8 @@ public class DBHandler {
     }
 
     @Nullable
-    public static <T> T get(String uuid, Field<T> column) throws SQLException {
-        String select = "SELECT " + column.getName() + " FROM " + column.getTable() + " WHERE " + Users.U_UUID + "=?";
+    public static <T> T get(String uuid, Field<T> column, Table from) throws SQLException {
+        String select = "SELECT " + column.getName() + " FROM " + column.getTable() + " WHERE " + from.key.getName() + "=?";
         try (PreparedStatement prSt = getDbConnection().prepareStatement(select)) {
             prSt.setString(1, uuid);
 
@@ -87,59 +81,29 @@ public class DBHandler {
     }
 
     @Nullable
-    public static PlayerData get(String uuid) throws SQLException {
-        String select = "SELECT " + Users.U_ALL + " FROM " + Users.U_TABLE + " WHERE " + Users.U_UUID + "=?";
+    public static <T extends Entry> T get(String key, Table from, Class<T> type) throws SQLException {
+        String select = "SELECT " + from.all + " FROM " + from.title + " WHERE " + from.key + "=?";
         try (PreparedStatement prSt = getDbConnection().prepareStatement(select)) {
-            prSt.setString(1, uuid);
+            prSt.setString(1, key);
 
             ResultSet data = prSt.executeQuery();
             if (!data.next()) {
                 return null;
             }
 
-            return PlayerData.builder()
-                    .uuid(data.getString(Users.U_UUID))
-                    .ip(data.getString(Users.U_IP))
-                    .name(data.getString(Users.U_NAME))
-                    .locale(data.getString(Users.U_LOCALE))
-                    .translator(data.getString(Users.U_TRANSLATOR))
-                    .admin(data.getBoolean(Users.U_ADMIN))
-                    .jsallowed(data.getBoolean(Users.U_JSALLOWED))
-                    .donated(data.getInt(Users.U_DONATED))
-                    .banned(data.getBoolean(Users.U_BANNED))
-                    .exp(data.getInt(Users.U_EXP))
-                    .build();
-        }
-    }
-
-    public static Set<PlayerData> getByIp(String ip) throws SQLException {
-        Set<PlayerData> result = new HashSet<>();
-        String select = "SELECT " + Users.U_ALL + " FROM " + Users.U_TABLE + " WHERE " + Users.U_UUID + "=?";
-        try (PreparedStatement prSt = getDbConnection().prepareStatement(select)) {
-            prSt.setString(1, ip);
-
-            ResultSet data = prSt.executeQuery();
-            while (data.next()) {
-                result.add(PlayerData.builder()
-                        .uuid(data.getString(Users.U_UUID))
-                        .ip(data.getString(Users.U_IP))
-                        .name(data.getString(Users.U_NAME))
-                        .locale(data.getString(Users.U_LOCALE))
-                        .translator(data.getString(Users.U_TRANSLATOR))
-                        .admin(data.getBoolean(Users.U_ADMIN))
-                        .jsallowed(data.getBoolean(Users.U_JSALLOWED))
-                        .donated(data.getInt(Users.U_DONATED))
-                        .banned(data.getBoolean(Users.U_BANNED))
-                        .exp(data.getInt(Users.U_EXP))
-                        .build());
+            String[] cols = from.all.split(",");
+            String[] args = new String[cols.length];
+            for (int i = 0; i < cols.length; i++) {
+                args[i] = data.getString(cols[i]);
             }
-            return result;
+            return type.getDeclaredConstructor(type).newInstance(args);
+        } catch (InvocationTargetException | InstantiationException | IllegalAccessException | NoSuchMethodException e) {
+            throw new RuntimeException(e);
         }
     }
 
-    public static <T> void update(String uuid, Field<T> column, T value) throws SQLException {
-        preparedExecute("UPDATE " + column.getTable() + " SET " + column.getName() + "=? WHERE " + Users.U_UUID + "=?",
-                value instanceof Boolean ? value : escapeString(String.valueOf(value)), uuid);
+    public static <T> void update(String key, Field<T> column, Table where, T value) throws SQLException {
+        preparedExecute("UPDATE " + where.title + " SET " + column.getName() + "=? WHERE " + where.key.getName() + "=?",
+                value instanceof Boolean ? value : escapeString(String.valueOf(value)), key);
     }
-
 }

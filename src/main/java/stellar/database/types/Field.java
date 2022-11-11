@@ -1,4 +1,4 @@
-package stellar.database;
+package stellar.database.types;
 
 import java.util.Objects;
 

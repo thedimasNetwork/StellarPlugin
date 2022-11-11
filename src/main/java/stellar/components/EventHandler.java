@@ -16,9 +16,10 @@ import mindustry.gen.Groups;
 import mindustry.gen.Player;
 import mindustry.net.Packets;
 import stellar.Const;
-import stellar.database.PlayerData;
+import stellar.database.entries.PlayerEntry;
 import stellar.Variables;
 import stellar.database.DBHandler;
+import stellar.database.tables.Tables;
 import stellar.database.tables.Users;
 import stellar.history.struct.CacheSeq;
 import stellar.util.Bundle;
@@ -41,7 +42,7 @@ public class EventHandler {
             String name = event.player.name;
             try {
                 if (DBHandler.userExist(uuid)) {
-                    Boolean banned = DBHandler.get(uuid, Users.BANNED);
+                    Boolean banned = DBHandler.get(uuid, Tables.users.banned, Tables.users);
                     if (banned != null) {
                         if (banned) {
                             event.player.kick(Packets.KickReason.banned);
@@ -75,11 +76,11 @@ public class EventHandler {
 
             try {
                 if (DBHandler.userExist(event.player.uuid())) {
-                    DBHandler.update(event.player.uuid(), Users.NAME, event.player.name);
-                    DBHandler.update(event.player.uuid(), Users.LOCALE, event.player.locale);
-                    DBHandler.update(event.player.uuid(), Users.IP, event.player.ip());
+                    DBHandler.update(event.player.uuid(), Tables.users.name, Tables.users, event.player.name);
+                    DBHandler.update(event.player.uuid(), Tables.users.locale, Tables.users, event.player.locale);
+                    DBHandler.update(event.player.uuid(), Tables.users.ip, Tables.users, event.player.ip());
 
-                    PlayerData data = DBHandler.get(event.player.uuid());
+                    PlayerEntry data = DBHandler.get(event.player.uuid(), Tables.users, PlayerEntry.class);
 
                     assert data != null;
                     if (data.isAdmin()) {
@@ -93,7 +94,7 @@ public class EventHandler {
                         Variables.donaters.put(event.player.uuid(), event.player.name);
                     }
                 } else {
-                    PlayerData data = PlayerData.builder()
+                    PlayerEntry data = PlayerEntry.builder()
                             .uuid(event.player.uuid())
                             .ip(event.player.ip())
                             .name(event.player.name())
@@ -113,7 +114,7 @@ public class EventHandler {
         // region баны
         Events.on(EventType.PlayerBanEvent.class, event -> {
             try {
-                DBHandler.update(event.uuid, Users.BANNED, true);
+                DBHandler.update(event.uuid, Tables.users.banned, Tables.users, true);
             } catch (SQLException e) {
                 Log.err("Failed to ban uuid for player '@'", event.uuid);
                 Log.err(e);
@@ -130,7 +131,7 @@ public class EventHandler {
 
             String uuid = target.uuid();
             try {
-                DBHandler.update(uuid, Users.BANNED, true);
+                DBHandler.update(uuid, Tables.users.banned, Tables.users, true);
             } catch (SQLException e) {
                 Log.err("Failed to ban ip for player '@'", event.ip);
                 Log.err(e);
@@ -140,7 +141,7 @@ public class EventHandler {
 
         Events.on(EventType.PlayerUnbanEvent.class, event -> {
             try {
-                DBHandler.update(event.uuid, Users.BANNED, false);
+                DBHandler.update(event.uuid, Tables.users.banned, Tables.users, false);
             } catch (SQLException e) {
                 Log.err("Failed to unban uuid for player '@'", event.uuid);
                 Log.err(e);
@@ -157,7 +158,7 @@ public class EventHandler {
 
             String uuid = target.uuid();
             try {
-                DBHandler.update(uuid, Users.BANNED, false);
+                DBHandler.update(uuid, Tables.users.banned, Tables.users, false);
             } catch (SQLException e) {
                 Log.err("Failed to unban ip for player '@'", uuid);
                 Log.err(e);

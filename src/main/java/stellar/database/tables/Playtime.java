@@ -1,56 +1,45 @@
 package stellar.database.tables;
 
-import stellar.database.Field;
-
+import stellar.database.types.*;
 import java.util.*;
 
-public class Playtime {
-    public static final String P_TABLE = "playtime";
-    public static final String P_UUID = "uuid";
-    public static final String P_HUB = "hub";
-    public static final String P_SURVIVAL = "survival";
-    public static final String P_ATTACK = "attack";
-    public static final String P_SANDBOX = "sandbox";
-    public static final String P_PVP = "pvp";
-    public static final String P_ANNEXATION = "annexation";
-    public static final String P_ANARCHY = "anarchy";
-    public static final String P_CAMPAIGN_MAPS = "campaign_maps";
-    public static final String P_MS_GO = "ms_go";
-    public static final String P_HEX_PVP = "hex_pvp";
-    public static final String P_CASTLE_WARS = "castle_wars";
-    public static final String P_CRAWLER_ARENA = "crawler_arena";
-    public static final String P_ZONE_CAPTURE = "zone_capture";
+public class Playtime extends Table {
+    public final String title = "playtime";
 
-    public static final Field<String> UUID = new Field<>(P_UUID, String.class, P_TABLE);
-    public static final Field<Long> HUB = new Field<>(P_HUB, Long.class, P_TABLE);
-    public static final Field<Long> SURVIVAL = new Field<>(P_SURVIVAL, Long.class, P_TABLE);
-    public static final Field<Long> ATTACK = new Field<>(P_ATTACK, Long.class, P_TABLE);
-    public static final Field<Long> SANDBOX = new Field<>(P_SANDBOX, Long.class, P_TABLE);
-    public static final Field<Long> PVP = new Field<>(P_PVP, Long.class, P_TABLE);
-    public static final Field<Long> ANNEXATION = new Field<>(P_ANNEXATION, Long.class, P_TABLE);
-    public static final Field<Long> ANARCHY = new Field<>(P_ANARCHY, Long.class, P_TABLE);
-    public static final Field<Long> CAMPAIGN_MAPS = new Field<>(P_CAMPAIGN_MAPS, Long.class, P_TABLE);
-    public static final Field<Long> MS_GO = new Field<>(P_MS_GO, Long.class, P_TABLE);
-    public static final Field<Long> HEX_PVP = new Field<>(P_HEX_PVP, Long.class, P_TABLE);
-    public static final Field<Long> CASTLE_WARS = new Field<>(P_CASTLE_WARS, Long.class, P_TABLE);
-    public static final Field<Long> CRAWLER_ARENA = new Field<>(P_CRAWLER_ARENA, Long.class, P_TABLE);
-    public static final Field<Long> ZONE_CAPTURE = new Field<>(P_ZONE_CAPTURE, Long.class, P_TABLE);
+    public final Field<String> uuid = new Field<>("uuid", String.class, title);
+    public final Field<Long> hub = new Field<>("hub", Long.class, title);
+    public final Field<Long> survival = new Field<>("survival", Long.class, title);
+    public final Field<Long> attack = new Field<>("attack", Long.class, title);
+    public final Field<Long> sandbox = new Field<>("sandbox", Long.class, title);
+    public final Field<Long> pvp = new Field<>("pvp", Long.class, title);
+    public final Field<Long> annexation = new Field<>("annexation", Long.class, title);
+    public final Field<Long> anarchy = new Field<>("anarchy", Long.class, title);
+    public final Field<Long> campaign_maps = new Field<>("campaign_maps", Long.class, title);
+    public final Field<Long> ms_go = new Field<>("ms_go", Long.class, title);
+    public final Field<Long> hex_pvp = new Field<>("hex_pvp", Long.class, title);
+    public final Field<Long> castle_wars = new Field<>("castle_wars", Long.class, title);
+    public final Field<Long> crawler_arena = new Field<>("crawler_arena", Long.class, title);
+    public final Field<Long> zone_capture = new Field<>("zone_capture", Long.class, title);
 
-    public static final Map<String, Field<Long>> FIELDS = new HashMap<>();
+    public final Field<String> key = uuid;
 
-    static {
-        FIELDS.put(P_HUB, HUB);
-        FIELDS.put(P_SURVIVAL, SURVIVAL);
-        FIELDS.put(P_ATTACK, ATTACK);
-        FIELDS.put(P_SANDBOX, SANDBOX);
-        FIELDS.put(P_PVP, PVP);
-        FIELDS.put(P_ANNEXATION, ANNEXATION);
-        FIELDS.put(P_ANARCHY, ANARCHY);
-        FIELDS.put(P_CAMPAIGN_MAPS, CAMPAIGN_MAPS);
-        FIELDS.put(P_MS_GO, MS_GO);
-        FIELDS.put(P_HEX_PVP, HEX_PVP);
-        FIELDS.put(P_CASTLE_WARS, CASTLE_WARS);
-        FIELDS.put(P_CRAWLER_ARENA, CRAWLER_ARENA);
-        FIELDS.put(P_ZONE_CAPTURE, ZONE_CAPTURE);
+    public final String all = String.format("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s", uuid, hub, survival, attack, sandbox, pvp, annexation, anarchy, campaign_maps, ms_go, hex_pvp, castle_wars, crawler_arena, zone_capture);
+    public final String all_raw = all.replaceAll("([a-zA-Z_])+", "?"); // заменяет все символы кроме ',' на '?'
+    public final Map<String, Field<Long>> fields = new HashMap<>();
+
+    public Playtime() {
+        fields.put("hub", hub);
+        fields.put("survival", survival);
+        fields.put("attack", attack);
+        fields.put("sandbox", sandbox);
+        fields.put("pvp", pvp);
+        fields.put("annexation", annexation);
+        fields.put("anarchy", anarchy);
+        fields.put("campaign_maps", campaign_maps);
+        fields.put("ms_go", ms_go);
+        fields.put("hex_pvp", hex_pvp);
+        fields.put("castle_wars", castle_wars);
+        fields.put("crawler_arena", crawler_arena);
+        fields.put("zone_capture", zone_capture);
     }
 }

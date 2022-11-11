@@ -10,10 +10,9 @@ import mindustry.content.Fx;
 import mindustry.gen.Groups;
 import mindustry.net.Administration;
 import mindustry.net.Packets;
-import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import stellar.bot.Util;
-import stellar.database.PlayerData;
+import stellar.database.entries.PlayerEntry;
 import stellar.Variables;
 import stellar.bot.Bot;
 import stellar.bot.Colors;
@@ -24,7 +23,6 @@ import java.sql.SQLException;
 import java.text.MessageFormat;
 
 import static mindustry.Vars.netServer;
-import static mindustry.Vars.state;
 
 public class ServerCommands {
 
@@ -44,7 +42,7 @@ public class ServerCommands {
             ObjectMap<String, Administration.PlayerInfo> playerList = Reflect.get(netServer.admins, "playerInfo");
             int exported = 0;
             for (Administration.PlayerInfo info : playerList.values()) {
-                PlayerData data = PlayerData.builder()
+                PlayerEntry data = PlayerEntry.builder()
                         .uuid(info.id)
                         .ip(info.lastIP)
                         .name(info.lastName)

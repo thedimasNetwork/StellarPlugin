@@ -18,7 +18,8 @@ import stellar.Const;
 import stellar.Variables;
 import stellar.bot.Bot;
 import stellar.database.DBHandler;
-import stellar.database.PlayerData;
+import stellar.database.entries.PlayerEntry;
+import stellar.database.tables.Tables;
 import stellar.database.tables.Users;
 import stellar.util.Bundle;
 import stellar.util.Players;
@@ -307,7 +308,7 @@ public class AdminCommands {
             }
 
             try {
-                DBHandler.update(uuid, Users.BANNED, true);
+                DBHandler.update(args[0], Tables.users.banned, Tables.users, true);
                 found.kick(Packets.KickReason.banned);
                 player.sendMessage(String.format("[lime]Игрок %s забанен[]", args[0]));
                 Log.info("@ (@) has banned @ (@)", player.name(), player.uuid(), found.name(), found.uuid());
@@ -338,8 +339,8 @@ public class AdminCommands {
                     return;
                 }
 
-                DBHandler.update(args[0], Users.BANNED, false);
-                PlayerData data = DBHandler.get(args[0]);
+                DBHandler.update(args[0], Tables.users.banned, Tables.users, false);
+                PlayerEntry data = DBHandler.get(args[0], Tables.users, PlayerEntry.class);
                 player.sendMessage(String.format("[lime]Игрок с айди %s разбанен[]", args[0]));
                 Log.info("@ (@) has unbanned @ (@)", player.name(), player.uuid(), data.getName(), args[0]);
                 Bot.sendMessage(String.format("%s разбанил игрока %s", player.name(), data.getName()));
