@@ -308,7 +308,7 @@ public class AdminCommands {
             }
 
             try {
-                DBHandler.update(args[0], Tables.users.banned, Tables.users, true);
+                DBHandler.update(args[0], Tables.users.getBanned(), Tables.users, true);
                 found.kick(Packets.KickReason.banned);
                 player.sendMessage(String.format("[lime]Игрок %s забанен[]", args[0]));
                 Log.info("@ (@) has banned @ (@)", player.name(), player.uuid(), found.name(), found.uuid());
@@ -339,7 +339,7 @@ public class AdminCommands {
                     return;
                 }
 
-                DBHandler.update(args[0], Tables.users.banned, Tables.users, false);
+                DBHandler.update(args[0], Tables.users.getBanned(), Tables.users, false);
                 PlayerEntry data = DBHandler.get(args[0], Tables.users, PlayerEntry.class);
                 player.sendMessage(String.format("[lime]Игрок с айди %s разбанен[]", args[0]));
                 Log.info("@ (@) has unbanned @ (@)", player.name(), player.uuid(), data.getName(), args[0]);

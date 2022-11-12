@@ -85,7 +85,7 @@ public class PlayerCommands {
         commandHandler.<Player>register("tr", "[off|auto|double|somelocale]", "commands.tr.description", (args, player) -> {
             String locale;
             try {
-                locale = DBHandler.get(player.uuid(), Tables.users.translator, Tables.users);
+                locale = DBHandler.get(player.uuid(), Tables.users.getTranslator(), Tables.users);
             } catch (Throwable t) {
                 Bundle.bundled(player, "commands.tr.error");
                 Log.err(t);
@@ -102,7 +102,7 @@ public class PlayerCommands {
             switch (mode) {
                 case "off" -> {
                     try {
-                        DBHandler.update(player.uuid(), Tables.users.translator, Tables.users,"off");
+                        DBHandler.update(player.uuid(), Tables.users.getTranslator(), Tables.users,"off");
                     } catch (Throwable t) {
                         Log.err(t);
                         DiscordLogger.err(t);
@@ -111,7 +111,7 @@ public class PlayerCommands {
                 }
                 case "auto" -> {
                     try {
-                        DBHandler.update(player.uuid(), Tables.users.translator, Tables.users, "auto");
+                        DBHandler.update(player.uuid(), Tables.users.getTranslator(), Tables.users, "auto");
                     } catch (Throwable t) {
                         Log.err(t);
                         DiscordLogger.err(t);
@@ -120,7 +120,7 @@ public class PlayerCommands {
                 }
                 case "double" -> {
                     try {
-                        DBHandler.update(player.uuid(), Tables.users.translator, Tables.users, "double");
+                        DBHandler.update(player.uuid(), Tables.users.getTranslator(), Tables.users, "double");
                     } catch (Throwable t) {
                         Log.err(t);
                         DiscordLogger.err(t);
@@ -134,7 +134,7 @@ public class PlayerCommands {
                         return;
                     }
                     try {
-                        DBHandler.update(player.uuid(), Tables.users.translator, Tables.users, target.toString());
+                        DBHandler.update(player.uuid(), Tables.users.getTranslator(), Tables.users, target.toString());
                     } catch (Throwable t) {
                         Log.err(t);
                         DiscordLogger.err(t);
@@ -272,13 +272,13 @@ public class PlayerCommands {
                 serverColumnName = Const.SERVER_COLUMN_NAME;
             }
 
-            if (!Tables.playtime.fields.containsKey(serverColumnName)) {
+            if (!Tables.playtime.getFields().containsKey(serverColumnName)) {
                 Bundle.bundled(player, "commands.server-notfound", Const.SERVER_LIST);
                 return;
             }
 
             try {
-                Long time = DBHandler.get(player.uuid(), Tables.playtime.fields.get(serverColumnName), Tables.playtime);
+                Long time = DBHandler.get(player.uuid(), Tables.playtime.getFields().get(serverColumnName), Tables.playtime);
                 if (time == null) {
                     Log.err("Player '" + player.uuid() + "' doesn't exists");
                 }
@@ -290,7 +290,7 @@ public class PlayerCommands {
 
         commandHandler.<Player>register("score", "commands.score.description", (args, player) -> {
             try {
-                int exp = DBHandler.get(player.uuid(), Tables.users.exp, Tables.users);
+                int exp = DBHandler.get(player.uuid(), Tables.users.getExp(), Tables.users);
                 Bundle.bundled(player, "commands.score.msg", exp);
             } catch (SQLException e) {
                 Log.err(e);

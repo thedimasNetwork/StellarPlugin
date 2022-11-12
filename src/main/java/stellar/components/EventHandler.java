@@ -42,7 +42,7 @@ public class EventHandler {
             String name = event.player.name;
             try {
                 if (DBHandler.userExist(uuid)) {
-                    Boolean banned = DBHandler.get(uuid, Tables.users.banned, Tables.users);
+                    Boolean banned = DBHandler.get(uuid, Tables.users.getBanned(), Tables.users);
                     if (banned != null) {
                         if (banned) {
                             event.player.kick(Packets.KickReason.banned);
@@ -76,9 +76,9 @@ public class EventHandler {
 
             try {
                 if (DBHandler.userExist(event.player.uuid())) {
-                    DBHandler.update(event.player.uuid(), Tables.users.name, Tables.users, event.player.name);
-                    DBHandler.update(event.player.uuid(), Tables.users.locale, Tables.users, event.player.locale);
-                    DBHandler.update(event.player.uuid(), Tables.users.ip, Tables.users, event.player.ip());
+                    DBHandler.update(event.player.uuid(), Tables.users.getName(), Tables.users, event.player.name);
+                    DBHandler.update(event.player.uuid(), Tables.users.getLocale(), Tables.users, event.player.locale);
+                    DBHandler.update(event.player.uuid(), Tables.users.getIp(), Tables.users, event.player.ip());
 
                     PlayerEntry data = DBHandler.get(event.player.uuid(), Tables.users, PlayerEntry.class);
 
@@ -114,7 +114,7 @@ public class EventHandler {
         // region баны
         Events.on(EventType.PlayerBanEvent.class, event -> {
             try {
-                DBHandler.update(event.uuid, Tables.users.banned, Tables.users, true);
+                DBHandler.update(event.uuid, Tables.users.getBanned(), Tables.users, true);
             } catch (SQLException e) {
                 Log.err("Failed to ban uuid for player '@'", event.uuid);
                 Log.err(e);
@@ -131,7 +131,7 @@ public class EventHandler {
 
             String uuid = target.uuid();
             try {
-                DBHandler.update(uuid, Tables.users.banned, Tables.users, true);
+                DBHandler.update(uuid, Tables.users.getBanned(), Tables.users, true);
             } catch (SQLException e) {
                 Log.err("Failed to ban ip for player '@'", event.ip);
                 Log.err(e);
@@ -141,7 +141,7 @@ public class EventHandler {
 
         Events.on(EventType.PlayerUnbanEvent.class, event -> {
             try {
-                DBHandler.update(event.uuid, Tables.users.banned, Tables.users, false);
+                DBHandler.update(event.uuid, Tables.users.getBanned(), Tables.users, false);
             } catch (SQLException e) {
                 Log.err("Failed to unban uuid for player '@'", event.uuid);
                 Log.err(e);
@@ -158,7 +158,7 @@ public class EventHandler {
 
             String uuid = target.uuid();
             try {
-                DBHandler.update(uuid, Tables.users.banned, Tables.users, false);
+                DBHandler.update(uuid, Tables.users.getBanned(), Tables.users, false);
             } catch (SQLException e) {
                 Log.err("Failed to unban ip for player '@'", uuid);
                 Log.err(e);

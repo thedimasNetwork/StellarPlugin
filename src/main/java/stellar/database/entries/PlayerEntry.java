@@ -5,11 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
 
-import stellar.database.tables.PlayerEvents;
-import stellar.database.tables.Tables;
-import stellar.database.tables.Users;
 import stellar.database.types.Entry;
-import stellar.database.types.Table;
 
 @Data
 @Builder
@@ -34,6 +30,24 @@ public class PlayerEntry extends Entry {
     @Override
     public String toString() {
         return String.format("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s", uuid, ip, name, locale, translator, admin, jsallowed, donated, banned, exp);
+    }
+
+    public static PlayerEntry fromString(String content) {
+        return new PlayerEntry(content);
+    }
+
+    public PlayerEntry(String content) {
+        String[] split = content.split(",");
+        this.uuid = split[0];
+        this.ip = split[1];
+        this.name = split[2];
+        this.locale = split[3];
+        this.translator = split[4];
+        this.admin = Boolean.parseBoolean(split[5]);
+        this.jsallowed = Boolean.parseBoolean(split[6]);
+        this.donated = Integer.parseInt(split[7]);
+        this.banned = Boolean.parseBoolean(split[8]);
+        this.exp = Integer.parseInt(split[9]);
     }
 
     public PlayerEntry(String uuid, String ip, String name, String locale, String translator, boolean admin, boolean jsallowed, int donated, boolean banned, int exp) {

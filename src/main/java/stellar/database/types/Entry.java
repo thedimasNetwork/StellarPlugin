@@ -8,6 +8,10 @@ public abstract class Entry {
         return super.toString();
     }
 
+    public static Entry fromString(String content) {
+        return null;
+    }
+
     public Entry(Object... args) {
 
     }

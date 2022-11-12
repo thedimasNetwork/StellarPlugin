@@ -44,7 +44,7 @@ public class Translator {
     public static String translateChat(Player player, Player otherPlayer, String message) {
         String locale = otherPlayer.locale;
         try {
-            locale = DBHandler.get(otherPlayer.uuid(), Tables.users.translator, Tables.users);
+            locale = DBHandler.get(otherPlayer.uuid(), Tables.users.getTranslator(), Tables.users);
         } catch (Throwable t) {
             Log.err(t);
             DiscordLogger.err(t);

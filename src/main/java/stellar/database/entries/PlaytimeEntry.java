@@ -7,6 +7,8 @@ import lombok.experimental.FieldDefaults;
 import stellar.database.tables.Tables;
 import stellar.database.types.*;
 
+import java.sql.Timestamp;
+
 @Data
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
@@ -29,6 +31,28 @@ public class PlaytimeEntry extends Entry {
     @Override
     public String toString() {
         return String.format("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s", uuid, hub, survival, attack, sandbox, pvp, annexation, anarchy, campaign_maps, ms_go, hex_pvp, castle_wars, crawler_arena, zone_capture);
+    }
+
+    public static PlaytimeEntry fromString(String content) {
+        return new PlaytimeEntry(content);
+    }
+
+    public PlaytimeEntry(String content) {
+        String[] split = content.split(",");
+        this.uuid = split[0];
+        this.hub = Integer.parseInt(split[1]);
+        this.survival = Integer.parseInt(split[2]);
+        this.attack = Integer.parseInt(split[3]);
+        this.sandbox = Integer.parseInt(split[4]);
+        this.pvp = Integer.parseInt(split[5]);
+        this.annexation = Integer.parseInt(split[6]);
+        this.anarchy = Integer.parseInt(split[7]);
+        this.campaign_maps = Integer.parseInt(split[8]);
+        this.ms_go = Integer.parseInt(split[9]);
+        this.hex_pvp = Integer.parseInt(split[10]);
+        this.castle_wars = Integer.parseInt(split[11]);
+        this.crawler_arena = Integer.parseInt(split[12]);
+        this.zone_capture = Integer.parseInt(split[13]);
     }
 
     public PlaytimeEntry(String uuid, int hub, int survival, int attack, int sandbox, int pvp, int annexation, int anarchy, int campaign_maps, int ms_go, int hex_pvp, int castle_wars, int crawler_arena, int zone_capture) {

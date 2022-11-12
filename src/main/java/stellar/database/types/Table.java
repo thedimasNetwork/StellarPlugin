@@ -1,8 +1,16 @@
 package stellar.database.types;
 
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.experimental.FieldDefaults;
+
+import java.util.Map;
+
+@Getter
+@FieldDefaults(level = AccessLevel.PROTECTED)
 public abstract class Table {
-    public String title;
-    public Field<Object> key;
-    public String all;
-    public String all_raw;
+    String title;
+    Field<String> key;
+    String all;
+    String allRaw;
 }

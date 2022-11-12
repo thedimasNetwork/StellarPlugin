@@ -6,9 +6,7 @@ import stellar.database.types.Table;
 import java.sql.Timestamp;
 
 public class ServerEvents extends Table {
-    public final String title = "server_events";
-
-    public final Field<Integer> id = new Field<>("id", Integer.class, title);
+    public final Field<String> id = new Field<>("id", String.class, title);
     public final Field<String> server = new Field<>("server", String.class, title);
     public final Field<Timestamp> timestamp = new Field<>("timestamp", Timestamp.class, title);
     public final Field<String> type = new Field<>("type", String.class, title);
@@ -18,9 +16,10 @@ public class ServerEvents extends Table {
     public final Field<String> mapname = new Field<>("mapname", String.class, title);
     public final Field<Integer> wave = new Field<>("wave", Integer.class, title);
 
-    public final Field<Integer> key = id;
-
-    public final String all = String.format("%s,%s,%s,%s,%s,%s,%s,%s,%s", id, server, timestamp, type, ip, name, uuid, mapname, wave);
-    public final String all_raw = all.replaceAll("([a-zA-Z_])+", "?"); // заменяет все символы кроме ',' на '?'
-
+    public ServerEvents() {
+        this.title = "server_events";
+        this.key = id;
+        this.all = String.format("%s,%s,%s,%s,%s,%s,%s,%s,%s", id, server, timestamp, type, ip, name, uuid, mapname, wave);
+        this.allRaw = all.replaceAll("([a-zA-Z_])+", "?"); // заменяет все символы кроме ',' на '?'
+    }
 }
