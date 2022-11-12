@@ -189,7 +189,6 @@ public class EventHandler {
 
         Events.on(EventType.ServerLoadEvent.class, event -> {
             Log.info("ThedimasPlugin: Server loaded");
-            Core.settings.put("playerlimit", 69);
         });
 
         Events.on(EventType.GameOverEvent.class, event -> Variables.votesRTV.clear());
