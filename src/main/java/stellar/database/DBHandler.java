@@ -61,6 +61,10 @@ public class DBHandler {
         return text.replace("&", "&amp").replace("\"", "&quot").replace("'", "&apos");
     }
 
+    private static String unescapeString(String text) {
+        return text.replace("&quot", "\"").replace("&apos", "'").replace("&amp", "&");
+    }
+
     public static boolean userExist(String uuid) throws SQLException {
         String select = "SELECT * FROM " + Tables.users.getTitle() + " WHERE " + Tables.users.getKey().getName() + "=?";
         try (PreparedStatement prSt = getDbConnection().prepareStatement(select)) {
