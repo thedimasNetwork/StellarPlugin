@@ -17,6 +17,8 @@ import stellar.Variables;
 import stellar.bot.Bot;
 import stellar.bot.Colors;
 import stellar.database.DBHandler;
+import stellar.database.entries.PlaytimeEntry;
+import stellar.database.tables.Tables;
 import stellar.util.Bundle;
 
 import java.sql.SQLException;
@@ -52,7 +54,8 @@ public class ServerCommands {
 
                 try {
                     if (!DBHandler.userExist(info.id)) {
-                        DBHandler.save(data);
+                        DBHandler.save(data, Tables.users);
+                        DBHandler.save(PlaytimeEntry.builder().uuid(info.id).build(), Tables.playtime);
                         exported++;
                     }
                 } catch (SQLException e) {
