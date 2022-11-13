@@ -14,7 +14,7 @@ import java.util.Map;
 public class PlayerEvents extends Table {
     Field<String> id = new Field<>("id", String.class, title);
     Field<String> server = new Field<>("server", String.class, title);
-    Field<Timestamp> timestamp = new Field<>("timestamp", Timestamp.class, title);
+    Field<Integer> timestamp = new Field<>("timestamp", Integer.class, title);
     Field<String> type = new Field<>("type", String.class, title);
     Field<String> uuid = new Field<>("uuid", String.class, title);
     Field<String> ip = new Field<>("ip", String.class, title);

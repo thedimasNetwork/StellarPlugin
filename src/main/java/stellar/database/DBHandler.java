@@ -48,7 +48,7 @@ public class DBHandler {
             for (int i = 0; i < values.length; i++) {
                 stmt.setObject(i + 1, values[i]);
             }
-
+            Log.info(sql);
             stmt.executeUpdate();
         }
     }
@@ -79,8 +79,6 @@ public class DBHandler {
         String select = "SELECT " + column.getName() + " FROM " + from.getTitle() + " WHERE " + from.getKey().getName() + "=?";
         try (PreparedStatement prSt = getDbConnection().prepareStatement(select)) {
             prSt.setString(1, uuid);
-            Log.info(select);
-
             ResultSet res = prSt.executeQuery();
             return res.next() ? res.getObject(1, column.getType()) : null;
         }

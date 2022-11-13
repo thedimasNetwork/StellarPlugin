@@ -7,4 +7,8 @@ public class StringUtils {
         str = Strings.stripColors(str);
         return Strings.stripGlyphs(str);
     }
+
+    public static String quote(String in) {
+        return in != null ? ("'" + in + "'") : null;
+    }
 }

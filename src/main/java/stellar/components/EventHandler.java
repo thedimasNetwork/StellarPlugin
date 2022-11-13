@@ -20,15 +20,17 @@ import stellar.database.entries.PlayerEntry;
 import stellar.Variables;
 import stellar.database.DBHandler;
 import stellar.database.entries.PlaytimeEntry;
-import stellar.database.enums.PlayerEventTypes;
+import stellar.database.entries.ServerEventEntry;
+import stellar.database.enums.ServerEventTypes;
 import stellar.database.tables.Tables;
-import stellar.database.tables.Users;
 import stellar.history.struct.CacheSeq;
 import stellar.util.Bundle;
 import stellar.util.Translator;
 import stellar.util.logger.DiscordLogger;
 
 import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.Locale;
 
 import static mindustry.Vars.*;
@@ -192,9 +194,31 @@ public class EventHandler {
 
         Events.on(EventType.ServerLoadEvent.class, event -> {
             Log.info("ThedimasPlugin: Server loaded");
+            ServerEventEntry entry = ServerEventEntry.builder()
+                    .server(Const.SERVER_COLUMN_NAME)
+                    .timestamp((int) (System.currentTimeMillis() / 1000))
+                    .type(ServerEventTypes.START)
+                    .build();
+            try {
+                DBHandler.save(entry, Tables.serverEvents);
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
         });
 
-        Events.on(EventType.GameOverEvent.class, event -> Variables.votesRTV.clear());
+        Events.on(EventType.GameOverEvent.class, event -> {
+            Variables.votesRTV.clear();
+            ServerEventEntry entry = ServerEventEntry.builder()
+                    .server(Const.SERVER_COLUMN_NAME)
+                    .timestamp((int) (System.currentTimeMillis() / 1000))
+                    .type(ServerEventTypes.GAMEOVER)
+                    .build();
+            try {
+                DBHandler.save(entry, Tables.serverEvents);
+            } catch (SQLException e) {
+                Log.err(e);
+            }
+        });
 
         // region ториевые реакторы
         Events.on(EventType.DepositEvent.class, event -> {
@@ -229,6 +253,49 @@ public class EventHandler {
 
         Events.on(EventType.WorldLoadEvent.class, event -> {
             Variables.history = new CacheSeq[world.width()][world.height()];
+            ServerEventEntry entry = ServerEventEntry.builder()
+                    .server(Const.SERVER_COLUMN_NAME)
+                    .timestamp((int) (System.currentTimeMillis() / 1000))
+                    .type(ServerEventTypes.MAPLOAD)
+                    .mapname(state.map.name())
+                    .build();
+            try {
+                DBHandler.save(entry, Tables.serverEvents);
+            } catch (SQLException e) {
+                Log.err(e);
+            }
+        });
+
+        Events.on(EventType.WaveEvent.class, event -> {
+            ServerEventEntry entry = ServerEventEntry.builder()
+                    .server(Const.SERVER_COLUMN_NAME)
+                    .timestamp((int) (System.currentTimeMillis() / 1000))
+                    .type(ServerEventTypes.NEWWAVE)
+                    .mapname(state.map.name())
+                    .wave(state.wave)
+                    .build();
+            try {
+                DBHandler.save(entry, Tables.serverEvents);
+            } catch (SQLException e) {
+                Log.err(e);
+            }
+        });
+
+        Events.on(EventType.AdminRequestEvent.class, event -> {
+            ServerEventEntry entry = ServerEventEntry.builder()
+                    .server(Const.SERVER_COLUMN_NAME)
+                    .timestamp((int) (System.currentTimeMillis() / 1000))
+                    .type(ServerEventTypes.ADMIN_REQUEST)
+                    .name(event.player.name())
+                    .uuid(event.player.uuid())
+                    .ip(event.player.ip())
+                    .request(event.action.name())
+                    .build();
+            try {
+                DBHandler.save(entry, Tables.serverEvents);
+            } catch (SQLException e) {
+                Log.err(e);
+            }
         });
 
         Events.on(EventType.PlayerChatEvent.class, event -> {

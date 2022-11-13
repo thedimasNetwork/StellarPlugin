@@ -4,12 +4,12 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
-import stellar.database.tables.PlayerEvents;
-import stellar.database.tables.Tables;
+import stellar.database.enums.PlayerEventTypes;
 import stellar.database.types.Entry;
-import stellar.database.types.Table;
 
 import java.sql.Timestamp;
+
+import static stellar.util.StringUtils.quote;
 
 @Data
 @Builder
@@ -17,8 +17,8 @@ import java.sql.Timestamp;
 public class PlayerEventEntry extends Entry {
     String id;
     String server;
-    Timestamp timestamp;
-    String type;
+    int timestamp;
+    PlayerEventTypes type;
     String uuid;
     String ip;
     String message;
@@ -29,7 +29,7 @@ public class PlayerEventEntry extends Entry {
 
     @Override
     public String toString() {
-        return String.format("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s", id, server, timestamp, type, uuid, ip, message, x, y, block, command);
+        return String.format("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s", id, quote(server), timestamp, quote(type.toString()), quote(uuid), quote(ip), quote(message), x, y, quote(block), quote(command));
     }
 
     public static PlayerEventEntry fromString(String content) {
@@ -40,8 +40,8 @@ public class PlayerEventEntry extends Entry {
         String[] split = content.split(",");
         this.id = split[0];
         this.server = split[1];
-        this.timestamp = Timestamp.valueOf(split[2]);
-        this.type = split[3];
+        this.timestamp = Integer.parseInt(split[2]);
+        this.type = PlayerEventTypes.parse(split[3]);
         this.uuid = split[4];
         this.ip = split[5];
         this.message = split[6];
@@ -51,7 +51,7 @@ public class PlayerEventEntry extends Entry {
         this.command = split[10];
     }
 
-    public PlayerEventEntry(String id, String server, Timestamp timestamp, String type, String uuid, String ip, String message, int x, int y, String block, String command) {
+    public PlayerEventEntry(String id, String server, int timestamp, PlayerEventTypes type, String uuid, String ip, String message, int x, int y, String block, String command) {
         this.id = id;
         this.server = server;
         this.timestamp = timestamp;
