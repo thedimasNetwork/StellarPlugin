@@ -53,8 +53,9 @@ public class DBHandler {
         }
     }
 
-    public static void save(Entry data) throws SQLException {
-        // TODO: Save Entry
+    public static void save(Entry data, Table into) throws SQLException {
+        String insert = "INSERT INTO " + into.getTitle() + " (" + into.getAll() + ") VALUES (" + data.toString() + ")";
+        preparedExecute(insert);
     }
 
     private static String escapeString(String text) {
