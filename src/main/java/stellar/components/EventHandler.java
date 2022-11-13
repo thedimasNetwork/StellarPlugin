@@ -19,6 +19,8 @@ import stellar.Const;
 import stellar.database.entries.PlayerEntry;
 import stellar.Variables;
 import stellar.database.DBHandler;
+import stellar.database.entries.PlaytimeEntry;
+import stellar.database.enums.PlayerEventTypes;
 import stellar.database.tables.Tables;
 import stellar.database.tables.Users;
 import stellar.history.struct.CacheSeq;
@@ -102,7 +104,8 @@ public class EventHandler {
                             .admin(event.player.admin())
                             .build();
 
-                    DBHandler.save(data);
+                    DBHandler.save(data, Tables.users);
+                    DBHandler.save(PlaytimeEntry.builder().uuid(data.getUuid()).build(), Tables.playtime);
                 }
             } catch (SQLException e) {
                 Log.err(e);
