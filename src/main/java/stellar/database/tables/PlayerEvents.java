@@ -6,9 +6,6 @@ import lombok.experimental.FieldDefaults;
 import stellar.database.types.Field;
 import stellar.database.types.Table;
 
-import java.sql.Timestamp;
-import java.util.Map;
-
 @Getter
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class PlayerEvents extends Table {

@@ -1,7 +1,5 @@
 package stellar.database.enums;
 
-import lombok.Getter;
-
 public enum ServerEventTypes {
     START,
     STOP,

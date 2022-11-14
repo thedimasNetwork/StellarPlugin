@@ -4,10 +4,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
-import stellar.database.tables.Tables;
-import stellar.database.types.*;
-
-import java.sql.Timestamp;
+import stellar.database.types.Entry;
 
 import static stellar.util.StringUtils.quote;
 

@@ -1,17 +1,18 @@
 package stellar;
 
-import arc.Core;
-import arc.util.*;
+import arc.util.CommandHandler;
+import arc.util.Log;
 import mindustry.mod.Plugin;
-
 import stellar.bot.Bot;
-import stellar.command.*;
+import stellar.command.AdminCommands;
+import stellar.command.PlayerCommands;
+import stellar.command.ServerCommands;
 import stellar.components.EventHandler;
 import stellar.components.Experience;
 import stellar.components.LaunchPad;
 import stellar.history.History;
 
-import static mindustry.Vars.*;
+import static mindustry.Vars.netServer;
 
 @SuppressWarnings({"unused"})
 public class ThedimasPlugin extends Plugin {

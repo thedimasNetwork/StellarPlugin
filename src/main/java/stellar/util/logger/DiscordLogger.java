@@ -3,7 +3,6 @@ package stellar.util.logger;
 import arc.util.Nullable;
 import arc.util.Strings;
 import mindustry.net.Administration;
-
 import webhook.Webhook;
 import webhook.embed.Embed;
 import webhook.http.Part;

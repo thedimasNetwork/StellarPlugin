@@ -4,7 +4,6 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
-
 import stellar.database.types.Entry;
 
 import static stellar.util.StringUtils.quote;

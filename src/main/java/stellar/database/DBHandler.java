@@ -2,19 +2,13 @@ package stellar.database;
 
 import arc.util.Log;
 import arc.util.Nullable;
-
-import stellar.database.entries.PlayerEntry;
-import stellar.database.tables.Playtime;
 import stellar.database.tables.Tables;
-import stellar.database.tables.Users;
 import stellar.database.types.Entry;
 import stellar.database.types.Field;
 import stellar.database.types.Table;
 
 import java.lang.reflect.InvocationTargetException;
 import java.sql.*;
-import java.util.HashSet;
-import java.util.Set;
 
 import static stellar.Variables.config;
 import static stellar.util.StringUtils.escapeString;

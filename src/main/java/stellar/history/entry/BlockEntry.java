@@ -2,7 +2,6 @@ package stellar.history.entry;
 
 import arc.util.Nullable;
 import arc.util.Time;
-import mindustry.core.NetClient;
 import mindustry.game.EventType.BlockBuildEndEvent;
 import mindustry.gen.Player;
 import mindustry.gen.Unit;

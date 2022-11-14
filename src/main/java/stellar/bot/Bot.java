@@ -1,15 +1,20 @@
 package stellar.bot;
 
 import arc.util.Log;
-import net.dv8tion.jda.api.*;
-import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.JDABuilder;
+import net.dv8tion.jda.api.entities.Activity;
+import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.requests.GatewayIntent;
-import net.dv8tion.jda.api.utils.messages.*;
+import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
+import net.dv8tion.jda.api.utils.messages.MessageCreateData;
+import net.dv8tion.jda.api.utils.messages.MessageRequest;
 import net.dv8tion.jda.internal.entities.EntityBuilder;
 
 import javax.security.auth.login.LoginException;
-
 import java.util.Collections;
 import java.util.EnumSet;
 

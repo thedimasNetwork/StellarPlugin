@@ -9,7 +9,6 @@ import mindustry.gen.Groups;
 import mindustry.gen.Player;
 import stellar.database.DBHandler;
 import stellar.database.tables.Tables;
-import stellar.database.tables.Users;
 
 import java.sql.SQLException;
 

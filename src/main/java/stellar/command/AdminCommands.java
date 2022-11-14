@@ -22,7 +22,6 @@ import stellar.database.entries.PlayerEntry;
 import stellar.database.entries.PlayerEventEntry;
 import stellar.database.enums.PlayerEventTypes;
 import stellar.database.tables.Tables;
-import stellar.database.tables.Users;
 import stellar.util.Bundle;
 import stellar.util.Players;
 import stellar.util.Translator;
@@ -30,8 +29,8 @@ import stellar.util.logger.DiscordLogger;
 
 import java.sql.SQLException;
 
-import static mindustry.Vars.world;
 import static mindustry.Vars.mods;
+import static mindustry.Vars.world;
 
 public class AdminCommands {
 

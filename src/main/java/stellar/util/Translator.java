@@ -5,7 +5,6 @@ import mindustry.gen.Player;
 import stellar.Const;
 import stellar.database.DBHandler;
 import stellar.database.tables.Tables;
-import stellar.database.tables.Users;
 import stellar.util.logger.DiscordLogger;
 
 import java.io.BufferedReader;

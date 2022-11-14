@@ -1,8 +1,6 @@
 package stellar;
 
 import arc.util.Interval;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import stellar.history.entry.HistoryEntry;
 import stellar.history.struct.CacheSeq;
 import stellar.history.struct.Seqs;

@@ -1,6 +1,7 @@
 package stellar.history.struct;
 
-import arc.struct.*;
+import arc.struct.Queue;
+import arc.struct.Seq;
 import arc.util.Time;
 
 import java.util.Objects;

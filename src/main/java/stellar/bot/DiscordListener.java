@@ -2,7 +2,6 @@ package stellar.bot;
 
 import arc.Core;
 import arc.Events;
-import arc.math.Mathf;
 import arc.util.Log;
 import com.sun.management.OperatingSystemMXBean;
 import mindustry.game.EventType;
@@ -10,13 +9,11 @@ import mindustry.game.Team;
 import mindustry.gen.Call;
 import mindustry.gen.Groups;
 import mindustry.maps.Map;
-import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import stellar.ThedimasPlugin;
 import stellar.util.StringUtils;
 
 import java.io.File;
@@ -24,8 +21,8 @@ import java.lang.management.ManagementFactory;
 import java.time.LocalDateTime;
 import java.util.DoubleSummaryStatistics;
 
-import static stellar.Variables.config;
 import static mindustry.Vars.*;
+import static stellar.Variables.config;
 
 public class DiscordListener extends ListenerAdapter {
     @Override

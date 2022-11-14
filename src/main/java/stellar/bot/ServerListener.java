@@ -1,11 +1,8 @@
 package stellar.bot;
 
 import arc.Events;
-import arc.util.Log;
 import mindustry.game.EventType;
-import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
-import stellar.ThedimasPlugin;
 import stellar.util.StringUtils;
 
 public class ServerListener {

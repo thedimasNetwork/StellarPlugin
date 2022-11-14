@@ -7,8 +7,6 @@ import lombok.experimental.FieldDefaults;
 import stellar.database.enums.PlayerEventTypes;
 import stellar.database.types.Entry;
 
-import java.sql.Timestamp;
-
 import static stellar.util.StringUtils.quote;
 
 @Data

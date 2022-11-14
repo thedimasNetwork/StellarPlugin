@@ -16,9 +16,9 @@ import mindustry.gen.Groups;
 import mindustry.gen.Player;
 import mindustry.net.Packets;
 import stellar.Const;
-import stellar.database.entries.PlayerEntry;
 import stellar.Variables;
 import stellar.database.DBHandler;
+import stellar.database.entries.PlayerEntry;
 import stellar.database.entries.PlayerEventEntry;
 import stellar.database.entries.PlaytimeEntry;
 import stellar.database.entries.ServerEventEntry;
@@ -31,13 +31,11 @@ import stellar.util.Translator;
 import stellar.util.logger.DiscordLogger;
 
 import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
 import java.util.Locale;
 
 import static mindustry.Vars.*;
-import static mindustry.Vars.world;
-import static stellar.Variables.*;
+import static stellar.Variables.config;
+import static stellar.Variables.interval;
 
 @SuppressWarnings({"unused", "unchecked"})
 public class EventHandler {

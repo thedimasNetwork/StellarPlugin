@@ -3,8 +3,11 @@ package stellar.database.tables;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.experimental.FieldDefaults;
-import stellar.database.types.*;
-import java.util.*;
+import stellar.database.types.Field;
+import stellar.database.types.Table;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @Getter
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)

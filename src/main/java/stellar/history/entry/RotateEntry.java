@@ -1,7 +1,6 @@
 package stellar.history.entry;
 
 import arc.util.Time;
-import mindustry.core.NetClient;
 import mindustry.gen.Player;
 import mindustry.world.Block;
 import stellar.util.Bundle;
