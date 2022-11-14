@@ -1,6 +1,8 @@
 package stellar.util;
 
 import arc.util.Log;
+import arc.util.serialization.JsonReader;
+import arc.util.serialization.JsonValue;
 import mindustry.gen.Player;
 import stellar.Const;
 import stellar.database.DBHandler;
@@ -17,6 +19,7 @@ import java.nio.charset.StandardCharsets;
 import java.text.MessageFormat;
 
 public class Translator {
+    private static JsonReader jsonReader = new JsonReader();
 
     public static String translate(String text, String langTo, String langFrom) throws IOException {
         // Второй вариант переводчика. Ответ парсить сложнее
@@ -37,7 +40,9 @@ public class Translator {
                 response.append(inputLine);
             }
         }
-        return response.substring(2, response.length() - 2);
+        Log.debug(response.toString());
+        JsonValue json = jsonReader.parse(response.toString());
+        return json.get(0).get(0).asString();
     }
 
     public static String translateChat(Player player, Player otherPlayer, String message) {
