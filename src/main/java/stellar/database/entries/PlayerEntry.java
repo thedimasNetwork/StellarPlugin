@@ -7,6 +7,8 @@ import lombok.experimental.FieldDefaults;
 
 import stellar.database.types.Entry;
 
+import static stellar.util.StringUtils.quote;
+
 @Data
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
@@ -29,7 +31,7 @@ public class PlayerEntry extends Entry {
 
     @Override
     public String toString() {
-        return String.format("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s", uuid, ip, name, locale, translator, admin, jsallowed, donated, banned, exp);
+        return String.format("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s", quote(uuid), quote(ip), quote(name), quote(locale), quote(translator), admin, jsallowed, donated, banned, exp);
     }
 
     public static PlayerEntry fromString(String content) {
