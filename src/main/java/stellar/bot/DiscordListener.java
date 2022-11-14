@@ -52,9 +52,9 @@ public class DiscordListener extends ListenerAdapter {
         switch (event.getName()) {
             case "info" -> {
                 String text = String.format("""
-                    Карта: **%s** | Волна: **%s**
-                    Игроков: **%s** | Юнитов: **%s**
-                    TPS **%s** | ОЗУ **%sМБ**""", state.map.name(), state.wave, Groups.player.size(), Groups.unit.size(), Core.graphics.getFramesPerSecond(), Core.app.getJavaHeap() / 1024 / 1024);
+                        Карта: **%s** | Волна: **%s**
+                        Игроков: **%s** | Юнитов: **%s**
+                        TPS **%s** | ОЗУ **%sМБ**""", state.map.name(), state.wave, Groups.player.size(), Groups.unit.size(), Core.graphics.getFramesPerSecond(), Core.app.getJavaHeap() / 1024 / 1024);
                 MessageEmbed embed = Util.embedBuilder("Статус сервера", text, Colors.blue, LocalDateTime.now());
                 event.replyEmbeds(embed).queue();
             }
@@ -66,8 +66,7 @@ public class DiscordListener extends ListenerAdapter {
                     });
                     MessageEmbed embed = Util.embedBuilder("Игроки", players.toString(), Colors.blue, LocalDateTime.now());
                     event.replyEmbeds(embed).queue();
-                }
-                else {
+                } else {
                     MessageEmbed embed = Util.embedBuilder("Никого нет", Colors.blue, LocalDateTime.now());
                     event.replyEmbeds(embed).queue();
                 }
@@ -78,10 +77,10 @@ public class DiscordListener extends ListenerAdapter {
 
                 long ramTotal = bean.getTotalMemorySize() / 1024 / 1024;
                 long ramUsage = ramTotal - bean.getFreeMemorySize() / 1024 / 1024;
-                int ramLoad = (int)(100.0 * ramUsage / ramTotal);
+                int ramLoad = (int) (100.0 * ramUsage / ramTotal);
                 long diskTotal = file.getTotalSpace() / 1024 / 1024 / 1024;
                 long diskUsage = diskTotal - file.getUsableSpace() / 1024 / 1024 / 1024;
-                int diskLoad = (int)(100.0 * diskUsage / diskTotal);
+                int diskLoad = (int) (100.0 * diskUsage / diskTotal);
 
                 DoubleSummaryStatistics s = new DoubleSummaryStatistics();
                 for (int i = 0; i < 100; i++) {

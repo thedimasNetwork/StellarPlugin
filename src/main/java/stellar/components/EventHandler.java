@@ -347,8 +347,8 @@ public class EventHandler {
                     .request(event.action.name())
                     .build();
             PlayerEventEntry entry2 = null;
-            if(event.action == Packets.AdminAction.kick) {
-                 entry2 = PlayerEventEntry.builder()
+            if (event.action == Packets.AdminAction.kick) {
+                entry2 = PlayerEventEntry.builder()
                         .server(Const.SERVER_COLUMN_NAME)
                         .timestamp((int) (System.currentTimeMillis() / 1000))
                         .type(PlayerEventTypes.KICK)
@@ -368,7 +368,7 @@ public class EventHandler {
             }
             try {
                 DBHandler.save(entry, Tables.serverEvents);
-                if(entry2 != null) {
+                if (entry2 != null) {
                     DBHandler.save(entry2, Tables.playerEvents);
                 }
             } catch (SQLException e) {

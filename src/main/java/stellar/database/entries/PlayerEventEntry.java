@@ -26,15 +26,6 @@ public class PlayerEventEntry extends Entry {
     String block;
     String command;
 
-    @Override
-    public String toString() {
-        return String.format("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s", id, quote(server), timestamp, quote(type.toString()), quote(uuid), quote(ip), quote(name), quote(message), x, y, quote(block), quote(command));
-    }
-
-    public static PlayerEventEntry fromString(String content) {
-        return new PlayerEventEntry(content);
-    }
-
     public PlayerEventEntry(String content) {
         String[] split = content.split(",");
         this.id = split[0];
@@ -64,5 +55,14 @@ public class PlayerEventEntry extends Entry {
         this.y = y;
         this.block = block;
         this.command = command;
+    }
+
+    public static PlayerEventEntry fromString(String content) {
+        return new PlayerEventEntry(content);
+    }
+
+    @Override
+    public String toString() {
+        return String.format("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s", id, quote(server), timestamp, quote(type.toString()), quote(uuid), quote(ip), quote(name), quote(message), x, y, quote(block), quote(command));
     }
 }

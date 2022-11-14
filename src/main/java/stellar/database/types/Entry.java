@@ -1,16 +1,16 @@
 package stellar.database.types;
 
 public abstract class Entry {
-    @Override
-    public String toString() {
-        return super.toString();
+    public Entry(Object... args) {
+
     }
 
     public static Entry fromString(String content) {
         return null;
     }
 
-    public Entry(Object... args) {
-
+    @Override
+    public String toString() {
+        return super.toString();
     }
 }

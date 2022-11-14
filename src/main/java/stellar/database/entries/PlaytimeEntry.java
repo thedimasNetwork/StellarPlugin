@@ -27,15 +27,6 @@ public class PlaytimeEntry extends Entry {
     int crawler_arena;
     int zone_capture;
 
-    @Override
-    public String toString() {
-        return String.format("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s", quote(uuid), hub, survival, attack, sandbox, pvp, annexation, anarchy, campaign_maps, ms_go, hex_pvp, castle_wars, crawler_arena, zone_capture);
-    }
-
-    public static PlaytimeEntry fromString(String content) {
-        return new PlaytimeEntry(content);
-    }
-
     public PlaytimeEntry(String content) {
         String[] split = content.split(",");
         this.uuid = split[0];
@@ -69,5 +60,14 @@ public class PlaytimeEntry extends Entry {
         this.castle_wars = castle_wars;
         this.crawler_arena = crawler_arena;
         this.zone_capture = zone_capture;
+    }
+
+    public static PlaytimeEntry fromString(String content) {
+        return new PlaytimeEntry(content);
+    }
+
+    @Override
+    public String toString() {
+        return String.format("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s", quote(uuid), hub, survival, attack, sandbox, pvp, annexation, anarchy, campaign_maps, ms_go, hex_pvp, castle_wars, crawler_arena, zone_capture);
     }
 }

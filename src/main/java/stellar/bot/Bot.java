@@ -23,6 +23,7 @@ import static stellar.Variables.config;
 public class Bot {
     private static JDA jda;
     private static TextChannel channel;
+
     public static void load() {
         try {
             Activity activity = null;

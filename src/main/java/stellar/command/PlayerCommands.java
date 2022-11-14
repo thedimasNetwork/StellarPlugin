@@ -99,7 +99,7 @@ public class PlayerCommands {
             switch (mode) {
                 case "off" -> {
                     try {
-                        DBHandler.update(player.uuid(), Tables.users.getTranslator(), Tables.users,"off");
+                        DBHandler.update(player.uuid(), Tables.users.getTranslator(), Tables.users, "off");
                     } catch (Throwable t) {
                         Log.err(t);
                         DiscordLogger.err(t);

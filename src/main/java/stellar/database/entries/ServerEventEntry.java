@@ -24,15 +24,6 @@ public class ServerEventEntry extends Entry {
     int wave;
     String request;
 
-    @Override
-    public String toString() {
-        return String.format("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s", id, quote(server), timestamp, quote(type.toString()), quote(ip), quote(name), quote(uuid), quote(mapname), wave, quote(request));
-    }
-
-    public static ServerEventEntry fromString(String content) {
-        return new ServerEventEntry(content);
-    }
-
     public ServerEventEntry(String content) {
         String[] split = content.split(",");
         this.id = split[0];
@@ -58,5 +49,14 @@ public class ServerEventEntry extends Entry {
         this.mapname = mapname;
         this.wave = wave;
         this.request = request;
+    }
+
+    public static ServerEventEntry fromString(String content) {
+        return new ServerEventEntry(content);
+    }
+
+    @Override
+    public String toString() {
+        return String.format("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s", id, quote(server), timestamp, quote(type.toString()), quote(ip), quote(name), quote(uuid), quote(mapname), wave, quote(request));
     }
 }

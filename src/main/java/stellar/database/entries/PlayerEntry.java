@@ -23,20 +23,6 @@ public class PlayerEntry extends Entry {
     boolean banned;
     int exp;
 
-    public static PlayerEntryBuilder builder() {
-        return new PlayerEntryBuilder()
-                .translator("double");
-    }
-
-    @Override
-    public String toString() {
-        return String.format("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s", quote(uuid), quote(ip), quote(name), quote(locale), quote(translator), admin, jsallowed, donated, banned, exp);
-    }
-
-    public static PlayerEntry fromString(String content) {
-        return new PlayerEntry(content);
-    }
-
     public PlayerEntry(String content) {
         String[] split = content.split(",");
         this.uuid = split[0];
@@ -62,5 +48,19 @@ public class PlayerEntry extends Entry {
         this.donated = donated;
         this.banned = banned;
         this.exp = exp;
+    }
+
+    public static PlayerEntryBuilder builder() {
+        return new PlayerEntryBuilder()
+                .translator("double");
+    }
+
+    public static PlayerEntry fromString(String content) {
+        return new PlayerEntry(content);
+    }
+
+    @Override
+    public String toString() {
+        return String.format("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s", quote(uuid), quote(ip), quote(name), quote(locale), quote(translator), admin, jsallowed, donated, banned, exp);
     }
 }

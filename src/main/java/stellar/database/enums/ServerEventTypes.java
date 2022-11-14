@@ -8,11 +8,6 @@ public enum ServerEventTypes {
     MAPLOAD,
     ADMIN_REQUEST;
 
-    @Override
-    public String toString() {
-        return this.name().toLowerCase().replace("_", "-");
-    }
-
     public static ServerEventTypes parse(String text) {
         for (ServerEventTypes e : ServerEventTypes.values()) {
             if (e.name().equalsIgnoreCase(text)) {
@@ -20,5 +15,10 @@ public enum ServerEventTypes {
             }
         }
         return null;
+    }
+
+    @Override
+    public String toString() {
+        return this.name().toLowerCase().replace("_", "-");
     }
 }

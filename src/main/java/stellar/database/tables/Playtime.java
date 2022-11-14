@@ -45,7 +45,7 @@ public class Playtime extends Table {
         fields.put("zone_capture", zoneCapture);
         this.title = "playtime";
         this.key = uuid;
-        this.all = String.format("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s", uuid, hub, survival, attack, sandbox, pvp, annexation, anarchy, campaignMaps,  msgo, hexPvp, castleWars, crawlerArena, zoneCapture);
+        this.all = String.format("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s", uuid, hub, survival, attack, sandbox, pvp, annexation, anarchy, campaignMaps, msgo, hexPvp, castleWars, crawlerArena, zoneCapture);
         this.allRaw = all.replaceAll("([a-zA-Z_])+", "?"); // заменяет все символы кроме ',' на '?'
     }
 }

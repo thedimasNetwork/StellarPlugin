@@ -23,13 +23,12 @@ import static mindustry.Vars.world;
 
 public class ConfigEntry implements HistoryEntry {
 
-    private final StringMap icons = new StringMap();
-
     public final long timestamp = Time.millis();
     public final String name;
     public final Block block;
     public final Object value;
     public final boolean connect;
+    private final StringMap icons = new StringMap();
 
     public ConfigEntry(ConfigEvent event, boolean connect) {
         Http.get("https://raw.githubusercontent.com/Anuken/Mindustry/v137/core/assets/icons/icons.properties", resp -> {
@@ -47,7 +46,7 @@ public class ConfigEntry implements HistoryEntry {
     private Object getConfig(ConfigEvent event) {
         if (block.configurations.containsKey(Integer.class) &&
                 (block.configurations.containsKey(Point2[].class) ||
-                block.configurations.containsKey(Point2.class))) {
+                        block.configurations.containsKey(Point2.class))) {
             int count;
             if (block instanceof PowerNode) {
                 count = event.tile != null ? event.tile.getPowerConnections(new Seq<>()).size : 0;

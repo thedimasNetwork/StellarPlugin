@@ -10,11 +10,6 @@ public enum PlayerEventTypes {
     BUILD,
     BREAK;
 
-    @Override
-    public String toString() {
-        return this.name().toLowerCase();
-    }
-
     public static PlayerEventTypes parse(String value) {
         for (PlayerEventTypes type : PlayerEventTypes.values()) {
             if (type.toString().equalsIgnoreCase(value)) {
@@ -22,5 +17,10 @@ public enum PlayerEventTypes {
             }
         }
         return null;
+    }
+
+    @Override
+    public String toString() {
+        return this.name().toLowerCase();
     }
 }

@@ -13,6 +13,7 @@ public class Util {
                 .setColor(color)
                 .build();
     }
+
     public static MessageEmbed embedBuilder(String text, Color color, LocalDateTime time) {
         return new EmbedBuilder()
                 .setDescription(text)
@@ -20,6 +21,7 @@ public class Util {
                 .setTimestamp(time)
                 .build();
     }
+
     public static MessageEmbed embedBuilder(String title, String description, Color color, LocalDateTime time) {
         return new EmbedBuilder()
                 .addField(title, description, false)

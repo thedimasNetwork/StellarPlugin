@@ -12,6 +12,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class Config {
+    public String webhookUrl;
+    public String discordUrl;
+    public Database database;
+    public Bot bot;
+
     public static void load() {
         ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
         mapper.findAndRegisterModules();
@@ -51,9 +56,4 @@ public class Config {
         public long channelId;
         public boolean main; // used for RPC
     }
-
-    public String webhookUrl;
-    public String discordUrl;
-    public Database database;
-    public Bot bot;
 }

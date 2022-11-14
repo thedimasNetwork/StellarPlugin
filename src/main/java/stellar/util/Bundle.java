@@ -25,8 +25,6 @@ public class Bundle {
 
     private static final ObjectMap<Locale, MessageFormat> formats = new ObjectMap<>();
 
-    private Bundle() {}
-
     static {
         Http.get(ghApi + "/search/code?q=name+repo:Anuken/Mindustry+filename:bundle&per_page=100", res -> {
             Jval json = Jval.read(res.getResultAsString());
@@ -44,6 +42,9 @@ public class Bundle {
             locales = Seq.with(locales).add(new Locale("router")).toArray(Locale.class);
             Log.debug("Fetched locales: @", Arrays.toString(Const.supportedLocales));
         }, Log::err);
+    }
+
+    private Bundle() {
     }
 
     public static String get(String key, Locale locale) {
