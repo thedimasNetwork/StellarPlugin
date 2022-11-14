@@ -17,6 +17,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import static stellar.Variables.config;
+import static stellar.util.StringUtils.escapeString;
 
 public class DBHandler {
 
@@ -48,7 +49,7 @@ public class DBHandler {
             for (int i = 0; i < values.length; i++) {
                 stmt.setObject(i + 1, values[i]);
             }
-            Log.info(sql);
+            Log.debug(sql);
             stmt.executeUpdate();
         }
     }
@@ -56,14 +57,6 @@ public class DBHandler {
     public static void save(Entry data, Table into) throws SQLException {
         String insert = "INSERT INTO " + into.getTitle() + " (" + into.getAll() + ") VALUES (" + data.toString() + ")";
         preparedExecute(insert);
-    }
-
-    private static String escapeString(String text) {
-        return text.replace("&", "&amp").replace("\"", "&quot").replace("'", "&apos");
-    }
-
-    private static String unescapeString(String text) {
-        return text.replace("&quot", "\"").replace("&apos", "'").replace("&amp", "&");
     }
 
     public static boolean userExist(String uuid) throws SQLException {

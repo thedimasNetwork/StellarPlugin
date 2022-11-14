@@ -18,6 +18,7 @@ public class PlayerEvents extends Table {
     Field<String> type = new Field<>("type", String.class, title);
     Field<String> uuid = new Field<>("uuid", String.class, title);
     Field<String> ip = new Field<>("ip", String.class, title);
+    Field<String> name = new Field<>("name", String.class, title);
     Field<String> message = new Field<>("message", String.class, title);
     Field<Integer> x = new Field<>("x", Integer.class, title);
     Field<Integer> y = new Field<>("y", Integer.class, title);
@@ -27,7 +28,7 @@ public class PlayerEvents extends Table {
     public PlayerEvents() {
         this.title = "player_events";
         this.key = id;
-        this.all = String.format("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s", id, server, timestamp, type, uuid, ip, message, x, y, block, command);
+        this.all = String.format("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s", id, server, timestamp, type, uuid, ip, name, message, x, y, block, command);
         this.allRaw = all.replaceAll("([a-zA-Z_])+", "?"); // заменяет все символы кроме ',' на '?'
     }
 

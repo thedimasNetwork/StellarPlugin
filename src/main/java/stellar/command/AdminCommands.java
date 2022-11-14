@@ -19,6 +19,8 @@ import stellar.Variables;
 import stellar.bot.Bot;
 import stellar.database.DBHandler;
 import stellar.database.entries.PlayerEntry;
+import stellar.database.entries.PlayerEventEntry;
+import stellar.database.enums.PlayerEventTypes;
 import stellar.database.tables.Tables;
 import stellar.database.tables.Users;
 import stellar.util.Bundle;
@@ -309,6 +311,19 @@ public class AdminCommands {
 
             try {
                 DBHandler.update(args[0], Tables.users.getBanned(), Tables.users, true);
+                PlayerEventEntry entry = PlayerEventEntry.builder()
+                        .server(Const.SERVER_COLUMN_NAME)
+                        .timestamp((int) (System.currentTimeMillis() / 1000))
+                        .type(PlayerEventTypes.BAN)
+                        .name(found.name())
+                        .uuid(found.uuid())
+                        .ip(found.ip())
+                        .build();
+                try {
+                    DBHandler.save(entry, Tables.playerEvents);
+                } catch (SQLException e) {
+                    Log.err(e);
+                }
                 found.kick(Packets.KickReason.banned);
                 player.sendMessage(String.format("[lime]Игрок %s забанен[]", args[0]));
                 Log.info("@ (@) has banned @ (@)", player.name(), player.uuid(), found.name(), found.uuid());
@@ -372,6 +387,19 @@ public class AdminCommands {
             }
 
             found.kick(Packets.KickReason.kick);
+            PlayerEventEntry entry = PlayerEventEntry.builder()
+                    .server(Const.SERVER_COLUMN_NAME)
+                    .timestamp((int) (System.currentTimeMillis() / 1000))
+                    .type(PlayerEventTypes.KICK)
+                    .name(found.name())
+                    .uuid(found.uuid())
+                    .ip(found.ip())
+                    .build();
+            try {
+                DBHandler.save(entry, Tables.playerEvents);
+            } catch (SQLException e) {
+                Log.err(e);
+            }
             player.sendMessage(String.format("[lime]Игрок %s выгнан[]", args[0]));
             Log.info("@ (@) has kicked @ (@)", player.name(), player.uuid(), found.name(), found.uuid());
             Bot.sendMessage(String.format("%s выгнал игрока %s", player.name(), found.name()));

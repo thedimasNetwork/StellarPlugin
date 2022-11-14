@@ -21,6 +21,7 @@ public class PlayerEventEntry extends Entry {
     PlayerEventTypes type;
     String uuid;
     String ip;
+    String name;
     String message;
     int x;
     int y;
@@ -29,7 +30,7 @@ public class PlayerEventEntry extends Entry {
 
     @Override
     public String toString() {
-        return String.format("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s", id, quote(server), timestamp, quote(type.toString()), quote(uuid), quote(ip), quote(message), x, y, quote(block), quote(command));
+        return String.format("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s", id, quote(server), timestamp, quote(type.toString()), quote(uuid), quote(ip), quote(name), quote(message), x, y, quote(block), quote(command));
     }
 
     public static PlayerEventEntry fromString(String content) {
@@ -44,20 +45,22 @@ public class PlayerEventEntry extends Entry {
         this.type = PlayerEventTypes.parse(split[3]);
         this.uuid = split[4];
         this.ip = split[5];
-        this.message = split[6];
-        this.x = Integer.parseInt(split[7]);
-        this.y = Integer.parseInt(split[8]);
-        this.block = split[9];
-        this.command = split[10];
+        this.name = split[6];
+        this.message = split[7];
+        this.x = Integer.parseInt(split[8]);
+        this.y = Integer.parseInt(split[9]);
+        this.block = split[10];
+        this.command = split[11];
     }
 
-    public PlayerEventEntry(String id, String server, int timestamp, PlayerEventTypes type, String uuid, String ip, String message, int x, int y, String block, String command) {
+    public PlayerEventEntry(String id, String server, int timestamp, PlayerEventTypes type, String uuid, String ip, String name, String message, int x, int y, String block, String command) {
         this.id = id;
         this.server = server;
         this.timestamp = timestamp;
         this.type = type;
         this.uuid = uuid;
         this.ip = ip;
+        this.name = name;
         this.message = message;
         this.x = x;
         this.y = y;

@@ -8,7 +8,7 @@ public enum PlayerEventTypes {
     CHAT,
     COMMAND,
     BUILD,
-    DEATH;
+    BREAK;
 
     @Override
     public String toString() {

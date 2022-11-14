@@ -19,8 +19,10 @@ import stellar.Const;
 import stellar.database.entries.PlayerEntry;
 import stellar.Variables;
 import stellar.database.DBHandler;
+import stellar.database.entries.PlayerEventEntry;
 import stellar.database.entries.PlaytimeEntry;
 import stellar.database.entries.ServerEventEntry;
+import stellar.database.enums.PlayerEventTypes;
 import stellar.database.enums.ServerEventTypes;
 import stellar.database.tables.Tables;
 import stellar.history.struct.CacheSeq;
@@ -78,7 +80,17 @@ public class EventHandler {
             String welcome = Bundle.format("welcome", locale, rules, config.discordUrl);
             Call.infoMessage(event.player.con, welcome);
 
+            PlayerEventEntry entry = PlayerEventEntry.builder()
+                    .server(Const.SERVER_COLUMN_NAME)
+                    .timestamp((int) (System.currentTimeMillis() / 1000))
+                    .type(PlayerEventTypes.JOIN)
+                    .ip(event.player.con.address)
+                    .uuid(event.player.uuid())
+                    .name(event.player.name)
+                    .build();
+
             try {
+                DBHandler.save(entry, Tables.playerEvents);
                 if (DBHandler.userExist(event.player.uuid())) {
                     DBHandler.update(event.player.uuid(), Tables.users.getName(), Tables.users, event.player.name);
                     DBHandler.update(event.player.uuid(), Tables.users.getLocale(), Tables.users, event.player.locale);
@@ -101,7 +113,7 @@ public class EventHandler {
                     PlayerEntry data = PlayerEntry.builder()
                             .uuid(event.player.uuid())
                             .ip(event.player.ip())
-                            .name(event.player.name())
+                            .name(event.player.name)
                             .locale(event.player.locale())
                             .admin(event.player.admin())
                             .build();
@@ -189,6 +201,20 @@ public class EventHandler {
             Log.info("@ has disconnected from the server", event.player.name);
             String playerName = event.player.coloredName();
             Bundle.bundled("events.leave.player-leave", playerName);
+
+            PlayerEventEntry entry = PlayerEventEntry.builder()
+                    .server(Const.SERVER_COLUMN_NAME)
+                    .timestamp((int) (System.currentTimeMillis() / 1000))
+                    .type(PlayerEventTypes.LEAVE)
+                    .ip(event.player.con.address)
+                    .uuid(event.player.uuid())
+                    .name(event.player.name)
+                    .build();
+            try {
+                DBHandler.save(entry, Tables.playerEvents);
+            } catch (SQLException e) {
+                Log.err(e);
+            }
         });
         // endregion
 
@@ -251,6 +277,36 @@ public class EventHandler {
         });
         // endregion
 
+        Events.on(EventType.BlockBuildEndEvent.class, event -> {
+            if (event.tile.build == null) {
+                return; // игнорируем ломание/строительство блоков по типу валунов
+            }
+
+            Player player = event.unit.getPlayer();
+            PlayerEventTypes type = PlayerEventTypes.BUILD;
+            String blockName = event.tile.build.block.name;
+            if (event.breaking) {
+                blockName = null;
+                type = PlayerEventTypes.BREAK;
+            }
+            PlayerEventEntry entry = PlayerEventEntry.builder()
+                    .server(Const.SERVER_COLUMN_NAME)
+                    .timestamp((int) (System.currentTimeMillis() / 1000))
+                    .type(type)
+                    .uuid(player != null ? player.uuid() : "UNIT_" + event.unit.type().name.toUpperCase())
+                    .name(player != null ? player.uuid() : null)
+                    .ip(player != null ? player.ip() : null)
+                    .x(event.tile.x)
+                    .y(event.tile.y)
+                    .block(blockName)
+                    .build();
+            try {
+                DBHandler.save(entry, Tables.playerEvents);
+            } catch (SQLException e) {
+                Log.err(e);
+            }
+        });
+
         Events.on(EventType.WorldLoadEvent.class, event -> {
             Variables.history = new CacheSeq[world.width()][world.height()];
             ServerEventEntry entry = ServerEventEntry.builder()
@@ -265,6 +321,7 @@ public class EventHandler {
                 Log.err(e);
             }
         });
+
 
         Events.on(EventType.WaveEvent.class, event -> {
             ServerEventEntry entry = ServerEventEntry.builder()
@@ -286,13 +343,36 @@ public class EventHandler {
                     .server(Const.SERVER_COLUMN_NAME)
                     .timestamp((int) (System.currentTimeMillis() / 1000))
                     .type(ServerEventTypes.ADMIN_REQUEST)
-                    .name(event.player.name())
+                    .name(event.player.name)
                     .uuid(event.player.uuid())
                     .ip(event.player.ip())
                     .request(event.action.name())
                     .build();
+            PlayerEventEntry entry2 = null;
+            if(event.action == Packets.AdminAction.kick) {
+                 entry2 = PlayerEventEntry.builder()
+                        .server(Const.SERVER_COLUMN_NAME)
+                        .timestamp((int) (System.currentTimeMillis() / 1000))
+                        .type(PlayerEventTypes.KICK)
+                        .name(event.other.name())
+                        .uuid(event.other.uuid())
+                        .ip(event.other.ip())
+                        .build();
+            } else if (event.action == Packets.AdminAction.ban) {
+                entry2 = PlayerEventEntry.builder()
+                        .server(Const.SERVER_COLUMN_NAME)
+                        .timestamp((int) (System.currentTimeMillis() / 1000))
+                        .type(PlayerEventTypes.BAN)
+                        .name(event.other.name())
+                        .uuid(event.other.uuid())
+                        .ip(event.other.ip())
+                        .build();
+            }
             try {
                 DBHandler.save(entry, Tables.serverEvents);
+                if(entry2 != null) {
+                    DBHandler.save(entry2, Tables.playerEvents);
+                }
             } catch (SQLException e) {
                 Log.err(e);
             }
@@ -300,12 +380,42 @@ public class EventHandler {
 
         Events.on(EventType.PlayerChatEvent.class, event -> {
             if (!event.message.startsWith("/")) {
+                PlayerEventEntry entry = PlayerEventEntry.builder()
+                        .server(Const.SERVER_COLUMN_NAME)
+                        .timestamp((int) (System.currentTimeMillis() / 1000))
+                        .type(PlayerEventTypes.CHAT)
+                        .uuid(event.player.uuid())
+                        .name(event.player.name)
+                        .ip(event.player.ip())
+                        .message(event.message)
+                        .build();
+                try {
+                    DBHandler.save(entry, Tables.playerEvents);
+                } catch (SQLException e) {
+                    Log.err(e);
+                }
+
                 Groups.player.each(otherPlayer -> {
                     String msg = Translator.translateChat(event.player, otherPlayer, event.message);
                     otherPlayer.sendMessage(msg);
                 });
 
                 Log.info(Const.CHAT_LOG_FORMAT, Strings.stripColors(event.player.name), Strings.stripColors(event.message), event.player.locale);
+            } else {
+                PlayerEventEntry entry = PlayerEventEntry.builder()
+                        .server(Const.SERVER_COLUMN_NAME)
+                        .timestamp((int) (System.currentTimeMillis() / 1000))
+                        .type(PlayerEventTypes.COMMAND)
+                        .uuid(event.player.uuid())
+                        .ip(event.player.ip())
+                        .name(event.player.name)
+                        .message(event.message.replaceAll("^/", ""))
+                        .build();
+                try {
+                    DBHandler.save(entry, Tables.playerEvents);
+                } catch (SQLException e) {
+                    Log.err(e);
+                }
             }
         });
 
