@@ -292,7 +292,7 @@ public class EventHandler {
                     .timestamp((int) (System.currentTimeMillis() / 1000))
                     .type(type)
                     .uuid(player != null ? player.uuid() : "UNIT_" + event.unit.type().name.toUpperCase())
-                    .name(player != null ? player.uuid() : null)
+                    .name(player != null ? player.name : null)
                     .ip(player != null ? player.ip() : null)
                     .x(event.tile.x)
                     .y(event.tile.y)

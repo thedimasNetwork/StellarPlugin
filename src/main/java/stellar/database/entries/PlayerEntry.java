@@ -30,10 +30,10 @@ public class PlayerEntry extends Entry {
         this.name = split[2];
         this.locale = split[3];
         this.translator = split[4];
-        this.admin = Boolean.parseBoolean(split[5]);
-        this.jsallowed = Boolean.parseBoolean(split[6]);
+        this.admin = split[5].equals("1");
+        this.jsallowed = split[6].equals("1");
         this.donated = Integer.parseInt(split[7]);
-        this.banned = Boolean.parseBoolean(split[8]);
+        this.banned = split[8].equals("1");
         this.exp = Integer.parseInt(split[9]);
     }
 
