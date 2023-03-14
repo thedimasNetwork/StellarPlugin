@@ -1,25 +1,23 @@
 package stellar.history.entry;
 
 import arc.math.geom.Point2;
-import arc.struct.Seq;
 import arc.struct.StringMap;
 import arc.util.Http;
-import arc.util.Pack;
+import arc.util.Structs;
 import arc.util.Time;
-import mindustry.content.Blocks;
+import arc.util.Tmp;
+import mindustry.ctype.MappableContent;
 import mindustry.game.EventType.ConfigEvent;
-import mindustry.type.Item;
-import mindustry.type.Liquid;
 import mindustry.world.Block;
-import mindustry.world.Tile;
-import mindustry.world.blocks.defense.Door;
-import mindustry.world.blocks.power.PowerNode;
+import mindustry.world.blocks.logic.CanvasBlock;
+import mindustry.world.blocks.logic.LogicBlock;
+import mindustry.world.blocks.power.LightBlock;
+import mindustry.world.blocks.units.UnitFactory;
 import stellar.util.Bundle;
 
+import java.util.Arrays;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
-
-import static mindustry.Vars.world;
 
 public class ConfigEntry implements HistoryEntry {
 
@@ -44,75 +42,72 @@ public class ConfigEntry implements HistoryEntry {
     }
 
     private Object getConfig(ConfigEvent event) {
-        if (block.configurations.containsKey(Integer.class) &&
-                (block.configurations.containsKey(Point2[].class) ||
-                        block.configurations.containsKey(Point2.class))) {
-            int count;
-            if (block instanceof PowerNode) {
-                count = event.tile != null ? event.tile.getPowerConnections(new Seq<>()).size : 0;
-            } else {
-                count = event.tile != null ? (int) event.value : -1;
+        if (event.value instanceof Integer) {
+            int number = (int) event.value;
+            if (event.tile.block instanceof UnitFactory) {
+                UnitFactory factory = (UnitFactory) event.tile.block;
+                return number == -1 ? null : factory.plans.get(number).unit;
             }
 
-            return Pack.longInt(count, (int) event.value);
+            if (event.tile.block.configurations.containsKey(Point2.class) || event.tile.block.configurations.containsKey(Point2[].class)) {
+                return Point2.unpack(number);
+            }
+        }
+
+        if (event.value instanceof Point2) {
+            Point2 point = (Point2) event.value;
+            return point.add(event.tile.tileX(), event.tile.tileY());
+        }
+
+        if (event.value instanceof Point2[]) {
+            Point2[] points = (Point2[]) event.value;
+            Structs.each(point -> point.add(event.tile.tileX(), event.tile.tileY()), points);
+            return points;
         }
         return event.value;
     }
 
     @Override
     public String getMessage(Locale locale) {
-        if (block.configurations.containsKey(Integer.class) &&
-                (block.configurations.containsKey(Point2[].class) || block.configurations.containsKey(Point2.class))) {
-            int data = Pack.rightInt((long) value);
-            if (data < 0) {
-                return Bundle.get("history.config.default", locale);
-            }
-
-            Tile tile = world.tile(data);
-            if (tile == null) {
-                return Bundle.get("history.unknown", locale);
-            }
-
-            if (connect) {
-                return Bundle.format("history.config.connect", locale, name, block, tile.x, tile.y);
-            }
-
-            return Bundle.format("history.config.disconnect", locale, name, block, tile.x, tile.y);
+        if (value instanceof MappableContent content) {
+            return Bundle.format("history.config.update", locale, name, icons.get(content.name));
         }
 
-        if (block instanceof Door) {
-            boolean data = (boolean) value;
-            return Bundle.format(data ? "history.config.open" : "history.config.close", locale, name, block);
+        if (value instanceof Boolean on) {
+            return on ?
+                    Bundle.format("history.config.on", locale, name) :
+                    Bundle.format("history.config.off", locale, name);
         }
 
-        if (block == Blocks.switchBlock) {
-            boolean data = (boolean) value;
-            return Bundle.format(data ? "history.config.on" : "history.config.off", locale, name);
+        if (value instanceof String text) {
+            return !text.isEmpty() ?
+                    Bundle.format("history.config.text", locale, name, text) :
+                    Bundle.format("history.config.default", locale, name);
         }
 
-        /* if (block == Blocks.commandCenter) {
-            String[] commands = Bundle.get("history.config.commands", locale).split(",");
-            return Bundle.format("history.config.command", locale, name, commands[((UnitCommand) value).ordinal()]);
-        } */
-
-        if (block == Blocks.liquidSource) {
-            Liquid liquid = (Liquid) value;
-            if (liquid == null) {
-                return Bundle.format("history.config.default", locale, name);
-            }
-
-            return Bundle.format("history.config.update", locale, name, icons.get(liquid.name));
+        if (value instanceof Point2 point) {
+            return connect ?
+                    Bundle.format("history.config.connect", locale, name, point.x, point.y) :
+                    Bundle.format("history.config.disconnect", locale, name);
         }
 
-        if (block == Blocks.unloader || block == Blocks.sorter || block == Blocks.invertedSorter || block == Blocks.itemSource) {
-            Item item = (Item) value;
-            if (item == null) {
-                return Bundle.format("history.config.default", locale, name);
-            }
-
-            return Bundle.format("history.config.update", locale, name, icons.get(item.name));
+        if (value instanceof Point2[] points) {
+            return points.length > 0 ?
+                    Bundle.format("history.config.connects", locale, name, Arrays.toString(points)) :
+                    Bundle.format("history.config.disconnect", locale, name);
         }
 
+        if (block instanceof LightBlock) {
+            return Bundle.format("history.config.color", locale, name, Tmp.c1.set((int) value));
+        }
+
+        if (block instanceof LogicBlock) {
+            return Bundle.format("history.config.code", locale, name);
+        }
+
+        if (block instanceof CanvasBlock) {
+            return Bundle.format("history.config.image", locale, name);
+        }
         return Bundle.get("history.unknown", locale);
     }
 
