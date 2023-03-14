@@ -394,8 +394,10 @@ public class EventHandler {
                 }
 
                 Groups.player.each(otherPlayer -> {
-                    String msg = Translator.translateChat(event.player, otherPlayer, event.message);
-                    otherPlayer.sendMessage(msg);
+                    new Thread(() -> {
+                        String msg = Translator.translateChat(event.player, otherPlayer, event.message);
+                        otherPlayer.sendMessage(msg);
+                    }).start();
                 });
 
                 Log.info(Const.CHAT_LOG_FORMAT, Strings.stripColors(event.player.name), Strings.stripColors(event.message), event.player.locale);

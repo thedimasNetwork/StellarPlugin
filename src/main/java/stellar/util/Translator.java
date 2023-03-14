@@ -58,7 +58,7 @@ public class Translator {
         if (!otherPlayer.locale.equals(player.locale()) && !"off".equals(locale)) {
             try {
                 String targetLocale = "auto".equals(locale) || "double".equals(locale) ? otherPlayer.locale : locale;
-                translated = Translator.translate(message, targetLocale, "auto");
+                translated = Translator.translate(message, targetLocale.split("#")[0], "auto");
             } catch (Throwable t) {
                 Log.err(t);
             }
