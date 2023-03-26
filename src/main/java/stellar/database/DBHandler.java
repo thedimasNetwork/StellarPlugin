@@ -38,15 +38,24 @@ public class DBHandler {
     }
 
     // для простых методов на вставку/обновление
-    public static void preparedExecute(String sql, Object... values) throws SQLException {
-        try (PreparedStatement stmt = getDbConnection().prepareStatement(sql)) {
-            for (int i = 0; i < values.length; i++) {
-                stmt.setObject(i + 1, values[i]);
+    public static void preparedExecute(String sql, Object... values) {
+        new Thread(() -> { // Maybe threading is not good idea
+            try (PreparedStatement stmt = getDbConnection().prepareStatement(sql)) {
+                for (int i = 0; i < values.length; i++) {
+                    stmt.setObject(i + 1, values[i]);
+                }
+                Log.debug(sql);
+                try { // Somehow make method throw Exception
+                    stmt.executeUpdate();
+                } catch (SQLException e) {
+                    Log.err(e);
+                }
+            } catch (SQLException e) {
+                Log.err(e);
             }
-            Log.debug(sql);
-            stmt.executeUpdate();
-        }
+        }).start();
     }
+
 
     public static void save(Entry data, Table into) throws SQLException {
         String insert = "INSERT INTO " + into.getTitle() + " (" + into.getAll() + ") VALUES (" + data.toString() + ")";

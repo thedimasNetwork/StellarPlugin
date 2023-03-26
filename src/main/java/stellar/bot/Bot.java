@@ -60,7 +60,9 @@ public class Bot {
     }
 
     public static void sendEmbed(MessageEmbed embed) {
-        channel.sendMessageEmbeds(embed).queue();
+        new Thread(() -> {
+            channel.sendMessageEmbeds(embed).queue();
+        }).start();
     }
 
     public static void sendMessage(String content) {
@@ -68,6 +70,8 @@ public class Bot {
                 .setContent(content)
                 .setAllowedMentions(Collections.singleton(Message.MentionType.CHANNEL))
                 .build();
-        channel.sendMessage(message).queue();
+        new Thread(() -> {
+            channel.sendMessage(message).queue();
+        }).start();
     }
 }
