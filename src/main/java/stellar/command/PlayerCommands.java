@@ -39,8 +39,10 @@ public class PlayerCommands {
         commandHandler.<Player>register("t", "<text...>", "commands.t.description", (args, player) -> {
             String message = args[0];
             Groups.player.each(o -> o.team() == player.team(), otherPlayer -> {
-                String msg = Translator.translateChat(player, otherPlayer, message);
-                otherPlayer.sendMessage("<[#" + player.team().color + "]T[]>" + msg);
+                new Thread(() -> {
+                    String msg = Translator.translateChat(player, otherPlayer, message);
+                    otherPlayer.sendMessage("<[#" + player.team().color + "]T[]>" + msg);
+                }).start();
             });
 
             Log.info("<T>" + Const.CHAT_LOG_FORMAT, Strings.stripColors(player.name), Strings.stripColors(message), player.locale);

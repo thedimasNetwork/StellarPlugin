@@ -45,8 +45,10 @@ public class AdminCommands {
 
             String message = args[0];
             Groups.player.each(Player::admin, otherPlayer -> {
-                String msg = Translator.translateChat(player, otherPlayer, message);
-                otherPlayer.sendMessage("<[scarlet]A[]>" + msg);
+                new Thread(() -> {
+                    String msg = Translator.translateChat(player, otherPlayer, message);
+                    otherPlayer.sendMessage("<[scarlet]A[]>" + msg);
+                }).start();
             });
 
             Log.info("<A>" + Const.CHAT_LOG_FORMAT, Strings.stripColors(player.name), Strings.stripColors(message), player.locale);
