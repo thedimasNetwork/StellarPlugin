@@ -252,7 +252,9 @@ public class EventHandler {
             if (building.block() == Blocks.thoriumReactor && event.item == Items.thorium
                     && target.team().cores().contains(c -> event.tile.dst(c.x, c.y) < 300)) {
                 String playerName = event.player.coloredName();
-                Bundle.bundled("events.deposit.thorium-in-reactor", playerName, building.tileX(), building.tileY());
+                Groups.player.each(o -> o.team() == target.team(), p -> {
+                    Bundle.bundled(p, "events.deposit.thorium-in-reactor", playerName, building.tileX(), building.tileY());
+                });
 
                 Log.info("@ положил торий в реактор (@, @)", target.name, building.tileX(), building.tileY());
                 DiscordLogger.warn(String.format("%s положил торий в реактор (%f, %f)", player.name, event.tile.x, event.tile.y));
@@ -265,8 +267,10 @@ public class EventHandler {
                     && event.team.cores().contains(c -> event.tile.dst(c.x, c.y) < 300)) {
                 Player player = event.builder.getPlayer();
                 String playerName = player.coloredName();
-                if (interval.get(0, 300)) {
-                    Bundle.bundled("events.build-select.reactor-near-core", playerName, event.tile.x, event.tile.y);
+                if (interval.get(0, 600)) {
+                    Groups.player.each(o -> o.team() == player.team(), p -> {
+                        Bundle.bundled(p, "events.build-select.reactor-near-core", playerName, event.tile.x, event.tile.y);
+                    });
 
                     Log.info("@ начал строить ториевый реактор близко к ядру (@, @)", player.name, event.tile.x, event.tile.y);
                     DiscordLogger.warn(String.format("%s начал строить ториевый реактор близко к ядру (%d, %d)", player.name, event.tile.x, event.tile.y));
