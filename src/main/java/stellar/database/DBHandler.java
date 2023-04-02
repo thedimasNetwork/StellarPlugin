@@ -18,7 +18,7 @@ public class DBHandler {
     private static Connection connection;
 
     private static String getConnectionUrl() {
-        return "jdbc:mysql://" + config.database.ip + ":" + config.database.port + "/" + config.database.name + "&autoReconnect=true";
+        return "jdbc:mysql://" + config.database.ip + ":" + config.database.port + "/" + config.database.name + "?autoReconnect=true";
     }
 
     public static Connection getDbConnection() throws SQLException {
