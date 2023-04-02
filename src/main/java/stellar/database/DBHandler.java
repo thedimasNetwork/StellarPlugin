@@ -18,11 +18,10 @@ public class DBHandler {
     private static Connection connection;
 
     private static String getConnectionUrl() {
-        return "jdbc:mysql://" + config.database.ip + ":" + config.database.port + "/" + config.database.name;
+        return "jdbc:mysql://" + config.database.ip + ":" + config.database.port + "/" + config.database.name + "&autoReconnect=true";
     }
 
     public static Connection getDbConnection() throws SQLException {
-
         if (connection == null) {
             try {
                 Class.forName("com.mysql.cj.jdbc.Driver");
