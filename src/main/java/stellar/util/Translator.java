@@ -6,7 +6,7 @@ import arc.util.serialization.JsonValue;
 import mindustry.gen.Player;
 import stellar.Const;
 import stellar.database.Database;
-import stellar.database.tables.Tables;
+import stellar.database.gen.Tables;
 import stellar.util.logger.DiscordLogger;
 
 import java.io.BufferedReader;
@@ -19,7 +19,7 @@ import java.nio.charset.StandardCharsets;
 import java.text.MessageFormat;
 
 public class Translator {
-    private static JsonReader jsonReader = new JsonReader();
+    private static final JsonReader jsonReader = new JsonReader();
 
     public static String translate(String text, String langTo, String langFrom) throws IOException {
         // Второй вариант переводчика. Ответ парсить сложнее
@@ -48,7 +48,11 @@ public class Translator {
     public static String translateChat(Player player, Player otherPlayer, String message) {
         String locale = otherPlayer.locale;
         try {
-            locale = Database.get(otherPlayer.uuid(), Tables.users.getTranslator(), Tables.users);
+            locale = Database.getContext()
+                    .select(Tables.USERS.TRANSLATOR)
+                    .from(Tables.USERS)
+                    .where(Tables.USERS.UUID.eq(player.uuid()))
+                    .fetchOne().value1();
         } catch (Throwable t) {
             Log.err(t);
             DiscordLogger.err(t);
