@@ -323,13 +323,8 @@ public class AdminCommands {
                 record.setName(found.name());
                 record.setUuid(found.uuid());
                 record.setIp(found.ip());
-                try {
-                    Database.getContext()
-                            .insertInto(Tables.PLAYER_EVENTS)
-                            .values(record);
-                } catch (SQLException e) {
-                    Log.err(e);
-                }
+                record.store();
+
                 found.kick(Packets.KickReason.banned);
                 player.sendMessage(String.format("[lime]Игрок %s забанен[]", args[0]));
                 Log.info("@ (@) has banned @ (@)", player.name(), player.uuid(), found.name(), found.uuid());
@@ -415,9 +410,7 @@ public class AdminCommands {
                 record.setName(found.name());
                 record.setUuid(found.uuid());
                 record.setIp(found.ip());
-                Database.getContext()
-                        .insertInto(Tables.PLAYER_EVENTS)
-                        .values(record);
+                record.store();
             } catch (SQLException e) {
                 Log.err(e);
             }
