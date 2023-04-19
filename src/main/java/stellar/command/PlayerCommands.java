@@ -15,8 +15,8 @@ import mindustry.gen.Groups;
 import mindustry.gen.Player;
 import stellar.Const;
 import stellar.Variables;
-import stellar.database.DBHandler;
-import stellar.database.tables.Tables;
+import stellar.database.Database;
+import stellar.database.gen.Tables;
 import stellar.history.entry.HistoryEntry;
 import stellar.history.struct.CacheSeq;
 import stellar.util.Bundle;
@@ -84,7 +84,7 @@ public class PlayerCommands {
         commandHandler.<Player>register("tr", "[off|auto|double|somelocale]", "commands.tr.description", (args, player) -> {
             String locale;
             try {
-                locale = DBHandler.get(player.uuid(), Tables.users.getTranslator(), Tables.users);
+                locale = Database.get(player.uuid(), Tables.users.getTranslator(), Tables.users);
             } catch (Throwable t) {
                 Bundle.bundled(player, "commands.tr.error");
                 Log.err(t);
@@ -101,7 +101,7 @@ public class PlayerCommands {
             switch (mode) {
                 case "off" -> {
                     try {
-                        DBHandler.update(player.uuid(), Tables.users.getTranslator(), Tables.users, "off");
+                        Database.update(player.uuid(), Tables.users.getTranslator(), Tables.users, "off");
                     } catch (Throwable t) {
                         Log.err(t);
                         DiscordLogger.err(t);
@@ -110,7 +110,7 @@ public class PlayerCommands {
                 }
                 case "auto" -> {
                     try {
-                        DBHandler.update(player.uuid(), Tables.users.getTranslator(), Tables.users, "auto");
+                        Database.update(player.uuid(), Tables.users.getTranslator(), Tables.users, "auto");
                     } catch (Throwable t) {
                         Log.err(t);
                         DiscordLogger.err(t);
@@ -119,7 +119,7 @@ public class PlayerCommands {
                 }
                 case "double" -> {
                     try {
-                        DBHandler.update(player.uuid(), Tables.users.getTranslator(), Tables.users, "double");
+                        Database.update(player.uuid(), Tables.users.getTranslator(), Tables.users, "double");
                     } catch (Throwable t) {
                         Log.err(t);
                         DiscordLogger.err(t);
@@ -133,7 +133,7 @@ public class PlayerCommands {
                         return;
                     }
                     try {
-                        DBHandler.update(player.uuid(), Tables.users.getTranslator(), Tables.users, target.toString());
+                        Database.update(player.uuid(), Tables.users.getTranslator(), Tables.users, target.toString());
                     } catch (Throwable t) {
                         Log.err(t);
                         DiscordLogger.err(t);
@@ -277,7 +277,7 @@ public class PlayerCommands {
             }
 
             try {
-                Long time = DBHandler.get(player.uuid(), Tables.playtime.getFields().get(serverColumnName), Tables.playtime);
+                Long time = Database.get(player.uuid(), Tables.playtime.getFields().get(serverColumnName), Tables.playtime);
                 if (time == null) {
                     Log.err("Player '" + player.uuid() + "' doesn't exists");
                 }
@@ -289,7 +289,7 @@ public class PlayerCommands {
 
         commandHandler.<Player>register("score", "commands.score.description", (args, player) -> {
             try {
-                int exp = DBHandler.get(player.uuid(), Tables.users.getExp(), Tables.users);
+                int exp = Database.get(player.uuid(), Tables.users.getExp(), Tables.users);
                 Bundle.bundled(player, "commands.score.msg", exp);
             } catch (SQLException e) {
                 Log.err(e);

@@ -16,7 +16,7 @@ import stellar.Variables;
 import stellar.bot.Bot;
 import stellar.bot.Colors;
 import stellar.bot.Util;
-import stellar.database.DBHandler;
+import stellar.database.Database;
 import stellar.database.entries.PlayerEntry;
 import stellar.database.entries.PlaytimeEntry;
 import stellar.database.entries.ServerEventEntry;
@@ -45,7 +45,7 @@ public class ServerCommands {
                     .type(ServerEventTypes.STOP)
                     .build();
             try {
-                DBHandler.save(entry, Tables.serverEvents);
+                Database.save(entry, Tables.serverEvents);
             } catch (SQLException e) {
                 Log.err(e);
             }
@@ -68,9 +68,9 @@ public class ServerCommands {
                         .build();
 
                 try {
-                    if (!DBHandler.userExist(info.id)) {
-                        DBHandler.save(data, Tables.users);
-                        DBHandler.save(PlaytimeEntry.builder().uuid(info.id).build(), Tables.playtime);
+                    if (!Database.userExist(info.id)) {
+                        Database.save(data, Tables.users);
+                        Database.save(PlaytimeEntry.builder().uuid(info.id).build(), Tables.playtime);
                         exported++;
                     }
                 } catch (SQLException e) {

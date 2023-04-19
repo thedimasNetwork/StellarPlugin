@@ -17,7 +17,7 @@ import mindustry.gen.Player;
 import mindustry.net.Packets;
 import stellar.Const;
 import stellar.Variables;
-import stellar.database.DBHandler;
+import stellar.database.Database;
 import stellar.database.entries.PlayerEntry;
 import stellar.database.entries.PlayerEventEntry;
 import stellar.database.entries.PlaytimeEntry;
@@ -45,8 +45,8 @@ public class EventHandler {
             String uuid = event.player.uuid();
             String name = event.player.name;
             try {
-                if (DBHandler.userExist(uuid)) {
-                    Boolean banned = DBHandler.get(uuid, Tables.users.getBanned(), Tables.users);
+                if (Database.userExist(uuid)) {
+                    Boolean banned = Database.get(uuid, Tables.users.getBanned(), Tables.users);
                     if (banned != null) {
                         if (banned) {
                             event.player.kick(Packets.KickReason.banned);
@@ -88,13 +88,13 @@ public class EventHandler {
                     .build();
 
             try {
-                DBHandler.save(entry, Tables.playerEvents);
-                if (DBHandler.userExist(event.player.uuid())) {
-                    DBHandler.update(event.player.uuid(), Tables.users.getName(), Tables.users, event.player.name);
-                    DBHandler.update(event.player.uuid(), Tables.users.getLocale(), Tables.users, event.player.locale);
-                    DBHandler.update(event.player.uuid(), Tables.users.getIp(), Tables.users, event.player.ip());
+                Database.save(entry, Tables.playerEvents);
+                if (Database.userExist(event.player.uuid())) {
+                    Database.update(event.player.uuid(), Tables.users.getName(), Tables.users, event.player.name);
+                    Database.update(event.player.uuid(), Tables.users.getLocale(), Tables.users, event.player.locale);
+                    Database.update(event.player.uuid(), Tables.users.getIp(), Tables.users, event.player.ip());
 
-                    PlayerEntry data = DBHandler.get(event.player.uuid(), Tables.users, PlayerEntry.class);
+                    PlayerEntry data = Database.get(event.player.uuid(), Tables.users, PlayerEntry.class);
 
                     assert data != null;
                     if (data.isAdmin()) {
@@ -116,8 +116,8 @@ public class EventHandler {
                             .admin(event.player.admin())
                             .build();
 
-                    DBHandler.save(data, Tables.users);
-                    DBHandler.save(PlaytimeEntry.builder().uuid(data.getUuid()).build(), Tables.playtime);
+                    Database.save(data, Tables.users);
+                    Database.save(PlaytimeEntry.builder().uuid(data.getUuid()).build(), Tables.playtime);
                 }
             } catch (SQLException e) {
                 Log.err(e);
@@ -129,7 +129,7 @@ public class EventHandler {
         // region баны
         Events.on(EventType.PlayerBanEvent.class, event -> {
             try {
-                DBHandler.update(event.uuid, Tables.users.getBanned(), Tables.users, true);
+                Database.update(event.uuid, Tables.users.getBanned(), Tables.users, true);
             } catch (SQLException e) {
                 Log.err("Failed to ban uuid for player '@'", event.uuid);
                 Log.err(e);
@@ -146,7 +146,7 @@ public class EventHandler {
 
             String uuid = target.uuid();
             try {
-                DBHandler.update(uuid, Tables.users.getBanned(), Tables.users, true);
+                Database.update(uuid, Tables.users.getBanned(), Tables.users, true);
             } catch (SQLException e) {
                 Log.err("Failed to ban ip for player '@'", event.ip);
                 Log.err(e);
@@ -156,7 +156,7 @@ public class EventHandler {
 
         Events.on(EventType.PlayerUnbanEvent.class, event -> {
             try {
-                DBHandler.update(event.uuid, Tables.users.getBanned(), Tables.users, false);
+                Database.update(event.uuid, Tables.users.getBanned(), Tables.users, false);
             } catch (SQLException e) {
                 Log.err("Failed to unban uuid for player '@'", event.uuid);
                 Log.err(e);
@@ -173,7 +173,7 @@ public class EventHandler {
 
             String uuid = target.uuid();
             try {
-                DBHandler.update(uuid, Tables.users.getBanned(), Tables.users, false);
+                Database.update(uuid, Tables.users.getBanned(), Tables.users, false);
             } catch (SQLException e) {
                 Log.err("Failed to unban ip for player '@'", uuid);
                 Log.err(e);
@@ -209,7 +209,7 @@ public class EventHandler {
                     .name(event.player.name)
                     .build();
             try {
-                DBHandler.save(entry, Tables.playerEvents);
+                Database.save(entry, Tables.playerEvents);
             } catch (SQLException e) {
                 Log.err(e);
             }
@@ -224,7 +224,7 @@ public class EventHandler {
                     .type(ServerEventTypes.START)
                     .build();
             try {
-                DBHandler.save(entry, Tables.serverEvents);
+                Database.save(entry, Tables.serverEvents);
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             }
@@ -238,7 +238,7 @@ public class EventHandler {
                     .type(ServerEventTypes.GAMEOVER)
                     .build();
             try {
-                DBHandler.save(entry, Tables.serverEvents);
+                Database.save(entry, Tables.serverEvents);
             } catch (SQLException e) {
                 Log.err(e);
             }
@@ -303,7 +303,7 @@ public class EventHandler {
                     .block(blockName)
                     .build();
             try {
-                DBHandler.save(entry, Tables.playerEvents);
+                Database.save(entry, Tables.playerEvents);
             } catch (SQLException e) {
                 Log.err(e);
             }
@@ -318,7 +318,7 @@ public class EventHandler {
                     .mapname(state.map.name())
                     .build();
             try {
-                DBHandler.save(entry, Tables.serverEvents);
+                Database.save(entry, Tables.serverEvents);
             } catch (SQLException e) {
                 Log.err(e);
             }
@@ -334,7 +334,7 @@ public class EventHandler {
                     .wave(state.wave)
                     .build();
             try {
-                DBHandler.save(entry, Tables.serverEvents);
+                Database.save(entry, Tables.serverEvents);
             } catch (SQLException e) {
                 Log.err(e);
             }
@@ -371,9 +371,9 @@ public class EventHandler {
                         .build();
             }
             try {
-                DBHandler.save(entry, Tables.serverEvents);
+                Database.save(entry, Tables.serverEvents);
                 if (entry2 != null) {
-                    DBHandler.save(entry2, Tables.playerEvents);
+                    Database.save(entry2, Tables.playerEvents);
                 }
             } catch (SQLException e) {
                 Log.err(e);
@@ -392,7 +392,7 @@ public class EventHandler {
                         .message(event.message)
                         .build();
                 try {
-                    DBHandler.save(entry, Tables.playerEvents);
+                    Database.save(entry, Tables.playerEvents);
                 } catch (SQLException e) {
                     Log.err(e);
                 }
@@ -416,7 +416,7 @@ public class EventHandler {
                         .message(event.message.replaceAll("^/", ""))
                         .build();
                 try {
-                    DBHandler.save(entry, Tables.playerEvents);
+                    Database.save(entry, Tables.playerEvents);
                 } catch (SQLException e) {
                     Log.err(e);
                 }

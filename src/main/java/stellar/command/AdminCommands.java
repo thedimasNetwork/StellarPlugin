@@ -17,11 +17,11 @@ import mindustry.world.Tile;
 import stellar.Const;
 import stellar.Variables;
 import stellar.bot.Bot;
-import stellar.database.DBHandler;
-import stellar.database.entries.PlayerEntry;
-import stellar.database.entries.PlayerEventEntry;
+import stellar.database.Database;
 import stellar.database.enums.PlayerEventTypes;
-import stellar.database.tables.Tables;
+import stellar.database.gen.Tables;
+import stellar.database.gen.tables.records.PlayerEventsRecord;
+import stellar.database.gen.tables.records.UsersRecord;
 import stellar.util.Bundle;
 import stellar.util.Players;
 import stellar.util.Translator;
@@ -311,17 +311,22 @@ public class AdminCommands {
             }
 
             try {
-                DBHandler.update(args[0], Tables.users.getBanned(), Tables.users, true);
-                PlayerEventEntry entry = PlayerEventEntry.builder()
-                        .server(Const.SERVER_COLUMN_NAME)
-                        .timestamp((int) (System.currentTimeMillis() / 1000))
-                        .type(PlayerEventTypes.BAN)
-                        .name(found.name())
-                        .uuid(found.uuid())
-                        .ip(found.ip())
-                        .build();
+                Database.getContext()
+                        .update(Tables.USERS)
+                        .set(Tables.USERS.BANNED, (byte) 1)
+                        .where(Tables.USERS.UUID.eq(args[0]));
+
+                PlayerEventsRecord record = Database.getContext().newRecord(Tables.PLAYER_EVENTS);
+                record.setServer(Const.SERVER_COLUMN_NAME);
+                record.setTimestamp(System.currentTimeMillis() / 1000);
+                record.setType(PlayerEventTypes.BAN.name());
+                record.setName(found.name());
+                record.setUuid(found.uuid());
+                record.setIp(found.ip());
                 try {
-                    DBHandler.save(entry, Tables.playerEvents);
+                    Database.getContext()
+                            .insertInto(Tables.PLAYER_EVENTS)
+                            .values(record);
                 } catch (SQLException e) {
                     Log.err(e);
                 }
@@ -350,13 +355,27 @@ public class AdminCommands {
             }
 
             try {
-                if (!DBHandler.userExist(args[0])) {
+                boolean exists = Database.getContext()
+                        .selectFrom(Tables.USERS)
+                        .where(Tables.USERS.UUID.eq(args[0]))
+                        .fetch()
+                        .size() > 0;
+
+                if (!exists) {
                     player.sendMessage(String.format("[red]Игрок с айди %s не найден[]", args[0]));
                     return;
                 }
 
-                DBHandler.update(args[0], Tables.users.getBanned(), Tables.users, false);
-                PlayerEntry data = DBHandler.get(args[0], Tables.users, PlayerEntry.class);
+                Database.getContext()
+                        .update(Tables.USERS)
+                        .set(Tables.USERS.BANNED, (byte) 0)
+                        .where(Tables.USERS.UUID.eq(args[0]));
+
+                UsersRecord data = Database.getContext()
+                        .selectFrom(Tables.USERS)
+                        .where(Tables.USERS.UUID.eq(args[0]))
+                        .fetchOne();
+
                 player.sendMessage(String.format("[lime]Игрок с айди %s разбанен[]", args[0]));
                 Log.info("@ (@) has unbanned @ (@)", player.name(), player.uuid(), data.getName(), args[0]);
                 Bot.sendMessage(String.format("%s разбанил игрока %s", player.name(), data.getName()));
@@ -387,17 +406,18 @@ public class AdminCommands {
                 return;
             }
 
-            found.kick(Packets.KickReason.kick);
-            PlayerEventEntry entry = PlayerEventEntry.builder()
-                    .server(Const.SERVER_COLUMN_NAME)
-                    .timestamp((int) (System.currentTimeMillis() / 1000))
-                    .type(PlayerEventTypes.KICK)
-                    .name(found.name())
-                    .uuid(found.uuid())
-                    .ip(found.ip())
-                    .build();
             try {
-                DBHandler.save(entry, Tables.playerEvents);
+                found.kick(Packets.KickReason.kick);
+                PlayerEventsRecord record = Database.getContext().newRecord(Tables.PLAYER_EVENTS);
+                record.setServer(Const.SERVER_COLUMN_NAME);
+                record.setTimestamp(System.currentTimeMillis() / 1000);
+                record.setType(PlayerEventTypes.KICK.name());
+                record.setName(found.name());
+                record.setUuid(found.uuid());
+                record.setIp(found.ip());
+                Database.getContext()
+                        .insertInto(Tables.PLAYER_EVENTS)
+                        .values(record);
             } catch (SQLException e) {
                 Log.err(e);
             }

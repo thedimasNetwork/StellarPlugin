@@ -7,7 +7,7 @@ import mindustry.game.Gamemode;
 import mindustry.game.Team;
 import mindustry.gen.Groups;
 import mindustry.gen.Player;
-import stellar.database.DBHandler;
+import stellar.database.Database;
 import stellar.database.tables.Tables;
 
 import java.sql.SQLException;
@@ -25,20 +25,20 @@ public class Experience {
                     for (Player p : Groups.player) {
                         int currExp;
                         try {
-                            currExp = DBHandler.get(p.uuid(), Tables.users.getExp(), Tables.users);
+                            currExp = Database.get(p.uuid(), Tables.users.getExp(), Tables.users);
                         } catch (SQLException e) {
                             Log.err(e);
                             continue;
                         }
                         if (p.team() == winner) {
                             try {
-                                DBHandler.update(p.uuid(), Tables.users.getExp(), Tables.users, currExp + 1000);
+                                Database.update(p.uuid(), Tables.users.getExp(), Tables.users, currExp + 1000);
                             } catch (SQLException | NullPointerException e) {
                                 Log.err(e);
                             }
                         } else if (p.team() != Team.derelict) {
                             try {
-                                DBHandler.update(p.uuid(), Tables.users.getExp(), Tables.users, (currExp < 200) ? currExp - 200 : 0);
+                                Database.update(p.uuid(), Tables.users.getExp(), Tables.users, (currExp < 200) ? currExp - 200 : 0);
                             } catch (SQLException | NullPointerException e) {
                                 Log.err(e);
                             }
@@ -49,16 +49,16 @@ public class Experience {
                     for (Player p : Groups.player) {
                         int currExp;
                         try {
-                            currExp = DBHandler.get(p.uuid(), Tables.users.getExp(), Tables.users);
+                            currExp = Database.get(p.uuid(), Tables.users.getExp(), Tables.users);
                         } catch (SQLException e) {
                             Log.err(e);
                             continue;
                         }
                         try {
                             if (winner == Team.sharded) {
-                                DBHandler.update(p.uuid(), Tables.users.getExp(), Tables.users, currExp + 500);
+                                Database.update(p.uuid(), Tables.users.getExp(), Tables.users, currExp + 500);
                             } else if (winner != Team.derelict) {
-                                DBHandler.update(p.uuid(), Tables.users.getExp(), Tables.users, (currExp < 100) ? currExp - 100 : 0);
+                                Database.update(p.uuid(), Tables.users.getExp(), Tables.users, (currExp < 100) ? currExp - 100 : 0);
                             }
                         } catch (SQLException e) {
                             Log.err(e);
@@ -70,8 +70,8 @@ public class Experience {
                         for (Player p : Groups.player) {
                             int currExp;
                             try {
-                                currExp = DBHandler.get(p.uuid(), Tables.users.getExp(), Tables.users);
-                                DBHandler.update(p.uuid(), Tables.users.getExp(), Tables.users, currExp + waves * 10);
+                                currExp = Database.get(p.uuid(), Tables.users.getExp(), Tables.users);
+                                Database.update(p.uuid(), Tables.users.getExp(), Tables.users, currExp + waves * 10);
                             } catch (SQLException e) {
                                 Log.err(e);
                             }
@@ -90,8 +90,8 @@ public class Experience {
                     for (Player p : Groups.player) {
                         int currExp;
                         try {
-                            currExp = DBHandler.get(p.uuid(), Tables.users.getExp(), Tables.users);
-                            DBHandler.update(p.uuid(), Tables.users.getExp(), Tables.users, currExp + 10 * waves % 10 == 0 ? 10 : 1);
+                            currExp = Database.get(p.uuid(), Tables.users.getExp(), Tables.users);
+                            Database.update(p.uuid(), Tables.users.getExp(), Tables.users, currExp + 10 * waves % 10 == 0 ? 10 : 1);
                         } catch (SQLException e) {
                             Log.err(e);
                         }
@@ -104,8 +104,8 @@ public class Experience {
                     for (Player p : Groups.player) {
                         int currExp;
                         try {
-                            currExp = DBHandler.get(p.uuid(), Tables.users.getExp(), Tables.users);
-                            DBHandler.update(p.uuid(), Tables.users.getExp(), Tables.users, (currExp < 10) ? currExp - 10 : 0);
+                            currExp = Database.get(p.uuid(), Tables.users.getExp(), Tables.users);
+                            Database.update(p.uuid(), Tables.users.getExp(), Tables.users, (currExp < 10) ? currExp - 10 : 0);
                         } catch (SQLException e) {
                             Log.err(e);
                         }

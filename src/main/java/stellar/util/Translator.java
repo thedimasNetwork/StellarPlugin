@@ -5,7 +5,7 @@ import arc.util.serialization.JsonReader;
 import arc.util.serialization.JsonValue;
 import mindustry.gen.Player;
 import stellar.Const;
-import stellar.database.DBHandler;
+import stellar.database.Database;
 import stellar.database.tables.Tables;
 import stellar.util.logger.DiscordLogger;
 
@@ -48,7 +48,7 @@ public class Translator {
     public static String translateChat(Player player, Player otherPlayer, String message) {
         String locale = otherPlayer.locale;
         try {
-            locale = DBHandler.get(otherPlayer.uuid(), Tables.users.getTranslator(), Tables.users);
+            locale = Database.get(otherPlayer.uuid(), Tables.users.getTranslator(), Tables.users);
         } catch (Throwable t) {
             Log.err(t);
             DiscordLogger.err(t);
