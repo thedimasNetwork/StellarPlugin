@@ -84,7 +84,11 @@ public class PlayerCommands {
         commandHandler.<Player>register("tr", "[off|auto|double|somelocale]", "commands.tr.description", (args, player) -> {
             String locale;
             try {
-                locale = Database.get(player.uuid(), Tables.users.getTranslator(), Tables.users);
+                locale = Database.getContext()
+                        .select(Tables.USERS.TRANSLATOR)
+                        .from(Tables.USERS)
+                        .where(Tables.USERS.UUID.eq(player.uuid()))
+                        .fetchOne().value1();
             } catch (Throwable t) {
                 Bundle.bundled(player, "commands.tr.error");
                 Log.err(t);
@@ -101,7 +105,10 @@ public class PlayerCommands {
             switch (mode) {
                 case "off" -> {
                     try {
-                        Database.update(player.uuid(), Tables.users.getTranslator(), Tables.users, "off");
+                        Database.getContext()
+                                .update(Tables.USERS)
+                                .set(Tables.USERS.TRANSLATOR, "off")
+                                .where(Tables.USERS.UUID.eq(player.uuid()));
                     } catch (Throwable t) {
                         Log.err(t);
                         DiscordLogger.err(t);
@@ -110,7 +117,10 @@ public class PlayerCommands {
                 }
                 case "auto" -> {
                     try {
-                        Database.update(player.uuid(), Tables.users.getTranslator(), Tables.users, "auto");
+                        Database.getContext()
+                                .update(Tables.USERS)
+                                .set(Tables.USERS.TRANSLATOR, "auto")
+                                .where(Tables.USERS.UUID.eq(player.uuid()));
                     } catch (Throwable t) {
                         Log.err(t);
                         DiscordLogger.err(t);
@@ -119,7 +129,10 @@ public class PlayerCommands {
                 }
                 case "double" -> {
                     try {
-                        Database.update(player.uuid(), Tables.users.getTranslator(), Tables.users, "double");
+                        Database.getContext()
+                                .update(Tables.USERS)
+                                .set(Tables.USERS.TRANSLATOR, "double")
+                                .where(Tables.USERS.UUID.eq(player.uuid()));
                     } catch (Throwable t) {
                         Log.err(t);
                         DiscordLogger.err(t);
@@ -133,7 +146,10 @@ public class PlayerCommands {
                         return;
                     }
                     try {
-                        Database.update(player.uuid(), Tables.users.getTranslator(), Tables.users, target.toString());
+                        Database.getContext()
+                                .update(Tables.USERS)
+                                .set(Tables.USERS.TRANSLATOR, target.toString())
+                                .where(Tables.USERS.UUID.eq(player.uuid()));
                     } catch (Throwable t) {
                         Log.err(t);
                         DiscordLogger.err(t);
@@ -264,14 +280,14 @@ public class PlayerCommands {
         });
 
         commandHandler.<Player>register("playtime", "[server...]", "commands.playtime.description", (args, player) -> {
-            String serverColumnName;
+            /*String serverColumnName;
             if (args.length > 0) {
                 serverColumnName = args[0].toLowerCase();
             } else {
                 serverColumnName = Const.SERVER_COLUMN_NAME;
             }
 
-            if (!Tables.playtime.getFields().containsKey(serverColumnName)) {
+            if (!Tables.PLAYTIME.fields.getFields().containsKey(serverColumnName)) {
                 Bundle.bundled(player, "commands.server-notfound", Const.SERVER_LIST);
                 return;
             }
@@ -284,12 +300,17 @@ public class PlayerCommands {
                 Bundle.bundled(player, "commands.playtime.msg", Const.SERVER_NAMES.get(serverColumnName), longToTime(time != null ? time : 0L));
             } catch (Throwable t) {
                 Log.err("Failed to get playtime for player '" + player.uuid() + "'", t);
-            }
+            }*/
+            player.sendMessage("[red]Command is under maintenance[]"); // TODO: playtime get
         });
 
         commandHandler.<Player>register("score", "commands.score.description", (args, player) -> {
             try {
-                int exp = Database.get(player.uuid(), Tables.users.getExp(), Tables.users);
+                int exp = Database.getContext()
+                        .select(Tables.USERS.EXP)
+                        .from(Tables.USERS)
+                        .where(Tables.USERS.UUID.eq(player.uuid()))
+                        .fetchOne().value1();
                 Bundle.bundled(player, "commands.score.msg", exp);
             } catch (SQLException e) {
                 Log.err(e);
