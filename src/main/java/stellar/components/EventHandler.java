@@ -18,14 +18,12 @@ import mindustry.net.Packets;
 import stellar.Const;
 import stellar.Variables;
 import stellar.database.Database;
-import stellar.database.entries.PlayerEntry;
-import stellar.database.entries.PlayerEventEntry;
-import stellar.database.entries.PlaytimeEntry;
-import stellar.database.entries.ServerEventEntry;
 import stellar.database.enums.PlayerEventTypes;
 import stellar.database.enums.ServerEventTypes;
-import stellar.database.tables.Tables;
-import stellar.history.struct.CacheSeq;
+import stellar.database.gen.Tables;
+import stellar.database.gen.tables.records.PlayerEventsRecord;
+import stellar.database.gen.tables.records.ServerEventsRecord;
+import stellar.database.gen.tables.records.UsersRecord;
 import stellar.util.Bundle;
 import stellar.util.Translator;
 import stellar.util.logger.DiscordLogger;
@@ -38,19 +36,22 @@ import static stellar.Variables.config;
 import static stellar.Variables.interval;
 
 @SuppressWarnings({"unused", "unchecked"})
-public class EventHandler {
+public class EventHandler { // TODO: split into different components
     public static void load() {
         // region PlayerConnect
         Events.on(EventType.PlayerConnect.class, event -> {
             String uuid = event.player.uuid();
             String name = event.player.name;
             try {
-                if (Database.userExist(uuid)) {
-                    Boolean banned = Database.get(uuid, Tables.users.getBanned(), Tables.users);
-                    if (banned != null) {
-                        if (banned) {
-                            event.player.kick(Packets.KickReason.banned);
-                        }
+                boolean exists = Database.getContext().fetchExists(Tables.USERS, Tables.USERS.UUID.eq(uuid)); // TODO: move to playerExists method
+                if (exists) {
+                    boolean banned = Database.getContext()
+                            .select(Tables.USERS.BANNED)
+                            .from(Tables.USERS)
+                            .where(Tables.USERS.UUID.eq(uuid))
+                            .fetchOne().value1() == 1;
+                    if (banned) {
+                        event.player.kick(Packets.KickReason.banned);
                     }
                 }
             } catch (SQLException e) {
@@ -78,46 +79,60 @@ public class EventHandler {
             String welcome = Bundle.format("welcome", locale, rules, config.discordUrl);
             Call.infoMessage(event.player.con, welcome);
 
-            PlayerEventEntry entry = PlayerEventEntry.builder()
-                    .server(Const.SERVER_COLUMN_NAME)
-                    .timestamp((int) (System.currentTimeMillis() / 1000))
-                    .type(PlayerEventTypes.JOIN)
-                    .ip(event.player.con.address)
-                    .uuid(event.player.uuid())
-                    .name(event.player.name)
-                    .build();
-
             try {
-                Database.save(entry, Tables.playerEvents);
-                if (Database.userExist(event.player.uuid())) {
-                    Database.update(event.player.uuid(), Tables.users.getName(), Tables.users, event.player.name);
-                    Database.update(event.player.uuid(), Tables.users.getLocale(), Tables.users, event.player.locale);
-                    Database.update(event.player.uuid(), Tables.users.getIp(), Tables.users, event.player.ip());
+                PlayerEventsRecord record = Database.getContext().newRecord(Tables.PLAYER_EVENTS);
+                record.setServer(Const.SERVER_COLUMN_NAME);
+                record.setTimestamp(System.currentTimeMillis() / 1000);
+                record.setType(PlayerEventTypes.JOIN.name());
+                record.setName(event.player.name());
+                record.setUuid(event.player.uuid());
+                record.setIp(event.player.ip());
+                record.store();
 
-                    PlayerEntry data = Database.get(event.player.uuid(), Tables.users, PlayerEntry.class);
+                boolean exists = Database.getContext().fetchExists(Tables.USERS, Tables.USERS.UUID.eq(event.player.uuid())); // TODO: move to playerExists method
+                if (exists) {
+                    Database.getContext()
+                            .update(Tables.USERS)
+                            .set(Tables.USERS.NAME, event.player.name())
+                            .where(Tables.USERS.UUID.eq(event.player.uuid()));
+
+                    Database.getContext()
+                            .update(Tables.USERS)
+                            .set(Tables.USERS.LOCALE, event.player.locale())
+                            .where(Tables.USERS.UUID.eq(event.player.uuid()));
+
+                    Database.getContext()
+                            .update(Tables.USERS)
+                            .set(Tables.USERS.IP, event.player.ip())
+                            .where(Tables.USERS.UUID.eq(event.player.uuid()));
+
+
+                    UsersRecord data = Database.getContext()
+                            .selectFrom(Tables.USERS)
+                            .where(Tables.USERS.UUID.eq(event.player.uuid()))
+                            .fetchOne();
 
                     assert data != null;
-                    if (data.isAdmin()) {
+                    if (data.getAdmin() == 1) { // damn, use bools instead of bytes
                         Variables.admins.put(event.player.uuid(), event.player.name);
                         event.player.admin = true;
                     }
-                    if (data.isJsallowed()) {
+                    if (data.getJsallowed() == 1) {
                         Variables.jsallowed.put(event.player.uuid(), event.player.name);
                     }
                     if (data.getDonated() > 0) {
                         Variables.donaters.put(event.player.uuid(), event.player.name);
                     }
                 } else {
-                    PlayerEntry data = PlayerEntry.builder()
-                            .uuid(event.player.uuid())
-                            .ip(event.player.ip())
-                            .name(event.player.name)
-                            .locale(event.player.locale())
-                            .admin(event.player.admin())
-                            .build();
+                    UsersRecord usersRecord = Database.getContext().newRecord(Tables.USERS);
+                    usersRecord.setUuid(event.player.uuid());
+                    usersRecord.setIp(event.player.ip());
+                    usersRecord.setName(event.player.name());
+                    usersRecord.setLocale(event.player.locale());
+                    usersRecord.setAdmin((byte) (event.player.admin() ? 1 : 0)); // FIXME: that's really awful
+                    usersRecord.store();
 
-                    Database.save(data, Tables.users);
-                    Database.save(PlaytimeEntry.builder().uuid(data.getUuid()).build(), Tables.playtime);
+                    Database.getContext().newRecord(Tables.PLAYTIME).store();
                 }
             } catch (SQLException e) {
                 Log.err(e);
@@ -129,7 +144,9 @@ public class EventHandler {
         // region баны
         Events.on(EventType.PlayerBanEvent.class, event -> {
             try {
-                Database.update(event.uuid, Tables.users.getBanned(), Tables.users, true);
+                Database.getContext()
+                        .update(Tables.USERS)
+                        .set(Tables.USERS.BANNED, (byte) 1);
             } catch (SQLException e) {
                 Log.err("Failed to ban uuid for player '@'", event.uuid);
                 Log.err(e);
@@ -137,47 +154,18 @@ public class EventHandler {
             }
         });
 
-        Events.on(EventType.PlayerIpBanEvent.class, event -> {
-            Player target = Groups.player.find(p -> p.ip().equalsIgnoreCase(event.ip));
-            if (target == null) {
-                Log.err("No player with ip '@' found.", event.ip);
-                return;
-            }
-
-            String uuid = target.uuid();
-            try {
-                Database.update(uuid, Tables.users.getBanned(), Tables.users, true);
-            } catch (SQLException e) {
-                Log.err("Failed to ban ip for player '@'", event.ip);
-                Log.err(e);
-                DiscordLogger.err("Failed to ban ip for player '" + uuid + "'", e);
-            }
-        });
+        // I just deleted IP ban/unban part, haha
+        // It isn't used anyway
 
         Events.on(EventType.PlayerUnbanEvent.class, event -> {
             try {
-                Database.update(event.uuid, Tables.users.getBanned(), Tables.users, false);
+                Database.getContext()
+                        .update(Tables.USERS)
+                        .set(Tables.USERS.BANNED, (byte) 0);
             } catch (SQLException e) {
                 Log.err("Failed to unban uuid for player '@'", event.uuid);
                 Log.err(e);
                 DiscordLogger.err("Failed to unban uuid for player '" + event.uuid + "'", e);
-            }
-        });
-
-        Events.on(EventType.PlayerIpUnbanEvent.class, event -> {
-            Player target = Groups.player.find(p -> p.ip().equalsIgnoreCase(event.ip));
-            if (target == null) {
-                Log.err("No player with ip '@' found.", event.ip);
-                return;
-            }
-
-            String uuid = target.uuid();
-            try {
-                Database.update(uuid, Tables.users.getBanned(), Tables.users, false);
-            } catch (SQLException e) {
-                Log.err("Failed to unban ip for player '@'", uuid);
-                Log.err(e);
-                DiscordLogger.err("Failed to unban ip for player '" + uuid + "'", e);
             }
         });
         // endregion
@@ -200,16 +188,15 @@ public class EventHandler {
             String playerName = event.player.coloredName();
             Bundle.bundled("events.leave.player-leave", playerName);
 
-            PlayerEventEntry entry = PlayerEventEntry.builder()
-                    .server(Const.SERVER_COLUMN_NAME)
-                    .timestamp((int) (System.currentTimeMillis() / 1000))
-                    .type(PlayerEventTypes.LEAVE)
-                    .ip(event.player.con.address)
-                    .uuid(event.player.uuid())
-                    .name(event.player.name)
-                    .build();
             try {
-                Database.save(entry, Tables.playerEvents);
+                PlayerEventsRecord record = Database.getContext().newRecord(Tables.PLAYER_EVENTS);
+                record.setServer(Const.SERVER_COLUMN_NAME);
+                record.setTimestamp(System.currentTimeMillis() / 1000);
+                record.setType(PlayerEventTypes.LEAVE.name());
+                record.setName(event.player.name());
+                record.setUuid(event.player.uuid());
+                record.setIp(event.player.ip());
+                record.store();
             } catch (SQLException e) {
                 Log.err(e);
             }
@@ -218,27 +205,25 @@ public class EventHandler {
 
         Events.on(EventType.ServerLoadEvent.class, event -> {
             Log.info("ThedimasPlugin: Server loaded");
-            ServerEventEntry entry = ServerEventEntry.builder()
-                    .server(Const.SERVER_COLUMN_NAME)
-                    .timestamp((int) (System.currentTimeMillis() / 1000))
-                    .type(ServerEventTypes.START)
-                    .build();
             try {
-                Database.save(entry, Tables.serverEvents);
+                ServerEventsRecord record = Database.getContext().newRecord(Tables.SERVER_EVENTS);
+                record.setServer(Const.SERVER_COLUMN_NAME);
+                record.setTimestamp(System.currentTimeMillis() / 1000);
+                record.setType(ServerEventTypes.START.name());
+                record.store();
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             }
         });
 
         Events.on(EventType.GameOverEvent.class, event -> {
-            Variables.votesRTV.clear();
-            ServerEventEntry entry = ServerEventEntry.builder()
-                    .server(Const.SERVER_COLUMN_NAME)
-                    .timestamp((int) (System.currentTimeMillis() / 1000))
-                    .type(ServerEventTypes.GAMEOVER)
-                    .build();
             try {
-                Database.save(entry, Tables.serverEvents);
+                Variables.votesRTV.clear();
+                ServerEventsRecord record = Database.getContext().newRecord(Tables.SERVER_EVENTS);
+                record.setServer(Const.SERVER_COLUMN_NAME);
+                record.setTimestamp(System.currentTimeMillis() / 1000);
+                record.setType(ServerEventTypes.GAMEOVER.name());
+                record.store();
             } catch (SQLException e) {
                 Log.err(e);
             }
@@ -291,89 +276,56 @@ public class EventHandler {
                 blockName = null;
                 type = PlayerEventTypes.BREAK;
             }
-            PlayerEventEntry entry = PlayerEventEntry.builder()
-                    .server(Const.SERVER_COLUMN_NAME)
-                    .timestamp((int) (System.currentTimeMillis() / 1000))
-                    .type(type)
-                    .uuid(player != null ? player.uuid() : "UNIT_" + event.unit.type().name.toUpperCase())
-                    .name(player != null ? player.name : null)
-                    .ip(player != null ? player.ip() : null)
-                    .x(event.tile.x)
-                    .y(event.tile.y)
-                    .block(blockName)
-                    .build();
             try {
-                Database.save(entry, Tables.playerEvents);
-            } catch (SQLException e) {
-                Log.err(e);
-            }
-        });
-
-        Events.on(EventType.WorldLoadEvent.class, event -> {
-            Variables.history = new CacheSeq[world.width()][world.height()];
-            ServerEventEntry entry = ServerEventEntry.builder()
-                    .server(Const.SERVER_COLUMN_NAME)
-                    .timestamp((int) (System.currentTimeMillis() / 1000))
-                    .type(ServerEventTypes.MAPLOAD)
-                    .mapname(state.map.name())
-                    .build();
-            try {
-                Database.save(entry, Tables.serverEvents);
+                PlayerEventsRecord record = Database.getContext().newRecord(Tables.PLAYER_EVENTS);
+                record.setServer(Const.SERVER_COLUMN_NAME);
+                record.setTimestamp(System.currentTimeMillis() / 1000);
+                record.setType(type.name());
+                record.setUuid(player != null ? player.uuid() : "UNIT_" + event.unit.type().name.toUpperCase());
+                record.setName(player != null ? player.name : null);
+                record.setIp(player != null ? player.ip() : null);
+                record.setX((int) event.tile.x);
+                record.setY((int) event.tile.y);
+                record.setBlock(blockName);
+                record.store();
             } catch (SQLException e) {
                 Log.err(e);
             }
         });
 
 
-        Events.on(EventType.WaveEvent.class, event -> {
-            ServerEventEntry entry = ServerEventEntry.builder()
-                    .server(Const.SERVER_COLUMN_NAME)
-                    .timestamp((int) (System.currentTimeMillis() / 1000))
-                    .type(ServerEventTypes.NEWWAVE)
-                    .mapname(state.map.name())
-                    .wave(state.wave)
-                    .build();
-            try {
-                Database.save(entry, Tables.serverEvents);
-            } catch (SQLException e) {
-                Log.err(e);
-            }
-        });
+        // WorldLoad and Wave events were removed as useless
 
         Events.on(EventType.AdminRequestEvent.class, event -> {
-            ServerEventEntry entry = ServerEventEntry.builder()
-                    .server(Const.SERVER_COLUMN_NAME)
-                    .timestamp((int) (System.currentTimeMillis() / 1000))
-                    .type(ServerEventTypes.ADMIN_REQUEST)
-                    .name(event.player.name)
-                    .uuid(event.player.uuid())
-                    .ip(event.player.ip())
-                    .request(event.action.name())
-                    .build();
-            PlayerEventEntry entry2 = null;
-            if (event.action == Packets.AdminAction.kick) {
-                entry2 = PlayerEventEntry.builder()
-                        .server(Const.SERVER_COLUMN_NAME)
-                        .timestamp((int) (System.currentTimeMillis() / 1000))
-                        .type(PlayerEventTypes.KICK)
-                        .name(event.other.name())
-                        .uuid(event.other.uuid())
-                        .ip(event.other.ip())
-                        .build();
-            } else if (event.action == Packets.AdminAction.ban) {
-                entry2 = PlayerEventEntry.builder()
-                        .server(Const.SERVER_COLUMN_NAME)
-                        .timestamp((int) (System.currentTimeMillis() / 1000))
-                        .type(PlayerEventTypes.BAN)
-                        .name(event.other.name())
-                        .uuid(event.other.uuid())
-                        .ip(event.other.ip())
-                        .build();
-            }
             try {
-                Database.save(entry, Tables.serverEvents);
-                if (entry2 != null) {
-                    Database.save(entry2, Tables.playerEvents);
+                ServerEventsRecord record = Database.getContext().newRecord(Tables.SERVER_EVENTS);
+                record.setServer(Const.SERVER_COLUMN_NAME);
+                record.setTimestamp(System.currentTimeMillis() / 1000);
+                record.setType(ServerEventTypes.ADMIN_REQUEST.name());
+                record.setName(event.player.name);
+                record.setUuid(event.player.uuid());
+                record.setIp(event.player.ip());
+                record.setRequest(event.action.name());
+                record.store();
+
+                if (event.action == Packets.AdminAction.kick) {
+                    PlayerEventsRecord record2 = Database.getContext().newRecord(Tables.PLAYER_EVENTS);
+                    record2.setServer(Const.SERVER_COLUMN_NAME);
+                    record2.setTimestamp(System.currentTimeMillis() / 1000);
+                    record2.setType(PlayerEventTypes.KICK.name());
+                    record2.setName(event.other.name);
+                    record2.setUuid(event.other.uuid());
+                    record2.setIp(event.other.ip());
+                    record2.store();
+                } else if (event.action == Packets.AdminAction.ban) {
+                    PlayerEventsRecord record2 = Database.getContext().newRecord(Tables.PLAYER_EVENTS);
+                    record2.setServer(Const.SERVER_COLUMN_NAME);
+                    record2.setTimestamp(System.currentTimeMillis() / 1000);
+                    record2.setType(PlayerEventTypes.BAN.name());
+                    record2.setName(event.other.name);
+                    record2.setUuid(event.other.uuid());
+                    record2.setIp(event.other.ip());
+                    record2.store();
                 }
             } catch (SQLException e) {
                 Log.err(e);
@@ -382,17 +334,16 @@ public class EventHandler {
 
         Events.on(EventType.PlayerChatEvent.class, event -> {
             if (!event.message.startsWith("/")) {
-                PlayerEventEntry entry = PlayerEventEntry.builder()
-                        .server(Const.SERVER_COLUMN_NAME)
-                        .timestamp((int) (System.currentTimeMillis() / 1000))
-                        .type(PlayerEventTypes.CHAT)
-                        .uuid(event.player.uuid())
-                        .name(event.player.name)
-                        .ip(event.player.ip())
-                        .message(event.message)
-                        .build();
                 try {
-                    Database.save(entry, Tables.playerEvents);
+                    PlayerEventsRecord record = Database.getContext().newRecord(Tables.PLAYER_EVENTS);
+                    record.setServer(Const.SERVER_COLUMN_NAME);
+                    record.setTimestamp(System.currentTimeMillis() / 1000);
+                    record.setType(PlayerEventTypes.KICK.name());
+                    record.setName(event.player.name);
+                    record.setUuid(event.player.uuid());
+                    record.setIp(event.player.ip());
+                    record.setMessage(event.message);
+                    record.store();
                 } catch (SQLException e) {
                     Log.err(e);
                 }
@@ -406,17 +357,16 @@ public class EventHandler {
 
                 Log.info(Const.CHAT_LOG_FORMAT, Strings.stripColors(event.player.name), Strings.stripColors(event.message), event.player.locale);
             } else {
-                PlayerEventEntry entry = PlayerEventEntry.builder()
-                        .server(Const.SERVER_COLUMN_NAME)
-                        .timestamp((int) (System.currentTimeMillis() / 1000))
-                        .type(PlayerEventTypes.COMMAND)
-                        .uuid(event.player.uuid())
-                        .ip(event.player.ip())
-                        .name(event.player.name)
-                        .message(event.message.replaceAll("^/", ""))
-                        .build();
                 try {
-                    Database.save(entry, Tables.playerEvents);
+                    PlayerEventsRecord record = Database.getContext().newRecord(Tables.PLAYER_EVENTS);
+                    record.setServer(Const.SERVER_COLUMN_NAME);
+                    record.setTimestamp(System.currentTimeMillis() / 1000);
+                    record.setType(PlayerEventTypes.KICK.name());
+                    record.setName(event.player.name);
+                    record.setUuid(event.player.uuid());
+                    record.setIp(event.player.ip());
+                    record.setMessage(event.message.replaceAll("^/", ""));
+                    record.store();
                 } catch (SQLException e) {
                     Log.err(e);
                 }
