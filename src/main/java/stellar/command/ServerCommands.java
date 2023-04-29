@@ -17,11 +17,9 @@ import stellar.bot.Bot;
 import stellar.bot.Colors;
 import stellar.bot.Util;
 import stellar.database.Database;
-import stellar.database.entries.PlayerEntry;
-import stellar.database.entries.PlaytimeEntry;
-import stellar.database.entries.ServerEventEntry;
 import stellar.database.enums.ServerEventTypes;
-import stellar.database.tables.Tables;
+import stellar.database.gen.Tables;
+import stellar.database.gen.tables.records.ServerEventsRecord;
 import stellar.util.Bundle;
 
 import java.sql.SQLException;
@@ -38,14 +36,12 @@ public class ServerCommands {
             Groups.player.each(e -> e.kick(Packets.KickReason.serverClose));
 
             MessageEmbed embed = Util.embedBuilder("*Сервер остановлен*", Colors.red);
-
-            ServerEventEntry entry = ServerEventEntry.builder()
-                    .server(Const.SERVER_COLUMN_NAME)
-                    .timestamp((int) (System.currentTimeMillis() / 1000))
-                    .type(ServerEventTypes.STOP)
-                    .build();
             try {
-                Database.save(entry, Tables.serverEvents);
+                ServerEventsRecord record = Database.getContext().newRecord(Tables.SERVER_EVENTS);
+                record.setServer(Const.SERVER_COLUMN_NAME);
+                record.setTimestamp(System.currentTimeMillis() / 1000);
+                record.setType(ServerEventTypes.STOP.name());
+                record.store();
             } catch (SQLException e) {
                 Log.err(e);
             }
@@ -56,7 +52,7 @@ public class ServerCommands {
         });
 
         commandHandler.register("export-players", "Export players into DB", args -> {
-            ObjectMap<String, Administration.PlayerInfo> playerList = Reflect.get(netServer.admins, "playerInfo");
+            /*ObjectMap<String, Administration.PlayerInfo> playerList = Reflect.get(netServer.admins, "playerInfo");
             int exported = 0;
             for (Administration.PlayerInfo info : playerList.values()) {
                 PlayerEntry data = PlayerEntry.builder()
@@ -78,7 +74,8 @@ public class ServerCommands {
                     Log.err("Unable to export data of player @ (@)", Strings.stripColors(info.lastName), info.id);
                 }
             }
-            Log.info(MessageFormat.format("Successfully exported {0} players", exported));
+            Log.info(MessageFormat.format("Successfully exported {0} players", exported));*/
+            Log.info("Command was removed because of changes in DB structure. Maybe one it will be working again...");
         });
 
         commandHandler.register("rtv", "[on|off]", "disable or enable RTV", args -> {
