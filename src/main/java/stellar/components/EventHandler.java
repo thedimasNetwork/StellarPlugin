@@ -146,7 +146,8 @@ public class EventHandler { // TODO: split into different components
             try {
                 Database.getContext()
                         .update(Tables.USERS)
-                        .set(Tables.USERS.BANNED, (byte) 1);
+                        .set(Tables.USERS.BANNED, (byte) 1)
+                        .where(Tables.USERS.UUID.eq(event.uuid));
             } catch (SQLException e) {
                 Log.err("Failed to ban uuid for player '@'", event.uuid);
                 Log.err(e);
@@ -161,7 +162,8 @@ public class EventHandler { // TODO: split into different components
             try {
                 Database.getContext()
                         .update(Tables.USERS)
-                        .set(Tables.USERS.BANNED, (byte) 0);
+                        .set(Tables.USERS.BANNED, (byte) 0)
+                        .where(Tables.USERS.UUID.eq(event.uuid));
             } catch (SQLException e) {
                 Log.err("Failed to unban uuid for player '@'", event.uuid);
                 Log.err(e);

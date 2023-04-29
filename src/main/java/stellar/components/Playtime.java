@@ -30,7 +30,7 @@ public class Playtime {
                                 .select(field)
                                 .from(Tables.PLAYTIME)
                                 .where(Tables.PLAYTIME.UUID.eq(p.uuid()))
-                                .fetchOne().value1(); // omg, idk whether it works or not :/
+                                .fetchOne().value1();
                         if (time == null) {
                             Log.err("Player '" + p.uuid() + "' doesn't exists");
                             DiscordLogger.err("Player '" + p.uuid() + "' doesn't exists");
