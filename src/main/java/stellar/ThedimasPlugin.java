@@ -8,7 +8,6 @@ import stellar.command.AdminCommands;
 import stellar.command.PlayerCommands;
 import stellar.command.ServerCommands;
 import stellar.components.EventHandler;
-import stellar.components.Experience;
 import stellar.components.LaunchPad;
 import stellar.history.History;
 
@@ -23,7 +22,7 @@ public class ThedimasPlugin extends Plugin {
 
         Config.load();
         Bot.load();
-        Experience.load();
+//        Experience.load(); // Work in progress on better version
         LaunchPad.load();
         EventHandler.load();
         History.load();
