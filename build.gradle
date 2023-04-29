@@ -106,9 +106,9 @@ task codegen() {
                             .withPackageName("stellar.database.gen")
                             .withDirectory(sourceSets.main.java.srcDirs.first().path)
                     )
-            );
+            )
 
-    GenerationTool.generate(configuration);
+    GenerationTool.generate(configuration)
 }
 
 jar {
@@ -120,15 +120,5 @@ jar {
 
     from("assets/$mod.name/") {
         include "**"
-    }
-}
-
-processResources {
-    def build = project.hasProperty("buildVersion") ? project.property("buildVersion") : "snapshot"
-    println("Compiling with build: '$build'")
-
-    filesMatching("**/plugin.json") {
-        from it.file
-        filter { line -> line.replace("%buildVersion%", build as String) }
     }
 }
