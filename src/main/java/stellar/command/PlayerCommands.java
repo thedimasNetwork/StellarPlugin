@@ -13,6 +13,7 @@ import mindustry.game.Team;
 import mindustry.gen.Call;
 import mindustry.gen.Groups;
 import mindustry.gen.Player;
+import org.jooq.Field;
 import stellar.Const;
 import stellar.Variables;
 import stellar.database.Database;
@@ -280,28 +281,33 @@ public class PlayerCommands {
         });
 
         commandHandler.<Player>register("playtime", "[server...]", "commands.playtime.description", (args, player) -> {
-            /*String serverColumnName;
+            String serverColumnName;
             if (args.length > 0) {
                 serverColumnName = args[0].toLowerCase();
             } else {
                 serverColumnName = Const.SERVER_COLUMN_NAME;
             }
 
-            if (!Tables.PLAYTIME.fields.getFields().containsKey(serverColumnName)) {
+            Log.debug(serverColumnName);
+            Field<Long> field = (Field<Long>) Tables.PLAYTIME.field(serverColumnName);
+            if (field == null) {
                 Bundle.bundled(player, "commands.server-notfound", Const.SERVER_LIST);
                 return;
             }
 
             try {
-                Long time = Database.get(player.uuid(), Tables.playtime.getFields().get(serverColumnName), Tables.playtime);
+                Long time = Database.getContext()
+                        .select(field)
+                        .from(Tables.PLAYTIME)
+                        .where(Tables.PLAYTIME.UUID.eq(player.uuid()))
+                        .fetchOne().value1();
                 if (time == null) {
                     Log.err("Player '" + player.uuid() + "' doesn't exists");
                 }
                 Bundle.bundled(player, "commands.playtime.msg", Const.SERVER_NAMES.get(serverColumnName), longToTime(time != null ? time : 0L));
             } catch (Throwable t) {
                 Log.err("Failed to get playtime for player '" + player.uuid() + "'", t);
-            }*/
-            player.sendMessage("[red]Command is under maintenance[]"); // TODO: playtime get
+            }
         });
 
         commandHandler.<Player>register("score", "commands.score.description", (args, player) -> {
