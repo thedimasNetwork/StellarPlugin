@@ -33,7 +33,7 @@ public class Const {
     public static final String[] PIRATES = {"valve", "igruhaorg", "tuttop", "freetp.org", "freetp"};
     // языки, для которых у нас есть перевод
     public static final Locale[] supportedLocales;
-    public static final String TEAM_LIST = "[white][yellow]sharded[], [red]crux[], [green]green[], [purple]purple[], [blue]blue[], [gray]derelict[]";
+    public static final String TEAM_LIST = "[white][yellow]sharded[], [red]crux[], [green]green[], [purple]malis[], [blue]blue[], [gray]derelict[]";
     public static final String UNIT_LIST = """
             [white]Ground:
             [accent]dagger [](\uF800), [accent]mace [](\uF7FF), [accent]fortress [](\uF7FE), [accent]scepter [](\uF7DB), [accent]reign [](\uF7DA)
