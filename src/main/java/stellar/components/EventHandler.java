@@ -22,6 +22,7 @@ import stellar.database.enums.PlayerEventTypes;
 import stellar.database.enums.ServerEventTypes;
 import stellar.database.gen.Tables;
 import stellar.database.gen.tables.records.PlayerEventsRecord;
+import stellar.database.gen.tables.records.PlaytimeRecord;
 import stellar.database.gen.tables.records.ServerEventsRecord;
 import stellar.database.gen.tables.records.UsersRecord;
 import stellar.util.Bundle;
@@ -136,7 +137,9 @@ public class EventHandler { // TODO: split into different components
                     usersRecord.setAdmin((byte) (event.player.admin() ? 1 : 0)); // FIXME: that's really awful
                     usersRecord.store();
 
-                    Database.getContext().newRecord(Tables.PLAYTIME).store();
+                    PlaytimeRecord playtimeRecord = Database.getContext().newRecord(Tables.PLAYTIME);
+                    playtimeRecord.setUuid(event.player.uuid());
+                    playtimeRecord.store();
                 }
             } catch (SQLException e) {
                 Log.err(e);
