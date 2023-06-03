@@ -64,54 +64,57 @@ dependencies {
     runtimeOnly "mysql:mysql-connector-java:$mysqlVersion"
 }
 
-task codegen() {
-    var host, schema, user, password
-    if (!project.hasProperty("dbhost") || !project.hasProperty("dbschema") || !project.hasProperty("dbuser") || !project.hasProperty("dbpassword")) {
-        if (file("./database.json").exists()) {
-            println("Using local JSON config")
-            var json = new JsonSlurper()
-            var dbFile = file("./database.json")
-            var db = json.parseText(dbFile.text)
+task codegen {
+    doLast {
+        var host, schema, user, password
+        if (!project.hasProperty("dbhost") || !project.hasProperty("dbschema") || !project.hasProperty("dbuser") || !project.hasProperty("dbpassword")) {
+            if (file("./database.json").exists()) {
+                println("Using local JSON config")
+                var json = new JsonSlurper()
+                var dbFile = file("./database.json")
+                var db = json.parseText(dbFile.text)
 
-            host = db.host
-            schema = db.schema
-            user = db.username
-            password = db.password
+                host = db.host
+                schema = db.schema
+                user = db.username
+                password = db.password
+            } else {
+                println("\u001B[33;1mWARNING!\u001B[0m No DB config. Compiling may fail due to lack of `gen` packet")
+                return
+            }
         } else {
-            println("\u001B[33;1mWARNING!\u001B[0m No DB config. Compiling may fail due to lack of `gen` packet")
-            return
+            host = project.property("dbhost")
+            schema = project.property("dbschema")
+            user = project.property("dbuser")
+            password = project.property("dbpassword")
         }
-    } else {
-        host = project.property("dbhost")
-        schema = project.property("dbschema")
-        user = project.property("dbuser")
-        password = project.property("dbpassword")
-    }
-    println(sourceSets.main.java.srcDirs.first().path)
-    org.jooq.meta.jaxb.Configuration configuration = new org.jooq.meta.jaxb.Configuration()
-            .withJdbc(new Jdbc()
-                    .withDriver("com.mysql.cj.jdbc.Driver")
-                    .withUrl("jdbc:mysql://$host:3306/$schema")
-                    .withUser("$user")
-                    .withPassword("$password")
-            )
-            .withGenerator(new Generator()
-                    .withDatabase(new Database()
-                            .withName("org.jooq.meta.mysql.MySQLDatabase")
-                            .withIncludes(".*")
-                            .withExcludes("")
-                            .withInputSchema("$schema")
-                    )
-                    .withTarget(new Target()
-                            .withPackageName("stellar.database.gen")
-                            .withDirectory(sourceSets.main.java.srcDirs.first().path)
-                    )
-            )
+        println(sourceSets.main.java.srcDirs.first().path)
+        org.jooq.meta.jaxb.Configuration configuration = new org.jooq.meta.jaxb.Configuration()
+                .withJdbc(new Jdbc()
+                        .withDriver("com.mysql.cj.jdbc.Driver")
+                        .withUrl("jdbc:mysql://$host:3306/$schema")
+                        .withUser("$user")
+                        .withPassword("$password")
+                )
+                .withGenerator(new Generator()
+                        .withDatabase(new Database()
+                                .withName("org.jooq.meta.mysql.MySQLDatabase")
+                                .withIncludes(".*")
+                                .withExcludes("")
+                                .withInputSchema("$schema")
+                        )
+                        .withTarget(new Target()
+                                .withPackageName("stellar.database.gen")
+                                .withDirectory(sourceSets.main.java.srcDirs.first().path)
+                        )
+                )
 
-    GenerationTool.generate(configuration)
+        GenerationTool.generate(configuration)
+    }
 }
 
 jar {
+    println("Make sure you're using latest database version. Do `./gradle codegen` to generate code")
     duplicatesStrategy = DuplicatesStrategy.INCLUDE
     archiveFileName = "${project.archivesBaseName}.jar"
     from {
@@ -121,4 +124,5 @@ jar {
     from("assets/$mod.name/") {
         include "**"
     }
+
 }
