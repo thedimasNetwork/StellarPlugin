@@ -22,8 +22,7 @@ public class Variables {
     public static final Map<String, String> donaters = new HashMap<>();
     public static final Map<String, String> jsallowed = new HashMap<>();
     public static Config config;
-    public static int waves = 0;
-    public static CacheSeq<HistoryEntry>[][] history;
+    public static CacheSeq<HistoryEntry>[][] history = new CacheSeq[2048][2048];
     public static final Seq<String> blacklistedSubnets = new Seq<>();
 
     public static CacheSeq<HistoryEntry> getHistorySeq(int x, int y) {
