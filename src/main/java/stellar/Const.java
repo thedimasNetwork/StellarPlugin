@@ -31,6 +31,8 @@ public class Const {
     public static final String BOOL_VALUES = "1, on, yes, true, вкл, да";
 
     public static final String[] PIRATES = {"valve", "igruhaorg", "tuttop", "freetp.org", "freetp"};
+
+    public static final int MAX_IDENTICAL_IPS = 3;
     // языки, для которых у нас есть перевод
     public static final Locale[] supportedLocales;
     public static final String TEAM_LIST = "[white][yellow]sharded[], [red]crux[], [purple]malis[], [green]green[], [blue]blue[], [gray]derelict[]";

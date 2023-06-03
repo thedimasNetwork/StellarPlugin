@@ -6,8 +6,11 @@ import arc.struct.Seq;
 import arc.util.Http;
 import arc.util.Log;
 import arc.util.serialization.Jval;
+import mindustry.Vars;
 import mindustry.game.EventType;
+import mindustry.net.NetConnection;
 import mindustry.net.Packets;
+import stellar.Const;
 import stellar.Variables;
 import stellar.database.Database;
 import stellar.database.gen.Tables;
@@ -19,6 +22,20 @@ import java.sql.SQLException;
 
 public class AntiVPN { // also includes anti ddos from gh actions servers
     public static void load() {
+        Vars.net.handleServer(Packets.Connect.class, (con, packet) -> {
+            Events.fire(new EventType.ConnectionEvent(con));
+            Seq<NetConnection> connections = Seq.with(Vars.net.getConnections()).filter(other -> other.address.equals(con.address));
+            if (connections.size >= Const.MAX_IDENTICAL_IPS) {
+                Vars.netServer.admins.blacklistDos(con.address);
+                connections.each(NetConnection::close);
+                Log.info("@ blacklisted because of ip spam", con.address);
+            }
+        });
+
+        /* TODO: GCP and AWS
+         * https://www.gstatic.com/ipranges/cloud.json
+         * https://ip-ranges.amazonaws.com/ip-ranges.json
+         */
         Http.get("https://api.github.com/meta", res -> {
             Jval json = Jval.read(res.getResultAsString());
             json.get("actions").asArray().each(subnet -> {
