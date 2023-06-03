@@ -72,7 +72,7 @@ public class AntiVPN { // also includes anti ddos from gh actions servers
                             .selectFrom(Tables.IP_CACHED)
                             .where(Tables.IP_CACHED.IP.eq(event.player.ip()))
                             .fetchOne();
-                    if (record.getProxy() == 1 || record.getProxy() == 1) {
+                    if (record.getProxy() == 1 || record.getVpn() == 1) {
                         event.player.kick("No VPN is allowed");
                     }
                 } catch (SQLException e) {
@@ -80,14 +80,15 @@ public class AntiVPN { // also includes anti ddos from gh actions servers
                 }
             } else {
                 Log.debug("Trying to get info...");
-                Http.get("http://proxycheck.io/v2/" + event.player.ip() + "?vpn=3&risk=2&key=" + Variables.config.pcToken, res -> { // TODO: caching
+                String url = "http://proxycheck.io/v2/" + event.player.ip() + "?vpn=3&risk=2&key=" + Variables.config.pcToken;
+                Http.get(url, res -> { // TODO: caching
                     String resp = res.getResultAsString();
                     Log.debug(resp);
                     Jval json = Jval.read(resp);
 
 
                     if (json.getString("status").equals("denied") || json.getString("status").equals("error")) {
-                        Log.err(res.getResultAsString());
+                        Log.err(resp);
                         return;
                     }
 
