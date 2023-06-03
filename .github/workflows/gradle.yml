@@ -21,4 +21,9 @@ jobs:
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
     - name: Build with Gradle
-      run: ./gradlew jar -Dorg.gradle.daemon=false -Pdbhost="${{ secrets.DB_HOST }}" -Pdbschema="${{ secrets.DB_SCHEMA }}" -Pdbuser=${{ secrets.DB_USER }} -Pdbpassword=${{ secrets.DB_PASSWORD }}
+      run: ./gradlew jar -Dorg.gradle.daemon=false -PbuildVersion="${{ env.BUILD_VERSION }}" -Pdbhost="${{ secrets.DB_HOST }}" -Pdbschema="${{ secrets.DB_SCHEMA }}" -Pdbuser=${{ secrets.DB_USER }} -Pdbpassword=${{ secrets.DB_PASSWORD }}
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: ${{ github.event.repository.name }}
+        path: build/libs/${{ github.event.repository.name }}.jar
