@@ -33,8 +33,9 @@ public class Const {
     public static final String[] PIRATES = {"valve", "igruhaorg", "tuttop", "freetp.org", "freetp"};
     // языки, для которых у нас есть перевод
     public static final Locale[] supportedLocales;
-    public static final String TEAM_LIST = "[white][yellow]sharded[], [red]crux[], [green]green[], [purple]purple[], [blue]blue[], [gray]derelict[]";
+    public static final String TEAM_LIST = "[white][yellow]sharded[], [red]crux[], [purple]malis[], [green]green[], [blue]blue[], [gray]derelict[]";
     public static final String UNIT_LIST = """
+            [accent]Serpulo:
             [white]Ground:
             [accent]dagger [](\uF800), [accent]mace [](\uF7FF), [accent]fortress [](\uF7FE), [accent]scepter [](\uF7DB), [accent]reign [](\uF7DA)
             [purple]crawler [](\uF7FA), [purple]atrax [](\uF7F9), [purple]spiroct [](\uF7F8), [purple]arkyid [](\uF7F7), [purple]toxopid [](\uF7DE)
@@ -45,7 +46,16 @@ public class Const {
             [white]Naval:
             [accent]risso [](\uF7E7), [accent]minke [](\uF7ED), [accent]bryde [](\uF7EC), [accent]sei [](\uF7C4), [accent]omura [](\uF7C6)
             [white]Core:
-            [accent]alpha [](\uF7EB), [accent]beta [](\uF7EA), [accent]gamma [](\uF7E9)[]""";
+            [accent]alpha [](\uF7EB), [accent]beta [](\uF7EA), [accent]gamma [](\uF7E9)[]
+            [accent]Erekir:
+            [white]Ground:
+            [#f69466]stell [](\uF6B5), [#f69466]locus [](\uF6B3), [#f69466]precept [](\uF69C), [#f69466]vanquish [](\uF6F4), [#f69466]conquer [](\uF6CF)
+            [#c7caeb]merui [](\uF69E), [#c7caeb]cleroi [](\uF6B1), [#c7caeb]anthicus [](\u63142), [#c7caeb]tecta [](\uF699), [#c7caeb]collaris [](\uF698)
+            [white]Air:
+            [#c8779bd]elude [](\uF697), [#c8779bd]avert [](\uF6B2), [#c8779bd]obviate [](\uF6A3), [#c8779bd]quell [](\uF6EC), [#c8779bd]disrupt [](\uF6CE)
+            [white]Core:
+            [accent]evoke [](\uF735), [accent]incite [](\uF724), [accent]emanate [](\uF719) 
+            """;
     public static final String SERVER_LIST = """
             []Hub
             PvP
