@@ -1,5 +1,6 @@
 package stellar;
 
+import arc.struct.Seq;
 import arc.util.Interval;
 import stellar.history.entry.HistoryEntry;
 import stellar.history.struct.CacheSeq;
@@ -23,6 +24,7 @@ public class Variables {
     public static Config config;
     public static int waves = 0;
     public static CacheSeq<HistoryEntry>[][] history;
+    public static final Seq<String> blacklistedSubnets = new Seq<>();
 
     public static CacheSeq<HistoryEntry> getHistorySeq(int x, int y) {
         CacheSeq<HistoryEntry> seq = history[x][y];
