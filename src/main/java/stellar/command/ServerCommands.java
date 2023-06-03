@@ -85,7 +85,7 @@ public class ServerCommands {
                 rtvEnabled = args[0].equalsIgnoreCase("on") || !args[0].equalsIgnoreCase("off");
                 Core.settings.put("rtv", rtvEnabled);
 
-                if (!rtvEnabled && Variables.votesRTV.size() > 0) {
+                if (!rtvEnabled && Variables.votesRTV.size > 0) {
                     Variables.votesRTV.clear();
                     Bundle.bundled("commands.rtv.votes-clear");
                 }

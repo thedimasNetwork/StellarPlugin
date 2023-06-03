@@ -1,26 +1,24 @@
 package stellar;
 
+import arc.struct.ObjectMap;
 import arc.struct.Seq;
+import arc.struct.StringMap;
 import arc.util.Interval;
 import stellar.history.entry.HistoryEntry;
 import stellar.history.struct.CacheSeq;
 import stellar.history.struct.Seqs;
 
 import java.time.Duration;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 
 public class Variables {
     public static final Interval interval = new Interval(2);
-    public static final Set<String> votesRTV = new HashSet<>();
+    public static final Seq<String> votesRTV = new Seq<>();
     // uuid -> enable
-    public static final Map<String, Boolean> activeHistoryPlayers = new HashMap<>();
+    public static final ObjectMap<String, Boolean> activeHistoryPlayers = new ObjectMap<>();
     // uuid -> name
-    public static final Map<String, String> admins = new HashMap<>();
-    public static final Map<String, String> donaters = new HashMap<>();
-    public static final Map<String, String> jsallowed = new HashMap<>();
+    public static final StringMap admins = new StringMap();
+    public static final StringMap donaters = new StringMap();
+    public static final StringMap jsallowed = new StringMap();
     public static Config config;
     public static CacheSeq<HistoryEntry>[][] history = new CacheSeq[2048][2048];
     public static final Seq<String> blacklistedSubnets = new Seq<>();

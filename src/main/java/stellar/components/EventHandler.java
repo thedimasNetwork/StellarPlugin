@@ -180,7 +180,7 @@ public class EventHandler { // TODO: split into different components
         Events.on(EventType.PlayerLeave.class, event -> {
             if (Variables.votesRTV.contains(event.player.uuid())) {
                 Variables.votesRTV.remove(event.player.uuid());
-                int cur = Variables.votesRTV.size();
+                int cur = Variables.votesRTV.size;
                 int req = (int) Math.ceil(Const.VOTES_RATIO * Groups.player.size());
                 String playerName = event.player.coloredName();
                 Bundle.bundled("commands.rtv.leave", playerName, cur, req);

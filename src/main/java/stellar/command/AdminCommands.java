@@ -305,7 +305,7 @@ public class AdminCommands {
             }
             String uuid = found.uuid();
 
-            if (Variables.admins.containsValue(uuid)) {
+            if (Variables.admins.containsValue(uuid, false)) {
                 player.sendMessage("[red]Игрок администратор[]");
                 return;
             }
@@ -396,7 +396,7 @@ public class AdminCommands {
             }
 
             String uuid = found.uuid();
-            if (Variables.admins.containsValue(uuid)) {
+            if (Variables.admins.containsValue(uuid, false)) {
                 player.sendMessage("[red]Игрок администратор[]");
                 return;
             }
