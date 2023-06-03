@@ -7,6 +7,7 @@ import stellar.bot.Bot;
 import stellar.command.AdminCommands;
 import stellar.command.PlayerCommands;
 import stellar.command.ServerCommands;
+import stellar.components.AntiVPN;
 import stellar.components.EventHandler;
 import stellar.components.LaunchPad;
 import stellar.history.History;
@@ -26,6 +27,7 @@ public class ThedimasPlugin extends Plugin {
         LaunchPad.load();
         EventHandler.load();
         History.load();
+        AntiVPN.load();
     }
 
     @Override

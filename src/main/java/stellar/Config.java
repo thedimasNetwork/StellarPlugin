@@ -14,6 +14,7 @@ import java.nio.file.Path;
 public class Config {
     public String webhookUrl;
     public String discordUrl;
+    public String pcToken;
     public Database database;
     public Bot bot;
 

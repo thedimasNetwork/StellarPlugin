@@ -74,7 +74,9 @@ public class Const {
             "hex_pvp", "play.thedimas.pp.ua:6509",
             "castle_wars", "play.thedimas.pp.ua:6510",
             "crawler_arena", "play.thedimas.pp.ua:6511",
-            "zone_capture", "play.thedimas.pp.ua:6512");
+            "zone_capture", "play.thedimas.pp.ua:6512",
+            "test", "play.thedimas.pp.ua:6666"
+    );
     public static final StringMap SERVER_NAMES = StringMap.of(
             "hub", "[#e6bd74]\uE829[] [#f92672]thedimas [#e6bd74]\uE810[#a6e22e]HUB[#e6bd74]\uE810[]",
             "survival", "[#e6bd74]\uE829[] [#f92672]thedimas [#e6bd74]\uE86B[#a6e22e]Survival[#e6bd74]\uE86B[]",
