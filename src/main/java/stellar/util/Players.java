@@ -1,9 +1,13 @@
 package stellar.util;
 
+import arc.util.Log;
 import arc.util.Nullable;
 import arc.util.Strings;
 import mindustry.gen.Groups;
 import mindustry.gen.Player;
+import stellar.Variables;
+
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Players {
     @Nullable
@@ -13,5 +17,15 @@ public class Players {
                 || name.equals(StringUtils.stripColorsAndGlyphs(p.name))
                 || replacedName.equals(Strings.stripColors(p.name))
                 || replacedName.equals(StringUtils.stripColorsAndGlyphs(p.name)));
+    }
+
+    public static boolean isBot(Player player) {
+        AtomicBoolean blocked = new AtomicBoolean(false);
+        Variables.blacklistedSubnets.each(subnet -> {
+            if (NetUtils.isIPInSubnet(player.ip(), subnet)) {
+                blocked.set(true);
+            }
+        });
+        return blocked.get();
     }
 }

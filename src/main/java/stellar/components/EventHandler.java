@@ -25,6 +25,7 @@ import stellar.database.gen.tables.records.PlayerEventsRecord;
 import stellar.database.gen.tables.records.ServerEventsRecord;
 import stellar.database.gen.tables.records.UsersRecord;
 import stellar.util.Bundle;
+import stellar.util.Players;
 import stellar.util.Translator;
 import stellar.util.logger.DiscordLogger;
 
@@ -40,6 +41,9 @@ public class EventHandler { // TODO: split into different components
     public static void load() {
         // region PlayerConnect
         Events.on(EventType.PlayerConnect.class, event -> {
+            if (Players.isBot(event.player)) {
+                return;
+            }
             String uuid = event.player.uuid();
             String name = event.player.name;
             try {
