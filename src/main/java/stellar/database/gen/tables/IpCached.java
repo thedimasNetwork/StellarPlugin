@@ -75,7 +75,7 @@ public class IpCached extends TableImpl<IpCachedRecord> {
     /**
      * The column <code>mindustry.ip_cached.type</code>.
      */
-    public final TableField<IpCachedRecord, String> TYPE = createField(DSL.name("type"), SQLDataType.VARCHAR(64).nullable(false), this, "");
+    public final TableField<IpCachedRecord, String> TYPE = createField(DSL.name("type"), SQLDataType.VARCHAR(64), this, "");
 
     /**
      * The column <code>mindustry.ip_cached.risk</code>.

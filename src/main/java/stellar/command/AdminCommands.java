@@ -314,7 +314,8 @@ public class AdminCommands {
                 Database.getContext()
                         .update(Tables.USERS)
                         .set(Tables.USERS.BANNED, (byte) 1)
-                        .where(Tables.USERS.UUID.eq(args[0]));
+                        .where(Tables.USERS.UUID.eq(args[0]))
+                        .execute();
 
                 PlayerEventsRecord record = Database.getContext().newRecord(Tables.PLAYER_EVENTS);
                 record.setServer(Const.SERVER_COLUMN_NAME);
@@ -364,7 +365,8 @@ public class AdminCommands {
                 Database.getContext()
                         .update(Tables.USERS)
                         .set(Tables.USERS.BANNED, (byte) 0)
-                        .where(Tables.USERS.UUID.eq(args[0]));
+                        .where(Tables.USERS.UUID.eq(args[0]))
+                        .execute();
 
                 UsersRecord data = Database.getContext()
                         .selectFrom(Tables.USERS)

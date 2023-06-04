@@ -65,7 +65,7 @@ public class Const {
             Survival
             Attack
             Hex_PvP
-            Annexation
+            Erekir_Hexed
             Campaign_maps
             Anarchy
             Castle_wars
@@ -80,7 +80,7 @@ public class Const {
             "sandbox", "play.thedimas.pp.ua:6503",
             "pvp", "play.thedimas.pp.ua:6504",
             "annexation", "play.thedimas.pp.ua:6505",
-            "anarchy", "play.thedimas.pp.ua:6506",
+            "erekir_hexed", "play.thedimas.pp.ua:6506",
             "campaign_maps", "play.thedimas.pp.ua:6507",
             "ms_go", "play.thedimas.pp.ua:6508",
             "hex_pvp", "play.thedimas.pp.ua:6509",
@@ -95,7 +95,7 @@ public class Const {
             "attack", "[#e6bd74]\uE829[] [#f92672]thedimas [#e6bd74]\uE86E[#a6e22e]Attack[#e6bd74]\uE86E[]",
             "sandbox", "[#e6bd74]\uE829[] [#f92672]thedimas [#e6bd74]\uE87C[#a6e22e]Sandbox[#e6bd74]\uE87C[]",
             "pvp", "[#e6bd74]\uE829[] [#f92672]thedimas [#e6bd74]\uE861[#a6e22e]PvP[#e6bd74]\uE861[]",
-            "annexation", "[#e6bd74]\uE829[] [#f92672]thedimas [#e6bd74]\uE861[#a6e22e]Annexation[#e6bd74]\uE861[]",
+            "erekir_hexed", "[#e6bd74]\uE829[] [#f92672]thedimas [#e6bd74]\uE861[#a6e22e]Erekir Hex PvP[#e6bd74]\uE861[]",
             "anarchy", "[#e6bd74]\uE829[] [#f92672]thedimas [#e6bd74]\uE876[#a6e22e]Anarchy[#e6bd74]\uE876[]",
             "campaign_maps", "[#e6bd74]\uE829[] [#f92672]thedimas [#e6bd74]\uE873[#a6e22e]Campaign maps[#e6bd74]\uE873[]",
             "ms_go", "[#e6bd74]\uE829[] [#f92672]thedimas [#e6bd74]\uF018[#a6e22e]MS:GO[#e6bd74]\uF018[]",

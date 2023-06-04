@@ -8,11 +8,11 @@ import java.util.function.Function;
 
 import org.jooq.Field;
 import org.jooq.ForeignKey;
-import org.jooq.Function14;
+import org.jooq.Function15;
 import org.jooq.Name;
 import org.jooq.Record;
 import org.jooq.Records;
-import org.jooq.Row14;
+import org.jooq.Row15;
 import org.jooq.Schema;
 import org.jooq.SelectField;
 import org.jooq.Table;
@@ -80,9 +80,9 @@ public class Playtime extends TableImpl<PlaytimeRecord> {
     public final TableField<PlaytimeRecord, Long> PVP = createField(DSL.name("pvp"), SQLDataType.BIGINT.nullable(false).defaultValue(DSL.inline("0", SQLDataType.BIGINT)), this, "");
 
     /**
-     * The column <code>mindustry.playtime.annexation</code>.
+     * The column <code>mindustry.playtime.erekir_hexed</code>.
      */
-    public final TableField<PlaytimeRecord, Long> ANNEXATION = createField(DSL.name("annexation"), SQLDataType.BIGINT.nullable(false).defaultValue(DSL.inline("0", SQLDataType.BIGINT)), this, "");
+    public final TableField<PlaytimeRecord, Long> EREKIR_HEXED = createField(DSL.name("erekir_hexed"), SQLDataType.BIGINT.nullable(false).defaultValue(DSL.inline("0", SQLDataType.BIGINT)), this, "");
 
     /**
      * The column <code>mindustry.playtime.anarchy</code>.
@@ -118,6 +118,11 @@ public class Playtime extends TableImpl<PlaytimeRecord> {
      * The column <code>mindustry.playtime.zone_capture</code>.
      */
     public final TableField<PlaytimeRecord, Long> ZONE_CAPTURE = createField(DSL.name("zone_capture"), SQLDataType.BIGINT.nullable(false).defaultValue(DSL.inline("0", SQLDataType.BIGINT)), this, "");
+
+    /**
+     * The column <code>mindustry.playtime.test</code>.
+     */
+    public final TableField<PlaytimeRecord, Long> TEST = createField(DSL.name("test"), SQLDataType.BIGINT.nullable(false).defaultValue(DSL.inline("0", SQLDataType.BIGINT)), this, "");
 
     private Playtime(Name alias, Table<PlaytimeRecord> aliased) {
         this(alias, aliased, null);
@@ -202,25 +207,25 @@ public class Playtime extends TableImpl<PlaytimeRecord> {
     }
 
     // -------------------------------------------------------------------------
-    // Row14 type methods
+    // Row15 type methods
     // -------------------------------------------------------------------------
 
     @Override
-    public Row14<String, Long, Long, Long, Long, Long, Long, Long, Long, Long, Long, Long, Long, Long> fieldsRow() {
-        return (Row14) super.fieldsRow();
+    public Row15<String, Long, Long, Long, Long, Long, Long, Long, Long, Long, Long, Long, Long, Long, Long> fieldsRow() {
+        return (Row15) super.fieldsRow();
     }
 
     /**
      * Convenience mapping calling {@link #convertFrom(Function)}.
      */
-    public <U> SelectField<U> mapping(Function14<? super String, ? super Long, ? super Long, ? super Long, ? super Long, ? super Long, ? super Long, ? super Long, ? super Long, ? super Long, ? super Long, ? super Long, ? super Long, ? super Long, ? extends U> from) {
+    public <U> SelectField<U> mapping(Function15<? super String, ? super Long, ? super Long, ? super Long, ? super Long, ? super Long, ? super Long, ? super Long, ? super Long, ? super Long, ? super Long, ? super Long, ? super Long, ? super Long, ? super Long, ? extends U> from) {
         return convertFrom(Records.mapping(from));
     }
 
     /**
      * Convenience mapping calling {@link #convertFrom(Class, Function)}.
      */
-    public <U> SelectField<U> mapping(Class<U> toType, Function14<? super String, ? super Long, ? super Long, ? super Long, ? super Long, ? super Long, ? super Long, ? super Long, ? super Long, ? super Long, ? super Long, ? super Long, ? super Long, ? super Long, ? extends U> from) {
+    public <U> SelectField<U> mapping(Class<U> toType, Function15<? super String, ? super Long, ? super Long, ? super Long, ? super Long, ? super Long, ? super Long, ? super Long, ? super Long, ? super Long, ? super Long, ? super Long, ? super Long, ? super Long, ? super Long, ? extends U> from) {
         return convertFrom(toType, Records.mapping(from));
     }
 }

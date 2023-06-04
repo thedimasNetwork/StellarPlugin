@@ -109,7 +109,8 @@ public class PlayerCommands {
                         Database.getContext()
                                 .update(Tables.USERS)
                                 .set(Tables.USERS.TRANSLATOR, "off")
-                                .where(Tables.USERS.UUID.eq(player.uuid()));
+                                .where(Tables.USERS.UUID.eq(player.uuid()))
+                                .execute();
                     } catch (Throwable t) {
                         Log.err(t);
                         DiscordLogger.err(t);
@@ -121,7 +122,8 @@ public class PlayerCommands {
                         Database.getContext()
                                 .update(Tables.USERS)
                                 .set(Tables.USERS.TRANSLATOR, "auto")
-                                .where(Tables.USERS.UUID.eq(player.uuid()));
+                                .where(Tables.USERS.UUID.eq(player.uuid()))
+                                .execute();
                     } catch (Throwable t) {
                         Log.err(t);
                         DiscordLogger.err(t);
@@ -133,7 +135,8 @@ public class PlayerCommands {
                         Database.getContext()
                                 .update(Tables.USERS)
                                 .set(Tables.USERS.TRANSLATOR, "double")
-                                .where(Tables.USERS.UUID.eq(player.uuid()));
+                                .where(Tables.USERS.UUID.eq(player.uuid()))
+                                .execute();
                     } catch (Throwable t) {
                         Log.err(t);
                         DiscordLogger.err(t);
@@ -150,7 +153,8 @@ public class PlayerCommands {
                         Database.getContext()
                                 .update(Tables.USERS)
                                 .set(Tables.USERS.TRANSLATOR, target.toString())
-                                .where(Tables.USERS.UUID.eq(player.uuid()));
+                                .where(Tables.USERS.UUID.eq(player.uuid()))
+                                .execute();
                     } catch (Throwable t) {
                         Log.err(t);
                         DiscordLogger.err(t);

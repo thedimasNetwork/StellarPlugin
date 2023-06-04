@@ -10,6 +10,7 @@ import stellar.command.ServerCommands;
 import stellar.components.AntiVPN;
 import stellar.components.EventHandler;
 import stellar.components.LaunchPad;
+import stellar.components.Playtime;
 import stellar.history.History;
 
 import static mindustry.Vars.netServer;
@@ -26,6 +27,7 @@ public class ThedimasPlugin extends Plugin {
 //        Experience.load(); // Work in progress on better version
         LaunchPad.load();
         EventHandler.load();
+        Playtime.load();
         History.load();
         AntiVPN.load();
     }

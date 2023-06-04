@@ -99,17 +99,20 @@ public class EventHandler { // TODO: split into different components
                     Database.getContext()
                             .update(Tables.USERS)
                             .set(Tables.USERS.NAME, event.player.name())
-                            .where(Tables.USERS.UUID.eq(event.player.uuid()));
+                            .where(Tables.USERS.UUID.eq(event.player.uuid()))
+                            .execute();
 
                     Database.getContext()
                             .update(Tables.USERS)
                             .set(Tables.USERS.LOCALE, event.player.locale())
-                            .where(Tables.USERS.UUID.eq(event.player.uuid()));
+                            .where(Tables.USERS.UUID.eq(event.player.uuid()))
+                            .execute();
 
                     Database.getContext()
                             .update(Tables.USERS)
                             .set(Tables.USERS.IP, event.player.ip())
-                            .where(Tables.USERS.UUID.eq(event.player.uuid()));
+                            .where(Tables.USERS.UUID.eq(event.player.uuid()))
+                            .execute();
 
 
                     UsersRecord data = Database.getContext()
@@ -154,7 +157,8 @@ public class EventHandler { // TODO: split into different components
                 Database.getContext()
                         .update(Tables.USERS)
                         .set(Tables.USERS.BANNED, (byte) 1)
-                        .where(Tables.USERS.UUID.eq(event.uuid));
+                        .where(Tables.USERS.UUID.eq(event.uuid))
+                        .execute();
             } catch (SQLException e) {
                 Log.err("Failed to ban uuid for player '@'", event.uuid);
                 Log.err(e);
@@ -170,7 +174,8 @@ public class EventHandler { // TODO: split into different components
                 Database.getContext()
                         .update(Tables.USERS)
                         .set(Tables.USERS.BANNED, (byte) 0)
-                        .where(Tables.USERS.UUID.eq(event.uuid));
+                        .where(Tables.USERS.UUID.eq(event.uuid))
+                        .execute();
             } catch (SQLException e) {
                 Log.err("Failed to unban uuid for player '@'", event.uuid);
                 Log.err(e);
