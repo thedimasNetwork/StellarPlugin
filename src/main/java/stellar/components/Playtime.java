@@ -7,6 +7,7 @@ import mindustry.game.EventType;
 import mindustry.gen.Groups;
 import mindustry.gen.Player;
 import org.jooq.Field;
+import org.jooq.Record1;
 import stellar.Const;
 import stellar.database.Database;
 import stellar.database.gen.Tables;
@@ -28,19 +29,22 @@ public class Playtime {
                 }
                 for (Player p : Groups.player) {
                     try {
-                        Long time = Database.getContext()
+                        Record1<Long> timeFetch = Database.getContext()
                                 .select(field)
                                 .from(Tables.PLAYTIME)
                                 .where(Tables.PLAYTIME.UUID.eq(p.uuid()))
-                                .fetchOne().value1();
-                        if (time == null) {
-                            Log.err("Player '" + p.uuid() + "' doesn't exists");
-                            DiscordLogger.err("Player '" + p.uuid() + "' doesn't exists");
+                                .fetchOne();
+                        long time = 0;
+                        if (timeFetch == null) {
+                            Log.warn("Player '" + p.uuid() + "' doesn't exists");
+                            DiscordLogger.warn("Player '" + p.uuid() + "' doesn't exists");
                             PlaytimeRecord playtimeRecord = Database.getContext().newRecord(Tables.PLAYTIME);
                             playtimeRecord.setUuid(p.uuid());
                             playtimeRecord.store();
+                        } else {
+                            time = timeFetch.value1();
                         }
-                        long computed = (time != null ? time : 0) + 60;
+                        long computed = time + 60;
                         Log.debug("@| @: @-@", field.getName(), p.name(), time, computed);
                         Database.getContext()
                                 .update(Tables.PLAYTIME)
