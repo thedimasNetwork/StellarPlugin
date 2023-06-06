@@ -247,7 +247,7 @@ public class AdminCommands {
                 case "medium" -> core = Blocks.coreFoundation;
                 case "big" -> core = Blocks.coreNucleus;
                 default -> {
-                    Bundle.bundled("commands.admin.core.core-type-not-found");
+                    Bundle.bundled(player, "commands.admin.core.core-type-not-found");
                     return;
                 }
             }
