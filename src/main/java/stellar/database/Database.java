@@ -2,8 +2,10 @@ package stellar.database;
 
 import arc.util.Log;
 import com.mysql.cj.jdbc.exceptions.CommunicationsException;
+import mindustry.gen.Player;
 import org.jooq.*;
 import org.jooq.impl.DSL;
+import stellar.database.gen.Tables;
 
 import java.sql.*;
 
@@ -46,4 +48,9 @@ public class Database {
         }
         return context;
     }
+
+    public static boolean playerExists(Player player) throws SQLException {
+        return Database.getContext().fetchExists(Tables.USERS, Tables.USERS.UUID.eq(player.uuid()));
+    }
+
 }

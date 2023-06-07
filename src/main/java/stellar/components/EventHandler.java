@@ -48,8 +48,7 @@ public class EventHandler { // TODO: split into different components
             String uuid = event.player.uuid();
             String name = event.player.name;
             try {
-                boolean exists = Database.getContext().fetchExists(Tables.USERS, Tables.USERS.UUID.eq(uuid)); // TODO: move to playerExists method
-                if (exists) {
+                if (Database.playerExists(player)) {
                     boolean banned = Database.getContext()
                             .select(Tables.USERS.BANNED)
                             .from(Tables.USERS)
@@ -94,8 +93,7 @@ public class EventHandler { // TODO: split into different components
                 record.setIp(event.player.ip());
                 record.store();
 
-                boolean exists = Database.getContext().fetchExists(Tables.USERS, Tables.USERS.UUID.eq(event.player.uuid())); // TODO: move to playerExists method
-                if (exists) {
+                if (Database.playerExists(player)) {
                     Database.getContext()
                             .update(Tables.USERS)
                             .set(Tables.USERS.NAME, event.player.name())
@@ -121,7 +119,7 @@ public class EventHandler { // TODO: split into different components
                             .fetchOne();
 
                     assert data != null;
-                    if (data.getAdmin() == 1) { // damn, use bools instead of bytes
+                    if (data.getAdmin() == 1) {
                         Variables.admins.put(event.player.uuid(), event.player.name);
                         event.player.admin = true;
                     }
@@ -137,7 +135,7 @@ public class EventHandler { // TODO: split into different components
                     usersRecord.setIp(event.player.ip());
                     usersRecord.setName(event.player.name());
                     usersRecord.setLocale(event.player.locale());
-                    usersRecord.setAdmin((byte) (event.player.admin() ? 1 : 0)); // FIXME: that's really awful
+                    usersRecord.setAdmin((byte) (event.player.admin() ? 1 : 0));
                     usersRecord.store();
 
                     PlaytimeRecord playtimeRecord = Database.getContext().newRecord(Tables.PLAYTIME);
