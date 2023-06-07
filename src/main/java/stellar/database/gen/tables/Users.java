@@ -10,12 +10,13 @@ import java.util.function.Function;
 
 import org.jooq.Field;
 import org.jooq.ForeignKey;
-import org.jooq.Function10;
+import org.jooq.Function12;
+import org.jooq.Identity;
 import org.jooq.Index;
 import org.jooq.Name;
 import org.jooq.Record;
 import org.jooq.Records;
-import org.jooq.Row10;
+import org.jooq.Row12;
 import org.jooq.Schema;
 import org.jooq.SelectField;
 import org.jooq.Table;
@@ -52,6 +53,11 @@ public class Users extends TableImpl<UsersRecord> {
     public Class<UsersRecord> getRecordType() {
         return UsersRecord.class;
     }
+
+    /**
+     * The column <code>mindustry.users.id</code>.
+     */
+    public final TableField<UsersRecord, Integer> ID = createField(DSL.name("id"), SQLDataType.INTEGER.nullable(false).identity(true), this, "");
 
     /**
      * The column <code>mindustry.users.uuid</code>.
@@ -103,6 +109,11 @@ public class Users extends TableImpl<UsersRecord> {
      */
     public final TableField<UsersRecord, Integer> EXP = createField(DSL.name("exp"), SQLDataType.INTEGER.nullable(false).defaultValue(DSL.inline("0", SQLDataType.INTEGER)), this, "");
 
+    /**
+     * The column <code>mindustry.users.popup</code>.
+     */
+    public final TableField<UsersRecord, Byte> POPUP = createField(DSL.name("popup"), SQLDataType.TINYINT.nullable(false).defaultValue(DSL.inline("1", SQLDataType.TINYINT)), this, "");
+
     private Users(Name alias, Table<UsersRecord> aliased) {
         this(alias, aliased, null);
     }
@@ -147,8 +158,18 @@ public class Users extends TableImpl<UsersRecord> {
     }
 
     @Override
+    public Identity<UsersRecord, Integer> getIdentity() {
+        return (Identity<UsersRecord, Integer>) super.getIdentity();
+    }
+
+    @Override
     public UniqueKey<UsersRecord> getPrimaryKey() {
         return Keys.KEY_USERS_PRIMARY;
+    }
+
+    @Override
+    public List<UniqueKey<UsersRecord>> getUniqueKeys() {
+        return Arrays.asList(Keys.KEY_USERS_SECONDARY);
     }
 
     @Override
@@ -191,25 +212,25 @@ public class Users extends TableImpl<UsersRecord> {
     }
 
     // -------------------------------------------------------------------------
-    // Row10 type methods
+    // Row12 type methods
     // -------------------------------------------------------------------------
 
     @Override
-    public Row10<String, String, String, String, String, Byte, Byte, Integer, Byte, Integer> fieldsRow() {
-        return (Row10) super.fieldsRow();
+    public Row12<Integer, String, String, String, String, String, Byte, Byte, Integer, Byte, Integer, Byte> fieldsRow() {
+        return (Row12) super.fieldsRow();
     }
 
     /**
      * Convenience mapping calling {@link #convertFrom(Function)}.
      */
-    public <U> SelectField<U> mapping(Function10<? super String, ? super String, ? super String, ? super String, ? super String, ? super Byte, ? super Byte, ? super Integer, ? super Byte, ? super Integer, ? extends U> from) {
+    public <U> SelectField<U> mapping(Function12<? super Integer, ? super String, ? super String, ? super String, ? super String, ? super String, ? super Byte, ? super Byte, ? super Integer, ? super Byte, ? super Integer, ? super Byte, ? extends U> from) {
         return convertFrom(Records.mapping(from));
     }
 
     /**
      * Convenience mapping calling {@link #convertFrom(Class, Function)}.
      */
-    public <U> SelectField<U> mapping(Class<U> toType, Function10<? super String, ? super String, ? super String, ? super String, ? super String, ? super Byte, ? super Byte, ? super Integer, ? super Byte, ? super Integer, ? extends U> from) {
+    public <U> SelectField<U> mapping(Class<U> toType, Function12<? super Integer, ? super String, ? super String, ? super String, ? super String, ? super String, ? super Byte, ? super Byte, ? super Integer, ? super Byte, ? super Integer, ? super Byte, ? extends U> from) {
         return convertFrom(toType, Records.mapping(from));
     }
 }

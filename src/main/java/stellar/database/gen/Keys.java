@@ -41,6 +41,7 @@ public class Keys {
     public static final UniqueKey<PlaytimeRecord> KEY_PLAYTIME_PRIMARY = Internal.createUniqueKey(Playtime.PLAYTIME, DSL.name("KEY_playtime_PRIMARY"), new TableField[] { Playtime.PLAYTIME.UUID }, true);
     public static final UniqueKey<ServerEventsRecord> KEY_SERVER_EVENTS_PRIMARY = Internal.createUniqueKey(ServerEvents.SERVER_EVENTS, DSL.name("KEY_server_events_PRIMARY"), new TableField[] { ServerEvents.SERVER_EVENTS.ID }, true);
     public static final UniqueKey<UsersRecord> KEY_USERS_PRIMARY = Internal.createUniqueKey(Users.USERS, DSL.name("KEY_users_PRIMARY"), new TableField[] { Users.USERS.UUID }, true);
+    public static final UniqueKey<UsersRecord> KEY_USERS_SECONDARY = Internal.createUniqueKey(Users.USERS, DSL.name("KEY_users_SECONDARY"), new TableField[] { Users.USERS.ID }, true);
     public static final UniqueKey<WarnsRecord> KEY_WARNS_PRIMARY = Internal.createUniqueKey(Warns.WARNS, DSL.name("KEY_warns_PRIMARY"), new TableField[] { Warns.WARNS.ID }, true);
 
     // -------------------------------------------------------------------------

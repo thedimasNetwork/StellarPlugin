@@ -38,7 +38,7 @@ import static stellar.Variables.config;
 import static stellar.Variables.interval;
 
 @SuppressWarnings({"unused", "unchecked"})
-public class EventHandler { // TODO: split into different components
+public class EventHandler {
     public static void load() {
         // region PlayerConnect
         Events.on(EventType.PlayerConnect.class, event -> {
@@ -48,7 +48,7 @@ public class EventHandler { // TODO: split into different components
             String uuid = event.player.uuid();
             String name = event.player.name;
             try {
-                if (Database.playerExists(player)) {
+                if (Database.playerExists(event.player)) {
                     boolean banned = Database.getContext()
                             .select(Tables.USERS.BANNED)
                             .from(Tables.USERS)
@@ -80,8 +80,27 @@ public class EventHandler { // TODO: split into different components
 
             Locale locale = Bundle.findLocale(event.player.locale);
             String rules = Bundle.get("rules", locale);
-            String welcome = Bundle.format("welcome", locale, rules, config.discordUrl);
-            Call.infoMessage(event.player.con, welcome);
+            String welcome = Bundle.format("welcome", locale, rules);
+            String title = Bundle.format("welcome.title", locale, Strings.stripColors(event.player.name()));
+            String[][] buttons = {
+                    { Bundle.get("welcome.close", locale) },
+                    { Bundle.get("welcome.discord", locale) },
+                    { Bundle.get("welcome.disable", locale) }
+            };
+
+            try {
+                UsersRecord record = Database.getContext()
+                        .selectFrom(Tables.USERS)
+                        .where(Tables.USERS.UUID.eq(event.player.uuid()))
+                        .fetchOne();
+
+                if (record.getPopup() == 1) {
+                    Call.menu(event.player.con(), 0, title, welcome, buttons); // TODO: enum of menus and buttons
+                }
+            } catch (Exception e) {
+                Log.err(e);
+                Call.menu(event.player.con(), 0, title, welcome, buttons);
+            }
 
             try {
                 PlayerEventsRecord record = Database.getContext().newRecord(Tables.PLAYER_EVENTS);
@@ -93,7 +112,7 @@ public class EventHandler { // TODO: split into different components
                 record.setIp(event.player.ip());
                 record.store();
 
-                if (Database.playerExists(player)) {
+                if (Database.playerExists(event.player)) {
                     Database.getContext()
                             .update(Tables.USERS)
                             .set(Tables.USERS.NAME, event.player.name())
@@ -148,6 +167,34 @@ public class EventHandler { // TODO: split into different components
             }
         });
         // endregion
+
+        Events.on(EventType.MenuOptionChooseEvent.class, event -> {
+            Log.debug("Menu &lb#@&fr: @", event.menuId, event.option);
+            if (event.menuId == 0) {
+                switch (event.option) {
+                    case 0 -> {
+                        // do nothing, it's close button
+                    }
+                    case 1 -> {
+                        Call.openURI(event.player.con(), config.discordUrl);
+                    }
+                    case 2 -> {
+                        try {
+                            Database.getContext()
+                                    .update(Tables.USERS)
+                                    .set(Tables.USERS.POPUP, (byte) 0)
+                                    .where(Tables.USERS.UUID.eq(event.player.uuid()))
+                                    .execute();
+                            Bundle.bundled(event.player, "welcome.disabled");
+                        } catch (SQLException e) {
+                            Log.err(e);
+                            Bundle.bundled(event.player, "welcome.disable.failed");
+                        }
+                    }
+                }
+            }
+        });
+
 
         // region баны
         Events.on(EventType.PlayerBanEvent.class, event -> {
