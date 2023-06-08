@@ -89,22 +89,6 @@ public class EventHandler {
             };
 
             try {
-                UsersRecord record = Database.getContext()
-                        .selectFrom(Tables.USERS)
-                        .where(Tables.USERS.UUID.eq(event.player.uuid()))
-                        .fetchOne();
-
-                if (record.getPopup() == 1) {
-                    Call.menu(event.player.con(), 0, title, welcome, buttons); // TODO: enum of menus and buttons
-                } else if (record.getDiscord() == 1) {
-                    Call.openURI(config.discordUrl);
-                }
-            } catch (Exception e) {
-                Log.err(e);
-                Call.menu(event.player.con(), 0, title, welcome, buttons);
-            }
-
-            try {
                 PlayerEventsRecord record = Database.getContext().newRecord(Tables.PLAYER_EVENTS);
                 record.setServer(Const.SERVER_COLUMN_NAME);
                 record.setTimestamp(System.currentTimeMillis() / 1000);
@@ -139,6 +123,12 @@ public class EventHandler {
                     if (data.getDonated() > 0) {
                         Variables.donaters.put(event.player.uuid(), event.player.name);
                     }
+                    if (data.getPopup() == 1) {
+                        Call.menu(event.player.con(), 0, title, welcome, buttons); // TODO: enum of menus and buttons
+                    } else if (data.getDiscord() == 1) {
+                        Call.openURI(event.player.con(), config.discordUrl);
+                    }
+
                 } else {
                     UsersRecord usersRecord = Database.getContext().newRecord(Tables.USERS);
                     usersRecord.setUuid(event.player.uuid());
@@ -151,10 +141,14 @@ public class EventHandler {
                     PlaytimeRecord playtimeRecord = Database.getContext().newRecord(Tables.PLAYTIME);
                     playtimeRecord.setUuid(event.player.uuid());
                     playtimeRecord.store();
+
+                    Call.menu(event.player.con(), 0, title, welcome, buttons);
                 }
             } catch (SQLException e) {
                 Log.err(e);
                 DiscordLogger.err(e);
+                Call.menu(event.player.con(), 0, title, welcome, buttons);
+
             }
         });
         // endregion
