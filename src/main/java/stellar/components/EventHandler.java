@@ -116,21 +116,10 @@ public class EventHandler {
                     Database.getContext()
                             .update(Tables.USERS)
                             .set(Tables.USERS.NAME, event.player.name())
-                            .where(Tables.USERS.UUID.eq(event.player.uuid()))
-                            .execute();
-
-                    Database.getContext()
-                            .update(Tables.USERS)
                             .set(Tables.USERS.LOCALE, event.player.locale())
-                            .where(Tables.USERS.UUID.eq(event.player.uuid()))
-                            .execute();
-
-                    Database.getContext()
-                            .update(Tables.USERS)
                             .set(Tables.USERS.IP, event.player.ip())
                             .where(Tables.USERS.UUID.eq(event.player.uuid()))
                             .execute();
-
 
                     UsersRecord data = Database.getContext()
                             .selectFrom(Tables.USERS)
