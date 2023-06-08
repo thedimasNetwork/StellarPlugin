@@ -314,38 +314,6 @@ public class EventHandler {
         });
         // endregion
 
-        Events.on(EventType.BlockBuildEndEvent.class, event -> {
-            if (event.tile.build == null) {
-                return; // игнорируем ломание/строительство блоков по типу валунов
-            }
-
-            Player player = event.unit.getPlayer();
-            PlayerEventTypes type = PlayerEventTypes.BUILD;
-            String blockName = event.tile.build.block.name;
-            if (event.breaking) {
-                blockName = null;
-                type = PlayerEventTypes.BREAK;
-            }
-            try {
-                PlayerEventsRecord record = Database.getContext().newRecord(Tables.PLAYER_EVENTS);
-                record.setServer(Const.SERVER_COLUMN_NAME);
-                record.setTimestamp(System.currentTimeMillis() / 1000);
-                record.setType(type.name());
-                record.setUuid(player != null ? player.uuid() : "UNIT_" + event.unit.type().name.toUpperCase());
-                record.setName(player != null ? player.name : null);
-                record.setIp(player != null ? player.ip() : null);
-                record.setX((int) event.tile.x);
-                record.setY((int) event.tile.y);
-                record.setBlock(blockName);
-                record.store();
-            } catch (SQLException e) {
-                Log.err(e);
-            }
-        });
-
-
-        // WorldLoad and Wave events were removed as useless
-
         Events.on(EventType.AdminRequestEvent.class, event -> {
             try {
                 ServerEventsRecord record = Database.getContext().newRecord(Tables.SERVER_EVENTS);
