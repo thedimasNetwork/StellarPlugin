@@ -10,13 +10,13 @@ import java.util.function.Function;
 
 import org.jooq.Field;
 import org.jooq.ForeignKey;
-import org.jooq.Function12;
+import org.jooq.Function13;
 import org.jooq.Identity;
 import org.jooq.Index;
 import org.jooq.Name;
 import org.jooq.Record;
 import org.jooq.Records;
-import org.jooq.Row12;
+import org.jooq.Row13;
 import org.jooq.Schema;
 import org.jooq.SelectField;
 import org.jooq.Table;
@@ -113,6 +113,11 @@ public class Users extends TableImpl<UsersRecord> {
      * The column <code>mindustry.users.popup</code>.
      */
     public final TableField<UsersRecord, Byte> POPUP = createField(DSL.name("popup"), SQLDataType.TINYINT.nullable(false).defaultValue(DSL.inline("1", SQLDataType.TINYINT)), this, "");
+
+    /**
+     * The column <code>mindustry.users.discord</code>.
+     */
+    public final TableField<UsersRecord, Byte> DISCORD = createField(DSL.name("discord"), SQLDataType.TINYINT.nullable(false).defaultValue(DSL.inline("1", SQLDataType.TINYINT)), this, "");
 
     private Users(Name alias, Table<UsersRecord> aliased) {
         this(alias, aliased, null);
@@ -212,25 +217,25 @@ public class Users extends TableImpl<UsersRecord> {
     }
 
     // -------------------------------------------------------------------------
-    // Row12 type methods
+    // Row13 type methods
     // -------------------------------------------------------------------------
 
     @Override
-    public Row12<Integer, String, String, String, String, String, Byte, Byte, Integer, Byte, Integer, Byte> fieldsRow() {
-        return (Row12) super.fieldsRow();
+    public Row13<Integer, String, String, String, String, String, Byte, Byte, Integer, Byte, Integer, Byte, Byte> fieldsRow() {
+        return (Row13) super.fieldsRow();
     }
 
     /**
      * Convenience mapping calling {@link #convertFrom(Function)}.
      */
-    public <U> SelectField<U> mapping(Function12<? super Integer, ? super String, ? super String, ? super String, ? super String, ? super String, ? super Byte, ? super Byte, ? super Integer, ? super Byte, ? super Integer, ? super Byte, ? extends U> from) {
+    public <U> SelectField<U> mapping(Function13<? super Integer, ? super String, ? super String, ? super String, ? super String, ? super String, ? super Byte, ? super Byte, ? super Integer, ? super Byte, ? super Integer, ? super Byte, ? super Byte, ? extends U> from) {
         return convertFrom(Records.mapping(from));
     }
 
     /**
      * Convenience mapping calling {@link #convertFrom(Class, Function)}.
      */
-    public <U> SelectField<U> mapping(Class<U> toType, Function12<? super Integer, ? super String, ? super String, ? super String, ? super String, ? super String, ? super Byte, ? super Byte, ? super Integer, ? super Byte, ? super Integer, ? super Byte, ? extends U> from) {
+    public <U> SelectField<U> mapping(Class<U> toType, Function13<? super Integer, ? super String, ? super String, ? super String, ? super String, ? super String, ? super Byte, ? super Byte, ? super Integer, ? super Byte, ? super Integer, ? super Byte, ? super Byte, ? extends U> from) {
         return convertFrom(toType, Records.mapping(from));
     }
 }

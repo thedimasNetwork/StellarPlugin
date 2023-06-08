@@ -96,6 +96,8 @@ public class EventHandler {
 
                 if (record.getPopup() == 1) {
                     Call.menu(event.player.con(), 0, title, welcome, buttons); // TODO: enum of menus and buttons
+                } else if (record.getDiscord() == 1) {
+                    Call.openURI(config.discordUrl);
                 }
             } catch (Exception e) {
                 Log.err(e);
