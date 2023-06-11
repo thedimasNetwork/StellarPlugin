@@ -6,6 +6,7 @@ import arc.graphics.Color;
 import arc.math.Mathf;
 import arc.util.Log;
 import arc.util.Strings;
+import mindustry.Vars;
 import mindustry.content.Blocks;
 import mindustry.content.Fx;
 import mindustry.content.Items;
@@ -28,17 +29,14 @@ import stellar.database.gen.Tables;
 import stellar.database.gen.tables.records.*;
 import stellar.util.Bundle;
 import stellar.util.Players;
-import stellar.util.StringUtils;
 import stellar.util.Translator;
 import stellar.util.logger.DiscordLogger;
 import types.AdminActionEntry;
 
 import java.sql.SQLException;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 
-import static mindustry.Vars.*;
 import static stellar.Variables.*;
 
 @SuppressWarnings({"unused", "unchecked"})
@@ -54,22 +52,15 @@ public class EventHandler {
             try {
                 if (Database.playerExists(event.player)) {
                     if (Database.isBanned(event.player)) {
+                        Locale locale = Bundle.findLocale(event.player.locale());
                         BansRecord record = Database.latestBan(event.player);
                         UsersRecord admin = Database.getPlayer(record.getAdmin());
                         String adminName = Strings.stripColors(admin.getName());
                         String banDate = record.getCreated().format(Const.DATE_FORMATTER);
-                        String unbanDate = record.getUntil() != null ? record.getUntil().format(Const.DATE_FORMATTER) : "never";
+                        String unbanDate = record.getUntil() != null ? record.getUntil().format(Const.DATE_FORMATTER) : Bundle.get("events.join.banned.forever", locale);
 
-                        String message = """
-                        You were banned by [accent]%admin%[] on [accent]%date%[].
-                        Reason: [accent]%reason%[].
-                        Unban date: [accent]%unban%[].
-                        For appeals visit our Discord: [blue]%discord%[].
-                        """.replace("%admin%", adminName)
-                                .replace("%reason%", record.getReason())
-                                .replace("%date%", banDate).replace("%unban%", unbanDate)
-                                .replace("%discord%", config.discordUrl);
-                        event.player.kick(message); // TODO: bundles
+                        String message = Bundle.format("events.join.banned", locale, adminName, banDate, record.getReason().strip(), unbanDate, config.discordUrl);
+                        event.player.kick(message);
                     }
                 }
             } catch (SQLException e) {
@@ -219,23 +210,26 @@ public class EventHandler {
                     computed = Math.max(0, computed);
                 }
                 adminActions.get(event.menuId).setUntil(computed);
-                String[][] buttons = {
-                        {"-1D", "+1D"},
-                        {"-1W", "+1W"},
-                        {"-1M", "+1M"},
-                        {"[teal]Reset[]", "[red]Permanent[]"},
-                        {"[scarlet]Ban![]"}
-                }; // TODO: locales, cancel
+
+                Locale locale = Bundle.findLocale(event.player.locale());
 
                 if (event.option != 8 && event.option != -1) {
-                    Call.followUpMenu(event.menuId, "Period", "Current period: [accent]" + computed + " days[].", buttons);
+                    String[][] buttons = {
+                            {Bundle.get("menus.ban.minus-1d", locale), Bundle.get("menus.ban.plus-1d", locale)},
+                            {Bundle.get("menus.ban.minus-1w", locale), Bundle.get("menus.ban.plus-1w", locale)},
+                            {Bundle.get("menus.ban.minus-1m", locale), Bundle.get("menus.ban.plus-1m", locale)},
+                            {Bundle.get("menus.ban.reset", locale), Bundle.get("menus.ban.permanent", locale)},
+                            {Bundle.get("menus.ban.proceed", locale)}
+                    };
+
+                    String title = Bundle.format("menus.ban.title", locale, Strings.stripColors(actionEntry.getTarget().getName()));
+                    String message = Bundle.format("menus.ban.msg", locale, computed);
+                    Call.followUpMenu(event.player.con(), event.menuId, title, message, buttons);
                 } else {
                     UsersRecord adminInfo = actionEntry.getAdmin();
                     UsersRecord targetInfo = actionEntry.getTarget();
                     String adminName = Strings.stripColors(adminInfo.getName());
                     String targetName = Strings.stripColors(targetInfo.getName());
-                    String reason = actionEntry.getReason();
-                    Log.debug("@ > @ | @ | @ days", adminName, targetName, reason, computed);
                     Call.hideFollowUpMenu(event.menuId);
 
                     String title, message;
@@ -247,18 +241,21 @@ public class EventHandler {
                                 **Причина**: %reason%
                                 """.replace("%admin%", adminName).replace("%aid%", adminInfo.getId().toString())
                                 .replace("%target%", targetName).replace("%tid%", targetInfo.getId().toString())
-                                .replace("%reason%", actionEntry.getReason());
+                                .replace("%reason%", actionEntry.getReason().strip());
                     } else {
                         title = "Бан";
                         message = """
                                 **Админ**: %admin% (%aid%)
                                 **Нарушитель**: %target% (%tid%)
                                 **Причина**: %reason%
-                                **Срок**: <t:%timestamp%:f>
                                 """.replace("%admin%", adminName).replace("%aid%", adminInfo.getId().toString())
                                 .replace("%target%", targetName).replace("%tid%", targetInfo.getId().toString())
-                                .replace("%reason%", actionEntry.getReason())
-                                .replace("%timestamp%", (System.currentTimeMillis() / 1000 + computed * (24 * 60 * 60)) + "");
+                                .replace("%reason%", actionEntry.getReason().strip());
+                        if (computed > -1) {
+                            message += "\n**Срок**: <t:%timestamp%:f>".replace("%timestamp%", (System.currentTimeMillis() / 1000 + computed * (24 * 60 * 60)) + "");
+                        } else {
+                            message += "**Срок**: Перманентный";
+                        }
 
                     }
                     Bot.sendEmbed(Util.embedBuilder(title, message, Colors.purple, LocalDateTime.now(), Const.SERVER_COLUMN_NAME));
@@ -267,7 +264,7 @@ public class EventHandler {
                     } catch (SQLException e) {
                         Log.err(e);
                     }
-                    netServer.admins.unbanPlayerID(actionEntry.getTarget().getUuid()); // maybe not a good idea
+                    Vars.netServer.admins.unbanPlayerID(actionEntry.getTarget().getUuid()); // maybe not a good idea
                     adminActions.remove(event.menuId);
                 }
             }
@@ -296,7 +293,6 @@ public class EventHandler {
                 UsersRecord targetInfo = actionEntry.getTarget();
                 String adminName = Strings.stripColors(adminInfo.getName());
                 String targetName = Strings.stripColors(targetInfo.getName());
-                String reason = actionEntry.getReason();
 
                 String title = "Кик";
                 String message = """
@@ -308,14 +304,17 @@ public class EventHandler {
                         .replace("%reason%", actionEntry.getReason());
                 Bot.sendEmbed(Util.embedBuilder(title, message, Colors.purple, LocalDateTime.now(), Const.SERVER_COLUMN_NAME));
             } else {
+                Locale locale = Bundle.findLocale(event.player.locale());
                 String[][] buttons = {
-                        {"-1D", "+1D"},
-                        {"-1W", "+1W"},
-                        {"-1M", "+1M"},
-                        {"[teal]Reset[]", "[red]Permanent[]"},
-                        {"[scarlet]Ban![]"}
-                }; // TODO: locales
-                Call.followUpMenu(event.player.con(), event.textInputId, "Period", "Current period: [accent]" + adminActions.get(event.textInputId).getUntil() + " days[].", buttons);
+                        {Bundle.get("menus.ban.minus-1d", locale), Bundle.get("menus.ban.plus-1d", locale)},
+                        {Bundle.get("menus.ban.minus-1w", locale), Bundle.get("menus.ban.plus-1w", locale)},
+                        {Bundle.get("menus.ban.minus-1m", locale), Bundle.get("menus.ban.plus-1m", locale)},
+                        {Bundle.get("menus.ban.reset", locale), Bundle.get("menus.ban.permanent", locale)},
+                        {Bundle.get("menus.ban.proceed", locale)}
+                };
+                String title = Bundle.format("menus.ban.title", locale, Strings.stripColors(actionEntry.getTarget().getName()));
+                String message = Bundle.format("menus.ban.msg", locale, actionEntry.getUntil());
+                Call.followUpMenu(event.player.con(), event.textInputId, title, message, buttons);
             }
         });
 
@@ -386,13 +385,16 @@ public class EventHandler {
 
                         AdminActionEntry entry = new AdminActionEntry(adminInfo, targetInfo, event.action);
                         adminActions.put(id, entry);
-                        Call.textInput(event.player.con(), id, "Reason", "Reason", 64, "", false);
+                        Locale locale = Bundle.findLocale(event.player.locale());
+                        String title = Bundle.format("inputs.punishment.title", locale, event.other.plainName());
+                        String message = Bundle.get("inputs.punishment.msg", locale);
+                        Call.textInput(event.player.con(), id, title, message, 64, "", false);
                     }
                 } catch (SQLException e) {
                     Log.err(e);
                 }
             } else {
-                player.sendMessage("[scarlet]?![]");
+                event.player.sendMessage("[scarlet]?![]");
             }
         });
         // endregion
@@ -469,7 +471,7 @@ public class EventHandler {
                 });
 
                 Log.info("@ положил торий в реактор (@, @)", target.name, building.tileX(), building.tileY());
-                DiscordLogger.warn(String.format("%s положил торий в реактор (%f, %f)", player.name, event.tile.x, event.tile.y));
+                DiscordLogger.warn(String.format("%s положил торий в реактор (%f, %f)", event.player.name, event.tile.x, event.tile.y));
             }
         });
 
