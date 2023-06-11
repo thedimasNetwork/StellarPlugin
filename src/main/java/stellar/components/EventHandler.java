@@ -252,13 +252,13 @@ public class EventHandler {
                                 .replace("%target%", targetName).replace("%tid%", targetInfo.getId().toString())
                                 .replace("%reason%", actionEntry.getReason().strip());
                         if (computed > -1) {
-                            message += "\n**Срок**: <t:%timestamp%:f>".replace("%timestamp%", (System.currentTimeMillis() / 1000 + computed * (24 * 60 * 60)) + "");
+                            message += "**Срок**: <t:%timestamp%:f>".replace("%timestamp%", (System.currentTimeMillis() / 1000 + computed * (24 * 60 * 60)) + "");
                         } else {
                             message += "**Срок**: Перманентный";
                         }
 
                     }
-                    Bot.sendEmbed(Util.embedBuilder(title, message, Colors.purple, LocalDateTime.now(), Const.SERVER_COLUMN_NAME));
+                    Bot.sendEmbed(config.bot.bansId, Util.embedBuilder(title, message, Colors.purple, LocalDateTime.now(), Const.SERVER_COLUMN_NAME));
                     try {
                         actionEntry.storeRecord();
                     } catch (SQLException e) {
@@ -301,8 +301,8 @@ public class EventHandler {
                                 **Причина**: %reason%
                                 """.replace("%admin%", adminName).replace("%aid%", adminInfo.getId().toString())
                         .replace("%target%", targetName).replace("%tid%", targetInfo.getId().toString())
-                        .replace("%reason%", actionEntry.getReason());
-                Bot.sendEmbed(Util.embedBuilder(title, message, Colors.purple, LocalDateTime.now(), Const.SERVER_COLUMN_NAME));
+                        .replace("%reason%", actionEntry.getReason().strip());
+                Bot.sendEmbed(config.bot.bansId, Util.embedBuilder(title, message, Colors.purple, LocalDateTime.now(), Const.SERVER_COLUMN_NAME));
             } else {
                 Locale locale = Bundle.findLocale(event.player.locale());
                 String[][] buttons = {

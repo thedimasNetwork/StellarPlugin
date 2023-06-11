@@ -55,6 +55,7 @@ public class Config {
     public static class Bot {
         public String token;
         public long channelId;
+        public long bansId;
         public boolean main; // used for RPC
     }
 }

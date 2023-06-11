@@ -65,6 +65,13 @@ public class Bot {
         }).start();
     }
 
+    public static void sendEmbed(long channelId, MessageEmbed embed) {
+        new Thread(() -> {
+            jda.getTextChannelById(channelId).sendMessageEmbeds(embed).queue();
+        }).start();
+    }
+
+
     public static void sendMessage(String content) {
         MessageCreateData message = new MessageCreateBuilder()
                 .setContent(content)
