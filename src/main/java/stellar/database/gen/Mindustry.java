@@ -11,12 +11,12 @@ import org.jooq.Catalog;
 import org.jooq.Table;
 import org.jooq.impl.SchemaImpl;
 
+import stellar.database.gen.tables.Bans;
 import stellar.database.gen.tables.IpCached;
 import stellar.database.gen.tables.PlayerEvents;
 import stellar.database.gen.tables.Playtime;
 import stellar.database.gen.tables.ServerEvents;
 import stellar.database.gen.tables.Users;
-import stellar.database.gen.tables.Warns;
 
 
 /**
@@ -31,6 +31,11 @@ public class Mindustry extends SchemaImpl {
      * The reference instance of <code>mindustry</code>
      */
     public static final Mindustry MINDUSTRY = new Mindustry();
+
+    /**
+     * The table <code>mindustry.bans</code>.
+     */
+    public final Bans BANS = Bans.BANS;
 
     /**
      * The table <code>mindustry.ip_cached</code>.
@@ -58,11 +63,6 @@ public class Mindustry extends SchemaImpl {
     public final Users USERS = Users.USERS;
 
     /**
-     * The table <code>mindustry.warns</code>.
-     */
-    public final Warns WARNS = Warns.WARNS;
-
-    /**
      * No further instances allowed
      */
     private Mindustry() {
@@ -78,12 +78,12 @@ public class Mindustry extends SchemaImpl {
     @Override
     public final List<Table<?>> getTables() {
         return Arrays.asList(
+            Bans.BANS,
             IpCached.IP_CACHED,
             PlayerEvents.PLAYER_EVENTS,
             Playtime.PLAYTIME,
             ServerEvents.SERVER_EVENTS,
-            Users.USERS,
-            Warns.WARNS
+            Users.USERS
         );
     }
 }

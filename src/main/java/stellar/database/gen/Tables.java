@@ -4,12 +4,12 @@
 package stellar.database.gen;
 
 
+import stellar.database.gen.tables.Bans;
 import stellar.database.gen.tables.IpCached;
 import stellar.database.gen.tables.PlayerEvents;
 import stellar.database.gen.tables.Playtime;
 import stellar.database.gen.tables.ServerEvents;
 import stellar.database.gen.tables.Users;
-import stellar.database.gen.tables.Warns;
 
 
 /**
@@ -17,6 +17,11 @@ import stellar.database.gen.tables.Warns;
  */
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Tables {
+
+    /**
+     * The table <code>mindustry.bans</code>.
+     */
+    public static final Bans BANS = Bans.BANS;
 
     /**
      * The table <code>mindustry.ip_cached</code>.
@@ -42,9 +47,4 @@ public class Tables {
      * The table <code>mindustry.users</code>.
      */
     public static final Users USERS = Users.USERS;
-
-    /**
-     * The table <code>mindustry.warns</code>.
-     */
-    public static final Warns WARNS = Warns.WARNS;
 }

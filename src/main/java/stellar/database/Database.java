@@ -6,8 +6,10 @@ import mindustry.gen.Player;
 import org.jooq.*;
 import org.jooq.impl.DSL;
 import stellar.database.gen.Tables;
+import stellar.database.gen.tables.records.BansRecord;
 
 import java.sql.*;
+import java.time.LocalDateTime;
 
 import static stellar.Variables.config;
 
@@ -53,4 +55,26 @@ public class Database {
         return Database.getContext().fetchExists(Tables.USERS, Tables.USERS.UUID.eq(player.uuid()));
     }
 
+    public static boolean isBanned(Player player) throws  SQLException {
+        BansRecord record = Database.getContext()
+                .selectFrom(Tables.BANS)
+                .where(Tables.BANS.TARGET.eq(player.uuid()))
+                .orderBy(Tables.BANS.ID.desc())
+                .limit(1)
+                .fetchOne();
+
+        if (record == null) {
+            return false;
+        }
+
+        if (record.getActive() != 1) {
+            return false;
+        }
+
+        if (record.getUntil() == null) {
+            return true;
+        }
+
+        return !record.getUntil().isBefore(LocalDateTime.now());
+    }
 }

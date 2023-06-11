@@ -55,12 +55,7 @@ public class EventHandler {
             String name = event.player.name;
             try {
                 if (Database.playerExists(event.player)) {
-                    boolean banned = Database.getContext()
-                            .select(Tables.USERS.BANNED)
-                            .from(Tables.USERS)
-                            .where(Tables.USERS.UUID.eq(uuid))
-                            .fetchOne().value1() == 1;
-                    if (banned) {
+                    if (Database.isBanned(event.player)) {
                         event.player.kick(Packets.KickReason.banned);
                     }
                 }
@@ -196,33 +191,15 @@ public class EventHandler {
                 AdminActionEntry actionEntry = adminActions.get(event.menuId);
                 int computed = actionEntry.getUntil();
                 switch (event.option) {
-                    case 0 -> {
-                        computed -= 1;
-                    }
-                    case 1 -> {
-                        computed += 1;
-                    }
-                    case 2 -> {
-                        computed -= 7;
-                    }
-                    case 3 -> {
-                        computed += 7;
-                    }
-                    case 4 -> {
-                        computed -= 30;
-                    }
-                    case 5 -> {
-                        computed += 30;
-                    }
-                    case 6 -> {
-                        computed = 0;
-                    }
-                    case 7 -> {
-                        computed = -1;
-                    }
-                    case 8 -> {
-                        // TODO: proceed ban
-                    }
+                    case 0 -> computed -= 1;
+                    case 1 -> computed += 1;
+                    case 2 -> computed -= 7;
+                    case 3 -> computed += 7;
+                    case 4 -> computed -= 30;
+                    case 5 -> computed += 30;
+                    case 6 -> computed = 0;
+                    case 7 -> computed = -1;
+                    case 8 -> { } // being processed later
                 }
 
                 if (event.option != 7 && event.option != 8) {
@@ -272,6 +249,13 @@ public class EventHandler {
 
                     }
                     Bot.sendEmbed(Util.embedBuilder(title, message, Colors.purple, LocalDateTime.now(), Const.SERVER_COLUMN_NAME));
+                    try {
+                        actionEntry.storeRecord();
+                    } catch (SQLException e) {
+                        Log.err(e);
+                    }
+                    netServer.admins.unbanPlayerID(actionEntry.getTarget().getUuid()); // maybe not a good idea
+                    adminActions.remove(event.menuId);
                 }
             }
         });
