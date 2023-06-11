@@ -29,7 +29,7 @@ ext {
 }
 
 ext {
-    mindustryVersion = "v140.2"
+    mindustryVersion = "v144.3"
     lombokVersion = "1.18.24"
     discordWebhookVersion = "v1.6"
     jacksonYamlVersion = "2.13.0"

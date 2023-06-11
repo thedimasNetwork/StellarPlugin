@@ -7,6 +7,7 @@ import arc.util.Interval;
 import stellar.history.entry.HistoryEntry;
 import stellar.history.struct.CacheSeq;
 import stellar.history.struct.Seqs;
+import types.AdminActionEntry;
 
 import java.time.Duration;
 
@@ -22,6 +23,7 @@ public class Variables {
     public static Config config;
     public static CacheSeq<HistoryEntry>[][] history = new CacheSeq[2048][2048];
     public static final Seq<String> blacklistedSubnets = new Seq<>();
+    public static final ObjectMap<Integer, AdminActionEntry> adminActions = new ObjectMap<>();
 
     public static CacheSeq<HistoryEntry> getHistorySeq(int x, int y) {
         CacheSeq<HistoryEntry> seq = history[x][y];

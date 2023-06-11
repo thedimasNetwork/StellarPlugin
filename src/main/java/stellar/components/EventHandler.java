@@ -3,6 +3,7 @@ package stellar.components;
 import arc.Core;
 import arc.Events;
 import arc.graphics.Color;
+import arc.math.Mathf;
 import arc.util.Log;
 import arc.util.Strings;
 import mindustry.content.Blocks;
@@ -29,13 +30,13 @@ import stellar.util.Bundle;
 import stellar.util.Players;
 import stellar.util.Translator;
 import stellar.util.logger.DiscordLogger;
+import types.AdminActionEntry;
 
 import java.sql.SQLException;
 import java.util.Locale;
 
 import static mindustry.Vars.*;
-import static stellar.Variables.config;
-import static stellar.Variables.interval;
+import static stellar.Variables.*;
 
 @SuppressWarnings({"unused", "unchecked"})
 public class EventHandler {
@@ -177,9 +178,97 @@ public class EventHandler {
                         }
                     }
                 }
+            } else {
+                if (!admins.containsKey(event.player.uuid())) {
+                    return;
+                }
+
+                if (!adminActions.containsKey(event.menuId)) {
+                    Log.err("@ tried to access non-existent admin action with ID @", event.player.plainName(), event.menuId);
+                    return;
+                }
+
+                AdminActionEntry actionEntry = adminActions.get(event.menuId);
+                int computed = actionEntry.getUntil();
+                switch (event.option) {
+                    case 0 -> {
+                        computed -= 1;
+                    }
+                    case 1 -> {
+                        computed += 1;
+                    }
+                    case 2 -> {
+                        computed -= 7;
+                    }
+                    case 3 -> {
+                        computed += 7;
+                    }
+                    case 4 -> {
+                        computed -= 30;
+                    }
+                    case 5 -> {
+                        computed += 30;
+                    }
+                    case 6 -> {
+                        computed = 0;
+                    }
+                    case 7 -> {
+                        computed = -1;
+                    }
+                    case 8 -> {
+                        // TODO: proceed ban
+                    }
+                }
+
+                if (event.option != 7 && event.option != 8) {
+                    computed = Math.max(0, computed);
+                }
+                adminActions.get(event.menuId).setUntil(computed);
+                String[][] buttons = {
+                        {"-1D", "+1D"},
+                        {"-1W", "+1W"},
+                        {"-1M", "+1M"},
+                        {"[teal]Reset[]", "[red]Permanent[]"},
+                        {"[scarlet]Ban![]"}
+                }; // TODO: locales, cancel
+
+                if (event.option != 8 && event.option != -1) {
+                    Call.followUpMenu(event.menuId, "Period", "Current period: [accent]" + computed + " days[].", buttons);
+                } else {
+                    String admin = Strings.stripColors(actionEntry.getAdmin().getName());
+                    String target = Strings.stripColors(actionEntry.getTarget().getName());
+                    String reason = actionEntry.getReason();
+                    Log.debug("@ > @ | @ | @ days", admin, target, reason, computed);
+                    Call.hideFollowUpMenu(event.menuId);
+                }
             }
         });
 
+        Events.on(EventType.TextInputEvent.class, event -> {
+            if (!admins.containsKey(event.player.uuid())) {
+                return;
+            }
+
+            Log.debug("@: @ (@)", event.player.plainName(), event.text, event.textInputId);
+            if (!adminActions.containsKey(event.textInputId)) {
+                Log.err("@ tried to access non-existent admin action with ID @", event.player.plainName(), event.textInputId);
+                return;
+            }
+            if (event.text == null || event.text.isBlank()) {
+                adminActions.get(event.textInputId).setReason("<не указана>");
+            } else {
+                adminActions.get(event.textInputId).setReason(event.text);
+            }
+
+            String[][] buttons = {
+                    {"-1D", "+1D"},
+                    {"-1W", "+1W"},
+                    {"-1M", "+1M"},
+                    {"[teal]Reset[]", "[red]Permanent[]"},
+                    {"[scarlet]Ban![]"}
+            }; // TODO: locales
+            Call.followUpMenu(event.player.con(), event.textInputId, "Period", "Current period: [accent]" + adminActions.get(event.textInputId).getUntil() + " days[].", buttons);
+        });
 
         // region баны
         Events.on(EventType.PlayerBanEvent.class, event -> {
@@ -210,6 +299,51 @@ public class EventHandler {
                 Log.err("Failed to unban uuid for player '@'", event.uuid);
                 Log.err(e);
                 DiscordLogger.err("Failed to unban uuid for player '" + event.uuid + "'", e);
+            }
+        });
+
+        Events.on(EventType.AdminRequestEvent.class, event -> {
+            if (admins.containsKey(event.player.uuid())) {
+                try {
+                    ServerEventsRecord record = Database.getContext().newRecord(Tables.SERVER_EVENTS);
+                    record.setServer(Const.SERVER_COLUMN_NAME);
+                    record.setTimestamp(System.currentTimeMillis() / 1000);
+                    record.setType(ServerEventTypes.ADMIN_REQUEST.name());
+                    record.setName(event.player.name);
+                    record.setUuid(event.player.uuid());
+                    record.setIp(event.player.ip());
+                    record.setRequest(event.action.name());
+                    record.store();
+
+                    if (event.action == Packets.AdminAction.kick || event.action == Packets.AdminAction.ban) {
+                        PlayerEventsRecord record2 = Database.getContext().newRecord(Tables.PLAYER_EVENTS);
+                        record2.setServer(Const.SERVER_COLUMN_NAME);
+                        record2.setTimestamp(System.currentTimeMillis() / 1000);
+                        record2.setType(event.action == Packets.AdminAction.kick ? PlayerEventTypes.KICK.name() : PlayerEventTypes.BAN.name());
+                        record2.setName(event.other.name);
+                        record2.setUuid(event.other.uuid());
+                        record2.setIp(event.other.ip());
+                        record2.store();
+
+                        int id = Mathf.random(0, Integer.MAX_VALUE - 1);
+                        UsersRecord adminInfo = Database.getContext()
+                                .selectFrom(Tables.USERS)
+                                .where(Tables.USERS.UUID.eq(event.player.uuid()))
+                                .fetchOne();
+                        UsersRecord targetInfo = Database.getContext()
+                                .selectFrom(Tables.USERS)
+                                .where(Tables.USERS.UUID.eq(event.other.uuid()))
+                                .fetchOne();
+
+                        AdminActionEntry entry = new AdminActionEntry(adminInfo, targetInfo, event.action);
+                        adminActions.put(id, entry);
+                        Call.textInput(event.player.con(), id, "Reason", "Reason", 64, "", false);
+                    }
+                } catch (SQLException e) {
+                    Log.err(e);
+                }
+            } else {
+                player.sendMessage("[scarlet]?![]");
             }
         });
         // endregion
@@ -307,42 +441,6 @@ public class EventHandler {
             }
         });
         // endregion
-
-        Events.on(EventType.AdminRequestEvent.class, event -> {
-            try {
-                ServerEventsRecord record = Database.getContext().newRecord(Tables.SERVER_EVENTS);
-                record.setServer(Const.SERVER_COLUMN_NAME);
-                record.setTimestamp(System.currentTimeMillis() / 1000);
-                record.setType(ServerEventTypes.ADMIN_REQUEST.name());
-                record.setName(event.player.name);
-                record.setUuid(event.player.uuid());
-                record.setIp(event.player.ip());
-                record.setRequest(event.action.name());
-                record.store();
-
-                if (event.action == Packets.AdminAction.kick) {
-                    PlayerEventsRecord record2 = Database.getContext().newRecord(Tables.PLAYER_EVENTS);
-                    record2.setServer(Const.SERVER_COLUMN_NAME);
-                    record2.setTimestamp(System.currentTimeMillis() / 1000);
-                    record2.setType(PlayerEventTypes.KICK.name());
-                    record2.setName(event.other.name);
-                    record2.setUuid(event.other.uuid());
-                    record2.setIp(event.other.ip());
-                    record2.store();
-                } else if (event.action == Packets.AdminAction.ban) {
-                    PlayerEventsRecord record2 = Database.getContext().newRecord(Tables.PLAYER_EVENTS);
-                    record2.setServer(Const.SERVER_COLUMN_NAME);
-                    record2.setTimestamp(System.currentTimeMillis() / 1000);
-                    record2.setType(PlayerEventTypes.BAN.name());
-                    record2.setName(event.other.name);
-                    record2.setUuid(event.other.uuid());
-                    record2.setIp(event.other.ip());
-                    record2.store();
-                }
-            } catch (SQLException e) {
-                Log.err(e);
-            }
-        });
 
         Events.on(EventType.PlayerChatEvent.class, event -> {
             if (!event.message.startsWith("/")) {
