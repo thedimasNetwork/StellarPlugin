@@ -18,6 +18,9 @@ import mindustry.gen.Player;
 import mindustry.net.Packets;
 import stellar.Const;
 import stellar.Variables;
+import stellar.bot.Bot;
+import stellar.bot.Colors;
+import stellar.bot.Util;
 import stellar.database.Database;
 import stellar.database.enums.PlayerEventTypes;
 import stellar.database.enums.ServerEventTypes;
@@ -28,11 +31,13 @@ import stellar.database.gen.tables.records.ServerEventsRecord;
 import stellar.database.gen.tables.records.UsersRecord;
 import stellar.util.Bundle;
 import stellar.util.Players;
+import stellar.util.StringUtils;
 import stellar.util.Translator;
 import stellar.util.logger.DiscordLogger;
 import types.AdminActionEntry;
 
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 import java.util.Locale;
 
 import static mindustry.Vars.*;
@@ -235,11 +240,38 @@ public class EventHandler {
                 if (event.option != 8 && event.option != -1) {
                     Call.followUpMenu(event.menuId, "Period", "Current period: [accent]" + computed + " days[].", buttons);
                 } else {
-                    String admin = Strings.stripColors(actionEntry.getAdmin().getName());
-                    String target = Strings.stripColors(actionEntry.getTarget().getName());
+                    UsersRecord adminInfo = actionEntry.getAdmin();
+                    UsersRecord targetInfo = actionEntry.getTarget();
+                    String adminName = Strings.stripColors(adminInfo.getName());
+                    String targetName = Strings.stripColors(targetInfo.getName());
                     String reason = actionEntry.getReason();
-                    Log.debug("@ > @ | @ | @ days", admin, target, reason, computed);
+                    Log.debug("@ > @ | @ | @ days", adminName, targetName, reason, computed);
                     Call.hideFollowUpMenu(event.menuId);
+
+                    String title, message;
+                    if (actionEntry.getAction() == Packets.AdminAction.kick) {
+                        title = "Кик";
+                        message = """
+                                **Админ**: %admin% (%aid%)
+                                **Нарушитель**: %target% (%tid%)
+                                **Причина**: %reason%
+                                """.replace("%admin%", adminName).replace("%aid%", adminInfo.getId().toString())
+                                .replace("%target%", targetName).replace("%tid%", targetInfo.getId().toString())
+                                .replace("%reason%", actionEntry.getReason());
+                    } else {
+                        title = "Бан";
+                        message = """
+                                **Админ**: %admin% (%aid%)
+                                **Нарушитель**: %target% (%tid%)
+                                **Причина**: %reason%
+                                **Срок**: <t:%timestamp%:f>
+                                """.replace("%admin%", adminName).replace("%aid%", adminInfo.getId().toString())
+                                .replace("%target%", targetName).replace("%tid%", targetInfo.getId().toString())
+                                .replace("%reason%", actionEntry.getReason())
+                                .replace("%timestamp%", (System.currentTimeMillis() / 1000 + computed * (24 * 60 * 60)) + "");
+
+                    }
+                    Bot.sendEmbed(Util.embedBuilder(title, message, Colors.purple, LocalDateTime.now(), Const.SERVER_COLUMN_NAME));
                 }
             }
         });
@@ -254,20 +286,40 @@ public class EventHandler {
                 Log.err("@ tried to access non-existent admin action with ID @", event.player.plainName(), event.textInputId);
                 return;
             }
+
+            AdminActionEntry actionEntry = adminActions.get(event.textInputId);
             if (event.text == null || event.text.isBlank()) {
-                adminActions.get(event.textInputId).setReason("<не указана>");
+                actionEntry.setReason("<не указана>");
             } else {
-                adminActions.get(event.textInputId).setReason(event.text);
+                actionEntry.setReason(event.text);
             }
 
-            String[][] buttons = {
-                    {"-1D", "+1D"},
-                    {"-1W", "+1W"},
-                    {"-1M", "+1M"},
-                    {"[teal]Reset[]", "[red]Permanent[]"},
-                    {"[scarlet]Ban![]"}
-            }; // TODO: locales
-            Call.followUpMenu(event.player.con(), event.textInputId, "Period", "Current period: [accent]" + adminActions.get(event.textInputId).getUntil() + " days[].", buttons);
+            if (actionEntry.getAction() == Packets.AdminAction.kick) {
+                UsersRecord adminInfo = actionEntry.getAdmin();
+                UsersRecord targetInfo = actionEntry.getTarget();
+                String adminName = Strings.stripColors(adminInfo.getName());
+                String targetName = Strings.stripColors(targetInfo.getName());
+                String reason = actionEntry.getReason();
+
+                String title = "Кик";
+                String message = """
+                                **Админ**: %admin% (%aid%)
+                                **Нарушитель**: %target% (%tid%)
+                                **Причина**: %reason%
+                                """.replace("%admin%", adminName).replace("%aid%", adminInfo.getId().toString())
+                        .replace("%target%", targetName).replace("%tid%", targetInfo.getId().toString())
+                        .replace("%reason%", actionEntry.getReason());
+                Bot.sendEmbed(Util.embedBuilder(title, message, Colors.purple, LocalDateTime.now(), Const.SERVER_COLUMN_NAME));
+            } else {
+                String[][] buttons = {
+                        {"-1D", "+1D"},
+                        {"-1W", "+1W"},
+                        {"-1M", "+1M"},
+                        {"[teal]Reset[]", "[red]Permanent[]"},
+                        {"[scarlet]Ban![]"}
+                }; // TODO: locales
+                Call.followUpMenu(event.player.con(), event.textInputId, "Period", "Current period: [accent]" + adminActions.get(event.textInputId).getUntil() + " days[].", buttons);
+            }
         });
 
         // region баны

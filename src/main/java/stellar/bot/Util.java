@@ -29,4 +29,14 @@ public class Util {
                 .setTimestamp(time)
                 .build();
     }
+
+    public static MessageEmbed embedBuilder(String title, String description, Color color, LocalDateTime time, String footer) {
+        return new EmbedBuilder()
+                .addField(title, description, false)
+                .setColor(color)
+                .setTimestamp(time)
+                .setFooter(footer)
+                .build();
+    }
+
 }
