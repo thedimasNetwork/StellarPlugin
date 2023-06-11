@@ -25,10 +25,7 @@ import stellar.database.Database;
 import stellar.database.enums.PlayerEventTypes;
 import stellar.database.enums.ServerEventTypes;
 import stellar.database.gen.Tables;
-import stellar.database.gen.tables.records.PlayerEventsRecord;
-import stellar.database.gen.tables.records.PlaytimeRecord;
-import stellar.database.gen.tables.records.ServerEventsRecord;
-import stellar.database.gen.tables.records.UsersRecord;
+import stellar.database.gen.tables.records.*;
 import stellar.util.Bundle;
 import stellar.util.Players;
 import stellar.util.StringUtils;
@@ -38,6 +35,7 @@ import types.AdminActionEntry;
 
 import java.sql.SQLException;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 
 import static mindustry.Vars.*;
@@ -56,7 +54,22 @@ public class EventHandler {
             try {
                 if (Database.playerExists(event.player)) {
                     if (Database.isBanned(event.player)) {
-                        event.player.kick(Packets.KickReason.banned);
+                        BansRecord record = Database.latestBan(event.player);
+                        UsersRecord admin = Database.getPlayer(record.getAdmin());
+                        String adminName = Strings.stripColors(admin.getName());
+                        String banDate = record.getCreated().format(Const.DATE_FORMATTER);
+                        String unbanDate = record.getUntil() != null ? record.getUntil().format(Const.DATE_FORMATTER) : "never";
+
+                        String message = """
+                        You were banned by [accent]%admin%[] on [accent]%date%[].
+                        Reason: [accent]%reason%[].
+                        Unban date: [accent]%unban%[].
+                        For appeals visit our Discord: [blue]%discord%[].
+                        """.replace("%admin%", adminName)
+                                .replace("%reason%", record.getReason())
+                                .replace("%date%", banDate).replace("%unban%", unbanDate)
+                                .replace("%discord%", config.discordUrl);
+                        event.player.kick(message); // TODO: bundles
                     }
                 }
             } catch (SQLException e) {

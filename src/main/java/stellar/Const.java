@@ -8,6 +8,7 @@ import mindustry.Vars;
 import mindustry.net.Administration;
 import stellar.util.Bundle;
 
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Locale;
 
@@ -31,6 +32,8 @@ public class Const {
     public static final String BOOL_VALUES = "1, on, yes, true, вкл, да";
 
     public static final String[] PIRATES = {"valve", "igruhaorg", "tuttop", "freetp.org", "freetp"};
+
+    public static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy k:m"); // 04.12.2003 23:09
 
     public static final int MAX_IDENTICAL_IPS = 3;
     // языки, для которых у нас есть перевод

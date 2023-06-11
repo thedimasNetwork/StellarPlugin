@@ -7,6 +7,7 @@ import org.jooq.*;
 import org.jooq.impl.DSL;
 import stellar.database.gen.Tables;
 import stellar.database.gen.tables.records.BansRecord;
+import stellar.database.gen.tables.records.UsersRecord;
 
 import java.sql.*;
 import java.time.LocalDateTime;
@@ -51,18 +52,28 @@ public class Database {
         return context;
     }
 
+    public static UsersRecord getPlayer(String uuid) throws SQLException {
+        return Database.getContext()
+                .selectFrom(Tables.USERS)
+                .where(Tables.USERS.UUID.eq(uuid))
+                .fetchOne();
+    }
+
     public static boolean playerExists(Player player) throws SQLException {
         return Database.getContext().fetchExists(Tables.USERS, Tables.USERS.UUID.eq(player.uuid()));
     }
 
-    public static boolean isBanned(Player player) throws  SQLException {
-        BansRecord record = Database.getContext()
+    public static BansRecord latestBan(Player player) throws SQLException {
+        return Database.getContext()
                 .selectFrom(Tables.BANS)
                 .where(Tables.BANS.TARGET.eq(player.uuid()))
                 .orderBy(Tables.BANS.ID.desc())
                 .limit(1)
                 .fetchOne();
+    }
 
+    public static boolean isBanned(Player player) throws  SQLException {
+        BansRecord record = latestBan(player);
         if (record == null) {
             return false;
         }
