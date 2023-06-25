@@ -185,7 +185,12 @@ public class PlayerCommands {
                 return;
             }
 
-            Variables.votesRTV.add(player.uuid());
+            if (Variables.votesRTV.contains(player.uuid())) {
+                Bundle.bundled(player, "commands.rtv.already-voted");
+                return;
+            }
+
+            Variables.votesRTV.add(player.uuid());          
             int cur = Variables.votesRTV.size;
             int req = (int) Math.ceil(Const.VOTES_RATIO * Groups.player.size());
 
