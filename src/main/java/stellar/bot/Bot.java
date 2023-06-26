@@ -1,5 +1,7 @@
 package stellar.bot;
 
+import arc.struct.Seq;
+import arc.util.CommandHandler;
 import arc.util.Log;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
@@ -7,8 +9,11 @@ import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
+import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.requests.GatewayIntent;
+import net.dv8tion.jda.api.requests.restaction.CommandListUpdateAction;
 import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 import net.dv8tion.jda.api.utils.messages.MessageCreateData;
 import net.dv8tion.jda.api.utils.messages.MessageRequest;
@@ -23,6 +28,7 @@ import static stellar.Variables.config;
 public class Bot {
     private static JDA jda;
     private static TextChannel channel;
+    private static Seq<String> manageCommands = Seq.with("find", "ban", "unban"); // create something better
 
     public static void load() {
         try {
@@ -44,14 +50,33 @@ public class Bot {
             Log.err(e);
         }
         ServerListener.listen();
-        jda.updateCommands().addCommands(
+        CommandListUpdateAction action = jda.updateCommands().addCommands(
                 Commands.slash("info", "Информация про сервер"),
                 Commands.slash("players", "Игроки на сервере"),
                 Commands.slash("host", "Информация про хост"),
                 Commands.slash("maps", "Список карт на сервере"),
                 Commands.slash("skipwave", "Пропустить волну"),
                 Commands.slash("gameover", "Принудительно завершить игру")
-        ).queue();
+        );
+
+        if (config.bot.main || true) {
+            action.addCommands(
+                Commands.slash("find", "Найти игрока")
+                        .addOptions(
+                            new OptionData(OptionType.STRING, "type", "Тип информации по которой искать")
+                                    .addChoice("Имя", "name")
+                                    .addChoice("ID", "id")
+                                    .addChoice("IP", "ip")
+                                    .addChoice("UUID", "uuid")
+                                    .setRequired(true),
+                            new OptionData(OptionType.STRING, "query", "Запрос")
+                                    .setRequired(true)
+                        )
+
+            );
+        }
+
+        action.queue();
     }
 
     public static void shutdown() {

@@ -9,16 +9,22 @@ import mindustry.game.Team;
 import mindustry.gen.Call;
 import mindustry.gen.Groups;
 import mindustry.maps.Map;
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import stellar.database.Database;
+import stellar.database.gen.Tables;
+import stellar.database.gen.tables.records.UsersRecord;
 import stellar.util.StringUtils;
 
 import java.io.File;
 import java.lang.management.ManagementFactory;
+import java.sql.SQLException;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.DoubleSummaryStatistics;
 
 import static mindustry.Vars.*;
@@ -49,7 +55,7 @@ public class DiscordListener extends ListenerAdapter {
             return;
         }
         Log.info("Got @ command from @", event.getName(), event.getMember().getUser().getName());
-        switch (event.getName()) {
+        switch (event.getName()) { // TODO: use command handler
             case "info" -> {
                 String text = String.format("""
                         Карта: **%s** | Волна: **%s**
@@ -125,6 +131,135 @@ public class DiscordListener extends ListenerAdapter {
                 String text = String.format("Игра окончена. Всего волн: %s на карте %s", state.wave, state.map.name());
                 MessageEmbed embed = Util.embedBuilder(text, Colors.blue);
                 event.replyEmbeds(embed).queue();
+            }
+            case "find" -> {
+                if (!event.getMember().hasPermission(Permission.ADMINISTRATOR)) {
+                    MessageEmbed embed = Util.embedBuilder("В доступе отказано", Colors.red);
+                    event.replyEmbeds(embed).queue();
+                    return;
+                }
+
+                String query = event.getOption("query").getAsString();
+                Log.debug("@ - @", event.getOption("type").getAsString(), query);
+                try {
+                    switch (event.getOption("type").getAsString()) {
+                        case "uuid" -> {
+                            UsersRecord record = Database.getPlayer(query);
+                            MessageEmbed embed;
+                            if (record == null) {
+                                embed = Util.embedBuilder("Игрок не найден", Colors.red);
+                            } else {
+                                String message = String.format("""
+                                        UUID: `%s`
+                                        Имя: %s
+                                        Айди: %s
+                                        Последний айпи: %s
+                                        Администратор: %s
+                                        """, record.getUuid(), record.getName(), record.getId(), record.getIp(), record.getAdmin() == 1);
+                                embed = Util.embedBuilder("Информация", message, Colors.purple);
+                            }
+
+                            event.replyEmbeds(embed).queue();
+                        } case "name" -> {
+                            StringBuilder builder = new StringBuilder();
+                            for (int i = 0; i < query.length(); i++) {
+                                builder.append("%").append(query.charAt(i));
+                            }
+                            builder.append("%");
+
+                            UsersRecord[] records = Database.getContext()
+                                    .selectFrom(Tables.USERS)
+                                    .where(Tables.USERS.NAME.likeIgnoreCase(builder.toString()))
+                                    .limit(20)
+                                    .fetchArray();
+
+                            if (records.length == 0) {
+                                event.replyEmbeds(Util.embedBuilder("Ничего не найдено", Colors.red)).queue();
+                                return;
+                            }
+
+                            EmbedBuilder embedBuilder = new EmbedBuilder()
+                                    .setTitle("Результат запроса")
+                                    .setColor(Colors.purple);
+
+                            for (UsersRecord record : Arrays.copyOfRange(records, 0, Math.min(records.length, 15))) {
+                                String message = String.format("""
+                                        UUID: `%s`
+                                        Имя: %s
+                                        Айди: %s
+                                        Последний айпи: %s
+                                        Администратор: %s
+                                        """, record.getUuid(), record.getName(), record.getId(), record.getIp(), record.getAdmin() == 1);
+                                embedBuilder.addField(StringUtils.stripColorsAndGlyphs(record.getName()), message, false);
+                            }
+
+                            if (records.length > 15) {
+                                embedBuilder.setFooter("Найдено больше 15 ползователей. Пожалуйста задайте запрос конкретнее");
+                            }
+
+                            event.replyEmbeds(embedBuilder.build()).queue();
+                        } case "id" -> {
+                            int id;
+                            try {
+                                id = Integer.parseInt(query);
+                            } catch (Exception e) {
+                                event.replyEmbeds(Util.embedBuilder("Невалидный айди", Colors.red)).queue();
+                                return;
+                            }
+
+                            UsersRecord record = Database.getPlayer(id);
+                            MessageEmbed embed;
+                            if (record == null) {
+                                embed = Util.embedBuilder("Игрок не найден", Colors.red);
+                            } else {
+                                String message = String.format("""
+                                        UUID: `%s`
+                                        Имя: %s
+                                        Айди: %s
+                                        Последний айпи: %s
+                                        Администратор: %s
+                                        """, record.getUuid(), record.getName(), record.getId(), record.getIp(), record.getAdmin() == 1);
+                                embed = Util.embedBuilder("Информация", message, Colors.purple);
+                            }
+
+                            event.replyEmbeds(embed).queue();
+                        } case "ip" -> {
+                            UsersRecord[] records = Database.getContext()
+                                    .selectFrom(Tables.USERS)
+                                    .where(Tables.USERS.IP.contains(query))
+                                    .limit(20)
+                                    .fetchArray();
+
+                            if (records.length == 0) {
+                                event.replyEmbeds(Util.embedBuilder("Ничего не найдено", Colors.red)).queue();
+                                return;
+                            }
+
+                            EmbedBuilder embedBuilder = new EmbedBuilder()
+                                    .setTitle("Результат запроса")
+                                    .setColor(Colors.purple);
+
+                            for (UsersRecord record : Arrays.copyOfRange(records, 0, Math.min(records.length, 15))) {
+                                String message = String.format("""
+                                        UUID: `%s`
+                                        Имя: %s
+                                        Айди: %s
+                                        Последний айпи: %s
+                                        Администратор: %s
+                                        """, record.getUuid(), record.getName(), record.getId(), record.getIp(), record.getAdmin() == 1);
+                                embedBuilder.addField(StringUtils.stripColorsAndGlyphs(record.getName()), message, false);
+                            }
+
+                            if (records.length > 15) { // TODO: pages
+                                embedBuilder.setFooter("Найдено больше 15 ползователей. Пожалуйста задайте запрос конкретнее");
+                            }
+
+                            event.replyEmbeds(embedBuilder.build()).queue();
+                        }
+                    }
+                } catch (SQLException e) {
+                    Log.err(e);
+                }
             }
         }
     }

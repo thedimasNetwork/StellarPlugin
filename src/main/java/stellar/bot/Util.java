@@ -22,6 +22,13 @@ public class Util {
                 .build();
     }
 
+    public static MessageEmbed embedBuilder(String title, String description, Color color) {
+        return new EmbedBuilder()
+                .addField(title, description, false)
+                .setColor(color)
+                .build();
+    }
+
     public static MessageEmbed embedBuilder(String title, String description, Color color, LocalDateTime time) {
         return new EmbedBuilder()
                 .addField(title, description, false)

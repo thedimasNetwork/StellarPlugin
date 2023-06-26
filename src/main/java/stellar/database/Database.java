@@ -1,6 +1,7 @@
 package stellar.database;
 
 import arc.util.Log;
+import arc.util.Nullable;
 import com.mysql.cj.jdbc.exceptions.CommunicationsException;
 import mindustry.gen.Player;
 import org.jooq.*;
@@ -52,10 +53,19 @@ public class Database {
         return context;
     }
 
+    @Nullable
     public static UsersRecord getPlayer(String uuid) throws SQLException {
         return Database.getContext()
                 .selectFrom(Tables.USERS)
                 .where(Tables.USERS.UUID.eq(uuid))
+                .fetchOne();
+    }
+
+    @Nullable
+    public static UsersRecord getPlayer(int id) throws SQLException {
+        return Database.getContext()
+                .selectFrom(Tables.USERS)
+                .where(Tables.USERS.ID.eq(id))
                 .fetchOne();
     }
 
