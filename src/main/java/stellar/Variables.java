@@ -7,7 +7,7 @@ import arc.util.Interval;
 import stellar.history.entry.HistoryEntry;
 import stellar.history.struct.CacheSeq;
 import stellar.history.struct.Seqs;
-import types.AdminActionEntry;
+import stellar.types.AdminActionEntry;
 
 import java.time.Duration;
 

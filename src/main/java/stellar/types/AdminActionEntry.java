@@ -1,4 +1,4 @@
-package types;
+package stellar.types;
 
 import lombok.Getter;
 import lombok.Setter;

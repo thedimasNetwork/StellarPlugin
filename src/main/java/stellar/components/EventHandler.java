@@ -31,7 +31,7 @@ import stellar.util.Bundle;
 import stellar.util.Players;
 import stellar.util.Translator;
 import stellar.util.logger.DiscordLogger;
-import types.AdminActionEntry;
+import stellar.types.AdminActionEntry;
 
 import java.sql.SQLException;
 import java.time.LocalDateTime;
