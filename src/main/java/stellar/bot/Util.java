@@ -5,6 +5,8 @@ import net.dv8tion.jda.api.entities.MessageEmbed;
 
 import java.awt.*;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 
 public class Util {
     public static MessageEmbed embedBuilder(String text, Color color) {
@@ -18,7 +20,7 @@ public class Util {
         return new EmbedBuilder()
                 .setDescription(text)
                 .setColor(color)
-                .setTimestamp(time)
+                .setTimestamp(time.atZone(ZoneId.systemDefault()).withZoneSameInstant(ZoneId.of("UTC")))
                 .build();
     }
 
@@ -33,7 +35,7 @@ public class Util {
         return new EmbedBuilder()
                 .addField(title, description, false)
                 .setColor(color)
-                .setTimestamp(time)
+                .setTimestamp(time.atZone(ZoneId.systemDefault()).withZoneSameInstant(ZoneId.of("UTC")))
                 .build();
     }
 
@@ -41,9 +43,8 @@ public class Util {
         return new EmbedBuilder()
                 .addField(title, description, false)
                 .setColor(color)
-                .setTimestamp(time)
+                .setTimestamp(time.atZone(ZoneId.systemDefault()).withZoneSameInstant(ZoneId.of("UTC")))
                 .setFooter(footer)
                 .build();
     }
-
 }

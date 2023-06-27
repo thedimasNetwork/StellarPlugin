@@ -174,7 +174,8 @@ public class DiscordListener extends ListenerAdapter {
                                     .fetchArray();
 
                             if (records.length == 0) {
-                                event.replyEmbeds(Util.embedBuilder("Ничего не найдено", Colors.red)).queue();
+                                MessageEmbed embed = Util.embedBuilder("Ничего не найдено", Colors.red);
+                                event.replyEmbeds(embed).queue();
                                 return;
                             }
 
@@ -203,7 +204,8 @@ public class DiscordListener extends ListenerAdapter {
                             try {
                                 id = Integer.parseInt(query);
                             } catch (Exception e) {
-                                event.replyEmbeds(Util.embedBuilder("Невалидный айди", Colors.red)).queue();
+                                MessageEmbed embed = Util.embedBuilder("Невалидный айди", Colors.red);
+                                event.replyEmbeds(embed).queue();
                                 return;
                             }
 
@@ -231,7 +233,8 @@ public class DiscordListener extends ListenerAdapter {
                                     .fetchArray();
 
                             if (records.length == 0) {
-                                event.replyEmbeds(Util.embedBuilder("Ничего не найдено", Colors.red)).queue();
+                                MessageEmbed embed = Util.embedBuilder("Ничего не найдено", Colors.red);
+                                event.replyEmbeds(embed).queue();
                                 return;
                             }
 

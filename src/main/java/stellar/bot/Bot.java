@@ -28,7 +28,6 @@ import static stellar.Variables.config;
 public class Bot {
     private static JDA jda;
     private static TextChannel channel;
-    private static Seq<String> manageCommands = Seq.with("find", "ban", "unban"); // create something better
 
     public static void load() {
         try {
@@ -50,33 +49,26 @@ public class Bot {
             Log.err(e);
         }
         ServerListener.listen();
-        CommandListUpdateAction action = jda.updateCommands().addCommands(
+        jda.updateCommands().addCommands(
                 Commands.slash("info", "Информация про сервер"),
                 Commands.slash("players", "Игроки на сервере"),
                 Commands.slash("host", "Информация про хост"),
                 Commands.slash("maps", "Список карт на сервере"),
                 Commands.slash("skipwave", "Пропустить волну"),
-                Commands.slash("gameover", "Принудительно завершить игру")
-        );
-
-        if (config.bot.main || true) {
-            action.addCommands(
+                Commands.slash("gameover", "Принудительно завершить игру"),
                 Commands.slash("find", "Найти игрока")
                         .addOptions(
-                            new OptionData(OptionType.STRING, "type", "Тип информации по которой искать")
-                                    .addChoice("Имя", "name")
-                                    .addChoice("ID", "id")
-                                    .addChoice("IP", "ip")
-                                    .addChoice("UUID", "uuid")
-                                    .setRequired(true),
-                            new OptionData(OptionType.STRING, "query", "Запрос")
-                                    .setRequired(true)
+                                new OptionData(OptionType.STRING, "type", "Тип информации по которой искать")
+                                        .addChoice("Имя", "name")
+                                        .addChoice("Айди", "id")
+                                        .addChoice("Айпи", "ip")
+                                        .addChoice("UUID", "uuid")
+                                        .setRequired(true),
+                                new OptionData(OptionType.STRING, "query", "Запрос")
+                                        .setRequired(true)
                         )
 
-            );
-        }
-
-        action.queue();
+        ).queue();
     }
 
     public static void shutdown() {
