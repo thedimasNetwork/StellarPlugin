@@ -73,7 +73,7 @@ public class DiscordListener extends ListenerAdapter {
                     MessageEmbed embed = Util.embedBuilder("Игроки", players.toString(), Colors.blue, LocalDateTime.now());
                     event.replyEmbeds(embed).queue();
                 } else {
-                    MessageEmbed embed = Util.embedBuilder("Никого нет", Colors.blue, LocalDateTime.now());
+                    MessageEmbed embed = Util.embedBuilder("Никого нет", Colors.blue);
                     event.replyEmbeds(embed).queue();
                 }
             }

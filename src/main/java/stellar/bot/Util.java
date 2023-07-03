@@ -16,14 +16,6 @@ public class Util {
                 .build();
     }
 
-    public static MessageEmbed embedBuilder(String text, Color color, LocalDateTime time) {
-        return new EmbedBuilder()
-                .setDescription(text)
-                .setColor(color)
-                .setTimestamp(time.atZone(ZoneId.systemDefault()).withZoneSameInstant(ZoneId.of("UTC")))
-                .build();
-    }
-
     public static MessageEmbed embedBuilder(String title, String description, Color color) {
         return new EmbedBuilder()
                 .addField(title, description, false)
