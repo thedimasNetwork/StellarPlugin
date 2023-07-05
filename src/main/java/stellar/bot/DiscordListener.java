@@ -23,11 +23,9 @@ import stellar.database.Database;
 import stellar.database.gen.Tables;
 import stellar.database.gen.tables.records.BansRecord;
 import stellar.database.gen.tables.records.UsersRecord;
-import stellar.types.AdminActionEntry;
 import stellar.util.Players;
 import stellar.util.StringUtils;
 
-import java.awt.*;
 import java.io.File;
 import java.lang.management.ManagementFactory;
 import java.sql.SQLException;
@@ -299,7 +297,7 @@ public class DiscordListener extends ListenerAdapter {
                                 } else {
                                     message += "**Срок**: Перманентный";
                                 }
-                                MessageEmbed embed = Util.embedBuilder("Бан (через Discord)", message, Colors.purple);
+                                MessageEmbed embed = Util.embedBuilder("Бан (через Discord)", message, Colors.red);
                                 Bot.sendEmbed(config.bot.bansId, embed);
                                 player.kick(Packets.KickReason.banned);
                             } else {
@@ -329,7 +327,7 @@ public class DiscordListener extends ListenerAdapter {
                                 } else {
                                     message += "**Срок**: Перманентный";
                                 }
-                                MessageEmbed embed = Util.embedBuilder("Бан", message, Colors.purple);
+                                MessageEmbed embed = Util.embedBuilder("Бан", message, Colors.red);
                                 Bot.sendEmbed(config.bot.bansId, embed);
                             }
                             MessageEmbed embed = Util.embedBuilder("Игрок забанен", Colors.green);
@@ -368,7 +366,7 @@ public class DiscordListener extends ListenerAdapter {
                             MessageEmbed embed = Util.embedBuilder("Игрок забанен", Colors.green);
                             event.replyEmbeds(embed).setEphemeral(true).queue();
 
-                            MessageEmbed banEmbed = Util.embedBuilder("Бан (через Discord)", message, Colors.purple);
+                            MessageEmbed banEmbed = Util.embedBuilder("Бан (через Discord)", message, Colors.red);
                             Bot.sendEmbed(config.bot.bansId, banEmbed);
                             player.kick(Packets.KickReason.banned);
                         }
