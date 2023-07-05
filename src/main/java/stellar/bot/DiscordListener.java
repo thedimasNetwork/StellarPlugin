@@ -299,7 +299,7 @@ public class DiscordListener extends ListenerAdapter {
                                 } else {
                                     message += "**Срок**: Перманентный";
                                 }
-                                MessageEmbed embed = Util.embedBuilder("Бан", message, Colors.purple);
+                                MessageEmbed embed = Util.embedBuilder("Бан (через Discord)", message, Colors.purple);
                                 Bot.sendEmbed(config.bot.bansId, embed);
                                 player.kick(Packets.KickReason.banned);
                             } else {
@@ -318,11 +318,11 @@ public class DiscordListener extends ListenerAdapter {
                                 bansRecord.store();
 
                                 String message = """
-                                **Админ**: %admin% (%aid%)
+                                **Админ**: <@%aid%> (%admin%)
                                 **Нарушитель**: %target% (%tid%)
                                 **Причина**: %reason%
-                                """.replace("%admin%", event.getUser().getName()).replace("%aid%", event.getUser().getId())
-                                        .replace("%target%", player.name).replace("%tid%", record.getId().toString())
+                                """.replace("%aid%", event.getUser().getId()).replace("%admin%", event.getUser().getName())
+                                        .replace("%target%", record.getName()).replace("%tid%", record.getId().toString())
                                         .replace("%reason%", reason);
                                 if (period > -1) {
                                     message += "**Срок**: <t:%timestamp%:f>".replace("%timestamp%", (System.currentTimeMillis() / 1000 + period * (24 * 60 * 60)) + "");
@@ -336,7 +336,41 @@ public class DiscordListener extends ListenerAdapter {
                             event.replyEmbeds(embed).setEphemeral(true).queue();
                         }
                         case "name" -> {
+                            Player player = Players.findPlayer(query);
+                            if (player == null) {
+                                MessageEmbed embed = Util.embedBuilder("Игрок не найден", Colors.red);
+                                event.replyEmbeds(embed).setEphemeral(true).queue();
+                                return;
+                            }
 
+                            UsersRecord record = Database.getPlayer(player.uuid());
+                            BansRecord bansRecord = Database.getContext().newRecord(Tables.BANS);
+                            bansRecord.setAdmin(event.getUser().getName());
+                            bansRecord.setTarget(player.uuid());
+                            bansRecord.setCreated(LocalDateTime.now());
+                            if (period > -1) { bansRecord.setUntil(LocalDateTime.now().plusDays(period)); }
+                            bansRecord.setReason(reason);
+                            bansRecord.store();
+
+                            String message = """
+                                **Админ**: <@%aid%> (%admin%)
+                                **Нарушитель**: %target% (%tid%)
+                                **Причина**: %reason%
+                                """.replace("%aid%", event.getUser().getId()).replace("%admin%", event.getUser().getName())
+                                    .replace("%target%", player.name).replace("%tid%", record.getId().toString())
+                                    .replace("%reason%", reason);
+                            if (period > -1) {
+                                message += "**Срок**: <t:%timestamp%:f>".replace("%timestamp%", (System.currentTimeMillis() / 1000 + period * (24 * 60 * 60)) + "");
+                            } else {
+                                message += "**Срок**: Перманентный";
+                            }
+
+                            MessageEmbed embed = Util.embedBuilder("Игрок забанен", Colors.green);
+                            event.replyEmbeds(embed).setEphemeral(true).queue();
+
+                            MessageEmbed banEmbed = Util.embedBuilder("Бан (через Discord)", message, Colors.purple);
+                            Bot.sendEmbed(config.bot.bansId, banEmbed);
+                            player.kick(Packets.KickReason.banned);
                         }
                         case "id" -> {
 
