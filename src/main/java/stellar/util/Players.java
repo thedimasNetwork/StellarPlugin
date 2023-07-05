@@ -1,6 +1,5 @@
 package stellar.util;
 
-import arc.util.Log;
 import arc.util.Nullable;
 import arc.util.Strings;
 import mindustry.gen.Groups;
@@ -10,6 +9,11 @@ import stellar.Variables;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Players {
+   @Nullable
+   public static Player getPlayer(String uuid) {
+       return Groups.player.find(player -> player.uuid().equals(uuid));
+   }
+
     @Nullable
     public static Player findPlayer(String name) {
         String replacedName = name.replace('_', ' ');

@@ -55,7 +55,7 @@ public class EventHandler {
                         Locale locale = Bundle.findLocale(event.player.locale());
                         BansRecord record = Database.latestBan(event.player);
                         UsersRecord admin = Database.getPlayer(record.getAdmin());
-                        String adminName = Strings.stripColors(admin.getName());
+                        String adminName = admin != null ? Strings.stripColors(admin.getName()) : record.getAdmin();
                         String banDate = record.getCreated().format(Const.DATE_FORMATTER);
                         String unbanDate = record.getUntil() != null ? record.getUntil().format(Const.DATE_FORMATTER) : Bundle.get("events.join.banned.forever", locale);
 

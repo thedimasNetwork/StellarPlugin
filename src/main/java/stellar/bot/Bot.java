@@ -66,8 +66,21 @@ public class Bot {
                                         .setRequired(true),
                                 new OptionData(OptionType.STRING, "query", "Запрос")
                                         .setRequired(true)
+                        ),
+                Commands.slash("ban", "Забанить игрока")
+                        .addOptions(
+                                new OptionData(OptionType.STRING, "type", "Тип информации по которой банить")
+                                        .addChoice("Имя", "name")
+                                        .addChoice("Айди", "id")
+//                                        .addChoice("Айпи", "ip") // TODO: ip ban
+                                        .addChoice("UUID", "uuid")
+                                        .setRequired(true),
+                                new OptionData(OptionType.STRING, "query", "Запрос")
+                                        .setRequired(true),
+                                new OptionData(OptionType.STRING, "reason", "Причина")
+                                        .setRequired(true),
+                                new OptionData(OptionType.INTEGER, "period", "Период")
                         )
-
         ).queue();
     }
 
