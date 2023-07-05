@@ -297,7 +297,7 @@ public class DiscordListener extends ListenerAdapter {
                                 } else {
                                     message += "**Срок**: Перманентный";
                                 }
-                                MessageEmbed embed = Util.embedBuilder("Бан (через Discord)", message, Colors.red);
+                                MessageEmbed embed = Util.embedBuilder("Бан (через Discord)", message, Colors.red, LocalDateTime.now());
                                 Bot.sendEmbed(config.bot.bansId, embed);
                                 player.kick(Packets.KickReason.banned);
                             } else {
@@ -327,7 +327,7 @@ public class DiscordListener extends ListenerAdapter {
                                 } else {
                                     message += "**Срок**: Перманентный";
                                 }
-                                MessageEmbed embed = Util.embedBuilder("Бан", message, Colors.red);
+                                MessageEmbed embed = Util.embedBuilder("Бан (через дискорд)", message, Colors.red, LocalDateTime.now());
                                 Bot.sendEmbed(config.bot.bansId, embed);
                             }
                             MessageEmbed embed = Util.embedBuilder("Игрок забанен", Colors.green);
@@ -366,7 +366,7 @@ public class DiscordListener extends ListenerAdapter {
                             MessageEmbed embed = Util.embedBuilder("Игрок забанен", Colors.green);
                             event.replyEmbeds(embed).setEphemeral(true).queue();
 
-                            MessageEmbed banEmbed = Util.embedBuilder("Бан (через Discord)", message, Colors.red);
+                            MessageEmbed banEmbed = Util.embedBuilder("Бан (через Discord)", message, Colors.red, LocalDateTime.now());
                             Bot.sendEmbed(config.bot.bansId, banEmbed);
                             player.kick(Packets.KickReason.banned);
                         }
@@ -414,7 +414,7 @@ public class DiscordListener extends ListenerAdapter {
                             MessageEmbed embed = Util.embedBuilder("Игрок забанен", Colors.green);
                             event.replyEmbeds(embed).setEphemeral(true).queue();
 
-                            MessageEmbed banEmbed = Util.embedBuilder("Бан (через Discord)", message, Colors.red);
+                            MessageEmbed banEmbed = Util.embedBuilder("Бан (через Discord)", message, Colors.red, LocalDateTime.now());
                             Bot.sendEmbed(config.bot.bansId, banEmbed);
                         }
                     }
