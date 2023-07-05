@@ -146,7 +146,7 @@ public class DiscordListener extends ListenerAdapter {
                             MessageEmbed embed;
                             if (record == null) {
                                 embed = Util.embedBuilder("Игрок не найден", Colors.red);
-                                event.replyEmbeds(embed).queue();
+                                event.replyEmbeds(embed).setEphemeral(true).queue();
                                 return;
                             }
                             String message = String.format("""
@@ -157,7 +157,7 @@ public class DiscordListener extends ListenerAdapter {
                                     Администратор: %s
                                     """, record.getUuid(), record.getName(), record.getId(), record.getIp(), record.getAdmin() == 1);
                             embed = Util.embedBuilder("Информация", message, Colors.purple);
-                            event.replyEmbeds(embed).queue();
+                            event.replyEmbeds(embed).setEphemeral(true).queue();
                         } case "name" -> {
                             StringBuilder builder = new StringBuilder();
                             for (int i = 0; i < query.length(); i++) {
@@ -173,7 +173,7 @@ public class DiscordListener extends ListenerAdapter {
 
                             if (records.length == 0) {
                                 MessageEmbed embed = Util.embedBuilder("Игрок не найден", Colors.red);
-                                event.replyEmbeds(embed).queue();
+                                event.replyEmbeds(embed).setEphemeral(true).queue();
                                 return;
                             }
 
@@ -196,31 +196,31 @@ public class DiscordListener extends ListenerAdapter {
                                 embedBuilder.setFooter("Найдено больше 15 ползователей. Пожалуйста задайте запрос конкретнее");
                             }
 
-                            event.replyEmbeds(embedBuilder.build()).queue();
+                            event.replyEmbeds(embedBuilder.build()).setEphemeral(true).queue();
                         } case "id" -> {
-                            if (!Strings.canParseInt("query")) {
+                            if (!Strings.canParseInt(query)) {
                                 MessageEmbed embed = Util.embedBuilder("Невалидный айди", Colors.red);
-                                event.replyEmbeds(embed).queue();
+                                event.replyEmbeds(embed).setEphemeral(true).queue();
                                 return;
                             }
 
                             int id = Integer.parseInt(query);
                             UsersRecord record = Database.getPlayer(id);
-                            MessageEmbed embed;
                             if (record == null) {
-                                embed = Util.embedBuilder("Игрок не найден", Colors.red);
-                            } else {
-                                String message = String.format("""
-                                        UUID: `%s`
-                                        Имя: %s
-                                        Айди: %s
-                                        Последний айпи: %s
-                                        Администратор: %s
-                                        """, record.getUuid(), record.getName(), record.getId(), record.getIp(), record.getAdmin() == 1);
-                                embed = Util.embedBuilder("Информация", message, Colors.purple);
+                                MessageEmbed embed = Util.embedBuilder("Игрок не найден", Colors.red);
+                                event.replyEmbeds(embed).setEphemeral(true).queue();
+                                return;
                             }
+                            String message = String.format("""
+                                    UUID: `%s`
+                                    Имя: %s
+                                    Айди: %s
+                                    Последний айпи: %s
+                                    Администратор: %s
+                                    """, record.getUuid(), record.getName(), record.getId(), record.getIp(), record.getAdmin() == 1);
 
-                            event.replyEmbeds(embed).queue();
+                            MessageEmbed embed = Util.embedBuilder("Информация", message, Colors.purple);
+                            event.replyEmbeds(embed).setEphemeral(true).queue();
                         } case "ip" -> {
                             UsersRecord[] records = Database.getContext()
                                     .selectFrom(Tables.USERS)
@@ -230,7 +230,7 @@ public class DiscordListener extends ListenerAdapter {
 
                             if (records.length == 0) {
                                 MessageEmbed embed = Util.embedBuilder("Ничего не найдено", Colors.red);
-                                event.replyEmbeds(embed).queue();
+                                event.replyEmbeds(embed).setEphemeral(true).queue();
                                 return;
                             }
 
@@ -253,7 +253,7 @@ public class DiscordListener extends ListenerAdapter {
                                 embedBuilder.setFooter("Найдено больше 15 ползователей. Пожалуйста задайте запрос конкретнее");
                             }
 
-                            event.replyEmbeds(embedBuilder.build()).queue();
+                            event.replyEmbeds(embedBuilder.build()).setEphemeral(true).queue();
                         }
                     }
                 } catch (SQLException e) {
@@ -371,7 +371,51 @@ public class DiscordListener extends ListenerAdapter {
                             player.kick(Packets.KickReason.banned);
                         }
                         case "id" -> {
+                            if (!Strings.canParseInt(query)) {
+                                MessageEmbed embed = Util.embedBuilder("Невалидный айди", Colors.red);
+                                event.replyEmbeds(embed).setEphemeral(true).queue();
+                                return;
+                            }
 
+                            int id = Integer.parseInt(query);
+                            UsersRecord record = Database.getPlayer(id);
+                            if (record == null) {
+                                MessageEmbed embed = Util.embedBuilder("Игрок не найден", Colors.red);
+                                event.replyEmbeds(embed).setEphemeral(true).queue();
+                                return;
+                            }
+
+                            Player player = Players.getPlayer(record.getUuid());
+                            if (player != null) {
+                                player.kick(Packets.KickReason.banned);
+                            }
+
+                            BansRecord bansRecord = Database.getContext().newRecord(Tables.BANS);
+                            bansRecord.setAdmin(event.getUser().getName());
+                            bansRecord.setTarget(record.getUuid());
+                            bansRecord.setCreated(LocalDateTime.now());
+                            if (period > -1) { bansRecord.setUntil(LocalDateTime.now().plusDays(period)); }
+                            bansRecord.setReason(reason);
+                            bansRecord.store();
+
+                            String message = """
+                                **Админ**: <@%aid%> (%admin%)
+                                **Нарушитель**: %target% (%tid%)
+                                **Причина**: %reason%
+                                """.replace("%aid%", event.getUser().getId()).replace("%admin%", event.getUser().getName())
+                                    .replace("%target%", record.getName()).replace("%tid%", record.getId().toString())
+                                    .replace("%reason%", reason);
+                            if (period > -1) {
+                                message += "**Срок**: <t:%timestamp%:f>".replace("%timestamp%", (System.currentTimeMillis() / 1000 + period * (24 * 60 * 60)) + "");
+                            } else {
+                                message += "**Срок**: Перманентный";
+                            }
+
+                            MessageEmbed embed = Util.embedBuilder("Игрок забанен", Colors.green);
+                            event.replyEmbeds(embed).setEphemeral(true).queue();
+
+                            MessageEmbed banEmbed = Util.embedBuilder("Бан (через Discord)", message, Colors.red);
+                            Bot.sendEmbed(config.bot.bansId, banEmbed);
                         }
                     }
                 } catch (SQLException e) {
