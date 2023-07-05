@@ -51,9 +51,9 @@ public class EventHandler {
             String name = event.player.name;
             try {
                 if (Database.playerExists(event.player)) {
-                    if (Database.isBanned(event.player)) {
+                    if (Database.isBanned(event.player.uuid())) {
                         Locale locale = Bundle.findLocale(event.player.locale());
-                        BansRecord record = Database.latestBan(event.player);
+                        BansRecord record = Database.latestBan(event.player.uuid());
                         UsersRecord admin = Database.getPlayer(record.getAdmin());
                         String adminName = admin != null ? Strings.stripColors(admin.getName()) : record.getAdmin();
                         String banDate = record.getCreated().format(Const.DATE_FORMATTER);

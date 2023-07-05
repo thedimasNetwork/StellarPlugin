@@ -2,6 +2,8 @@ package stellar.bot;
 
 import java.awt.*;
 
+
+// Maybe include https://gist.github.com/thomasbnt/b6f455e2c7d743b796917fa3c205f812
 public class Colors {
     public static final Color red = new Color(0xF04747);
     public static final Color green = new Color(0x43B581);

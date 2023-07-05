@@ -80,6 +80,15 @@ public class Bot {
                                 new OptionData(OptionType.STRING, "reason", "Причина")
                                         .setRequired(true),
                                 new OptionData(OptionType.INTEGER, "period", "Период")
+                        ),
+                Commands.slash("unban", "Забанить игрока")
+                        .addOptions(
+                                new OptionData(OptionType.STRING, "type", "Тип информации по которой банить")
+                                        .addChoice("Айди", "id")
+                                        .addChoice("UUID", "uuid")
+                                        .setRequired(true),
+                                new OptionData(OptionType.STRING, "query", "Запрос")
+                                        .setRequired(true)
                         )
         ).queue();
     }

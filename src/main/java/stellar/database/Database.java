@@ -73,17 +73,17 @@ public class Database {
         return Database.getContext().fetchExists(Tables.USERS, Tables.USERS.UUID.eq(player.uuid()));
     }
 
-    public static BansRecord latestBan(Player player) throws SQLException {
+    public static BansRecord latestBan(String uuid) throws SQLException {
         return Database.getContext()
                 .selectFrom(Tables.BANS)
-                .where(Tables.BANS.TARGET.eq(player.uuid()))
+                .where(Tables.BANS.TARGET.eq(uuid))
                 .orderBy(Tables.BANS.ID.desc())
                 .limit(1)
                 .fetchOne();
     }
 
-    public static boolean isBanned(Player player) throws  SQLException {
-        BansRecord record = latestBan(player);
+    public static boolean isBanned(String uuid) throws  SQLException {
+        BansRecord record = latestBan(uuid);
         if (record == null) {
             return false;
         }
