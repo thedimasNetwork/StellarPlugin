@@ -204,7 +204,7 @@ public class DiscordListener extends ListenerAdapter {
                                 return;
                             }
 
-                            int id = Integer.parseInt(query);
+                            int id = Strings.parseInt(query);
                             UsersRecord record = Database.getPlayer(id);
                             if (record == null) {
                                 MessageEmbed embed = Util.embedBuilder("Игрок не найден", Colors.red);
@@ -320,7 +320,7 @@ public class DiscordListener extends ListenerAdapter {
                                 **Нарушитель**: %target% (%tid%)
                                 **Причина**: %reason%
                                 """.replace("%aid%", event.getUser().getId()).replace("%admin%", event.getUser().getName())
-                                        .replace("%target%", record.getName()).replace("%tid%", record.getId().toString())
+                                        .replace("%target%", Strings.stripColors(record.getName())).replace("%tid%", record.getId().toString())
                                         .replace("%reason%", reason);
                                 if (period > -1) {
                                     message += "**Срок**: <t:%timestamp%:f>".replace("%timestamp%", (System.currentTimeMillis() / 1000 + period * (24 * 60 * 60)) + "");
@@ -358,7 +358,7 @@ public class DiscordListener extends ListenerAdapter {
                                 **Нарушитель**: %target% (%tid%)
                                 **Причина**: %reason%
                                 """.replace("%aid%", event.getUser().getId()).replace("%admin%", event.getUser().getName())
-                                    .replace("%target%", player.name).replace("%tid%", record.getId().toString())
+                                    .replace("%target%", Strings.stripColors(player.name())).replace("%tid%", record.getId().toString())
                                     .replace("%reason%", reason);
                             if (period > -1) {
                                 message += "**Срок**: <t:%timestamp%:f>".replace("%timestamp%", (System.currentTimeMillis() / 1000 + period * (24 * 60 * 60)) + "");
@@ -376,7 +376,7 @@ public class DiscordListener extends ListenerAdapter {
                                 return;
                             }
 
-                            int id = Integer.parseInt(query);
+                            int id = Strings.parseInt(query);
                             UsersRecord record = Database.getPlayer(id);
                             if (record == null) {
                                 MessageEmbed embed = Util.embedBuilder("Игрок не найден", Colors.red);
@@ -405,7 +405,7 @@ public class DiscordListener extends ListenerAdapter {
                                 **Нарушитель**: %target% (%tid%)
                                 **Причина**: %reason%
                                 """.replace("%aid%", event.getUser().getId()).replace("%admin%", event.getUser().getName())
-                                    .replace("%target%", record.getName()).replace("%tid%", record.getId().toString())
+                                    .replace("%target%", Strings.stripColors(record.getName())).replace("%tid%", record.getId().toString())
                                     .replace("%reason%", reason);
                             if (period > -1) {
                                 message += "**Срок**: <t:%timestamp%:f>".replace("%timestamp%", (System.currentTimeMillis() / 1000 + period * (24 * 60 * 60)) + "");
@@ -437,7 +437,7 @@ public class DiscordListener extends ListenerAdapter {
                                 return;
                             }
 
-                            int id = Integer.parseInt(query);
+                            int id = Strings.parseInt(query);
                             UsersRecord record = Database.getPlayer(id);
                             if (record == null) {
                                 MessageEmbed embed = Util.embedBuilder("Игрок не найден", Colors.red);
@@ -459,10 +459,8 @@ public class DiscordListener extends ListenerAdapter {
                             String message = """
                                 **Админ**: <@%aid%> (%admin%)
                                 **Нарушитель**: %target% (%tid%)
-                                **Айди бана**: %bid%
                                 """.replace("%aid%", event.getUser().getId()).replace("%admin%", event.getUser().getName())
-                                    .replace("%target%", record.getName()).replace("%tid%", record.getId().toString())
-                                    .replace("%bid%", bansRecord.getId().toString());
+                                    .replace("%target%", record.getName()).replace("%tid%", record.getId().toString());
                             MessageEmbed banEmbed = Util.embedBuilder("Разбан (через Discord)", message, Colors.green, LocalDateTime.now());
                             Bot.sendEmbed(config.bot.bansId, banEmbed);
 
@@ -488,10 +486,8 @@ public class DiscordListener extends ListenerAdapter {
                             String message = """
                                 **Админ**: <@%aid%> (%admin%)
                                 **Нарушитель**: %target% (%tid%)
-                                **Айди бана**: %bid%
                                 """.replace("%aid%", event.getUser().getId()).replace("%admin%", event.getUser().getName())
-                                    .replace("%target%", record.getName()).replace("%tid%", record.getId().toString())
-                                    .replace("%bid%", bansRecord.getId().toString());
+                                    .replace("%target%", Strings.stripColors(record.getName())).replace("%tid%", record.getId().toString());
                             MessageEmbed banEmbed = Util.embedBuilder("Разбан (через Discord)", message, Colors.green, LocalDateTime.now());
                             Bot.sendEmbed(config.bot.bansId, banEmbed);
                         }

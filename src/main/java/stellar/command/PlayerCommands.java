@@ -213,7 +213,7 @@ public class PlayerCommands {
         commandHandler.<Player>register("hub", "commands.hub.description", (args, player) -> {
             String[] address = Const.SERVER_ADDRESS.get("hub").split(":");
             String ip = address[0];
-            int port = Integer.parseInt(address[1]);
+            int port = Strings.parseInt(address[1]);
 
             Call.connect(player.con, ip, port);
         });
@@ -232,7 +232,7 @@ public class PlayerCommands {
 
             String[] address = Const.SERVER_ADDRESS.get(serverName).split(":");
             String ip = address[0];
-            int port = Integer.parseInt(address[1]);
+            int port = Strings.parseInt(address[1]);
             Vars.net.pingHost(ip, port, host -> Call.connect(player.con, ip, port), e -> Bundle.bundled(player, "commands.connect.server-offline"));
         });
 
@@ -251,7 +251,7 @@ public class PlayerCommands {
 
                 CacheSeq<HistoryEntry> entries = Variables.getHistorySeq(mouseX, mouseY);
 
-                int page = Integer.parseInt(args[0]) - 1;
+                int page = Strings.parseInt(args[0]) - 1;
                 int pages = Mathf.ceil(entries.size / Const.LIST_PAGE_SIZE);
 
                 if (page >= pages || pages < 0 || page < 0) {

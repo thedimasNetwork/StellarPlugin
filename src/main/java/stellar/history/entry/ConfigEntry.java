@@ -2,10 +2,7 @@ package stellar.history.entry;
 
 import arc.math.geom.Point2;
 import arc.struct.StringMap;
-import arc.util.Http;
-import arc.util.Structs;
-import arc.util.Time;
-import arc.util.Tmp;
+import arc.util.*;
 import mindustry.ctype.MappableContent;
 import mindustry.game.EventType.ConfigEvent;
 import mindustry.world.Block;
@@ -32,7 +29,7 @@ public class ConfigEntry implements HistoryEntry {
         Http.get("https://raw.githubusercontent.com/Anuken/Mindustry/v137/core/assets/icons/icons.properties", resp -> {
             for (String line : resp.getResultAsString().split("\n")) {
                 String[] arr = line.split("\\|")[0].split("=");
-                icons.put(arr[1], String.valueOf((char) Integer.parseInt(arr[0])));
+                icons.put(arr[1], String.valueOf((char) Strings.parseInt(arr[0])));
             }
         });
         this.name = event.player.coloredName();

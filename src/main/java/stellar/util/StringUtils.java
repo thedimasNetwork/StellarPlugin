@@ -2,6 +2,8 @@ package stellar.util;
 
 import arc.util.Strings;
 
+import java.util.Base64;
+
 public class StringUtils {
     public static String stripColorsAndGlyphs(String str) {
         str = Strings.stripColors(str);
@@ -19,5 +21,14 @@ public class StringUtils {
     public static String unescapeString(String text) {
 //        return text.replace("&quot", "\"").replace("&apos", "'").replace("&amp", "&");
         return text;
+    }
+
+    public static boolean isBase64(String input) {
+        try {
+            byte[] decodedBytes = Base64.getDecoder().decode(input);
+            return true;
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
     }
 }

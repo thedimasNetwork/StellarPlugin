@@ -8,7 +8,7 @@ import stellar.util.StringUtils;
 public class ServerListener {
     public static void listen() {
         Events.on(EventType.ServerLoadEvent.class, event -> {
-            MessageEmbed embed = Util.embedBuilder("*Сервер запущен*", Colors.green);
+            MessageEmbed embed = Util.embedBuilder("**Сервер запущен**", Colors.green);
             Bot.sendEmbed(embed);
         });
 

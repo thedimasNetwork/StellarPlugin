@@ -89,8 +89,8 @@ public class AdminCommands {
                 return;
             }
 
-            float x = Float.parseFloat(args[0]);
-            float y = Float.parseFloat(args[1]);
+            float x = Strings.parseFloat(args[0]);
+            float y = Strings.parseFloat(args[1]);
 
             if (x > world.width() || x < 0 || y > world.height() || y < 0) {
                 Bundle.bundled(player, "commands.admin.tp.out-of-map");

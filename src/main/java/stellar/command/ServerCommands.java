@@ -8,6 +8,7 @@ import arc.util.Reflect;
 import arc.util.Strings;
 import mindustry.content.Fx;
 import mindustry.gen.Groups;
+import mindustry.gen.Player;
 import mindustry.net.Administration;
 import mindustry.net.Packets;
 import net.dv8tion.jda.api.entities.MessageEmbed;
@@ -19,13 +20,20 @@ import stellar.bot.Util;
 import stellar.database.Database;
 import stellar.database.enums.ServerEventTypes;
 import stellar.database.gen.Tables;
+import stellar.database.gen.tables.records.BansRecord;
 import stellar.database.gen.tables.records.ServerEventsRecord;
+import stellar.database.gen.tables.records.UsersRecord;
 import stellar.util.Bundle;
+import stellar.util.Players;
+import stellar.util.StringUtils;
 
 import java.sql.SQLException;
 import java.text.MessageFormat;
+import java.time.LocalDateTime;
+import java.util.Base64;
 
 import static mindustry.Vars.netServer;
+import static stellar.Variables.config;
 
 public class ServerCommands {
 
@@ -35,7 +43,7 @@ public class ServerCommands {
             Log.info("Shutting down server...");
             Groups.player.each(e -> e.kick(Packets.KickReason.serverClose));
 
-            MessageEmbed embed = Util.embedBuilder("*Сервер остановлен*", Colors.red);
+            MessageEmbed embed = Util.embedBuilder("**Сервер остановлен**", Colors.red);
             try {
                 ServerEventsRecord record = Database.getContext().newRecord(Tables.SERVER_EVENTS);
                 record.setServer(Const.SERVER_COLUMN_NAME);
@@ -75,10 +83,10 @@ public class ServerCommands {
                 }
             }
             Log.info(MessageFormat.format("Successfully exported {0} players", exported));*/
-            Log.info("Command was removed because of changes in DB structure. Maybe one it will be working again...");
+            Log.warn("Command was removed because of changes in DB structure. Maybe once it will be working again...");
         });
 
-        commandHandler.register("rtv", "[on|off]", "disable or enable RTV", args -> {
+        commandHandler.register("rtv", "[on|off]", "Disable or enable RTV.", args -> {
             boolean rtvEnabled = Core.settings.getBool("rtv");
 
             if (args.length > 0 && (args[0].equalsIgnoreCase("on") || args[0].equalsIgnoreCase("off"))) {
@@ -94,7 +102,8 @@ public class ServerCommands {
             }
             Log.info(rtvEnabled ? "RTV включен" : "RTV выключен");
         });
-        commandHandler.register("effect", "<effect>", "set new moving effect", args -> {
+
+        commandHandler.register("effect", "<effect>", "Set new moving effect.", args -> {
             try {
                 Fx.class.getField(args[0]).get(null);
             } catch (NoSuchFieldException | IllegalAccessException e) {
@@ -102,6 +111,80 @@ public class ServerCommands {
                 return;
             }
             Core.settings.put("effect", args[0]);
+        });
+
+        commandHandler.removeCommand("ban");
+        commandHandler.register("ban", "<id/uuid/name> [period] [reason...]", "Ban a player. Use underscores instead of spaces for usernames.", args -> {
+            try {
+                UsersRecord record = null;
+                if (Strings.canParseInt(args[0])) {
+                    record = Database.getPlayer(Strings.parseInt(args[0]));
+                    Log.debug("@ - id", record == null);
+                }
+                if (StringUtils.isBase64(args[0]) && record == null) {
+                    record = Database.getPlayer(args[0]);
+                    Log.debug("@ - uuid", record == null);
+                }
+                if (record == null) {
+                    Player player = Players.findPlayer(args[0]);
+                    if (player != null) {
+                        record = Database.getPlayer(player.uuid());
+                    }
+                    Log.debug("@ - last (username)", record == null);
+                }
+
+                if (record == null) {
+                    Log.err("Player @ not found", args[0]);
+                    return;
+                }
+
+                int period = -1;
+                String reason = args.length > 2 ? args[2] : "<не указана>";
+                if (args.length > 1) {
+                    if (Strings.canParseInt(args[1])) {
+                        period = Strings.parseInt(args[1]);
+                    } else {
+                        Log.err("Invalid period!");
+                        return;
+                    }
+                }
+
+                Player player = Players.getPlayer(record.getUuid());
+                if (player != null) {
+                    player.kick(Packets.KickReason.banned);
+                }
+
+                BansRecord bansRecord = Database.getContext().newRecord(Tables.BANS); // move into separate method
+                bansRecord.setAdmin("console");
+                bansRecord.setTarget(record.getUuid());
+                bansRecord.setCreated(LocalDateTime.now());
+                if (period > -1) { bansRecord.setUntil(LocalDateTime.now().plusDays(period)); }
+                bansRecord.setReason(reason);
+                bansRecord.store();
+
+                String message = """
+                                **Админ**: `<консоль>`
+                                **Нарушитель**: %target% (%tid%)
+                                **Причина**: %reason%
+                                """.replace("%target%", Strings.stripColors(record.getName())).replace("%tid%", record.getId().toString())
+                        .replace("%reason%", reason);
+                if (period > -1) {
+                    message += "**Срок**: <t:%timestamp%:f>".replace("%timestamp%", (System.currentTimeMillis() / 1000 + period * (24 * 60 * 60)) + "");
+                } else {
+                    message += "**Срок**: Перманентный";
+                }
+                MessageEmbed banEmbed = Util.embedBuilder("Бан (через консоль)", message, Colors.red, LocalDateTime.now(), Const.SERVER_COLUMN_NAME);
+                Bot.sendEmbed(config.bot.bansId, banEmbed);
+
+                Log.info("Player @ / @ / #@ got banned", Strings.stripColors(record.getName()), record.getUuid(), record.getId());
+            } catch (SQLException e) {
+                Log.err(e);
+            }
+        });
+
+        commandHandler.removeCommand("unban");
+        commandHandler.register("unban", "<id/uuid>", "Unban a player.", args -> {
+            Log.err("[WIP]");
         });
     }
 
