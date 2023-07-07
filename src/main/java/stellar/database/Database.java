@@ -69,8 +69,8 @@ public class Database {
                 .fetchOne();
     }
 
-    public static boolean playerExists(Player player) throws SQLException {
-        return Database.getContext().fetchExists(Tables.USERS, Tables.USERS.UUID.eq(player.uuid()));
+    public static boolean playerExists(String uuid) throws SQLException {
+        return Database.getContext().fetchExists(Tables.USERS, Tables.USERS.UUID.eq(uuid));
     }
 
     public static BansRecord latestBan(String uuid) throws SQLException {
@@ -82,7 +82,7 @@ public class Database {
                 .fetchOne();
     }
 
-    public static boolean isBanned(String uuid) throws  SQLException {
+    public static boolean isBanned(String uuid) throws SQLException {
         BansRecord record = latestBan(uuid);
         if (record == null) {
             return false;
@@ -97,5 +97,35 @@ public class Database {
         }
 
         return !record.getUntil().isBefore(LocalDateTime.now());
+    }
+
+    public static void ban(String admin, String target, int period, String reason) throws SQLException {
+        if (!Database.playerExists(target)) {
+            throw new IllegalArgumentException("Target does not exist!");
+        }
+        if (Database.isBanned(target)) {
+            throw new IllegalArgumentException("Target is already banned!");
+        }
+
+        BansRecord bansRecord = Database.getContext().newRecord(Tables.BANS);
+        bansRecord.setAdmin(admin);
+        bansRecord.setTarget(target);
+        bansRecord.setCreated(LocalDateTime.now());
+        if (period > -1) { bansRecord.setUntil(LocalDateTime.now().plusDays(period)); }
+        bansRecord.setReason(reason);
+        bansRecord.store();
+    }
+
+    public static void unban(String target) throws SQLException {
+        if (!Database.playerExists(target)) {
+            throw new IllegalArgumentException("Target does not exist!");
+        }
+        if (!Database.isBanned(target)) {
+            throw new IllegalArgumentException("Target is not banned!");
+        }
+
+        BansRecord bansRecord = Database.latestBan(target);
+        bansRecord.setActive((byte) 0);
+        bansRecord.store();
     }
 }

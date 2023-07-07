@@ -4,12 +4,9 @@ import lombok.Getter;
 import lombok.Setter;
 import mindustry.net.Packets;
 import stellar.database.Database;
-import stellar.database.gen.Tables;
-import stellar.database.gen.tables.records.BansRecord;
 import stellar.database.gen.tables.records.UsersRecord;
 
 import java.sql.SQLException;
-import java.time.LocalDateTime;
 
 @Getter
 public class AdminActionEntry {
@@ -21,22 +18,16 @@ public class AdminActionEntry {
     private String reason;
 
     @Setter
-    private int until;
+    private int period;
 
     public AdminActionEntry(UsersRecord admin, UsersRecord target, Packets.AdminAction action) {
         this.admin = admin;
         this.target = target;
         this.action = action;
-        this.until = 0;
+        this.period = 0;
     }
 
     public void storeRecord() throws SQLException {
-        BansRecord record = Database.getContext().newRecord(Tables.BANS);
-        record.setAdmin(this.admin.getUuid());
-        record.setTarget(this.target.getUuid());
-        record.setCreated(LocalDateTime.now());
-        if (until > -1) { record.setUntil(LocalDateTime.now().plusDays(until)); }
-        record.setReason(reason);
-        record.store();
+        Database.ban(this.getAdmin().getUuid(), this.getTarget().getUuid(), getPeriod(), getReason());
     }
 }

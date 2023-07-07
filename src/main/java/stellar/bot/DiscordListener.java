@@ -272,102 +272,16 @@ public class DiscordListener extends ListenerAdapter {
                 int period = event.getOption("period") == null ? -1 : event.getOption("period").getAsInt();
                 Log.debug("@ - @", event.getOption("type").getAsString(), query);
                 try {
+                    UsersRecord record = null;
+                    Player player = null;
                     switch (event.getOption("type").getAsString()) {
                         case "uuid" -> {
-                            Player player = Players.getPlayer(query);
-                            UsersRecord record = Database.getPlayer(query);
-                            if (player != null) {
-                                BansRecord bansRecord = Database.getContext().newRecord(Tables.BANS);
-                                bansRecord.setAdmin(event.getUser().getName());
-                                bansRecord.setTarget(query);
-                                bansRecord.setCreated(LocalDateTime.now());
-                                if (period > -1) { bansRecord.setUntil(LocalDateTime.now().plusDays(period)); }
-                                bansRecord.setReason(reason);
-                                bansRecord.store();
-
-                                String message = """
-                                **Админ**: %admin% (%aid%)
-                                **Нарушитель**: %target% (%tid%)
-                                **Причина**: %reason%
-                                """.replace("%admin%", event.getUser().getName()).replace("%aid%", event.getUser().getId())
-                                        .replace("%target%", player.name).replace("%tid%", record.getId().toString())
-                                        .replace("%reason%", reason);
-                                if (period > -1) {
-                                    message += "**Срок**: <t:%timestamp%:f>".replace("%timestamp%", (System.currentTimeMillis() / 1000 + period * (24 * 60 * 60)) + "");
-                                } else {
-                                    message += "**Срок**: Перманентный";
-                                }
-                                MessageEmbed embed = Util.embedBuilder("Бан (через Discord)", message, Colors.red, LocalDateTime.now());
-                                Bot.sendEmbed(config.bot.bansId, embed);
-                                player.kick(Packets.KickReason.banned);
-                            } else {
-                                if (record == null) {
-                                    MessageEmbed embed = Util.embedBuilder("Игрок не найден", Colors.red);
-                                    event.replyEmbeds(embed).setEphemeral(true).queue();
-                                    return;
-                                }
-
-                                BansRecord bansRecord = Database.getContext().newRecord(Tables.BANS);
-                                bansRecord.setAdmin(event.getUser().getName());
-                                bansRecord.setTarget(query);
-                                bansRecord.setCreated(LocalDateTime.now());
-                                if (period > -1) { bansRecord.setUntil(LocalDateTime.now().plusDays(period)); }
-                                bansRecord.setReason(reason);
-                                bansRecord.store();
-
-                                String message = """
-                                **Админ**: <@%aid%> (%admin%)
-                                **Нарушитель**: %target% (%tid%)
-                                **Причина**: %reason%
-                                """.replace("%aid%", event.getUser().getId()).replace("%admin%", event.getUser().getName())
-                                        .replace("%target%", Strings.stripColors(record.getName())).replace("%tid%", record.getId().toString())
-                                        .replace("%reason%", reason);
-                                if (period > -1) {
-                                    message += "**Срок**: <t:%timestamp%:f>".replace("%timestamp%", (System.currentTimeMillis() / 1000 + period * (24 * 60 * 60)) + "");
-                                } else {
-                                    message += "**Срок**: Перманентный";
-                                }
-                                MessageEmbed embed = Util.embedBuilder("Бан (через дискорд)", message, Colors.red, LocalDateTime.now());
-                                Bot.sendEmbed(config.bot.bansId, embed);
-                            }
-                            MessageEmbed embed = Util.embedBuilder("Игрок забанен", Colors.green);
-                            event.replyEmbeds(embed).setEphemeral(true).queue();
+                            record = Database.getPlayer(query);
+                            player = Players.getPlayer(query);
                         }
                         case "name" -> {
-                            Player player = Players.findPlayer(query);
-                            if (player == null) {
-                                MessageEmbed embed = Util.embedBuilder("Игрок не найден", Colors.red);
-                                event.replyEmbeds(embed).setEphemeral(true).queue();
-                                return;
-                            }
-
-                            UsersRecord record = Database.getPlayer(player.uuid());
-                            BansRecord bansRecord = Database.getContext().newRecord(Tables.BANS);
-                            bansRecord.setAdmin(event.getUser().getName());
-                            bansRecord.setTarget(player.uuid());
-                            bansRecord.setCreated(LocalDateTime.now());
-                            if (period > -1) { bansRecord.setUntil(LocalDateTime.now().plusDays(period)); }
-                            bansRecord.setReason(reason);
-                            bansRecord.store();
-
-                            MessageEmbed embed = Util.embedBuilder("Игрок забанен", Colors.green);
-                            event.replyEmbeds(embed).setEphemeral(true).queue();
-
-                            String message = """
-                                **Админ**: <@%aid%> (%admin%)
-                                **Нарушитель**: %target% (%tid%)
-                                **Причина**: %reason%
-                                """.replace("%aid%", event.getUser().getId()).replace("%admin%", event.getUser().getName())
-                                    .replace("%target%", Strings.stripColors(player.name())).replace("%tid%", record.getId().toString())
-                                    .replace("%reason%", reason);
-                            if (period > -1) {
-                                message += "**Срок**: <t:%timestamp%:f>".replace("%timestamp%", (System.currentTimeMillis() / 1000 + period * (24 * 60 * 60)) + "");
-                            } else {
-                                message += "**Срок**: Перманентный";
-                            }
-                            MessageEmbed banEmbed = Util.embedBuilder("Бан (через Discord)", message, Colors.red, LocalDateTime.now());
-                            Bot.sendEmbed(config.bot.bansId, banEmbed);
-                            player.kick(Packets.KickReason.banned);
+                            player = Players.findPlayer(query);
+                            record = player != null ? Database.getPlayer(player.uuid()) : null;
                         }
                         case "id" -> {
                             if (!Strings.canParseInt(query)) {
@@ -375,48 +289,45 @@ public class DiscordListener extends ListenerAdapter {
                                 event.replyEmbeds(embed).setEphemeral(true).queue();
                                 return;
                             }
-
-                            int id = Strings.parseInt(query);
-                            UsersRecord record = Database.getPlayer(id);
-                            if (record == null) {
-                                MessageEmbed embed = Util.embedBuilder("Игрок не найден", Colors.red);
-                                event.replyEmbeds(embed).setEphemeral(true).queue();
-                                return;
-                            }
-
-                            Player player = Players.getPlayer(record.getUuid());
-                            if (player != null) {
-                                player.kick(Packets.KickReason.banned);
-                            }
-
-                            BansRecord bansRecord = Database.getContext().newRecord(Tables.BANS);
-                            bansRecord.setAdmin(event.getUser().getName());
-                            bansRecord.setTarget(record.getUuid());
-                            bansRecord.setCreated(LocalDateTime.now());
-                            if (period > -1) { bansRecord.setUntil(LocalDateTime.now().plusDays(period)); }
-                            bansRecord.setReason(reason);
-                            bansRecord.store();
-
-                            MessageEmbed embed = Util.embedBuilder("Игрок забанен", Colors.green);
-                            event.replyEmbeds(embed).setEphemeral(true).queue();
-
-                            String message = """
-                                **Админ**: <@%aid%> (%admin%)
-                                **Нарушитель**: %target% (%tid%)
-                                **Причина**: %reason%
-                                """.replace("%aid%", event.getUser().getId()).replace("%admin%", event.getUser().getName())
-                                    .replace("%target%", Strings.stripColors(record.getName())).replace("%tid%", record.getId().toString())
-                                    .replace("%reason%", reason);
-                            if (period > -1) {
-                                message += "**Срок**: <t:%timestamp%:f>".replace("%timestamp%", (System.currentTimeMillis() / 1000 + period * (24 * 60 * 60)) + "");
-                            } else {
-                                message += "**Срок**: Перманентный";
-                            }
-                            MessageEmbed banEmbed = Util.embedBuilder("Бан (через Discord)", message, Colors.red, LocalDateTime.now());
-                            Bot.sendEmbed(config.bot.bansId, banEmbed);
+                            record = Database.getPlayer(Strings.parseInt(query));
                         }
                     }
-                } catch (SQLException e) {
+
+                    if (record == null) {
+                        MessageEmbed embed = Util.embedBuilder("Игрок не найден", Colors.red);
+                        event.replyEmbeds(embed).setEphemeral(true).queue();
+                        return;
+                    }
+
+                    if (Database.isBanned(record.getUuid())) {
+                        MessageEmbed embed = Util.embedBuilder("Игрок уже забанен", Colors.red);
+                        event.replyEmbeds(embed).setEphemeral(true).queue();
+                        return;
+                    }
+
+                    if (player != null) {
+                        player.kick(Packets.KickReason.banned);
+                    }
+
+                    Database.ban(event.getUser().getName(), record.getUuid(), period, reason);
+                    MessageEmbed embed = Util.embedBuilder("Игрок забанен", Colors.green);
+                    event.replyEmbeds(embed).setEphemeral(true).queue();
+
+                    String message = """
+                            **Админ**: <@%aid%> (%admin%)
+                            **Нарушитель**: %target% (%tid%)
+                            **Причина**: %reason%
+                            """.replace("%aid%", event.getUser().getId()).replace("%admin%", event.getUser().getName())
+                            .replace("%target%", Strings.stripColors(record.getName())).replace("%tid%", record.getId().toString())
+                            .replace("%reason%", reason);
+                    if (period > -1) {
+                        message += "**Срок**: <t:%timestamp%:f>".replace("%timestamp%", (System.currentTimeMillis() / 1000 + period * (24 * 60 * 60)) + "");
+                    } else {
+                        message += "**Срок**: Перманентный";
+                    }
+                    MessageEmbed banEmbed = Util.embedBuilder("Бан (через Discord)", message, Colors.red, LocalDateTime.now());
+                    Bot.sendEmbed(config.bot.bansId, banEmbed);
+                } catch (IllegalArgumentException | SQLException e) {
                     Log.err(e);
                     event.replyEmbeds(Util.embedBuilder("Возникла ошибка", Colors.red)).setEphemeral(true).queue();
                 }
@@ -429,6 +340,7 @@ public class DiscordListener extends ListenerAdapter {
 
                 String query = event.getOption("query").getAsString();
                 try {
+                    UsersRecord record = null;
                     switch (event.getOption("type").getAsString()) {
                         case "id" -> {
                             if (!Strings.canParseInt(query)) {
@@ -436,63 +348,38 @@ public class DiscordListener extends ListenerAdapter {
                                 event.replyEmbeds(embed).setEphemeral(true).queue();
                                 return;
                             }
-
-                            int id = Strings.parseInt(query);
-                            UsersRecord record = Database.getPlayer(id);
-                            if (record == null) {
-                                MessageEmbed embed = Util.embedBuilder("Игрок не найден", Colors.red);
-                                event.replyEmbeds(embed).setEphemeral(true).queue();
-                                return;
-                            } else if (!Database.isBanned(record.getUuid())) {
-                                MessageEmbed embed = Util.embedBuilder("Игрок не забанен", Colors.red);
-                                event.replyEmbeds(embed).setEphemeral(true).queue();
-                                return;
-                            }
-
-                            BansRecord bansRecord = Database.latestBan(record.getUuid());
-                            bansRecord.setActive((byte) 0);
-                            bansRecord.store();
-
-                            MessageEmbed embed = Util.embedBuilder("Игрок разбанен", Colors.green);
-                            event.replyEmbeds(embed).setEphemeral(true).queue();
-
-                            String message = """
-                                **Админ**: <@%aid%> (%admin%)
-                                **Нарушитель**: %target% (%tid%)
-                                """.replace("%aid%", event.getUser().getId()).replace("%admin%", event.getUser().getName())
-                                    .replace("%target%", record.getName()).replace("%tid%", record.getId().toString());
-                            MessageEmbed banEmbed = Util.embedBuilder("Разбан (через Discord)", message, Colors.green, LocalDateTime.now());
-                            Bot.sendEmbed(config.bot.bansId, banEmbed);
-
-                        } case "uuid" -> {
-                            UsersRecord record = Database.getPlayer(query);
-                            if (record == null) {
-                                MessageEmbed embed = Util.embedBuilder("Игрок не найден", Colors.red);
-                                event.replyEmbeds(embed).setEphemeral(true).queue();
-                                return;
-                            } else if (!Database.isBanned(query)) {
-                                MessageEmbed embed = Util.embedBuilder("Игрок не забанен", Colors.red);
-                                event.replyEmbeds(embed).setEphemeral(true).queue();
-                                return;
-                            }
-
-                            BansRecord bansRecord = Database.latestBan(query);
-                            bansRecord.setActive((byte) 0);
-                            bansRecord.store();
-
-                            MessageEmbed embed = Util.embedBuilder("Игрок разбанен", Colors.green);
-                            event.replyEmbeds(embed).setEphemeral(true).queue();
-
-                            String message = """
-                                **Админ**: <@%aid%> (%admin%)
-                                **Нарушитель**: %target% (%tid%)
-                                """.replace("%aid%", event.getUser().getId()).replace("%admin%", event.getUser().getName())
-                                    .replace("%target%", Strings.stripColors(record.getName())).replace("%tid%", record.getId().toString());
-                            MessageEmbed banEmbed = Util.embedBuilder("Разбан (через Discord)", message, Colors.green, LocalDateTime.now());
-                            Bot.sendEmbed(config.bot.bansId, banEmbed);
+                            record = Database.getPlayer(Strings.parseInt(query));
+                        }
+                        case "uuid" -> {
+                            record = Database.getPlayer(query);
                         }
                     }
-                } catch (SQLException e) {
+
+                    if (record == null) {
+                        MessageEmbed embed = Util.embedBuilder("Игрок не найден", Colors.red);
+                        event.replyEmbeds(embed).setEphemeral(true).queue();
+                        return;
+                    }
+
+                    if (!Database.isBanned(record.getUuid())) {
+                        MessageEmbed embed = Util.embedBuilder("Игрок не забанен", Colors.red);
+                        event.replyEmbeds(embed).setEphemeral(true).queue();
+                        return;
+                    }
+
+
+                    Database.unban(record.getUuid());
+                    MessageEmbed embed = Util.embedBuilder("Игрок разбанен", Colors.green);
+                    event.replyEmbeds(embed).setEphemeral(true).queue();
+
+                    String message = """
+                            **Админ**: <@%aid%> (%admin%)
+                            **Нарушитель**: %target% (%tid%)
+                            """.replace("%aid%", event.getUser().getId()).replace("%admin%", event.getUser().getName())
+                            .replace("%target%", Strings.stripColors(record.getName())).replace("%tid%", record.getId().toString());
+                    MessageEmbed unbanEmbed = Util.embedBuilder("Разбан (через Discord)", message, Colors.green, LocalDateTime.now());
+                    Bot.sendEmbed(config.bot.bansId, unbanEmbed);
+                } catch (IllegalArgumentException | SQLException e) {
                     Log.err(e);
                     event.replyEmbeds(Util.embedBuilder("Возникла ошибка", Colors.red)).setEphemeral(true).queue();
                 }

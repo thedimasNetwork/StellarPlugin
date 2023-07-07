@@ -138,6 +138,11 @@ public class ServerCommands {
                     return;
                 }
 
+                if (Database.isBanned(record.getUuid())) {
+                    Log.err("Player @ is already banned", Strings.stripColors(record.getName()));
+                    return;
+                }
+
                 int period = -1;
                 String reason = args.length > 2 ? args[2] : "<не указана>";
                 if (args.length > 1) {
@@ -154,14 +159,7 @@ public class ServerCommands {
                     player.kick(Packets.KickReason.banned);
                 }
 
-                BansRecord bansRecord = Database.getContext().newRecord(Tables.BANS); // move into separate method
-                bansRecord.setAdmin("console");
-                bansRecord.setTarget(record.getUuid());
-                bansRecord.setCreated(LocalDateTime.now());
-                if (period > -1) { bansRecord.setUntil(LocalDateTime.now().plusDays(period)); }
-                bansRecord.setReason(reason);
-                bansRecord.store();
-
+                Database.ban("console", record.getUuid(), period, reason);
                 String message = """
                                 **Админ**: `<консоль>`
                                 **Нарушитель**: %target% (%tid%)
@@ -184,7 +182,37 @@ public class ServerCommands {
 
         commandHandler.removeCommand("unban");
         commandHandler.register("unban", "<id/uuid>", "Unban a player.", args -> {
-            Log.err("[WIP]");
+            try {
+                UsersRecord record = null;
+                if (Strings.canParseInt(args[0])) {
+                    record = Database.getPlayer(Strings.parseInt(args[0]));
+                } else if (StringUtils.isBase64(args[0])) {
+                    record = Database.getPlayer(args[0]);
+                }
+
+                if (record == null) {
+                    Log.err("Player not found");
+                    return;
+                }
+
+                if (!Database.isBanned(record.getUuid())) {
+                    Log.err("Player @ is not banned", Strings.stripColors(record.getName()));
+                    return;
+                }
+
+                Database.unban(record.getUuid());
+                Log.info("Player @ / @ / #@ got unbanned", Strings.stripColors(record.getName()), record.getUuid(), record.getId());
+
+                String message = """
+                            **Админ**: `<консоль>`
+                            **Нарушитель**: %target% (%tid%)
+                            """.replace("%target%", Strings.stripColors(record.getName())).replace("%tid%", record.getId().toString());
+                MessageEmbed unbanEmbed = Util.embedBuilder("Разбан (через консоль)", message, Colors.green, LocalDateTime.now());
+                Bot.sendEmbed(config.bot.bansId, unbanEmbed);
+            } catch (IllegalArgumentException | SQLException e) {
+                Log.err(e);
+            }
+
         });
     }
 

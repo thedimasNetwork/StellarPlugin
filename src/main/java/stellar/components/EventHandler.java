@@ -50,7 +50,7 @@ public class EventHandler {
             String uuid = event.player.uuid();
             String name = event.player.name;
             try {
-                if (Database.playerExists(event.player)) {
+                if (Database.playerExists(event.player.uuid())) {
                     if (Database.isBanned(event.player.uuid())) {
                         Locale locale = Bundle.findLocale(event.player.locale());
                         BansRecord record = Database.latestBan(event.player.uuid());
@@ -103,7 +103,7 @@ public class EventHandler {
                 record.setIp(event.player.ip());
                 record.store();
 
-                if (Database.playerExists(event.player)) {
+                if (Database.playerExists(event.player.uuid())) {
                     Database.getContext()
                             .update(Tables.USERS)
                             .set(Tables.USERS.NAME, event.player.name())
@@ -193,7 +193,7 @@ public class EventHandler {
                 }
 
                 AdminActionEntry actionEntry = adminActions.get(event.menuId);
-                int computed = actionEntry.getUntil();
+                int computed = actionEntry.getPeriod();
                 switch (event.option) {
                     case 0 -> computed -= 1;
                     case 1 -> computed += 1;
@@ -209,7 +209,7 @@ public class EventHandler {
                 if (event.option != 7 && event.option != 8) {
                     computed = Math.max(0, computed);
                 }
-                adminActions.get(event.menuId).setUntil(computed);
+                adminActions.get(event.menuId).setPeriod(computed);
 
                 Locale locale = Bundle.findLocale(event.player.locale());
 
@@ -313,7 +313,7 @@ public class EventHandler {
                         {Bundle.get("menus.ban.proceed", locale)}
                 };
                 String title = Bundle.format("menus.ban.title", locale, Strings.stripColors(actionEntry.getTarget().getName()));
-                String message = Bundle.format("menus.ban.msg", locale, actionEntry.getUntil());
+                String message = Bundle.format("menus.ban.msg", locale, actionEntry.getPeriod());
                 Call.followUpMenu(event.player.con(), event.textInputId, title, message, buttons);
             }
         });
