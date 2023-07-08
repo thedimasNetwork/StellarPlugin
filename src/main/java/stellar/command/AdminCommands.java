@@ -300,7 +300,7 @@ public class AdminCommands {
 
             Player found = Players.findPlayer(args[0]);
             if (found == null) {
-                Bundle.bundled(player, "commands.admin.ban.player-notfound", args[0]);
+                Bundle.bundled(player, "commands.player-notfound", args[0]);
                 return;
             }
             String uuid = found.uuid();
