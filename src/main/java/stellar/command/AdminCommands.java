@@ -292,7 +292,7 @@ public class AdminCommands {
         });
 
         commandHandler.removeCommand("ban");
-        commandHandler.<Player>register("ban", "<name...>", "Забанить игрока", (args, player) -> {
+        commandHandler.<Player>register("ban", "<name...>", "commands.admin.ban.description", (args, player) -> {
             if (!Variables.admins.containsKey(player.uuid())) {
                 Bundle.bundled(player, "commands.access-denied");
                 return;
@@ -337,6 +337,7 @@ public class AdminCommands {
                 Bundle.bundled(player, "commands.admin.ban.failed", args[0]);
             }
         });
+
         commandHandler.removeCommand("unban");
         commandHandler.<Player>register("unban", "<uuid>", "Разбанить игрока", (args, player) -> {
             if (!Variables.admins.containsKey(player.uuid())) {
