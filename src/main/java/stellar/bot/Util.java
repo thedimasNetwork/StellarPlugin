@@ -1,12 +1,16 @@
 package stellar.bot;
 
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 
 import java.awt.*;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
+
+import static stellar.Variables.config;
 
 public class Util {
     public static MessageEmbed embedBuilder(String text, Color color) {
@@ -38,5 +42,10 @@ public class Util {
                 .setTimestamp(time.atZone(ZoneId.systemDefault()).withZoneSameInstant(ZoneId.of("UTC")))
                 .setFooter(footer)
                 .build();
+    }
+
+    public static boolean isMindustryAdmin(Member member) {
+        return member.getRoles().contains(member.getGuild().getRoleById(config.bot.adminId)) ||
+                member.hasPermission(Permission.ADMINISTRATOR);
     }
 }

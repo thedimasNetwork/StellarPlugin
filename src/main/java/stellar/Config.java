@@ -56,6 +56,7 @@ public class Config {
         public String token;
         public long channelId;
         public long bansId;
+        public long adminId;
         public boolean main; // used for RPC
     }
 }

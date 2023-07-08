@@ -23,7 +23,6 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jooq.Record1;
 import stellar.database.Database;
 import stellar.database.gen.Tables;
-import stellar.database.gen.tables.records.BansRecord;
 import stellar.database.gen.tables.records.UsersRecord;
 import stellar.util.Players;
 import stellar.util.StringUtils;
@@ -118,7 +117,7 @@ public class DiscordListener extends ListenerAdapter {
                 event.replyEmbeds(embed).queue();
             }
             case "skipwave" -> {
-                if (!event.getMember().hasPermission(Permission.ADMINISTRATOR)) {
+                if (!Util.isMindustryAdmin(event.getMember())) {
                     MessageEmbed embed = Util.embedBuilder("В доступе отказано", Colors.red);
                     event.replyEmbeds(embed).queue();
                     return;
@@ -129,7 +128,7 @@ public class DiscordListener extends ListenerAdapter {
                 event.replyEmbeds(embed).queue();
             }
             case "gameover" -> {
-                if (!event.getMember().hasPermission(Permission.ADMINISTRATOR)) {
+                if (!Util.isMindustryAdmin(event.getMember())) {
                     MessageEmbed embed = Util.embedBuilder("В доступе отказано", Colors.red);
                     event.replyEmbeds(embed).queue();
                     return;
@@ -140,7 +139,7 @@ public class DiscordListener extends ListenerAdapter {
                 event.replyEmbeds(embed).queue();
             }
             case "find" -> {
-                if (!event.getMember().hasPermission(Permission.ADMINISTRATOR)) {
+                if (!Util.isMindustryAdmin(event.getMember())) {
                     MessageEmbed embed = Util.embedBuilder("В доступе отказано", Colors.red);
                     event.replyEmbeds(embed).queue();
                     return;
@@ -237,7 +236,7 @@ public class DiscordListener extends ListenerAdapter {
                 }
             }
             case "ban" -> {
-                if (!event.getMember().hasPermission(Permission.ADMINISTRATOR)) {
+                if (!Util.isMindustryAdmin(event.getMember())) {
                     MessageEmbed embed = Util.embedBuilder("В доступе отказано", Colors.red);
                     event.replyEmbeds(embed).queue();
                     return;
@@ -309,7 +308,7 @@ public class DiscordListener extends ListenerAdapter {
                 }
             }
             case "unban" -> {
-                if (!event.getMember().hasPermission(Permission.ADMINISTRATOR)) {
+                if (!Util.isMindustryAdmin(event.getMember())) {
                     MessageEmbed embed = Util.embedBuilder("В доступе отказано", Colors.red);
                     event.replyEmbeds(embed).queue();
                     return;
