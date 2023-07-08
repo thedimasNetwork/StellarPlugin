@@ -277,7 +277,7 @@ public class AdminCommands {
                 return;
             }
             if (!Variables.jsallowed.containsKey(player.uuid())) {
-                Bundle.bundled(player, "В доступе к этой команде отказано. Для получения обратись к высшей администрации");
+                Bundle.bundled(player, "commands.admin.js.access-denied");
                 return;
             }
             String output = mods.getScripts().runConsole(args[0]);
@@ -289,7 +289,7 @@ public class AdminCommands {
                 error = true;
             }
             player.sendMessage("> " + (error ? "[#ff341c]" + output : output));
-        }); // TODO: использовать бандлы
+        });
 
         commandHandler.removeCommand("ban");
         commandHandler.<Player>register("ban", "<name...>", "Забанить игрока", (args, player) -> {
