@@ -2,6 +2,7 @@ package stellar.bot;
 
 import arc.Core;
 import arc.Events;
+import arc.struct.Seq;
 import arc.util.Log;
 import arc.util.Strings;
 import com.sun.management.OperatingSystemMXBean;
@@ -19,6 +20,7 @@ import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import org.jooq.Record1;
 import stellar.database.Database;
 import stellar.database.gen.Tables;
 import stellar.database.gen.tables.records.BansRecord;
@@ -68,7 +70,8 @@ public class DiscordListener extends ListenerAdapter {
                         TPS **%s** | ОЗУ **%sМБ**""", Vars.state.map.name(), Vars.state.wave, Groups.player.size(), Groups.unit.size(), Core.graphics.getFramesPerSecond(), Core.app.getJavaHeap() / 1024 / 1024);
                 MessageEmbed embed = Util.embedBuilder("Статус сервера", text, Colors.blue, LocalDateTime.now());
                 event.replyEmbeds(embed).queue();
-            } case "players" -> {
+            }
+            case "players" -> {
                 if (Groups.player.size() > 0) {
                     StringBuilder players = new StringBuilder();
                     Groups.player.each(p -> {
@@ -80,7 +83,8 @@ public class DiscordListener extends ListenerAdapter {
                     MessageEmbed embed = Util.embedBuilder("Никого нет", Colors.blue);
                     event.replyEmbeds(embed).queue();
                 }
-            } case "host" -> {
+            }
+            case "host" -> {
                 OperatingSystemMXBean bean = (OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
                 File file = new File("/");
 
@@ -104,14 +108,16 @@ public class DiscordListener extends ListenerAdapter {
                         """, cpuLoad, ramUsage, ramTotal, ramLoad, diskUsage, diskTotal, diskLoad);
                 MessageEmbed embed = Util.embedBuilder("Нагрузка на хост", text, Colors.blue, LocalDateTime.now());
                 event.replyEmbeds(embed).queue();
-            } case "maps" -> {
+            }
+            case "maps" -> {
                 StringBuilder text = new StringBuilder();
                 for (Map map : Vars.maps.customMaps()) {
                     text.append(map.name()).append("\n");
                 }
                 MessageEmbed embed = Util.embedBuilder("Карты на сервере", text.toString(), Colors.blue, LocalDateTime.now());
                 event.replyEmbeds(embed).queue();
-            } case "skipwave" -> {
+            }
+            case "skipwave" -> {
                 if (!event.getMember().hasPermission(Permission.ADMINISTRATOR)) {
                     MessageEmbed embed = Util.embedBuilder("В доступе отказано", Colors.red);
                     event.replyEmbeds(embed).queue();
@@ -121,7 +127,8 @@ public class DiscordListener extends ListenerAdapter {
                 String text = String.format("Волна пропущена. Текущая волна %s на карте %s", Vars.state.wave, Vars.state.map.name());
                 MessageEmbed embed = Util.embedBuilder(text, Colors.green);
                 event.replyEmbeds(embed).queue();
-            } case "gameover" -> {
+            }
+            case "gameover" -> {
                 if (!event.getMember().hasPermission(Permission.ADMINISTRATOR)) {
                     MessageEmbed embed = Util.embedBuilder("В доступе отказано", Colors.red);
                     event.replyEmbeds(embed).queue();
@@ -131,7 +138,8 @@ public class DiscordListener extends ListenerAdapter {
                 String text = String.format("Игра окончена. Всего волн: %s на карте %s", Vars.state.wave, Vars.state.map.name());
                 MessageEmbed embed = Util.embedBuilder(text, Colors.blue);
                 event.replyEmbeds(embed).queue();
-            } case "find" -> {
+            }
+            case "find" -> {
                 if (!event.getMember().hasPermission(Permission.ADMINISTRATOR)) {
                     MessageEmbed embed = Util.embedBuilder("В доступе отказано", Colors.red);
                     event.replyEmbeds(embed).queue();
@@ -140,127 +148,95 @@ public class DiscordListener extends ListenerAdapter {
 
                 String query = event.getOption("query").getAsString();
                 try {
+                    Seq<UsersRecord> records = new Seq<>();
+                    Integer count = 0;
                     switch (event.getOption("type").getAsString()) {
                         case "uuid" -> {
                             UsersRecord record = Database.getPlayer(query);
-                            MessageEmbed embed;
-                            if (record == null) {
-                                embed = Util.embedBuilder("Игрок не найден", Colors.red);
-                                event.replyEmbeds(embed).setEphemeral(true).queue();
-                                return;
-                            }
-                            String message = String.format("""
-                                    UUID: `%s`
-                                    Имя: %s
-                                    Айди: %s
-                                    Последний айпи: %s
-                                    Администратор: %s
-                                    """, record.getUuid(), record.getName(), record.getId(), record.getIp(), record.getAdmin() == 1);
-                            embed = Util.embedBuilder("Информация", message, Colors.purple);
-                            event.replyEmbeds(embed).setEphemeral(true).queue();
-                        } case "name" -> {
+                            records = record != null ? Seq.with(record) : new Seq<>();
+                            count = records.size;
+                        }
+                        case "name" -> {
                             StringBuilder builder = new StringBuilder();
                             for (int i = 0; i < query.length(); i++) {
                                 builder.append("%").append(query.charAt(i));
                             }
                             builder.append("%");
-
-                            UsersRecord[] records = Database.getContext()
+                            records = Seq.with(Database.getContext()
                                     .selectFrom(Tables.USERS)
                                     .where(Tables.USERS.NAME.likeIgnoreCase(builder.toString()))
-                                    .limit(20)
-                                    .fetchArray();
-
-                            if (records.length == 0) {
-                                MessageEmbed embed = Util.embedBuilder("Игрок не найден", Colors.red);
-                                event.replyEmbeds(embed).setEphemeral(true).queue();
-                                return;
-                            }
-
-                            EmbedBuilder embedBuilder = new EmbedBuilder()
-                                    .setTitle("Результат запроса")
-                                    .setColor(Colors.purple);
-
-                            for (UsersRecord record : Arrays.copyOfRange(records, 0, Math.min(records.length, 15))) {
-                                String message = String.format("""
-                                        UUID: `%s`
-                                        Имя: %s
-                                        Айди: %s
-                                        Последний айпи: %s
-                                        Администратор: %s
-                                        """, record.getUuid(), record.getName(), record.getId(), record.getIp(), record.getAdmin() == 1);
-                                embedBuilder.addField(StringUtils.stripColorsAndGlyphs(record.getName()), message, false);
-                            }
-
-                            if (records.length > 15) {
-                                embedBuilder.setFooter("Найдено больше 15 ползователей. Пожалуйста задайте запрос конкретнее");
-                            }
-
-                            event.replyEmbeds(embedBuilder.build()).setEphemeral(true).queue();
-                        } case "id" -> {
+                                    .limit(15)
+                                    .fetchArray());
+                            Record1<Integer> record1 = Database.getContext()
+                                    .selectCount()
+                                    .from(Tables.USERS)
+                                    .where(Tables.USERS.NAME.likeIgnoreCase(builder.toString()))
+                                    .limit(15)
+                                    .fetchOne();
+                            count = record1 == null ? 0 : record1.value1();
+                        }
+                        case "id" -> {
                             if (!Strings.canParseInt(query)) {
                                 MessageEmbed embed = Util.embedBuilder("Невалидный айди", Colors.red);
                                 event.replyEmbeds(embed).setEphemeral(true).queue();
                                 return;
                             }
+                            UsersRecord record = Database.getPlayer(Strings.parseInt(query));
+                            records = record != null ? Seq.with(record) : new Seq<>();
+                            count = records.size;
+                        }
+                        case "ip" -> {
+                            records = Seq.with(Database.getContext()
+                                    .selectFrom(Tables.USERS)
+                                    .where(Tables.USERS.IP.contains(query))
+                                    .limit(15)
+                                    .fetchArray());
+                            Record1<Integer> record1 = Database.getContext()
+                                    .selectCount()
+                                    .from(Tables.USERS)
+                                    .where(Tables.USERS.IP.contains(query))
+                                    .limit(15)
+                                    .fetchOne();
+                            count = record1 == null ? 0 : record1.value1();
 
-                            int id = Strings.parseInt(query);
-                            UsersRecord record = Database.getPlayer(id);
-                            if (record == null) {
-                                MessageEmbed embed = Util.embedBuilder("Игрок не найден", Colors.red);
-                                event.replyEmbeds(embed).setEphemeral(true).queue();
-                                return;
-                            }
-                            String message = String.format("""
+                        }
+                    }
+
+                    if (count == 0) {
+                        MessageEmbed embed = Util.embedBuilder("Ничего не найдено", Colors.red);
+                        event.replyEmbeds(embed).setEphemeral(true).queue();
+                        return;
+                    }
+
+                    EmbedBuilder embedBuilder = new EmbedBuilder()
+                            .setTitle(String.format("Найдено %s записей", count))
+                            .setFooter(count > 15 ? "Показано только 15 записей. Задайте запрос конкретнее" : null) // TODO: pages
+                            .setColor(Colors.blue);
+
+                    records.each(record -> {
+                        String banned = "???";
+                        try {
+                            banned = StringUtils.fancyBool(Database.isBanned(record.getUuid()));
+                        } catch (SQLException e) {
+                            Log.err(e);
+                        }
+                        String message = String.format("""
                                     UUID: `%s`
                                     Имя: %s
                                     Айди: %s
                                     Последний айпи: %s
                                     Администратор: %s
-                                    """, record.getUuid(), record.getName(), record.getId(), record.getIp(), record.getAdmin() == 1);
-
-                            MessageEmbed embed = Util.embedBuilder("Информация", message, Colors.purple);
-                            event.replyEmbeds(embed).setEphemeral(true).queue();
-                        } case "ip" -> {
-                            UsersRecord[] records = Database.getContext()
-                                    .selectFrom(Tables.USERS)
-                                    .where(Tables.USERS.IP.contains(query))
-                                    .limit(20)
-                                    .fetchArray();
-
-                            if (records.length == 0) {
-                                MessageEmbed embed = Util.embedBuilder("Ничего не найдено", Colors.red);
-                                event.replyEmbeds(embed).setEphemeral(true).queue();
-                                return;
-                            }
-
-                            EmbedBuilder embedBuilder = new EmbedBuilder()
-                                    .setTitle("Результат запроса")
-                                    .setColor(Colors.purple);
-
-                            for (UsersRecord record : Arrays.copyOfRange(records, 0, Math.min(records.length, 15))) {
-                                String message = String.format("""
-                                        UUID: `%s`
-                                        Имя: %s
-                                        Айди: %s
-                                        Последний айпи: %s
-                                        Администратор: %s
-                                        """, record.getUuid(), record.getName(), record.getId(), record.getIp(), record.getAdmin() == 1);
-                                embedBuilder.addField(StringUtils.stripColorsAndGlyphs(record.getName()), message, false);
-                            }
-
-                            if (records.length > 15) { // TODO: pages
-                                embedBuilder.setFooter("Найдено больше 15 ползователей. Пожалуйста задайте запрос конкретнее");
-                            }
-
-                            event.replyEmbeds(embedBuilder.build()).setEphemeral(true).queue();
-                        }
-                    }
+                                    Забанен: %s
+                                    """, record.getUuid(), record.getName(), record.getId(), record.getIp(), StringUtils.fancyBool(record.getAdmin() == 1), banned);
+                        embedBuilder.addField(Strings.stripColors("**" + record.getName()) + "**", message, false);
+                    });
+                    event.replyEmbeds(embedBuilder.build()).setEphemeral(true).queue();
                 } catch (SQLException e) {
                     Log.err(e);
                     event.replyEmbeds(Util.embedBuilder("Возникла ошибка", Colors.red)).setEphemeral(true).queue();
                 }
-            } case "ban" -> {
+            }
+            case "ban" -> {
                 if (!event.getMember().hasPermission(Permission.ADMINISTRATOR)) {
                     MessageEmbed embed = Util.embedBuilder("В доступе отказано", Colors.red);
                     event.replyEmbeds(embed).queue();
@@ -331,7 +307,8 @@ public class DiscordListener extends ListenerAdapter {
                     Log.err(e);
                     event.replyEmbeds(Util.embedBuilder("Возникла ошибка", Colors.red)).setEphemeral(true).queue();
                 }
-            } case "unban" -> {
+            }
+            case "unban" -> {
                 if (!event.getMember().hasPermission(Permission.ADMINISTRATOR)) {
                     MessageEmbed embed = Util.embedBuilder("В доступе отказано", Colors.red);
                     event.replyEmbeds(embed).queue();

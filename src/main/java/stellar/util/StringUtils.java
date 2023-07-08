@@ -25,10 +25,14 @@ public class StringUtils {
 
     public static boolean isBase64(String input) {
         try {
-            byte[] decodedBytes = Base64.getDecoder().decode(input);
+            Base64.getDecoder().decode(input);
             return true;
         } catch (IllegalArgumentException e) {
             return false;
         }
+    }
+
+    public static String fancyBool(boolean bool) {
+        return bool ? "✔" : "✘";
     }
 }
