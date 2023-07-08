@@ -292,7 +292,7 @@ public class AdminCommands {
         });
 
         commandHandler.removeCommand("ban");
-        commandHandler.<Player>register("ban", "<name...>", "Забанить игрока", (args, player) -> {
+        commandHandler.<Player>register("ban", "<name...>", "commands.admin.ban.description", (args, player) -> {
             if (!Variables.admins.containsKey(player.uuid())) {
                 Bundle.bundled(player, "commands.access-denied");
                 return;
@@ -300,7 +300,7 @@ public class AdminCommands {
 
             Player found = Players.findPlayer(args[0]);
             if (found == null) {
-                Bundle.bundled(player, "commands.admin.ban.player-notfound", args[0]);
+                Bundle.bundled(player, "commands.player-notfound", args[0]);
                 return;
             }
             String uuid = found.uuid();
@@ -327,16 +327,16 @@ public class AdminCommands {
                 record.store();
 
                 found.kick(Packets.KickReason.banned);
-                player.sendMessage(String.format("[lime]Игрок %s забанен[]", args[0]));
+                Bundle.bundled(player, "commands.admin.ban.banned", args[0]);
                 Log.info("@ (@) has banned @ (@)", player.name(), player.uuid(), found.name(), found.uuid());
                 Bot.sendMessage(String.format("%s забанил игрока %s", player.name(), found.name()));
             } catch (SQLException e) {
                 Log.err("Failed to ban uuid for player '@'", uuid);
                 Log.err(e);
                 DiscordLogger.err("Failed to ban uuid for player '" + uuid + "'", e);
-                player.sendMessage(String.format("[red]Не могу забанить игрока с ником %s[]", args[0]));
+                Bundle.bundled(player, "commands.admin.ban.failed", args[0]);
             }
-        }); // TODO: использовать бандлы
+        });
 
         commandHandler.removeCommand("unban");
         commandHandler.<Player>register("unban", "<uuid>", "Разбанить игрока", (args, player) -> {
@@ -379,7 +379,7 @@ public class AdminCommands {
             } catch (SQLException e) {
                 Log.err("Failed to unban uuid for player '@'", args[0]);
                 Log.err(e);
-                DiscordLogger.err("Failed to ban uuid for player '" + args[0] + "'", e);
+                DiscordLogger.err("Failed to unban uuid for player '" + args[0] + "'", e);
                 player.sendMessage(String.format("[red]Не могу разбанить игрока с айди %s[]", args[0]));
             }
         }); // TODO: использовать бандлы
