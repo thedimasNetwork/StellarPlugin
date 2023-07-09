@@ -7,10 +7,12 @@ import arc.util.Strings;
 import arc.util.Structs;
 import mindustry.Vars;
 import mindustry.content.Blocks;
+import mindustry.content.Planets;
 import mindustry.game.EventType;
 import mindustry.game.Team;
 import mindustry.gen.*;
 import mindustry.net.Packets;
+import mindustry.type.Planet;
 import mindustry.type.UnitType;
 import mindustry.world.Block;
 import mindustry.world.Tile;
@@ -235,22 +237,41 @@ public class AdminCommands {
             }
         });
 
-        commandHandler.<Player>register("core", "<small|medium|big>", "commands.admin.core.description", (args, player) -> {
+        commandHandler.<Player>register("core", "[planet] <small|medium|big>", "commands.admin.core.description", (args, player) -> {
             if (!Variables.admins.containsKey(player.uuid())) {
                 Bundle.bundled(player, "commands.access-denied");
                 return;
             }
 
             Block core;
-            switch (args[0].toLowerCase()) {
-                case "small" -> core = Blocks.coreShard;
-                case "medium" -> core = Blocks.coreFoundation;
-                case "big" -> core = Blocks.coreNucleus;
-                default -> {
-                    Bundle.bundled(player, "commands.admin.core.core-type-not-found");
-                    return;
+            String planet = args[0].toLowerCase();
+            
+            if(planet == "serpulo"){
+                switch (args[1].toLowerCase()) {
+                    case "small" -> core = Blocks.coreShard;
+                    case "medium" -> core = Blocks.coreFoundation;
+                    case "big" -> core = Blocks.coreNucleus;
+                    default -> {
+                        Bundle.bundled(player, "commands.admin.core.core-type-not-found");
+                        return;
+                    }
                 }
+            }else if(planet == "erekir"){
+                switch (args[1].toLowerCase()) {
+                    case "small" -> core = Blocks.coreBastion;
+                    case "medium" -> core = Blocks.coreCitadel;
+                    case "big" -> core = Blocks.coreAcropolis;
+                    default -> {
+                        Bundle.bundled(player, "commands.admin.core.core-type-not-found");
+                        return;
+                    }
+                }
+            }else{
+                Bundle.bundled(player, "commands.admin.core.planet-type-not-found");
+                return;
             }
+            
+            
 
             Tile tile = player.tileOn();
             Call.constructFinish(tile, core, player.unit(), (byte) 0, player.team(), false);
