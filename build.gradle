@@ -113,7 +113,7 @@ task codegen {
                                 .withInputSchema("$schema")
                         )
                         .withTarget(new Target()
-                                .withPackageName("stellar.database.gen")
+                                .withPackageName("stellar.plugin.database.gen")
                                 .withDirectory(sourceSets.main.java.srcDirs.first().path)
                         )
                 )
