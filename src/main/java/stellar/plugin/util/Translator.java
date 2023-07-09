@@ -5,8 +5,8 @@ import arc.util.serialization.JsonReader;
 import arc.util.serialization.JsonValue;
 import mindustry.gen.Player;
 import stellar.plugin.Const;
-import stellar.plugin.database.Database;
-import stellar.plugin.database.gen.Tables;
+import stellar.database.Database;
+import stellar.database.gen.Tables;
 import stellar.plugin.util.logger.DiscordLogger;
 
 import java.io.BufferedReader;

@@ -20,9 +20,9 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jooq.Record1;
-import stellar.plugin.database.Database;
-import stellar.plugin.database.gen.Tables;
-import stellar.plugin.database.gen.tables.records.UsersRecord;
+import stellar.database.Database;
+import stellar.database.gen.Tables;
+import stellar.database.gen.tables.records.UsersRecord;
 import stellar.plugin.util.Players;
 import stellar.plugin.util.StringUtils;
 

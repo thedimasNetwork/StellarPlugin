@@ -11,9 +11,9 @@ import mindustry.net.NetConnection;
 import mindustry.net.Packets;
 import stellar.plugin.Const;
 import stellar.plugin.Variables;
-import stellar.plugin.database.Database;
-import stellar.plugin.database.gen.Tables;
-import stellar.plugin.database.gen.tables.records.IpCachedRecord;
+import stellar.database.Database;
+import stellar.database.gen.Tables;
+import stellar.database.gen.tables.records.IpCachedRecord;
 import stellar.plugin.util.Players;
 
 import java.sql.SQLException;

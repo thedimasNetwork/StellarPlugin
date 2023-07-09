@@ -3,8 +3,8 @@ package stellar.plugin.types;
 import lombok.Getter;
 import lombok.Setter;
 import mindustry.net.Packets;
-import stellar.plugin.database.Database;
-import stellar.plugin.database.gen.tables.records.UsersRecord;
+import stellar.database.Database;
+import stellar.database.gen.tables.records.UsersRecord;
 
 import java.sql.SQLException;
 

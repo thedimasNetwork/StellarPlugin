@@ -8,9 +8,9 @@ import mindustry.gen.Player;
 import org.jooq.Field;
 import org.jooq.Record1;
 import stellar.plugin.Const;
-import stellar.plugin.database.Database;
-import stellar.plugin.database.gen.Tables;
-import stellar.plugin.database.gen.tables.records.PlaytimeRecord;
+import stellar.database.Database;
+import stellar.database.gen.Tables;
+import stellar.database.gen.tables.records.PlaytimeRecord;
 import stellar.plugin.util.logger.DiscordLogger;
 
 import static stellar.plugin.Variables.interval;
