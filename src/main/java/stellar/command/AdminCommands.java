@@ -177,7 +177,7 @@ public class AdminCommands {
                     String otherPlayerName = otherPlayer.coloredName(); // ???
                     Bundle.bundled(player, "commands.admin.team.successful-updated", otherPlayer.name, team.color, team);
                 } else {
-                    Bundle.bundled(player, "commands.admin.team.player-notfound");
+                    Bundle.bundled(player, "commands.player-notfound");
                 }
             }
         });
@@ -300,7 +300,7 @@ public class AdminCommands {
 
             Player found = Players.findPlayer(args[0]);
             if (found == null) {
-                Bundle.bundled(player, "commands.player-notfound", args[0]);
+                Bundle.bundled(player, "commands.player-notfound");
                 return;
             }
             String uuid = found.uuid();
