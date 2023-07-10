@@ -1,5 +1,6 @@
 package stellar.plugin;
 
+import arc.struct.IntIntMap;
 import arc.struct.ObjectMap;
 import arc.struct.Seq;
 import arc.struct.StringMap;

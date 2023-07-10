@@ -6,7 +6,7 @@ import net.dv8tion.jda.api.entities.MessageEmbed;
 import stellar.plugin.util.StringUtils;
 
 public class ServerListener {
-    public static void listen() {
+    public static void load() {
         Events.on(EventType.ServerLoadEvent.class, event -> {
             MessageEmbed embed = Util.embedBuilder("**Сервер запущен**", Colors.green);
             Bot.sendEmbed(embed);

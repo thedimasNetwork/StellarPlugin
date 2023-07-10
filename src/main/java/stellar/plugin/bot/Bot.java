@@ -45,7 +45,7 @@ public class Bot {
         } catch (InterruptedException | LoginException e) {
             Log.err(e);
         }
-        ServerListener.listen();
+        ServerListener.load();
         jda.updateCommands().addCommands(
                 Commands.slash("info", "Информация про сервер"),
                 Commands.slash("players", "Игроки на сервере"),

@@ -79,11 +79,10 @@ public class AntiVPN { // also includes anti ddos from gh actions servers
             } else {
                 Log.debug("Trying to get info...");
                 String url = "http://proxycheck.io/v2/" + event.player.ip() + "?vpn=3&risk=2&key=" + Variables.config.pcToken;
-                Http.get(url, res -> { // TODO: caching
+                Http.get(url, res -> {
                     String resp = res.getResultAsString();
                     Log.debug(resp);
                     Jval json = Jval.read(resp);
-
 
                     if (json.getString("status").equals("denied") || json.getString("status").equals("error")) {
                         Log.err(resp);
@@ -102,7 +101,7 @@ public class AntiVPN { // also includes anti ddos from gh actions servers
 
                     if (!(data.getString("proxy").equals("no") && data.getString("vpn").equals("no"))) {
                         event.player.kick("No VPN is allowed"); // TODO: bundles
-                    } // maybe do check on type of ip, only allow Residential/Wireless
+                    }
                 }, Log::err);
             }
         });

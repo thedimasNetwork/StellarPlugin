@@ -28,7 +28,9 @@ ext {
     discordWebhookVersion = "v1.6"
     jacksonYamlVersion = "2.13.0"
     jdaVersion = "5.0.0-alpha.18"
-    databaseVersion = "c55bf78a3e   "
+    mysqlVersion = "8.0.30"
+    jooqVersion = "3.17.0"
+    databaseVersion = "bad256b9fb"
 }
 
 repositories {
@@ -47,7 +49,21 @@ dependencies {
     implementation ("net.dv8tion:JDA:$jdaVersion") { exclude module: "opus-java" }
     implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:$jacksonYamlVersion"
 
+    compileOnly "org.jooq:jooq:$jooqVersion"
+    compileOnly "mysql:mysql-connector-java:$mysqlVersion"
     implementation "com.github.thedimasNetwork:DatabaseWrapper:$databaseVersion"
+}
+
+jar {
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
+    archiveFileName = "${project.archivesBaseName}.jar"
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+
+    from("assets/$mod.name/") {
+        include "**"
+    }
 }
 
 processResources {
