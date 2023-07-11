@@ -312,6 +312,7 @@ public class AdminCommands {
             player.sendMessage("> " + (error ? "[#ff341c]" + output : output));
         });
 
+        /*
         commandHandler.removeCommand("ban");
         commandHandler.<Player>register("ban", "<name...>", "commands.admin.ban.description", (args, player) -> {
             if (!Variables.admins.containsKey(player.uuid())) {
@@ -404,6 +405,7 @@ public class AdminCommands {
                 player.sendMessage(String.format("[red]Не могу разбанить игрока с айди %s[]", args[0]));
             }
         }); // TODO: использовать бандлы
+        */
 
         commandHandler.removeCommand("kick");
         commandHandler.<Player>register("kick", "<name...>", "Выгнать игрока", (args, player) -> {

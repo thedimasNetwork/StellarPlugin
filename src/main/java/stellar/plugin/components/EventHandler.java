@@ -125,9 +125,9 @@ public class EventHandler {
                     if (data.getJsallowed() == 1) {
                         Variables.jsallowed.put(event.player.uuid(), event.player.name);
                     }
-                    if (data.getDonated() > 0) {
-                        Variables.donaters.put(event.player.uuid(), event.player.name);
-                    }
+                    // if (data.getDonated() > 0) {
+                    //     Variables.donaters.put(event.player.uuid(), event.player.name);
+                    // }
                     if (data.getPopup() == 1) {
                         Call.menu(event.player.con(), 0, title, welcome, buttons); // TODO: enum of menus and buttons
                     } else if (data.getDiscord() == 1) {
@@ -318,6 +318,7 @@ public class EventHandler {
             }
         });
 
+        /*
         // region баны
         Events.on(EventType.PlayerBanEvent.class, event -> {
             try {
@@ -349,6 +350,7 @@ public class EventHandler {
                 DiscordLogger.err("Failed to unban uuid for player '" + event.uuid + "'", e);
             }
         });
+        */
 
         Events.on(EventType.AdminRequestEvent.class, event -> {
             if (admins.containsKey(event.player.uuid())) {

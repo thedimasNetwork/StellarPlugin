@@ -319,6 +319,7 @@ public class PlayerCommands {
             }
         });
 
+        /*
         commandHandler.<Player>register("score", "commands.score.description", (args, player) -> {
             try {
                 int exp = Database.getContext()
@@ -331,6 +332,7 @@ public class PlayerCommands {
                 Log.err(e);
             }
         });
+        */
 
         commandHandler.<Player>register("info", "Получить информацию про игрока", (args, player) -> {
             String message = String.format("""
