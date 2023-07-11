@@ -143,7 +143,3 @@ gradle-app.setting
 .DS_Store
 Thumbs.db
 android/libs/
-
-## Database
-#src/main/java/stellar/database/gen/
-database.json
