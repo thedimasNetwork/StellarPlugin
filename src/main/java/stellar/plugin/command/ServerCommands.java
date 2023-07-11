@@ -205,7 +205,15 @@ public class ServerCommands {
             } catch (IllegalArgumentException | SQLException e) {
                 Log.err(e);
             }
+        });
 
+        commandHandler.register("corestats", "Get current player stats.", args -> {
+            Variables.statsData.each((uuid, stats) -> {
+                Log.info("@:", uuid);
+                stats.each((name, value) -> {
+                    Log.info(" - @: @", name, value);
+                });
+            });
         });
     }
 

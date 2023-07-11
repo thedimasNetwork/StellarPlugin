@@ -237,7 +237,7 @@ public class AdminCommands {
             }
         });
 
-        commandHandler.<Player>register("core", "[planet] <small|medium|big>", "commands.admin.core.description", (args, player) -> {
+        commandHandler.<Player>register("core", "<planet> <small|medium|big>", "commands.admin.core.description", (args, player) -> {
             if (!Variables.admins.containsKey(player.uuid())) {
                 Bundle.bundled(player, "commands.access-denied");
                 return;
@@ -245,8 +245,8 @@ public class AdminCommands {
 
             Block core;
             String planet = args[0].toLowerCase();
-            
-            if(planet == "serpulo"){
+
+            if (planet.equals("serpulo")) {
                 switch (args[1].toLowerCase()) {
                     case "small" -> core = Blocks.coreShard;
                     case "medium" -> core = Blocks.coreFoundation;
@@ -256,7 +256,7 @@ public class AdminCommands {
                         return;
                     }
                 }
-            }else if(planet == "erekir"){
+            } else if (planet.equals("erekir")) {
                 switch (args[1].toLowerCase()) {
                     case "small" -> core = Blocks.coreBastion;
                     case "medium" -> core = Blocks.coreCitadel;
@@ -266,12 +266,10 @@ public class AdminCommands {
                         return;
                     }
                 }
-            }else{
+            } else {
                 Bundle.bundled(player, "commands.admin.core.planet-type-not-found");
                 return;
             }
-            
-            
 
             Tile tile = player.tileOn();
             Call.constructFinish(tile, core, player.unit(), (byte) 0, player.team(), false);

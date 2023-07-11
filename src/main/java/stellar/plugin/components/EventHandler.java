@@ -4,6 +4,7 @@ import arc.Core;
 import arc.Events;
 import arc.graphics.Color;
 import arc.math.Mathf;
+import arc.struct.ObjectMap;
 import arc.util.Log;
 import arc.util.Strings;
 import mindustry.Vars;
@@ -12,11 +13,14 @@ import mindustry.content.Fx;
 import mindustry.content.Items;
 import mindustry.entities.Effect;
 import mindustry.game.EventType;
+import mindustry.game.Gamemode;
+import mindustry.game.Team;
 import mindustry.gen.Building;
 import mindustry.gen.Call;
 import mindustry.gen.Groups;
 import mindustry.gen.Player;
 import mindustry.net.Packets;
+import org.jooq.Field;
 import stellar.plugin.Const;
 import stellar.plugin.Variables;
 import stellar.plugin.bot.Bot;
@@ -125,9 +129,9 @@ public class EventHandler {
                     if (data.getJsallowed() == 1) {
                         Variables.jsallowed.put(event.player.uuid(), event.player.name);
                     }
-                    // if (data.getDonated() > 0) {
-                    //     Variables.donaters.put(event.player.uuid(), event.player.name);
-                    // }
+                     if (data.getDonated() > 0) {
+                         Variables.donaters.put(event.player.uuid(), event.player.name);
+                     }
                     if (data.getPopup() == 1) {
                         Call.menu(event.player.con(), 0, title, welcome, buttons); // TODO: enum of menus and buttons
                     } else if (data.getDiscord() == 1) {
@@ -148,6 +152,20 @@ public class EventHandler {
                     playtimeRecord.store();
 
                     Call.menu(event.player.con(), 0, title, welcome, buttons);
+                }
+
+                if (statsData.containsKey(event.player.uuid())) {
+                    Players.incrementStats(event.player, "logins");
+                } else {
+                    statsData.put(event.player.uuid(), ObjectMap.of(
+                            "attacks", 0,
+                            "waves", 0,
+                            "built", 0,
+                            "broken", 0,
+                            "deaths", 0,
+                            "logins", 1,
+                            "messages", 0
+                    ));
                 }
             } catch (SQLException e) {
                 Log.err(e);
@@ -233,6 +251,7 @@ public class EventHandler {
                     Call.hideFollowUpMenu(event.menuId);
 
                     String title, message;
+                    java.awt.Color color;
                     if (actionEntry.getAction() == Packets.AdminAction.kick) {
                         title = "Кик";
                         message = """
@@ -242,6 +261,7 @@ public class EventHandler {
                                 """.replace("%admin%", adminName).replace("%aid%", adminInfo.getId().toString())
                                 .replace("%target%", targetName).replace("%tid%", targetInfo.getId().toString())
                                 .replace("%reason%", actionEntry.getReason().strip());
+                        color = Colors.purple;
                     } else {
                         title = "Бан";
                         message = """
@@ -251,6 +271,7 @@ public class EventHandler {
                                 """.replace("%admin%", adminName).replace("%aid%", adminInfo.getId().toString())
                                 .replace("%target%", targetName).replace("%tid%", targetInfo.getId().toString())
                                 .replace("%reason%", actionEntry.getReason().strip());
+                        color = Colors.red;
                         if (computed > -1) {
                             message += "**Срок**: <t:%timestamp%:f>".replace("%timestamp%", (System.currentTimeMillis() / 1000 + computed * (24 * 60 * 60)) + "");
                         } else {
@@ -258,7 +279,7 @@ public class EventHandler {
                         }
 
                     }
-                    Bot.sendEmbed(config.bot.bansId, Util.embedBuilder(title, message, Colors.purple, LocalDateTime.now(), Const.SERVER_COLUMN_NAME));
+                    Bot.sendEmbed(config.bot.bansId, Util.embedBuilder(title, message, color, LocalDateTime.now(), Const.SERVER_COLUMN_NAME));
                     try {
                         actionEntry.storeRecord();
                     } catch (SQLException e) {
@@ -431,6 +452,8 @@ public class EventHandler {
             } catch (SQLException e) {
                 Log.err(e);
             }
+
+            unitPlayer.remove(event.player.unit().id);
         });
         // endregion
 
@@ -458,6 +481,50 @@ public class EventHandler {
             } catch (SQLException e) {
                 Log.err(e);
             }
+            if (Vars.state.rules.mode() == Gamemode.attack && event.winner == Team.sharded) {
+                Groups.player.each(player -> {
+                    Players.incrementStats(player, "attacks");
+                });
+            }
+        });
+
+        Events.on(EventType.WaveEvent.class, event -> {
+            if (Vars.state.rules.mode() != Gamemode.sandbox) {
+                Groups.player.each(player -> {
+                    Players.incrementStats(player, "waves");
+                });
+            }
+        });
+
+        Events.on(EventType.BlockBuildEndEvent.class, event -> {
+            if (event.tile.build == null) {
+                return;
+            }
+
+            if (event.unit.isPlayer()) {
+                Players.incrementStats(event.unit.getPlayer(), event.breaking ? "broken" : "built");
+            }
+        });
+
+        Events.on(EventType.UnitDestroyEvent.class, event -> {
+            Log.debug("== @ died ==", event.unit.type().name);
+            Log.debug("- Player: @", event.unit.getPlayer());
+            Log.debug("- Controller: @", event.unit.getControllerName());
+            Log.debug("- Last commanded: @", event.unit.lastCommanded());
+            Log.debug("== Workaround: ==");
+            Log.debug("- Player: @", Groups.player.getByID(unitPlayer.get(event.unit.id())));
+
+            Player player = event.unit.getPlayer();
+            if (player == null) {
+                player = Groups.player.getByID(unitPlayer.get(event.unit.id()));
+            }
+
+            if (player == null) {
+                return;
+            }
+
+            Log.debug(player);
+            Players.incrementStats(player, "deaths");
         });
 
         // region ториевые реакторы
@@ -501,7 +568,7 @@ public class EventHandler {
                     PlayerEventsRecord record = Database.getContext().newRecord(Tables.PLAYER_EVENTS);
                     record.setServer(Const.SERVER_COLUMN_NAME);
                     record.setTimestamp(System.currentTimeMillis() / 1000);
-                    record.setType(PlayerEventTypes.KICK.name());
+                    record.setType(PlayerEventTypes.CHAT.name());
                     record.setName(event.player.name);
                     record.setUuid(event.player.uuid());
                     record.setIp(event.player.ip());
@@ -519,6 +586,7 @@ public class EventHandler {
                 });
 
                 Log.info(Const.CHAT_LOG_FORMAT, Strings.stripColors(event.player.name), Strings.stripColors(event.message), event.player.locale);
+                Players.incrementStats(event.player, "messages");
             } else {
                 try {
                     PlayerEventsRecord record = Database.getContext().newRecord(Tables.PLAYER_EVENTS);
@@ -537,6 +605,39 @@ public class EventHandler {
         });
 
         Events.run(EventType.Trigger.update, () -> {
+            Groups.player.each(player -> {
+                if (player.unit().id() != -1) {
+                    unitPlayer.put(player.unit().id(), player.id());
+                }
+            });
+
+            if (Variables.interval.get(2, 3600)) {
+                Variables.statsData.each((uuid, stats) -> {
+                    stats.each((name, value) -> {
+                        try {
+                            Field<Integer> field = (Field<Integer>) Tables.USERS.field(name);
+                            if (field == null) {
+                                Log.err("Field @ is null. UUID: @", name, uuid);
+                                return;
+                            }
+
+                            Database.getContext()
+                                    .update(Tables.USERS)
+                                    .set(field, field.plus(value))
+                                    .where(Tables.USERS.UUID.eq(uuid))
+                                    .execute();
+
+                            stats.put(name, 0);
+                        } catch (SQLException e) {
+                            Log.err(e);
+                        }
+                    });
+
+                    if (!Groups.player.contains(p -> p.uuid().equals(uuid))) {
+                        Variables.statsData.remove(uuid);
+                    }
+                });
+            }
             /*if (!donaters.containsKey(event.player.uuid())) {
                 return;
             }*/

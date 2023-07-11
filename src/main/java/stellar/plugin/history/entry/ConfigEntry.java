@@ -26,7 +26,7 @@ public class ConfigEntry implements HistoryEntry {
     private final StringMap icons = new StringMap();
 
     public ConfigEntry(ConfigEvent event, boolean connect) {
-        Http.get("https://raw.githubusercontent.com/Anuken/Mindustry/v137/core/assets/icons/icons.properties", resp -> {
+        Http.get("https://raw.githubusercontent.com/Anuken/Mindustry/v145/core/assets/icons/icons.properties", resp -> {
             for (String line : resp.getResultAsString().split("\n")) {
                 String[] arr = line.split("\\|")[0].split("=");
                 icons.put(arr[1], String.valueOf((char) Strings.parseInt(arr[0])));
@@ -41,8 +41,7 @@ public class ConfigEntry implements HistoryEntry {
     private Object getConfig(ConfigEvent event) {
         if (event.value instanceof Integer) {
             int number = (int) event.value;
-            if (event.tile.block instanceof UnitFactory) {
-                UnitFactory factory = (UnitFactory) event.tile.block;
+            if (event.tile.block instanceof UnitFactory factory) {
                 return number == -1 ? null : factory.plans.get(number).unit;
             }
 
@@ -51,13 +50,11 @@ public class ConfigEntry implements HistoryEntry {
             }
         }
 
-        if (event.value instanceof Point2) {
-            Point2 point = (Point2) event.value;
+        if (event.value instanceof Point2 point) {
             return point.add(event.tile.tileX(), event.tile.tileY());
         }
 
-        if (event.value instanceof Point2[]) {
-            Point2[] points = (Point2[]) event.value;
+        if (event.value instanceof Point2[] points) {
             Structs.each(point -> point.add(event.tile.tileX(), event.tile.tileY()), points);
             return points;
         }

@@ -13,7 +13,7 @@ import stellar.plugin.types.AdminActionEntry;
 import java.time.Duration;
 
 public class Variables {
-    public static final Interval interval = new Interval(2);
+    public static final Interval interval = new Interval(5);
     public static final Seq<String> votesRTV = new Seq<>();
     // uuid -> enable
     public static final ObjectMap<String, Boolean> activeHistoryPlayers = new ObjectMap<>();
@@ -25,6 +25,8 @@ public class Variables {
     public static CacheSeq<HistoryEntry>[][] history = new CacheSeq[2048][2048];
     public static final Seq<String> blacklistedSubnets = new Seq<>();
     public static final ObjectMap<Integer, AdminActionEntry> adminActions = new ObjectMap<>();
+    public static final ObjectMap<String, ObjectMap<String, Integer>> statsData = new ObjectMap<>(); // uuid -> [field -> increase,...]
+    public static final IntIntMap unitPlayer = new IntIntMap();
 
     public static CacheSeq<HistoryEntry> getHistorySeq(int x, int y) {
         CacheSeq<HistoryEntry> seq = history[x][y];

@@ -32,4 +32,9 @@ public class Players {
         });
         return blocked.get();
     }
+
+    public static void incrementStats(Player player, String stat) {
+       int value = Variables.statsData.get(player.uuid()).get(stat);
+       Variables.statsData.get(player.uuid()).put(stat, value + 1);
+    }
 }

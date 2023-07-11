@@ -56,9 +56,7 @@ public class History {
             boolean connect = true;
 
             HistoryEntry last = entries.peek();
-            if (!entries.isEmpty() && last instanceof ConfigEntry) {
-                ConfigEntry lastConfigEntry = (ConfigEntry) last;
-
+            if (!entries.isEmpty() && last instanceof ConfigEntry lastConfigEntry) {
                 Seq<Building> conns = event.tile.getPowerConnections(new Seq<>());
                 connect = lastConfigEntry.value instanceof Long &&
                         (conns.any() && event.tile.block instanceof PowerNode &&
