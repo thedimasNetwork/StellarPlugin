@@ -18,4 +18,9 @@ public class Requirements {
                 requirements.built >= this.built &&
                 requirements.playtime >= this.playtime;
     }
+
+    @Override
+    public String toString() {
+        return String.format("a%s;w%s;h%s;b%s;p%s", attacks, waves, hexes, built, playtime);
+    }
 }

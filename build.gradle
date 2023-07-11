@@ -30,7 +30,7 @@ ext {
     jdaVersion = "5.0.0-alpha.18"
     mysqlVersion = "8.0.30"
     jooqVersion = "3.17.0"
-    databaseVersion = "2e13bc6030"
+    databaseVersion = "842227bf52"
 }
 
 repositories {

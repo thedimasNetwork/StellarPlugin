@@ -24,6 +24,7 @@ import stellar.plugin.history.entry.HistoryEntry;
 import stellar.plugin.history.struct.CacheSeq;
 import stellar.plugin.types.Requirements;
 import stellar.plugin.util.Bundle;
+import stellar.plugin.util.Players;
 import stellar.plugin.util.Translator;
 import stellar.plugin.util.logger.DiscordLogger;
 
@@ -334,7 +335,28 @@ public class PlayerCommands {
         commandHandler.<Player>register("rank", "Get your rank", (args, player) -> {
             try {
                 UsersRecord record = Database.getPlayer(player.uuid());
-                player.sendMessage(Rank.getRank(new Requirements(record.getAttacks(), record.getWaves(), record.getHexes(), record.getBuilt(), 100)).name());
+                player.sendMessage(Rank.getRank(new Requirements(record.getAttacks(), record.getWaves(), record.getHexes(), record.getBuilt(),  (int) (Players.totalPlaytime(player.uuid()) / 60))).name());
+            } catch (SQLException e) {
+                player.sendMessage("error");
+                Log.err(e);
+            }
+        });
+
+        commandHandler.<Player>register("ranks", "Get all ranks", (args, player) -> {
+            StringBuilder builder = new StringBuilder();
+            for (Rank rank : Rank.values()) {
+                if (rank.icon != null) {
+                    builder.append(String.format("<[#%s]%s[]> %s: %s", rank.color, rank.icon, rank.name(), rank.requirements)).append("\n");
+                } else {
+                    builder.append(String.format("%s: %s", rank.name(), rank.requirements)).append("\n");
+                }
+            }
+            player.sendMessage(builder.toString().trim());
+        });
+
+        commandHandler.<Player>register("total", "Get your total playtime", (args, player) -> {
+            try {
+                player.sendMessage(String.format("%.2f hours", Players.totalPlaytime(player.uuid()) / 60f / 60f));
             } catch (SQLException e) {
                 player.sendMessage("error");
                 Log.err(e);
