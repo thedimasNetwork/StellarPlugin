@@ -14,12 +14,15 @@ import mindustry.gen.Call;
 import mindustry.gen.Groups;
 import mindustry.gen.Player;
 import org.jooq.Field;
+import stellar.database.gen.tables.records.UsersRecord;
 import stellar.plugin.Const;
 import stellar.plugin.Variables;
 import stellar.database.Database;
 import stellar.database.gen.Tables;
+import stellar.plugin.components.Rank;
 import stellar.plugin.history.entry.HistoryEntry;
 import stellar.plugin.history.struct.CacheSeq;
+import stellar.plugin.types.Requirements;
 import stellar.plugin.util.Bundle;
 import stellar.plugin.util.Translator;
 import stellar.plugin.util.logger.DiscordLogger;
@@ -319,21 +322,6 @@ public class PlayerCommands {
             }
         });
 
-        /*
-        commandHandler.<Player>register("score", "commands.score.description", (args, player) -> {
-            try {
-                int exp = Database.getContext()
-                        .select(Tables.USERS.EXP)
-                        .from(Tables.USERS)
-                        .where(Tables.USERS.UUID.eq(player.uuid()))
-                        .fetchOne().value1();
-                Bundle.bundled(player, "commands.score.msg", exp);
-            } catch (SQLException e) {
-                Log.err(e);
-            }
-        });
-        */
-
         commandHandler.<Player>register("info", "Получить информацию про игрока", (args, player) -> {
             String message = String.format("""
                     [yellow]Name[]: %s
@@ -342,6 +330,16 @@ public class PlayerCommands {
                     [yellow]Locale[]: %s""", player.name(), player.uuid(), player.con.address, player.locale());
             player.sendMessage(message);
         }); // TODO: использовать бандлы
+
+        commandHandler.<Player>register("rank", "Get your rank", (args, player) -> {
+            try {
+                UsersRecord record = Database.getPlayer(player.uuid());
+                player.sendMessage(Rank.getRank(new Requirements(record.getAttacks(), record.getWaves(), record.getHexes(), record.getBuilt(), 100)).name());
+            } catch (SQLException e) {
+                player.sendMessage("error");
+                Log.err(e);
+            }
+        });
     }
 
     private static String longToTime(long seconds) {
