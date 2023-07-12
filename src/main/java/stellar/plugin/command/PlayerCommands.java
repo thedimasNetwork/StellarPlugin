@@ -32,8 +32,7 @@ import java.sql.SQLException;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
-import static mindustry.Vars.locales;
-import static mindustry.Vars.world;
+import static mindustry.Vars.*;
 import static stellar.plugin.Variables.config;
 
 
@@ -360,6 +359,41 @@ public class PlayerCommands {
             } catch (SQLException e) {
                 player.sendMessage("error");
                 Log.err(e);
+            }
+        });
+
+        commandHandler.<Player>register("stats", "Your playing stats", (args, player) -> {
+            try {
+                UsersRecord record = Database.getPlayer(player.uuid());
+                long playtime = Players.totalPlaytime(player.uuid());
+                String playtimeStr = playtime < 60 ? playtime + "m" :
+                        String.format("%dh %dm", playtime / (60 * 60),  (playtime % (60 * 60)) / 60);
+                Rank rank = Rank.getRank(new Requirements(record.getAttacks(), record.getWaves(), record.getHexes(), record.getBuilt(),  (int) (Players.totalPlaytime(player.uuid()) / 60)));
+                String rankStr = rank.icon != null ?
+                        String.format("<[#%s]%s[]> %s", rank.color, rank.icon, rank.name()) :
+                        rank.name();
+
+                String message = String.format("""
+                        [accent]\uF029[white] ID: []%d[]
+                        [accent]\uE872[white] Name: %s[][white]
+                        [accent]\uE81E[white] Rank: %s[]
+                                            
+                        [accent]\uE800[white] Blocks built: [accent]%d[]
+                        [accent]\uE815[white] Blocks broken: [accent]%d[]
+                                            
+                        [accent]\uE861[white] Attacks captured: [accent]%d[]
+                        [accent]\uE873[white] Hexes captured: [accent]%d[]
+                        [accent]\uE83B[white] Waves survived: [accent]%d[]
+                                            
+                        [accent]\uE813[white] Logins: [accent]%d[]
+                        [accent]\uE870[white] Messages: [accent]%d[]
+                        [accent]\u26A0[white] Deaths: [accent]%d[]
+                        [accent]\uE819[white] Playtime: [accent]%s[]
+                        """, record.getId(), player.coloredName(), rankStr, record.getBuilt(), record.getBroken(), record.getAttacks(), record.getHexes(), record.getWaves(), record.getLogins(), record.getMessages(), record.getDeaths(), playtimeStr);
+                Call.infoMessage(message);
+            } catch (SQLException e) {
+                Log.err(e);
+                player.sendMessage("error");
             }
         });
     }

@@ -5,13 +5,13 @@ import stellar.plugin.types.Requirements;
 
 public enum Rank {
     player,
-    beginner(Color.valueOf("FC8E6C"), "\uE872", new Requirements(5, 10, 2, 200, 1 * 60), player),
-    active(Color.valueOf("FFA665"), "\uE86B", new Requirements(8, 25, 3, 500, 2 * 60), beginner),
-    expert(Color.valueOf("F3E979"), "\uE86E", new Requirements(12, 50, 5, 1000, 4 * 60), active),
-    veteran(Color.valueOf("96F58C"), "\uE809", new Requirements(15, 100, 8, 2000, 8 * 60), expert),
-    elite(Color.valueOf("C0ECFF"), "\uE80E", new Requirements(20, 200, 12, 5000, 16 * 60), veteran),
-    master(Color.valueOf("88A4FF"), "\uE88B", new Requirements(30, 400, 16, 10000, 24 * 60), elite),
-    legendary(Color.valueOf("9E78DC"), "\uE88E", new Requirements(40, 600, 20, 20000, 36 * 60), master);
+    beginner(Color.valueOf("#fc693d"), "\uE872", new Requirements(5, 10, 2, 200, 1 * 60), player),
+    active(Color.valueOf("#ff8f40"), "\uE86B", new Requirements(8, 25, 3, 500, 2 * 60), beginner),
+    expert(Color.valueOf("#f2e33d"), "\uE86E", new Requirements(12, 50, 5, 1000, 4 * 60), active),
+    veteran(Color.valueOf("#66f556"), "\uE809", new Requirements(15, 100, 8, 2000, 8 * 60), expert),
+    elite(Color.valueOf("#8cddff"), "\uE80E", new Requirements(20, 200, 12, 5000, 16 * 60), veteran),
+    master(Color.valueOf("#547cff"), "\uE88B", new Requirements(30, 400, 16, 10000, 24 * 60), elite),
+    legendary(Color.valueOf("#8148db"), "\uE88E", new Requirements(40, 600, 20, 20000, 36 * 60), master);
 
 
     public final Color color;
