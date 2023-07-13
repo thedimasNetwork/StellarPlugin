@@ -5,6 +5,7 @@ import arc.struct.ObjectMap;
 import arc.struct.Seq;
 import arc.struct.StringMap;
 import arc.util.Interval;
+import stellar.plugin.components.Rank;
 import stellar.plugin.history.entry.HistoryEntry;
 import stellar.plugin.history.struct.CacheSeq;
 import stellar.plugin.history.struct.Seqs;
@@ -27,6 +28,7 @@ public class Variables {
     public static final ObjectMap<Integer, AdminActionEntry> adminActions = new ObjectMap<>();
     public static final ObjectMap<String, ObjectMap<String, Integer>> statsData = new ObjectMap<>(); // uuid -> [field -> increase,...]
     public static final IntIntMap unitPlayer = new IntIntMap();
+    public static final ObjectMap<String, Rank> ranks = new ObjectMap<>();
 
     public static CacheSeq<HistoryEntry> getHistorySeq(int x, int y) {
         CacheSeq<HistoryEntry> seq = history[x][y];

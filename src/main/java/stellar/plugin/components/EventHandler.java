@@ -168,6 +168,8 @@ public class EventHandler {
                             "messages", 0
                     ));
                 }
+
+                Rank.getRank(event.player);
             } catch (SQLException e) {
                 Log.err(e);
                 DiscordLogger.err(e);
@@ -455,6 +457,7 @@ public class EventHandler {
             }
 
             unitPlayer.remove(event.player.unit().id);
+            ranks.remove(event.player.uuid());
         });
         // endregion
 
