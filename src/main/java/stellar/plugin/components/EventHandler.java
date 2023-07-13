@@ -645,21 +645,19 @@ public class EventHandler {
             /*if (!donaters.containsKey(event.player.uuid())) {
                 return;
             }*/
-
-            // String effectName = Core.settings.getString("effect", "burning"); // TODO: перенести в конфиг файл
-            // Effect effect = Fx.burning;
-            // try {
-            //     effect = (Effect) Fx.class.getField(effectName).get(effect);
-            // } catch (NoSuchFieldException | IllegalAccessException e) {
-            //     Log.err(e);
-            // }
             
             Groups.player.each(p -> {
                 if (p.unit().moving()) {
                     try {
                         Rank rank = Rank.getRank(p);
                         Effect finalEffect = rank.effect;
-                        Call.effect(finalEffect, p.x, p.y, 0, Color.white);
+                        Color effectColor = rank.effectColor;
+                        if(effectColor == null){
+                            Call.effect(Fx.vapor, p.x, p.y, 0, Color.white);
+                        }else{
+                            Call.effect(Fx.vapor, p.x, p.y, 0, effectColor);
+                        }
+                        
                     } catch (SQLException e) {
                         p.sendMessage("error");
                         Log.err(e);
