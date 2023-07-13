@@ -650,13 +650,11 @@ public class EventHandler {
                 if (p.unit().moving()) {
                     try {
                         Rank rank = Rank.getRank(p);
-                        Effect finalEffect = rank.effect;
-                        Color effectColor = rank.effectColor;
-                        if(effectColor == null){
-                            Call.effect(Fx.vapor, p.x, p.y, 0, Color.white);
-                        }else{
-                            Call.effect(Fx.vapor, p.x, p.y, 0, effectColor);
-                        }
+                        Effect effect = rank.effect;
+                        Color effectColor = rank.effectColor == null ? Color.white : rank.effectColor;
+                        
+                        Call.effect(effect, p.x, p.y, 0, effectColor);
+                        
                         
                     } catch (SQLException e) {
                         p.sendMessage("error");
