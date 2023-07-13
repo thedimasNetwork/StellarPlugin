@@ -652,10 +652,7 @@ public class EventHandler {
                         Rank rank = Rank.getRank(p);
                         Effect effect = rank.effect;
                         Color effectColor = rank.effectColor == null ? Color.white : rank.effectColor;
-                        
                         Call.effect(effect, p.x, p.y, 0, effectColor);
-                        
-                        
                     } catch (SQLException e) {
                         p.sendMessage("error");
                         Log.err(e);

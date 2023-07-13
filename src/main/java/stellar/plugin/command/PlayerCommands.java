@@ -404,6 +404,15 @@ public class PlayerCommands {
                 player.sendMessage("error");
             }
         }); // TODO: finish bundles
+
+        commandHandler.<Player>register("setrank", "<rank>", "Set your rank temporary. [accent]Debug only![]", (args, player) -> {
+            try {
+                Variables.ranks.put(player.uuid(), Rank.valueOf(args[0]));
+                player.sendMessage(String.format("Your new rank is %s", args[0]));
+            } catch (IllegalArgumentException e) {
+                player.sendMessage("not found");
+            }
+        });
     }
 
     private static String longToTime(long seconds) {
