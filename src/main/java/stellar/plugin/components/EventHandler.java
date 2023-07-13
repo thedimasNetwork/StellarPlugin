@@ -656,15 +656,11 @@ public class EventHandler {
             
             Groups.player.each(p -> {
                 if (p.unit().moving()) {
-                    try {
-                        UsersRecord record = Database.getPlayer(p.uuid());
-                        Rank rank = Rank.getRank(new Requirements(record.getAttacks(), record.getWaves(), record.getHexes(), record.getBuilt(),  (int) (Players.totalPlaytime(p.uuid()) / 60)));
-                        Effect finalEffect = rank.effect;
-                        Call.effect(finalEffect, p.x, p.y, 0, Color.white);
-                    } catch (SQLException e) {
-                        p.sendMessage("error");
-                        Log.err(e);
-                    }
+                    
+                    Rank rank = Rank.getRank(p);
+                    Effect finalEffect = rank.effect;
+                    Call.effect(finalEffect, p.x, p.y, 0, Color.white);
+                    
                 }
             });
         });
