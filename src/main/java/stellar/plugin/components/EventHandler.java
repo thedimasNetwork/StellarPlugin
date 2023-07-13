@@ -32,6 +32,7 @@ import stellar.database.enums.ServerEventTypes;
 import stellar.database.gen.Tables;
 import stellar.database.gen.tables.records.*;
 import stellar.plugin.types.AdminActionEntry;
+import stellar.plugin.types.Requirements;
 import stellar.plugin.util.Bundle;
 import stellar.plugin.util.Players;
 import stellar.plugin.util.Translator;
@@ -129,9 +130,9 @@ public class EventHandler {
                     if (data.getJsallowed() == 1) {
                         Variables.jsallowed.put(event.player.uuid(), event.player.name);
                     }
-                     if (data.getDonated() > 0) {
-                         Variables.donaters.put(event.player.uuid(), event.player.name);
-                     }
+                    //  if (data.getDonated() > 0) {
+                    //      Variables.donaters.put(event.player.uuid(), event.player.name);
+                    //  }
                     if (data.getPopup() == 1) {
                         Call.menu(event.player.con(), 0, title, welcome, buttons); // TODO: enum of menus and buttons
                     } else if (data.getDiscord() == 1) {
@@ -641,16 +642,26 @@ public class EventHandler {
             /*if (!donaters.containsKey(event.player.uuid())) {
                 return;
             }*/
-            String effectName = Core.settings.getString("effect", "burning"); // TODO: перенести в конфиг файл
-            Effect effect = Fx.burning;
-            try {
-                effect = (Effect) Fx.class.getField(effectName).get(effect);
-            } catch (NoSuchFieldException | IllegalAccessException e) {
-                Log.err(e);
-            }
-            Effect finalEffect = effect;
+
+            // String effectName = Core.settings.getString("effect", "burning"); // TODO: перенести в конфиг файл
+            // Effect effect = Fx.burning;
+            // try {
+            //     effect = (Effect) Fx.class.getField(effectName).get(effect);
+            // } catch (NoSuchFieldException | IllegalAccessException e) {
+            //     Log.err(e);
+            // }
+            
             Groups.player.each(p -> {
                 if (p.unit().moving()) {
+                    try {
+                        UsersRecord record = Database.getPlayer(p.uuid());
+                        Rank rank = Rank.getRank(new Requirements(record.getAttacks(), record.getWaves(), record.getHexes(), record.getBuilt(),  (int) (Players.totalPlaytime(p.uuid()) / 60)));
+
+                    } catch (SQLException e) {
+                        p.sendMessage("error");
+                        Log.err(e);
+                    }
+                    Effect finalEffect = rank.effect;
                     Call.effect(finalEffect, p.x, p.y, 0, Color.white);
                 }
             });
