@@ -656,11 +656,14 @@ public class EventHandler {
             
             Groups.player.each(p -> {
                 if (p.unit().moving()) {
-                    
-                    Rank rank = Rank.getRank(p);
-                    Effect finalEffect = rank.effect;
-                    Call.effect(finalEffect, p.x, p.y, 0, Color.white);
-                    
+                    try {
+                        Rank rank = Rank.getRank(p);
+                        Effect finalEffect = rank.effect;
+                        Call.effect(finalEffect, p.x, p.y, 0, Color.white);
+                    } catch (SQLException e) {
+                        p.sendMessage("error");
+                        Log.err(e);
+                    }
                 }
             });
         });
