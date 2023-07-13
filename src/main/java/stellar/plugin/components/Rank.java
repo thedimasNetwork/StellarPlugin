@@ -1,7 +1,14 @@
 package stellar.plugin.components;
 
 import arc.graphics.Color;
+import mindustry.gen.Player;
+import stellar.database.Database;
+import stellar.database.gen.tables.records.UsersRecord;
+import stellar.plugin.Variables;
 import stellar.plugin.types.Requirements;
+import stellar.plugin.util.Players;
+
+import java.sql.SQLException;
 
 public enum Rank {
     player,
@@ -62,5 +69,25 @@ public enum Rank {
                 rank = rank.prevRank;
             }
         }
+    }
+
+    public static Rank getRank(Player player) throws SQLException {
+        if (Variables.ranks.containsKey(player.uuid())) {
+            return Variables.ranks.get(player.uuid());
+        }
+        UsersRecord record = Database.getPlayer(player.uuid());
+        Rank rank = Rank.getRank(new Requirements(record.getAttacks(), record.getWaves(), record.getHexes(), record.getBuilt(), (int) (Players.totalPlaytime(player.uuid()) / 60)));
+        Variables.ranks.put(player.uuid(), rank);
+        return rank;
+    }
+
+    @Override
+    public String toString() {
+        return "Rank{" +
+                "color=" + color +
+                ", icon='" + icon + '\'' +
+                ", requirements=" + requirements +
+                ", prevRank=" + (prevRank != null ? prevRank.name() : "null") +
+                '}';
     }
 }

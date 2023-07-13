@@ -13,6 +13,7 @@ import mindustry.game.Team;
 import mindustry.gen.Call;
 import mindustry.gen.Groups;
 import mindustry.gen.Player;
+import mindustry.graphics.Pal;
 import org.jooq.Field;
 import stellar.database.gen.tables.records.UsersRecord;
 import stellar.plugin.Const;
@@ -333,8 +334,11 @@ public class PlayerCommands {
 
         commandHandler.<Player>register("rank", "Get your rank", (args, player) -> {
             try {
-                UsersRecord record = Database.getPlayer(player.uuid());
-                player.sendMessage(Rank.getRank(new Requirements(record.getAttacks(), record.getWaves(), record.getHexes(), record.getBuilt(),  (int) (Players.totalPlaytime(player.uuid()) / 60))).name());
+                Rank rank = Rank.getRank(player);
+                String rankStr = rank.icon != null ?
+                        String.format("<[#%s]%s[]> %s", rank.color, rank.icon, Bundle.get("ranks." + rank.name(), Bundle.findLocale(player.locale()))) :
+                        Bundle.get("ranks." + rank.name(), Bundle.findLocale(player.locale()));
+                player.sendMessage(rankStr); // TODO: probably add rank format into bundle idk
             } catch (SQLException e) {
                 player.sendMessage("error");
                 Log.err(e);
@@ -343,11 +347,12 @@ public class PlayerCommands {
 
         commandHandler.<Player>register("ranks", "Get all ranks", (args, player) -> {
             StringBuilder builder = new StringBuilder();
+            Locale locale = Bundle.findLocale(player.locale());
             for (Rank rank : Rank.values()) {
                 if (rank.icon != null) {
-                    builder.append(String.format("<[#%s]%s[]> %s: %s", rank.color, rank.icon, rank.name(), rank.requirements)).append("\n");
+                    builder.append(String.format("<[#%s]%s[]> %s", rank.color, rank.icon, Bundle.get("ranks." + rank.name(), locale))).append("\n");
                 } else {
-                    builder.append(String.format("%s: %s", rank.name(), rank.requirements)).append("\n");
+                    builder.append(Bundle.get("ranks." + rank.name(), locale)).append("\n");
                 }
             }
             player.sendMessage(builder.toString().trim());
@@ -355,12 +360,15 @@ public class PlayerCommands {
 
         commandHandler.<Player>register("total", "Get your total playtime", (args, player) -> {
             try {
-                player.sendMessage(String.format("%.2f hours", Players.totalPlaytime(player.uuid()) / 60f / 60f));
+                long playtime = Players.totalPlaytime(player.uuid());
+                String playtimeStr = playtime < 60 ? playtime + "m" :
+                        String.format("%dh %dm", playtime / (60 * 60),  (playtime % (60 * 60)) / 60);
+                player.sendMessage(playtimeStr);
             } catch (SQLException e) {
                 player.sendMessage("error");
                 Log.err(e);
             }
-        });
+        }); // TODO: bundles
 
         commandHandler.<Player>register("stats", "Your playing stats", (args, player) -> {
             try {
@@ -368,10 +376,10 @@ public class PlayerCommands {
                 long playtime = Players.totalPlaytime(player.uuid());
                 String playtimeStr = playtime < 60 ? playtime + "m" :
                         String.format("%dh %dm", playtime / (60 * 60),  (playtime % (60 * 60)) / 60);
-                Rank rank = Rank.getRank(new Requirements(record.getAttacks(), record.getWaves(), record.getHexes(), record.getBuilt(),  (int) (Players.totalPlaytime(player.uuid()) / 60)));
+                Rank rank = Rank.getRank(player);
                 String rankStr = rank.icon != null ?
-                        String.format("<[#%s]%s[]> %s", rank.color, rank.icon, rank.name()) :
-                        rank.name();
+                        String.format("<[#%s]%s[]> %s", rank.color, rank.icon, Bundle.get("ranks." + rank.name(), Bundle.findLocale(player.locale()))) :
+                        Bundle.get("ranks." + rank.name(), Bundle.findLocale(player.locale));
 
                 String message = String.format("""
                         [accent]\uF029[white] ID: []%d[]
@@ -395,7 +403,7 @@ public class PlayerCommands {
                 Log.err(e);
                 player.sendMessage("error");
             }
-        });
+        }); // TODO: finish bundles
     }
 
     private static String longToTime(long seconds) {
