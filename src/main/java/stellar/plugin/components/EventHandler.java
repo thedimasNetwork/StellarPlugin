@@ -140,7 +140,7 @@ public class EventHandler {
                     }
 
                 } else {
-                    UsersRecord usersRecord = Database.getContext().newRecord(Tables.USERS);
+                    UsersRecord usersRecord = Database.getContext().newRecord(Tables.USERS); // TODO: Database.createPlayer
                     usersRecord.setUuid(event.player.uuid());
                     usersRecord.setIp(event.player.ip());
                     usersRecord.setName(event.player.name());
@@ -174,7 +174,7 @@ public class EventHandler {
                 Log.err(e);
                 DiscordLogger.err(e);
                 Call.menu(event.player.con(), 0, title, welcome, buttons);
-
+                ranks.put(event.player.uuid(), Rank.player);
             }
         });
         // endregion
@@ -653,10 +653,7 @@ public class EventHandler {
                         Effect effect = rank.effect;
                         Color effectColor = rank.effectColor == null ? Color.white : rank.effectColor;
                         Call.effect(effect, p.x, p.y, 0, effectColor);
-                    } catch (SQLException e) {
-                        p.sendMessage("error");
-                        Log.err(e);
-                    }
+                    } catch (SQLException ignored) { } // it can't throw as it calls the DB only when a player joins
                 }
             });
         });

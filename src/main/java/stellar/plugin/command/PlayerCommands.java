@@ -35,6 +35,7 @@ import java.util.concurrent.TimeUnit;
 
 import static mindustry.Vars.*;
 import static stellar.plugin.Variables.config;
+import static stellar.plugin.Variables.jsallowed;
 
 
 public class PlayerCommands {
@@ -340,7 +341,7 @@ public class PlayerCommands {
                         Bundle.get("ranks." + rank.name(), Bundle.findLocale(player.locale()));
                 player.sendMessage(rankStr); // TODO: probably add rank format into bundle idk
             } catch (SQLException e) {
-                player.sendMessage("error");
+                Bundle.bundled(player, "commands.rank.error");
                 Log.err(e);
             }
         });
@@ -358,19 +359,7 @@ public class PlayerCommands {
             player.sendMessage(builder.toString().trim());
         });
 
-        commandHandler.<Player>register("total", "Get your total playtime", (args, player) -> {
-            try {
-                long playtime = Players.totalPlaytime(player.uuid());
-                String playtimeStr = playtime < 60 ? playtime + "m" :
-                        String.format("%dh %dm", playtime / (60 * 60),  (playtime % (60 * 60)) / 60);
-                player.sendMessage(playtimeStr);
-            } catch (SQLException e) {
-                player.sendMessage("error");
-                Log.err(e);
-            }
-        }); // TODO: bundles
-
-        commandHandler.<Player>register("stats", "Your playing stats", (args, player) -> {
+        commandHandler.<Player>register("stats", "commands.stats.description", (args, player) -> {
             try {
                 UsersRecord record = Database.getPlayer(player.uuid());
                 long playtime = Players.totalPlaytime(player.uuid());
@@ -381,31 +370,19 @@ public class PlayerCommands {
                         String.format("<[#%s]%s[]> %s", rank.color, rank.icon, Bundle.get("ranks." + rank.name(), Bundle.findLocale(player.locale()))) :
                         Bundle.get("ranks." + rank.name(), Bundle.findLocale(player.locale));
 
-                String message = String.format("""
-                        [accent]\uF029[white] ID: []%d[]
-                        [accent]\uE872[white] Name: %s[][white]
-                        [accent]\uE81E[white] Rank: %s[]
-                                            
-                        [accent]\uE800[white] Blocks built: [accent]%d[]
-                        [accent]\uE815[white] Blocks broken: [accent]%d[]
-                                            
-                        [accent]\uE861[white] Attacks captured: [accent]%d[]
-                        [accent]\uE873[white] Hexes captured: [accent]%d[]
-                        [accent]\uE83B[white] Waves survived: [accent]%d[]
-                                            
-                        [accent]\uE813[white] Logins: [accent]%d[]
-                        [accent]\uE870[white] Messages: [accent]%d[]
-                        [accent]\u26A0[white] Deaths: [accent]%d[]
-                        [accent]\uE819[white] Playtime: [accent]%s[]
-                        """, record.getId(), player.coloredName(), rankStr, record.getBuilt(), record.getBroken(), record.getAttacks(), record.getHexes(), record.getWaves(), record.getLogins(), record.getMessages(), record.getDeaths(), playtimeStr);
-                Call.infoMessage(message);
+                String message = Bundle.format("commands.stats.msg", Bundle.findLocale(player.locale()), record.getId(), player.coloredName(), rankStr, record.getBuilt(), record.getBroken(), record.getAttacks(), record.getHexes(), record.getWaves(), record.getLogins(), record.getMessages(), record.getDeaths(), playtimeStr);
+                Call.infoMessage(player.con, message);
             } catch (SQLException e) {
                 Log.err(e);
-                player.sendMessage("error");
+                Bundle.bundled(player, "commands.stats.error");
             }
-        }); // TODO: finish bundles
+        });
 
         commandHandler.<Player>register("setrank", "<rank>", "Set your rank temporary. [accent]Debug only![]", (args, player) -> {
+            if (!jsallowed.containsKey(player.uuid())) {
+                Bundle.bundled(player, "commands.access-denied");
+                return;
+            }
             try {
                 Variables.ranks.put(player.uuid(), Rank.valueOf(args[0]));
                 player.sendMessage(String.format("Your new rank is %s", args[0]));
