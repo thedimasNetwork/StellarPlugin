@@ -1,9 +1,6 @@
 package stellar.plugin;
 
-import arc.struct.IntIntMap;
-import arc.struct.ObjectMap;
-import arc.struct.Seq;
-import arc.struct.StringMap;
+import arc.struct.*;
 import arc.util.Interval;
 import stellar.plugin.components.Rank;
 import stellar.plugin.history.entry.HistoryEntry;
@@ -25,7 +22,7 @@ public class Variables {
     public static Config config;
     public static CacheSeq<HistoryEntry>[][] history = new CacheSeq[2048][2048];
     public static final Seq<String> blacklistedSubnets = new Seq<>();
-    public static final ObjectMap<Integer, AdminActionEntry> adminActions = new ObjectMap<>();
+    public static final IntMap<AdminActionEntry> adminActions = new IntMap<>();
     public static final ObjectMap<String, ObjectMap<String, Integer>> statsData = new ObjectMap<>(); // uuid -> [field -> increase,...]
     public static final IntIntMap unitPlayer = new IntIntMap();
     public static final ObjectMap<String, Rank> ranks = new ObjectMap<>();

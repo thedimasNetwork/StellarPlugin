@@ -3,6 +3,7 @@ package stellar.plugin.util;
 import arc.util.Strings;
 
 import java.util.Base64;
+import java.util.Locale;
 
 public class StringUtils {
     public static String stripColorsAndGlyphs(String str) {
@@ -34,5 +35,14 @@ public class StringUtils {
 
     public static String fancyBool(boolean bool) {
         return bool ? "✔" : "✘";
+    }
+
+    public static String targetColor(int passed, int required) {
+        return passed < required ? "red" : "green";
+    }
+
+    public static String longToTime(long seconds, Locale locale) {
+        return seconds < 60 * 60 ? Bundle.format("formats.playtime.short", locale, seconds / 60) :
+                Bundle.format("formats.playtime", locale, seconds / (60 * 60),  (seconds % (60 * 60)) / 60);
     }
 }

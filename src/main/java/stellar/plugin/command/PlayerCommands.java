@@ -3,6 +3,7 @@ package stellar.plugin.command;
 import arc.Core;
 import arc.Events;
 import arc.math.Mathf;
+import arc.struct.Seq;
 import arc.util.CommandHandler;
 import arc.util.Log;
 import arc.util.Strings;
@@ -13,7 +14,9 @@ import mindustry.game.Team;
 import mindustry.gen.Call;
 import mindustry.gen.Groups;
 import mindustry.gen.Player;
+import mindustry.gen.RequestDebugStatusCallPacket;
 import mindustry.graphics.Pal;
+import mindustry.net.Packets;
 import org.jooq.Field;
 import stellar.database.gen.tables.records.UsersRecord;
 import stellar.plugin.Const;
@@ -21,11 +24,13 @@ import stellar.plugin.Variables;
 import stellar.database.Database;
 import stellar.database.gen.Tables;
 import stellar.plugin.components.Rank;
+import stellar.plugin.enums.Menus;
 import stellar.plugin.history.entry.HistoryEntry;
 import stellar.plugin.history.struct.CacheSeq;
 import stellar.plugin.types.Requirements;
 import stellar.plugin.util.Bundle;
 import stellar.plugin.util.Players;
+import stellar.plugin.util.StringUtils;
 import stellar.plugin.util.Translator;
 import stellar.plugin.util.logger.DiscordLogger;
 
@@ -315,62 +320,60 @@ public class PlayerCommands {
                         .from(Tables.PLAYTIME)
                         .where(Tables.PLAYTIME.UUID.eq(player.uuid()))
                         .fetchOne().value1();
+                Locale locale = Bundle.findLocale(player.locale());
                 if (time == null) {
                     Log.err("Player '" + player.uuid() + "' doesn't exists");
                 }
-                Bundle.bundled(player, "commands.playtime.msg", Const.SERVER_NAMES.get(serverColumnName), longToTime(time != null ? time : 0L));
+                Bundle.bundled(player, "commands.playtime.msg", Const.SERVER_NAMES.get(serverColumnName), StringUtils.longToTime((time == null) ? 0 : time, locale));
             } catch (Throwable t) {
                 Log.err("Failed to get playtime for player '" + player.uuid() + "'", t);
             }
         });
 
-        commandHandler.<Player>register("info", "Получить информацию про игрока", (args, player) -> {
-            String message = String.format("""
-                    [yellow]Name[]: %s
-                    [yellow]UUID[]: %s
-                    [yellow]IP[]: [yellow]%s
-                    [yellow]Locale[]: %s""", player.name(), player.uuid(), player.con.address, player.locale());
-            player.sendMessage(message);
-        }); // TODO: использовать бандлы
-
-        commandHandler.<Player>register("rank", "Get your rank", (args, player) -> {
+        commandHandler.<Player>register("rank", "commands.rank.description", (args, player) -> {
             try {
                 Rank rank = Rank.getRank(player);
+                Locale locale = Bundle.findLocale(player.locale());
                 String rankStr = rank.icon != null ?
-                        String.format("<[#%s]%s[]> %s", rank.color, rank.icon, Bundle.get("ranks." + rank.name(), Bundle.findLocale(player.locale()))) :
-                        Bundle.get("ranks." + rank.name(), Bundle.findLocale(player.locale()));
-                player.sendMessage(rankStr); // TODO: probably add rank format into bundle idk
+                        String.format("<[#%s]%s[]> %s", rank.color, rank.icon, Bundle.get("ranks." + rank.name(), locale)) :
+                        Bundle.get("ranks." + rank.name(), locale);
+
+                String[][] buttons = {
+                        {Bundle.get("commands.rank.next-rank", locale)},
+                        {Bundle.get("menus.close", locale)}
+                };
+
+                Call.menu(player.con(), Menus.ranks.ordinal(), "Rank info", Bundle.format("commands.rank.msg", Bundle.findLocale(player.locale()), rankStr), buttons);
             } catch (SQLException e) {
                 Bundle.bundled(player, "commands.rank.error");
                 Log.err(e);
             }
         });
 
-        commandHandler.<Player>register("ranks", "Get all ranks", (args, player) -> {
+        commandHandler.<Player>register("ranks", "commands.ranks.description", (args, player) -> {
             StringBuilder builder = new StringBuilder();
             Locale locale = Bundle.findLocale(player.locale());
+            String[][] buttons = new String[Rank.values().length + 1][]; // I wanted to use Seq<String> that didn't work
             for (Rank rank : Rank.values()) {
-                if (rank.icon != null) {
-                    builder.append(String.format("<[#%s]%s[]> %s", rank.color, rank.icon, Bundle.get("ranks." + rank.name(), locale))).append("\n");
-                } else {
-                    builder.append(Bundle.get("ranks." + rank.name(), locale)).append("\n");
-                }
+                 buttons[rank.ordinal()] = new String[]{rank.icon != null ?
+                        String.format("<[#%s]%s[]> %s", rank.color, rank.icon, Bundle.get("ranks." + rank.name(), locale)) :
+                        Bundle.get("ranks." + rank.name(), locale)};
             }
-            player.sendMessage(builder.toString().trim());
+            buttons[Rank.values().length] = new String[]{Bundle.get("menus.close", locale)};
+            Call.menu(player.con(), Menus.allRanks.ordinal(), "Ranks info", "", buttons);
         });
 
         commandHandler.<Player>register("stats", "commands.stats.description", (args, player) -> {
             try {
                 UsersRecord record = Database.getPlayer(player.uuid());
                 long playtime = Players.totalPlaytime(player.uuid());
-                String playtimeStr = playtime < 60 ? playtime + "m" :
-                        String.format("%dh %dm", playtime / (60 * 60),  (playtime % (60 * 60)) / 60);
                 Rank rank = Rank.getRank(player);
+                Locale locale = Bundle.findLocale(player.locale);
                 String rankStr = rank.icon != null ?
-                        String.format("<[#%s]%s[]> %s", rank.color, rank.icon, Bundle.get("ranks." + rank.name(), Bundle.findLocale(player.locale()))) :
-                        Bundle.get("ranks." + rank.name(), Bundle.findLocale(player.locale));
+                        String.format("<[#%s]%s[]> %s", rank.color, rank.icon, Bundle.get("ranks." + rank.name(), locale)) :
+                        Bundle.get("ranks." + rank.name(), locale);
 
-                String message = Bundle.format("commands.stats.msg", Bundle.findLocale(player.locale()), record.getId(), player.coloredName(), rankStr, record.getBuilt(), record.getBroken(), record.getAttacks(), record.getHexes(), record.getWaves(), record.getLogins(), record.getMessages(), record.getDeaths(), playtimeStr);
+                String message = Bundle.format("commands.stats.msg", Bundle.findLocale(player.locale()), record.getId(), player.coloredName(), rankStr, record.getBuilt(), record.getBroken(), record.getAttacks(), record.getHexes(), record.getWaves(), record.getLogins(), record.getMessages(), record.getDeaths(), StringUtils.longToTime(playtime, locale));
                 Call.infoMessage(player.con, message);
             } catch (SQLException e) {
                 Log.err(e);
@@ -391,11 +394,4 @@ public class PlayerCommands {
             }
         });
     }
-
-    private static String longToTime(long seconds) {
-        long min = seconds / 60;
-        long hour = min / 60;
-        return String.format("%d:%02d:%02d", hour, min % 60, seconds % 60);
-    }
-
 }

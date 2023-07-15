@@ -1,6 +1,5 @@
 package stellar.plugin.components;
 
-import arc.Core;
 import arc.Events;
 import arc.graphics.Color;
 import arc.math.Mathf;
@@ -9,7 +8,6 @@ import arc.util.Log;
 import arc.util.Strings;
 import mindustry.Vars;
 import mindustry.content.Blocks;
-import mindustry.content.Fx;
 import mindustry.content.Items;
 import mindustry.entities.Effect;
 import mindustry.game.EventType;
@@ -31,8 +29,8 @@ import stellar.database.enums.PlayerEventTypes;
 import stellar.database.enums.ServerEventTypes;
 import stellar.database.gen.Tables;
 import stellar.database.gen.tables.records.*;
+import stellar.plugin.enums.Menus;
 import stellar.plugin.types.AdminActionEntry;
-import stellar.plugin.types.Requirements;
 import stellar.plugin.util.Bundle;
 import stellar.plugin.util.Players;
 import stellar.plugin.util.Translator;
@@ -43,6 +41,8 @@ import java.time.LocalDateTime;
 import java.util.Locale;
 
 import static stellar.plugin.Variables.*;
+import static stellar.plugin.util.StringUtils.longToTime;
+import static stellar.plugin.util.StringUtils.targetColor;
 
 @SuppressWarnings({"unused", "unchecked"})
 public class EventHandler {
@@ -93,7 +93,7 @@ public class EventHandler {
             String welcome = Bundle.format("welcome", locale, rules);
             String title = Bundle.format("welcome.title", locale, Strings.stripColors(event.player.name()));
             String[][] buttons = {
-                    { Bundle.get("welcome.close", locale) },
+                    { Bundle.get("menus.close", locale) },
                     { Bundle.get("welcome.discord", locale) },
                     { Bundle.get("welcome.disable", locale) }
             };
@@ -134,7 +134,7 @@ public class EventHandler {
                     //      Variables.donaters.put(event.player.uuid(), event.player.name);
                     //  }
                     if (data.getPopup() == 1) {
-                        Call.menu(event.player.con(), 0, title, welcome, buttons); // TODO: enum of menus and buttons
+                        Call.menu(event.player.con(), Menus.welcome.ordinal(), title, welcome, buttons); // TODO: enum of menu buttons
                     } else if (data.getDiscord() == 1) {
                         Call.openURI(event.player.con(), config.discordUrl);
                     }
@@ -152,7 +152,7 @@ public class EventHandler {
                     playtimeRecord.setUuid(event.player.uuid());
                     playtimeRecord.store();
 
-                    Call.menu(event.player.con(), 0, title, welcome, buttons);
+                    Call.menu(event.player.con(), Menus.welcome.ordinal(), title, welcome, buttons);
                 }
 
                 if (statsData.containsKey(event.player.uuid())) {
@@ -173,7 +173,7 @@ public class EventHandler {
             } catch (SQLException e) {
                 Log.err(e);
                 DiscordLogger.err(e);
-                Call.menu(event.player.con(), 0, title, welcome, buttons);
+                Call.menu(event.player.con(), Menus.welcome.ordinal(), title, welcome, buttons);
                 ranks.put(event.player.uuid(), Rank.player);
             }
         });
@@ -181,115 +181,182 @@ public class EventHandler {
 
         Events.on(EventType.MenuOptionChooseEvent.class, event -> {
             Log.debug("Menu &lb#@&fr: @", event.menuId, event.option);
-            if (event.menuId == 0) {
-                switch (event.option) {
-                    case 0 -> {
-                        // do nothing, it's close button
+            switch (Menus.values()[event.menuId]) {
+                case welcome ->  {
+                    switch (event.option) {
+                        case 0 -> {
+                            // do nothing, it's close button
+                        }
+                        case 1 -> {
+                            Call.openURI(event.player.con(), config.discordUrl);
+                        }
+                        case 2 -> {
+                            try {
+                                Database.getContext()
+                                        .update(Tables.USERS)
+                                        .set(Tables.USERS.POPUP, (byte) 0)
+                                        .where(Tables.USERS.UUID.eq(event.player.uuid()))
+                                        .execute();
+                                Bundle.bundled(event.player, "welcome.disabled");
+                            } catch (SQLException e) {
+                                Log.err(e);
+                                Bundle.bundled(event.player, "welcome.disable.failed");
+                            }
+                        }
                     }
-                    case 1 -> {
-                        Call.openURI(event.player.con(), config.discordUrl);
+                }
+                case punishment -> {
+                    if (!admins.containsKey(event.player.uuid())) {
+                        return;
                     }
-                    case 2 -> {
+
+                    if (!adminActions.containsKey(event.menuId)) {
+                        Log.err("@ tried to access non-existent admin action with ID @", event.player.plainName(), event.menuId);
+                        return;
+                    }
+
+                    AdminActionEntry actionEntry = adminActions.get(event.menuId);
+                    int computed = actionEntry.getPeriod();
+                    switch (event.option) {
+                        case 0 -> computed -= 1;
+                        case 1 -> computed += 1;
+                        case 2 -> computed -= 7;
+                        case 3 -> computed += 7;
+                        case 4 -> computed -= 30;
+                        case 5 -> computed += 30;
+                        case 6 -> computed = 0;
+                        case 7 -> computed = -1;
+                        case 8 -> {} // being processed later
+                    }
+
+                    if (event.option != 7 && event.option != 8) {
+                        computed = Math.max(0, computed);
+                    }
+                    adminActions.get(event.menuId).setPeriod(computed);
+
+                    Locale locale = Bundle.findLocale(event.player.locale());
+
+                    if (event.option != 8 && event.option != -1) {
+                        String[][] buttons = {
+                                {Bundle.get("menus.ban.minus-1d", locale), Bundle.get("menus.ban.plus-1d", locale)},
+                                {Bundle.get("menus.ban.minus-1w", locale), Bundle.get("menus.ban.plus-1w", locale)},
+                                {Bundle.get("menus.ban.minus-1m", locale), Bundle.get("menus.ban.plus-1m", locale)},
+                                {Bundle.get("menus.ban.reset", locale), Bundle.get("menus.ban.permanent", locale)},
+                                {Bundle.get("menus.ban.proceed", locale)}
+                        };
+
+                        String title = Bundle.format("menus.ban.title", locale, Strings.stripColors(actionEntry.getTarget().getName()));
+                        String message = Bundle.format("menus.ban.msg", locale, computed);
+                        Call.followUpMenu(event.player.con(), event.menuId, title, message, buttons);
+                    } else {
+                        UsersRecord adminInfo = actionEntry.getAdmin();
+                        UsersRecord targetInfo = actionEntry.getTarget();
+                        String adminName = Strings.stripColors(adminInfo.getName());
+                        String targetName = Strings.stripColors(targetInfo.getName());
+                        Call.hideFollowUpMenu(event.menuId);
+
+                        String title, message;
+                        java.awt.Color color;
+                        if (actionEntry.getAction() == Packets.AdminAction.kick) {
+                            title = "Кик";
+                            message = """
+                                    **Админ**: %admin% (%aid%)
+                                    **Нарушитель**: %target% (%tid%)
+                                    **Причина**: %reason%
+                                    """.replace("%admin%", adminName).replace("%aid%", adminInfo.getId().toString())
+                                    .replace("%target%", targetName).replace("%tid%", targetInfo.getId().toString())
+                                    .replace("%reason%", actionEntry.getReason().strip());
+                            color = Colors.purple;
+                        } else {
+                            title = "Бан";
+                            message = """
+                                    **Админ**: %admin% (%aid%)
+                                    **Нарушитель**: %target% (%tid%)
+                                    **Причина**: %reason%
+                                    """.replace("%admin%", adminName).replace("%aid%", adminInfo.getId().toString())
+                                    .replace("%target%", targetName).replace("%tid%", targetInfo.getId().toString())
+                                    .replace("%reason%", actionEntry.getReason().strip());
+                            color = Colors.red;
+                            if (computed > -1) {
+                                message += "**Срок**: <t:%timestamp%:f>".replace("%timestamp%", (System.currentTimeMillis() / 1000 + computed * (24 * 60 * 60)) + "");
+                            } else {
+                                message += "**Срок**: Перманентный";
+                            }
+
+                        }
+                        Bot.sendEmbed(config.bot.bansId, Util.embedBuilder(title, message, color, LocalDateTime.now(), Const.SERVER_COLUMN_NAME));
                         try {
-                            Database.getContext()
-                                    .update(Tables.USERS)
-                                    .set(Tables.USERS.POPUP, (byte) 0)
-                                    .where(Tables.USERS.UUID.eq(event.player.uuid()))
-                                    .execute();
-                            Bundle.bundled(event.player, "welcome.disabled");
+                            actionEntry.storeRecord();
                         } catch (SQLException e) {
                             Log.err(e);
-                            Bundle.bundled(event.player, "welcome.disable.failed");
+                        }
+                        Vars.netServer.admins.unbanPlayerID(actionEntry.getTarget().getUuid()); // maybe not a good idea
+                        adminActions.remove(event.menuId);
+                    }
+                }
+                case ranks -> {
+                    switch (event.option) { // TODO: menu instead of infoMessage
+                        case 0 -> {
+                            try {
+                                Rank rank = Rank.getRank(event.player).getNext();
+                                Locale locale = Bundle.findLocale(event.player.locale());
+
+                                if (rank == null) {
+                                    Call.infoMessage(event.player.con(), Bundle.format("commands.rank.next-rank.none", locale));
+                                } else {
+                                    UsersRecord record = Database.getPlayer(event.player.uuid());
+                                    int playtime = (int) Players.totalPlaytime(event.player.uuid());
+                                    String rankStr = rank.icon != null ?
+                                            String.format("<[#%s]%s[]> %s", rank.color, rank.icon, Bundle.get("ranks." + rank.name(), locale)) :
+                                            Bundle.get("ranks." + rank.name(), locale);
+
+                                    String message = Bundle.format("commands.rank.next-rank.info", locale,
+                                            rankStr,
+                                            targetColor(record.getAttacks(), rank.requirements.attacks), record.getAttacks(), rank.requirements.attacks,
+                                            targetColor(record.getWaves(), rank.requirements.waves), record.getWaves(), rank.requirements.waves,
+                                            targetColor(record.getHexes(), rank.requirements.hexes), record.getHexes(), rank.requirements.hexes,
+                                            targetColor(record.getBuilt(), rank.requirements.built), record.getBuilt(), rank.requirements.built,
+                                            targetColor(playtime, rank.requirements.playtime * 60), longToTime(playtime, locale), longToTime(rank.requirements.playtime * 60, locale)
+                                    );
+                                    Call.infoMessage(event.player.con(), message);
+                                }
+                            } catch (SQLException e) {
+                                Log.err(e);
+                                Bundle.bundled(event.player, "commands.rank.error");
+                            }
+                        }
+                        case 1 -> {
+                            // do nothing as menu is being hidden automatically
                         }
                     }
                 }
-            } else {
-                if (!admins.containsKey(event.player.uuid())) {
-                    return;
-                }
-
-                if (!adminActions.containsKey(event.menuId)) {
-                    Log.err("@ tried to access non-existent admin action with ID @", event.player.plainName(), event.menuId);
-                    return;
-                }
-
-                AdminActionEntry actionEntry = adminActions.get(event.menuId);
-                int computed = actionEntry.getPeriod();
-                switch (event.option) {
-                    case 0 -> computed -= 1;
-                    case 1 -> computed += 1;
-                    case 2 -> computed -= 7;
-                    case 3 -> computed += 7;
-                    case 4 -> computed -= 30;
-                    case 5 -> computed += 30;
-                    case 6 -> computed = 0;
-                    case 7 -> computed = -1;
-                    case 8 -> { } // being processed later
-                }
-
-                if (event.option != 7 && event.option != 8) {
-                    computed = Math.max(0, computed);
-                }
-                adminActions.get(event.menuId).setPeriod(computed);
-
-                Locale locale = Bundle.findLocale(event.player.locale());
-
-                if (event.option != 8 && event.option != -1) {
-                    String[][] buttons = {
-                            {Bundle.get("menus.ban.minus-1d", locale), Bundle.get("menus.ban.plus-1d", locale)},
-                            {Bundle.get("menus.ban.minus-1w", locale), Bundle.get("menus.ban.plus-1w", locale)},
-                            {Bundle.get("menus.ban.minus-1m", locale), Bundle.get("menus.ban.plus-1m", locale)},
-                            {Bundle.get("menus.ban.reset", locale), Bundle.get("menus.ban.permanent", locale)},
-                            {Bundle.get("menus.ban.proceed", locale)}
-                    };
-
-                    String title = Bundle.format("menus.ban.title", locale, Strings.stripColors(actionEntry.getTarget().getName()));
-                    String message = Bundle.format("menus.ban.msg", locale, computed);
-                    Call.followUpMenu(event.player.con(), event.menuId, title, message, buttons);
-                } else {
-                    UsersRecord adminInfo = actionEntry.getAdmin();
-                    UsersRecord targetInfo = actionEntry.getTarget();
-                    String adminName = Strings.stripColors(adminInfo.getName());
-                    String targetName = Strings.stripColors(targetInfo.getName());
-                    Call.hideFollowUpMenu(event.menuId);
-
-                    String title, message;
-                    java.awt.Color color;
-                    if (actionEntry.getAction() == Packets.AdminAction.kick) {
-                        title = "Кик";
-                        message = """
-                                **Админ**: %admin% (%aid%)
-                                **Нарушитель**: %target% (%tid%)
-                                **Причина**: %reason%
-                                """.replace("%admin%", adminName).replace("%aid%", adminInfo.getId().toString())
-                                .replace("%target%", targetName).replace("%tid%", targetInfo.getId().toString())
-                                .replace("%reason%", actionEntry.getReason().strip());
-                        color = Colors.purple;
-                    } else {
-                        title = "Бан";
-                        message = """
-                                **Админ**: %admin% (%aid%)
-                                **Нарушитель**: %target% (%tid%)
-                                **Причина**: %reason%
-                                """.replace("%admin%", adminName).replace("%aid%", adminInfo.getId().toString())
-                                .replace("%target%", targetName).replace("%tid%", targetInfo.getId().toString())
-                                .replace("%reason%", actionEntry.getReason().strip());
-                        color = Colors.red;
-                        if (computed > -1) {
-                            message += "**Срок**: <t:%timestamp%:f>".replace("%timestamp%", (System.currentTimeMillis() / 1000 + computed * (24 * 60 * 60)) + "");
-                        } else {
-                            message += "**Срок**: Перманентный";
-                        }
-
+                case allRanks -> {
+                    if (event.option >= Rank.values().length || event.option < 0) {
+                        return;
                     }
-                    Bot.sendEmbed(config.bot.bansId, Util.embedBuilder(title, message, color, LocalDateTime.now(), Const.SERVER_COLUMN_NAME));
+
                     try {
-                        actionEntry.storeRecord();
+                        Rank rank = Rank.values()[event.option];
+                        Locale locale = Bundle.findLocale(event.player.locale());
+                        UsersRecord record = Database.getPlayer(event.player.uuid());
+                        int playtime = (int) Players.totalPlaytime(event.player.uuid());
+                        String rankStr = rank.icon != null ?
+                                String.format("<[#%s]%s[]> %s", rank.color, rank.icon, Bundle.get("ranks." + rank.name(), locale)) :
+                                Bundle.get("ranks." + rank.name(), locale);
+
+                        String message = Bundle.format("commands.rank.next-rank.info", locale,
+                                rankStr,
+                                targetColor(record.getAttacks(), rank.requirements.attacks), record.getAttacks(), rank.requirements.attacks,
+                                targetColor(record.getWaves(), rank.requirements.waves), record.getWaves(), rank.requirements.waves,
+                                targetColor(record.getHexes(), rank.requirements.hexes), record.getHexes(), rank.requirements.hexes,
+                                targetColor(record.getBuilt(), rank.requirements.built), record.getBuilt(), rank.requirements.built,
+                                targetColor(playtime, rank.requirements.playtime * 60), longToTime(playtime, locale), longToTime(rank.requirements.playtime * 60, locale)
+                        );
+                        Call.infoMessage(event.player.con(), message);
                     } catch (SQLException e) {
                         Log.err(e);
+                        Bundle.bundled(event.player, "commands.rank.error");
                     }
-                    Vars.netServer.admins.unbanPlayerID(actionEntry.getTarget().getUuid()); // maybe not a good idea
-                    adminActions.remove(event.menuId);
                 }
             }
         });
