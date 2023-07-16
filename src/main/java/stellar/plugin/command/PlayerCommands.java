@@ -27,6 +27,7 @@ import stellar.plugin.components.Rank;
 import stellar.plugin.enums.Menus;
 import stellar.plugin.history.entry.HistoryEntry;
 import stellar.plugin.history.struct.CacheSeq;
+import stellar.plugin.menus.MenuHandler;
 import stellar.plugin.types.Requirements;
 import stellar.plugin.util.Bundle;
 import stellar.plugin.util.Players;
@@ -396,6 +397,17 @@ public class PlayerCommands {
             } catch (IllegalArgumentException e) {
                 player.sendMessage("not found");
             }
+        });
+
+        commandHandler.<Player>register("testmenu", "[some-text...]", "Test menu", (args, player) -> {
+            String[][] buttons = new String[][] {
+                    {"A", "B", "C"},
+                    {"D", "E"}
+            };
+
+            MenuHandler.send(player, "Test", args.length > 0 ? args[0] : "None", buttons, (menuId, option, p) -> {
+                p.sendMessage(String.format("%d: %d", menuId, option));
+            });
         });
     }
 }

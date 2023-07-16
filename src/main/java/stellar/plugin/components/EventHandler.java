@@ -30,6 +30,7 @@ import stellar.database.enums.ServerEventTypes;
 import stellar.database.gen.Tables;
 import stellar.database.gen.tables.records.*;
 import stellar.plugin.enums.Menus;
+import stellar.plugin.menus.MenuHandler;
 import stellar.plugin.types.AdminActionEntry;
 import stellar.plugin.util.Bundle;
 import stellar.plugin.util.Players;
@@ -181,6 +182,12 @@ public class EventHandler {
 
         Events.on(EventType.MenuOptionChooseEvent.class, event -> {
             Log.debug("Menu &lb#@&fr: @", event.menuId, event.option);
+
+            if (event.menuId > Menus.values().length - 1) {
+                MenuHandler.handle(event.menuId, event.option, event.player);
+                return;
+            }
+
             switch (Menus.values()[event.menuId]) {
                 case welcome ->  {
                     switch (event.option) {
