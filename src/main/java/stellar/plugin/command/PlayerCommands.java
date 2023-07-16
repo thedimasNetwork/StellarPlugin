@@ -3,7 +3,6 @@ package stellar.plugin.command;
 import arc.Core;
 import arc.Events;
 import arc.math.Mathf;
-import arc.struct.Seq;
 import arc.util.CommandHandler;
 import arc.util.Log;
 import arc.util.Strings;
@@ -14,9 +13,6 @@ import mindustry.game.Team;
 import mindustry.gen.Call;
 import mindustry.gen.Groups;
 import mindustry.gen.Player;
-import mindustry.gen.RequestDebugStatusCallPacket;
-import mindustry.graphics.Pal;
-import mindustry.net.Packets;
 import org.jooq.Field;
 import stellar.database.gen.tables.records.UsersRecord;
 import stellar.plugin.Const;
@@ -28,7 +24,6 @@ import stellar.plugin.enums.Menus;
 import stellar.plugin.history.entry.HistoryEntry;
 import stellar.plugin.history.struct.CacheSeq;
 import stellar.plugin.menus.MenuHandler;
-import stellar.plugin.types.Requirements;
 import stellar.plugin.util.Bundle;
 import stellar.plugin.util.Players;
 import stellar.plugin.util.StringUtils;
@@ -42,6 +37,8 @@ import java.util.concurrent.TimeUnit;
 import static mindustry.Vars.*;
 import static stellar.plugin.Variables.config;
 import static stellar.plugin.Variables.jsallowed;
+import static stellar.plugin.util.StringUtils.longToTime;
+import static stellar.plugin.util.StringUtils.targetColor;
 
 
 public class PlayerCommands {
@@ -344,7 +341,33 @@ public class PlayerCommands {
                         {Bundle.get("menus.close", locale)}
                 };
 
-                Call.menu(player.con(), Menus.ranks.ordinal(), Bundle.get("menus.title.rank-info", locale), Bundle.format("commands.rank.msg", Bundle.findLocale(player.locale()), rankStr), buttons);
+                MenuHandler.send(player, Bundle.get("menus.title.rank-info", locale), Bundle.format("commands.rank.msg", locale, rankStr), buttons, ((menuId, option, p) -> {
+                    try {
+                        Rank nextRank = Rank.getRank(p).getNext();
+                        if (nextRank == null) {
+                            Call.infoMessage(p.con(), Bundle.format("commands.rank.next-rank.none", locale));
+                        } else {
+                            UsersRecord record = Database.getPlayer(p.uuid());
+                            int playtime = (int) Players.totalPlaytime(p.uuid());
+                            String nextRankStr = nextRank.icon != null ?
+                                    String.format("<[#%s]%s[]> %s", nextRank.color, nextRank.icon, Bundle.get("ranks." + nextRank.name(), locale)) :
+                                    Bundle.get("ranks." + nextRank.name(), locale);
+
+                            String message = Bundle.format("commands.rank.next-rank.info", locale,
+                                    nextRankStr,
+                                    targetColor(record.getAttacks(), nextRank.requirements.attacks), record.getAttacks(), nextRank.requirements.attacks,
+                                    targetColor(record.getWaves(), nextRank.requirements.waves), record.getWaves(), nextRank.requirements.waves,
+                                    targetColor(record.getHexes(), nextRank.requirements.hexes), record.getHexes(), nextRank.requirements.hexes,
+                                    targetColor(record.getBuilt(), nextRank.requirements.built), record.getBuilt(), nextRank.requirements.built,
+                                    targetColor(playtime, nextRank.requirements.playtime * 60), longToTime(playtime, locale), longToTime(nextRank.requirements.playtime * 60, locale)
+                            );
+                            Call.infoMessage(p.con(), message);
+                        }
+                    } catch (SQLException e) {
+                        Log.err(e);
+                        Bundle.bundled(p, "commands.rank.error");
+                    }
+                }));
             } catch (SQLException e) {
                 Bundle.bundled(player, "commands.rank.error");
                 Log.err(e);
