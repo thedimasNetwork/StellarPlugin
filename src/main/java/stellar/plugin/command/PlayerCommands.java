@@ -343,7 +343,7 @@ public class PlayerCommands {
                         {Bundle.get("menus.close", locale)}
                 };
 
-                Call.menu(player.con(), Menus.ranks.ordinal(), "Rank info", Bundle.format("commands.rank.msg", Bundle.findLocale(player.locale()), rankStr), buttons);
+                Call.menu(player.con(), Menus.ranks.ordinal(), Bundle.get("menus.title.rank-info", locale), Bundle.format("commands.rank.msg", Bundle.findLocale(player.locale()), rankStr), buttons);
             } catch (SQLException e) {
                 Bundle.bundled(player, "commands.rank.error");
                 Log.err(e);
@@ -360,7 +360,7 @@ public class PlayerCommands {
                         Bundle.get("ranks." + rank.name(), locale)};
             }
             buttons[Rank.values().length] = new String[]{Bundle.get("menus.close", locale)};
-            Call.menu(player.con(), Menus.allRanks.ordinal(), "Ranks info", "", buttons);
+            Call.menu(player.con(), Menus.allRanks.ordinal(), Bundle.get("menus.title.ranks-info", locale), "", buttons);
         });
 
         commandHandler.<Player>register("stats", "commands.stats.description", (args, player) -> {
@@ -374,12 +374,11 @@ public class PlayerCommands {
                         Bundle.get("ranks." + rank.name(), locale);
 
                 String message = Bundle.format("commands.stats.msg", Bundle.findLocale(player.locale()), record.getId(), player.coloredName(), rankStr, record.getBuilt(), record.getBroken(), record.getAttacks(), record.getHexes(), record.getWaves(), record.getLogins(), record.getMessages(), record.getDeaths(), StringUtils.longToTime(playtime, locale));
-                // Call.infoMessage(player.con, message);
                 String[][] buttons = {
                         {Bundle.get("commands.rank.next-rank", locale)},
                         {Bundle.get("menus.close", locale)}
                 };
-                Call.menu(player.con(), Menus.ranks.ordinal(), "Player stats", message, buttons);
+                Call.menu(player.con(), Menus.ranks.ordinal(), Bundle.get("menus.title.stats", locale), message, buttons);
             } catch (SQLException e) {
                 Log.err(e);
                 Bundle.bundled(player, "commands.stats.error");
