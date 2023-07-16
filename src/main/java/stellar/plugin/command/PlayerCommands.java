@@ -374,7 +374,12 @@ public class PlayerCommands {
                         Bundle.get("ranks." + rank.name(), locale);
 
                 String message = Bundle.format("commands.stats.msg", Bundle.findLocale(player.locale()), record.getId(), player.coloredName(), rankStr, record.getBuilt(), record.getBroken(), record.getAttacks(), record.getHexes(), record.getWaves(), record.getLogins(), record.getMessages(), record.getDeaths(), StringUtils.longToTime(playtime, locale));
-                Call.infoMessage(player.con, message);
+                // Call.infoMessage(player.con, message);
+                String[][] buttons = {
+                        {Bundle.get("commands.rank.next-rank", locale)},
+                        {Bundle.get("menus.close", locale)}
+                };
+                Call.menu(player.con(), Menus.ranks.ordinal(), "Player stats", message, buttons);
             } catch (SQLException e) {
                 Log.err(e);
                 Bundle.bundled(player, "commands.stats.error");
