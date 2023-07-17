@@ -384,7 +384,34 @@ public class PlayerCommands {
                         Bundle.get("ranks." + rank.name(), locale)};
             }
             buttons[Rank.values().length] = new String[]{Bundle.get("menus.close", locale)};
-            Call.menu(player.con(), Menus.allRanks.ordinal(), Bundle.get("menus.title.ranks-info", locale), "", buttons);
+
+            MenuHandler.send(player, Bundle.get("menus.title.ranks-info", locale), "", buttons, (menuId, option, p) -> {
+                if (option >= Rank.values().length || option < 0) {
+                    return;
+                }
+
+                try {
+                    Rank rank = Rank.values()[option];
+                    UsersRecord record = Database.getPlayer(p.uuid());
+                    int playtime = (int) Players.totalPlaytime(p.uuid());
+                    String rankStr = rank.icon != null ?
+                            String.format("<[#%s]%s[]> %s", rank.color, rank.icon, Bundle.get("ranks." + rank.name(), locale)) :
+                            Bundle.get("ranks." + rank.name(), locale);
+
+                    String message = Bundle.format("commands.rank.next-rank.info", locale,
+                            rankStr,
+                            targetColor(record.getAttacks(), rank.requirements.attacks), record.getAttacks(), rank.requirements.attacks,
+                            targetColor(record.getWaves(), rank.requirements.waves), record.getWaves(), rank.requirements.waves,
+                            targetColor(record.getHexes(), rank.requirements.hexes), record.getHexes(), rank.requirements.hexes,
+                            targetColor(record.getBuilt(), rank.requirements.built), record.getBuilt(), rank.requirements.built,
+                            targetColor(playtime, rank.requirements.playtime * 60), longToTime(playtime, locale), longToTime(rank.requirements.playtime * 60, locale)
+                    );
+                    Call.infoMessage(p.con(), message);
+                } catch (SQLException e) {
+                    Log.err(e);
+                    Bundle.bundled(p, "commands.rank.error");
+                }
+            });
         });
 
         commandHandler.<Player>register("stats", "commands.stats.description", (args, player) -> {

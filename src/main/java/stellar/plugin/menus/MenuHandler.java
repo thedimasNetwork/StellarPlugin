@@ -5,7 +5,7 @@ import arc.struct.IntMap;
 import mindustry.gen.Call;
 import mindustry.gen.Player;
 
-public class MenuHandler {
+public class MenuHandler { // TODO: implement text inputs and somehow followUp menus
     private static final IntMap<MenuRunner> runners = new IntMap<>();
     public static int send(Player player, String title, String message, String[][] buttons, MenuRunner runner) {
         int menuId = Mathf.random(Integer.MAX_VALUE - 1);

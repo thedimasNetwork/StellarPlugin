@@ -337,34 +337,6 @@ public class EventHandler {
                         }
                     }
                 }
-                case allRanks -> {
-                    if (event.option >= Rank.values().length || event.option < 0) {
-                        return;
-                    }
-
-                    try {
-                        Rank rank = Rank.values()[event.option];
-                        Locale locale = Bundle.findLocale(event.player.locale());
-                        UsersRecord record = Database.getPlayer(event.player.uuid());
-                        int playtime = (int) Players.totalPlaytime(event.player.uuid());
-                        String rankStr = rank.icon != null ?
-                                String.format("<[#%s]%s[]> %s", rank.color, rank.icon, Bundle.get("ranks." + rank.name(), locale)) :
-                                Bundle.get("ranks." + rank.name(), locale);
-
-                        String message = Bundle.format("commands.rank.next-rank.info", locale,
-                                rankStr,
-                                targetColor(record.getAttacks(), rank.requirements.attacks), record.getAttacks(), rank.requirements.attacks,
-                                targetColor(record.getWaves(), rank.requirements.waves), record.getWaves(), rank.requirements.waves,
-                                targetColor(record.getHexes(), rank.requirements.hexes), record.getHexes(), rank.requirements.hexes,
-                                targetColor(record.getBuilt(), rank.requirements.built), record.getBuilt(), rank.requirements.built,
-                                targetColor(playtime, rank.requirements.playtime * 60), longToTime(playtime, locale), longToTime(rank.requirements.playtime * 60, locale)
-                        );
-                        Call.infoMessage(event.player.con(), message);
-                    } catch (SQLException e) {
-                        Log.err(e);
-                        Bundle.bundled(event.player, "commands.rank.error");
-                    }
-                }
             }
         });
 
