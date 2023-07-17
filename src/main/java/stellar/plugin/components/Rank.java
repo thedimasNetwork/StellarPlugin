@@ -91,12 +91,18 @@ public enum Rank {
         }
     }
 
+    public static Rank getRankForced(Player player) throws SQLException {
+        UsersRecord record = Database.getPlayer(player.uuid());
+        Rank rank = Rank.getRank(new Requirements(record.getAttacks(), record.getWaves(), record.getHexes(), record.getBuilt(), (int) (Players.totalPlaytime(player.uuid()) / 60)));
+        Variables.ranks.put(player.uuid(), rank);
+        return rank;
+    }
+
     public static Rank getRank(Player player) throws SQLException {
         if (Variables.ranks.containsKey(player.uuid())) {
             return Variables.ranks.get(player.uuid());
         }
-        UsersRecord record = Database.getPlayer(player.uuid());
-        Rank rank = Rank.getRank(new Requirements(record.getAttacks(), record.getWaves(), record.getHexes(), record.getBuilt(), (int) (Players.totalPlaytime(player.uuid()) / 60)));
+        Rank rank = Rank.getRankForced(player);
         Variables.ranks.put(player.uuid(), rank);
         return rank;
     }

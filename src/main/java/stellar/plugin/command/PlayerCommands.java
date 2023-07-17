@@ -20,7 +20,6 @@ import stellar.plugin.Variables;
 import stellar.database.Database;
 import stellar.database.gen.Tables;
 import stellar.plugin.components.Rank;
-import stellar.plugin.enums.Menus;
 import stellar.plugin.history.entry.HistoryEntry;
 import stellar.plugin.history.struct.CacheSeq;
 import stellar.plugin.menus.MenuHandler;
@@ -341,7 +340,7 @@ public class PlayerCommands {
                         {Bundle.get("menus.close", locale)}
                 };
 
-                MenuHandler.send(player, Bundle.get("menus.title.rank-info", locale), Bundle.format("commands.rank.msg", locale, rankStr), buttons, ((menuId, option, p) -> {
+                MenuHandler.send(player, Bundle.get("menus.rank-info.title", locale), Bundle.format("commands.rank.msg", locale, rankStr), buttons, ((menuId, option, p) -> {
                     try {
                         Rank nextRank = Rank.getRank(p).getNext();
                         if (nextRank == null) {
@@ -385,7 +384,7 @@ public class PlayerCommands {
             }
             buttons[Rank.values().length] = new String[]{Bundle.get("menus.close", locale)};
 
-            MenuHandler.send(player, Bundle.get("menus.title.ranks-info", locale), "", buttons, (menuId, option, p) -> {
+            MenuHandler.send(player, Bundle.get("menus.ranks-info.title", locale), "", buttons, (menuId, option, p) -> {
                 if (option >= Rank.values().length || option < 0) {
                     return;
                 }
@@ -429,7 +428,31 @@ public class PlayerCommands {
                         {Bundle.get("commands.rank.next-rank", locale)},
                         {Bundle.get("menus.close", locale)}
                 };
-                Call.menu(player.con(), Menus.ranks.ordinal(), Bundle.get("menus.title.stats", locale), message, buttons);
+                MenuHandler.send(player, Bundle.get("menus.stats.title", locale), message, buttons, (menuId, option, p) -> {
+                    try {
+                        Rank nextRank = Rank.getRank(p).getNext();
+                        if (nextRank == null) {
+                            Call.infoMessage(p.con(), Bundle.format("commands.rank.next-rank.none", locale));
+                        } else {
+                            String nextRankStr = nextRank.icon != null ?
+                                    String.format("<[#%s]%s[]> %s", nextRank.color, nextRank.icon, Bundle.get("ranks." + nextRank.name(), locale)) :
+                                    Bundle.get("ranks." + nextRank.name(), locale);
+
+                            String msg = Bundle.format("commands.rank.next-rank.info", locale,
+                                    rankStr,
+                                    targetColor(record.getAttacks(), nextRank.requirements.attacks), record.getAttacks(), nextRank.requirements.attacks,
+                                    targetColor(record.getWaves(), nextRank.requirements.waves), record.getWaves(), nextRank.requirements.waves,
+                                    targetColor(record.getHexes(), nextRank.requirements.hexes), record.getHexes(), nextRank.requirements.hexes,
+                                    targetColor(record.getBuilt(), nextRank.requirements.built), record.getBuilt(), nextRank.requirements.built,
+                                    targetColor((int) playtime, nextRank.requirements.playtime * 60), longToTime(playtime, locale), longToTime(nextRank.requirements.playtime * 60, locale)
+                            );
+                            Call.infoMessage(p.con(), msg);
+                        }
+                    } catch (SQLException e) {
+                        Log.err(e);
+                        Bundle.bundled(p, "commands.rank.error");
+                    }
+                });
             } catch (SQLException e) {
                 Log.err(e);
                 Bundle.bundled(player, "commands.stats.error");
