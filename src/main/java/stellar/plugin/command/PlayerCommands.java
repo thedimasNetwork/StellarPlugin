@@ -490,7 +490,7 @@ public class PlayerCommands {
         // region debug commands
         // TODO: effect, set block/floor/overlay commands
         if (Core.settings.getBool("debug")) {
-            commandHandler.<Player>register("", "[some-text...]", "Test menu", (args, player) -> {
+            commandHandler.<Player>register("test-menu", "[some-text...]", "Test menu", (args, player) -> {
                 String[][] buttons = new String[][]{
                         {"A", "B", "C"},
                         {"D", "E"}
