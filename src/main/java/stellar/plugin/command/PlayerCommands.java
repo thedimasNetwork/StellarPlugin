@@ -482,10 +482,8 @@ public class PlayerCommands {
                     Log.err(e);
                 }
 
-                String playerFormatted =  String.format(playerDetailed ? "[lightgray]\uE803 %s: %s (%s) []" : "[lightgray]\uE803 %s: %s[]", Strings.stripColors(target.name()), args[1], args[1]);
-                String targetFormatted =  String.format(targetDetailed ? "[lightgray]\uE802 %s: %s (%s) []" : "[lightgray]\uE802 %s: %s[]", Strings.stripColors(player.name()), Translator.translateRaw(player, target, args[1]), args[1]);
-                player.sendMessage(playerFormatted);
-                target.sendMessage(targetFormatted);
+                Bundle.bundled(player, "commands.msg.to", Strings.stripColors(target.name()), String.format(playerDetailed ? "%s (%s)" : "%s", args[1], args[1]));
+                Bundle.bundled(target, "commands.msg.from", Strings.stripColors(player.name()), String.format(targetDetailed ? "%s (%s)" : "%s", Translator.translateRaw(player, target, args[1]), args[1]));
             }).start();
         });
 
