@@ -30,6 +30,7 @@ import stellar.plugin.util.Translator;
 import stellar.plugin.util.logger.DiscordLogger;
 
 import java.sql.SQLException;
+import java.text.MessageFormat;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
@@ -459,28 +460,62 @@ public class PlayerCommands {
             }
         });
 
-        commandHandler.<Player>register("setrank", "<rank>", "Set your rank temporary. [accent]Debug only![]", (args, player) -> {
-            if (!jsallowed.containsKey(player.uuid())) {
-                Bundle.bundled(player, "commands.access-denied");
+        commandHandler.<Player>register("msg", "<player_name> <message...>", "commands.msg.description", (args, player) -> {
+            Player target = Players.findPlayer(StringUtils.stripColorsAndGlyphs(args[0]).strip());
+            if (target == null) {
+                Bundle.bundled(player, "commands.player-notfound");
                 return;
             }
-            try {
-                Variables.ranks.put(player.uuid(), Rank.valueOf(args[0]));
-                player.sendMessage(String.format("Your new rank is %s", args[0]));
-            } catch (IllegalArgumentException e) {
-                player.sendMessage("not found");
+
+            if (player == target) {
+                Bundle.bundled(player, "commands.msg.self");
+                return;
             }
+
+            new Thread(() -> {
+                boolean playerDetailed = false;
+                boolean targetDetailed = false;
+                try {
+                    playerDetailed = Database.getPlayer(player.uuid()).getTranslator().equals("double");
+                    targetDetailed = Database.getPlayer(player.uuid()).getTranslator().equals("double");
+                } catch (SQLException e) {
+                    Log.err(e);
+                }
+
+                String playerFormatted =  String.format(playerDetailed ? "[lightgray]\uE803 %s: %s (%s) []" : "[lightgray]\uE803 %s: %s[]", Strings.stripColors(target.name()), args[1], args[1]);
+                String targetFormatted =  String.format(targetDetailed ? "[lightgray]\uE802 %s: %s (%s) []" : "[lightgray]\uE802 %s: %s[]", Strings.stripColors(player.name()), Translator.translateRaw(player, target, args[1]), args[1]);
+                player.sendMessage(playerFormatted);
+                target.sendMessage(targetFormatted);
+            }).start();
         });
 
-        commandHandler.<Player>register("testmenu", "[some-text...]", "Test menu", (args, player) -> {
-            String[][] buttons = new String[][] {
-                    {"A", "B", "C"},
-                    {"D", "E"}
-            };
+        // region debug commands
+        // TODO: effect, set block/floor/overlay commands
+        if (Core.settings.getBool("debug")) {
+            commandHandler.<Player>register("", "[some-text...]", "Test menu", (args, player) -> {
+                String[][] buttons = new String[][]{
+                        {"A", "B", "C"},
+                        {"D", "E"}
+                };
 
-            MenuHandler.send(player, "Test", args.length > 0 ? args[0] : "None", buttons, (menuId, option, p) -> {
-                p.sendMessage(String.format("%d: %d", menuId, option));
+                MenuHandler.send(player, "Test", args.length > 0 ? args[0] : "None", buttons, (menuId, option, p) -> {
+                    p.sendMessage(String.format("%d: %d", menuId, option));
+                });
             });
-        });
+
+            commandHandler.<Player>register("setrank", "<rank>", "Set your rank temporary. [accent]Debug only![]", (args, player) -> {
+                if (!jsallowed.containsKey(player.uuid())) {
+                    Bundle.bundled(player, "commands.access-denied");
+                    return;
+                }
+                try {
+                    Variables.ranks.put(player.uuid(), Rank.valueOf(args[0]));
+                    player.sendMessage(String.format("Your new rank is %s", args[0]));
+                } catch (IllegalArgumentException e) {
+                    player.sendMessage("not found");
+                }
+            });
+        }
+        // endregion
     }
 }

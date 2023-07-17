@@ -45,7 +45,7 @@ public class Translator {
         return json.get(0).get(0).asString();
     }
 
-    public static String translateChat(Player player, Player otherPlayer, String message) {
+    public static String translateRaw(Player player, Player otherPlayer, String message) {
         String locale = otherPlayer.locale;
         try {
             locale = Database.getContext()
@@ -59,20 +59,32 @@ public class Translator {
         }
 
         String translated = message;
-        if (!otherPlayer.locale.equals(player.locale()) && !"off".equals(locale)) {
+        if (!otherPlayer.locale.equals(player.locale()) && !locale.equals("off")) {
             try {
-                String targetLocale = "auto".equals(locale) || "double".equals(locale) ? otherPlayer.locale : locale;
+                String targetLocale = locale.equals("auto") || locale.equals("double") ? otherPlayer.locale : locale;
                 translated = Translator.translate(message, targetLocale.split("#")[0], "auto");
             } catch (Throwable t) {
                 Log.err(t);
             }
         }
 
-        String prefix = player.admin() ? "\uE82C" : "\uE872";
-        String playerName = player.coloredName();
-
-        return MessageFormat.format("double".equals(locale) ? Const.CHAT_FORMAT_DETAILED : Const.CHAT_FORMAT,
-                prefix, playerName, translated, message);
+        return translated;
     }
 
+    public static String formatChat(Player player, String translated, String message, boolean detailed) {
+        return MessageFormat.format(detailed ? Const.CHAT_FORMAT_DETAILED : Const.CHAT_FORMAT, Players.prefixName(player), translated, message);
+    }
+
+
+    public static String translateChat(Player player, Player otherPlayer, String message) {
+        String locale = otherPlayer.locale;
+        try {
+            locale = Database.getPlayer(player.uuid()).getTranslator();
+        } catch (Throwable t) {
+            Log.err(t);
+            DiscordLogger.err(t);
+        }
+
+        return Translator.formatChat(player, Translator.translateRaw(player, otherPlayer, message), message, locale.equals("double"));
+    }
 }

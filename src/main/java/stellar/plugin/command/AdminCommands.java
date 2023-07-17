@@ -49,7 +49,7 @@ public class AdminCommands {
             Groups.player.each(Player::admin, otherPlayer -> {
                 new Thread(() -> {
                     String msg = Translator.translateChat(player, otherPlayer, message);
-                    otherPlayer.sendMessage("<[scarlet]A[]>" + msg);
+                    otherPlayer.sendMessage("<[scarlet]A[]> " + msg);
                 }).start();
             });
 

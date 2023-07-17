@@ -24,8 +24,8 @@ public class Const {
     public static final String JOIN_LOG_FORMAT = "@ has joined the server | locale: @ | IP: @";
     public static final String CHAT_LOG_FORMAT = "@: @ | @";
 
-    public static final String CHAT_FORMAT = "<{0}> {1}[white]: {2}";
-    public static final String CHAT_FORMAT_DETAILED = CHAT_FORMAT + " [gray]({3}[gray])";
+    public static final String CHAT_FORMAT = "{0}[white]: {1}";
+    public static final String CHAT_FORMAT_DETAILED = CHAT_FORMAT + " [gray]({2}[gray])";
 
     public static final float VOTES_RATIO = 0.6f;
 
