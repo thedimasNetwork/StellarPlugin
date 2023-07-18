@@ -66,7 +66,7 @@ public class AdminCommands {
             }
         });
 
-        commandHandler.<Player>register("name", "<name...>", "commands.admin.name.description", (args, player) -> {
+        commandHandler.<Player>register("name", "[name...]", "commands.admin.name.description", (args, player) -> {
             if (!Variables.admins.containsKey(player.uuid())) {
                 Bundle.bundled(player, "commands.access-denied");
                 return;

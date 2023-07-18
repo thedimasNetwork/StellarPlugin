@@ -3,5 +3,5 @@
   "author": "thedimas & Ahsoka-501 & skykatik",
   "main": "stellar.plugin.ThedimasPlugin",
   "description": "Plugin for thedimas' servers.",
-  "version": "4.3 Build %buildVersion%"
+  "version": "4.4 Build %buildVersion%"
 }

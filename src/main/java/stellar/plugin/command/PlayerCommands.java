@@ -346,8 +346,12 @@ public class PlayerCommands {
 
                     try {
                         Rank nextRank = Rank.getRank(p).getNext();
+                        String[][] newButtons = new String[][] {
+                                {Bundle.get("menus.close", locale)}
+                        };
+
                         if (nextRank == null) {
-                            Call.infoMessage(p.con(), Bundle.format("commands.rank.next-rank.none", locale));
+                            Call.menu(p.con(), 0, Bundle.get("menus.rank-info.title", locale), Bundle.format("commands.rank.next-rank.none", locale), newButtons);
                         } else {
                             UsersRecord record = Database.getPlayer(p.uuid());
                             int playtime = (int) Players.totalPlaytime(p.uuid());
@@ -363,7 +367,7 @@ public class PlayerCommands {
                                     targetColor(record.getBuilt(), nextRank.requirements.built), record.getBuilt(), nextRank.requirements.built,
                                     targetColor(playtime, nextRank.requirements.playtime * 60), longToTime(playtime, locale), longToTime(nextRank.requirements.playtime * 60, locale)
                             );
-                            Call.infoMessage(p.con(), message);
+                            Call.menu(p.con(), 0, Bundle.get("menus.rank-info.title", locale), message, newButtons);
                         }
                     } catch (SQLException e) {
                         Log.err(e);
@@ -393,6 +397,10 @@ public class PlayerCommands {
                 }
 
                 try {
+                    String[][] newButtons = new String[][] {
+                            {Bundle.get("menus.close", locale)}
+                    };
+
                     Rank rank = Rank.values()[option];
                     UsersRecord record = Database.getPlayer(p.uuid());
                     int playtime = (int) Players.totalPlaytime(p.uuid());
@@ -408,7 +416,7 @@ public class PlayerCommands {
                             targetColor(record.getBuilt(), rank.requirements.built), record.getBuilt(), rank.requirements.built,
                             targetColor(playtime, rank.requirements.playtime * 60), longToTime(playtime, locale), longToTime(rank.requirements.playtime * 60, locale)
                     );
-                    Call.infoMessage(p.con(), message);
+                    Call.menu(p.con(), 0, Bundle.get("menus.rank-info.title", locale), message, newButtons);
                 } catch (SQLException e) {
                     Log.err(e);
                     Bundle.bundled(p, "commands.rank.error");
@@ -438,8 +446,12 @@ public class PlayerCommands {
 
                     try {
                         Rank nextRank = Rank.getRank(p).getNext();
+                        String[][] newButtons = new String[][] {
+                                {Bundle.get("menus.close", locale)}
+                        };
+
                         if (nextRank == null) {
-                            Call.infoMessage(p.con(), Bundle.format("commands.rank.next-rank.none", locale));
+                            Call.menu(p.con(), 0, Bundle.get("menus.rank-info.title", locale), Bundle.format("commands.rank.next-rank.none", locale), newButtons);
                         } else {
                             String msg = Bundle.format("commands.rank.next-rank.info", locale,
                                     rankStr,
@@ -449,7 +461,7 @@ public class PlayerCommands {
                                     targetColor(record.getBuilt(), nextRank.requirements.built), record.getBuilt(), nextRank.requirements.built,
                                     targetColor((int) playtime, nextRank.requirements.playtime * 60), longToTime(playtime, locale), longToTime(nextRank.requirements.playtime * 60, locale)
                             );
-                            Call.infoMessage(p.con(), msg);
+                            Call.menu(p.con(), 0, Bundle.get("menus.rank-info.title", locale), msg, newButtons);
                         }
                     } catch (SQLException e) {
                         Log.err(e);
