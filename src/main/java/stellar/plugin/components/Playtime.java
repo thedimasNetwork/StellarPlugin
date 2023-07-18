@@ -14,6 +14,7 @@ import stellar.database.gen.tables.records.PlaytimeRecord;
 import stellar.plugin.util.logger.DiscordLogger;
 
 import static stellar.plugin.Variables.interval;
+import static stellar.plugin.util.NetUtils.updateBackground;
 
 public class Playtime {
     public static void load() {
@@ -28,11 +29,10 @@ public class Playtime {
                 for (Player p : Groups.player) {
                     try {
                         long computed = Database.getPlaytime(p.uuid(), Const.PLAYTIME_FIELD) + 60;
-                        Database.getContext()
+                        updateBackground(Database.getContext()
                                 .update(Tables.PLAYTIME)
                                 .set(Const.PLAYTIME_FIELD, computed)
-                                .where(Tables.PLAYTIME.UUID.eq(p.uuid()))
-                                .execute();
+                                .where(Tables.PLAYTIME.UUID.eq(p.uuid())));
                     } catch (Throwable t) {
                         Log.err("Failed to update playtime for player '" + p.uuid() + "'", t);
                         DiscordLogger.err("Failed to update playtime for player '" + p.uuid() + "'", t);

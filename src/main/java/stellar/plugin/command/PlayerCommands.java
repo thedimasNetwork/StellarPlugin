@@ -37,6 +37,7 @@ import java.util.concurrent.TimeUnit;
 import static mindustry.Vars.*;
 import static stellar.plugin.Variables.config;
 import static stellar.plugin.Variables.jsallowed;
+import static stellar.plugin.util.NetUtils.updateBackground;
 import static stellar.plugin.util.StringUtils.longToTime;
 import static stellar.plugin.util.StringUtils.targetColor;
 
@@ -114,11 +115,10 @@ public class PlayerCommands {
             switch (mode) {
                 case "off" -> {
                     try {
-                        Database.getContext()
+                        updateBackground(Database.getContext()
                                 .update(Tables.USERS)
                                 .set(Tables.USERS.TRANSLATOR, "off")
-                                .where(Tables.USERS.UUID.eq(player.uuid()))
-                                .execute();
+                                .where(Tables.USERS.UUID.eq(player.uuid())));
                     } catch (Throwable t) {
                         Log.err(t);
                         DiscordLogger.err(t);
@@ -127,11 +127,10 @@ public class PlayerCommands {
                 }
                 case "auto" -> {
                     try {
-                        Database.getContext()
+                        updateBackground(Database.getContext()
                                 .update(Tables.USERS)
                                 .set(Tables.USERS.TRANSLATOR, "auto")
-                                .where(Tables.USERS.UUID.eq(player.uuid()))
-                                .execute();
+                                .where(Tables.USERS.UUID.eq(player.uuid())));
                     } catch (Throwable t) {
                         Log.err(t);
                         DiscordLogger.err(t);
@@ -140,11 +139,10 @@ public class PlayerCommands {
                 }
                 case "double" -> {
                     try {
-                        Database.getContext()
+                        updateBackground(Database.getContext()
                                 .update(Tables.USERS)
                                 .set(Tables.USERS.TRANSLATOR, "double")
-                                .where(Tables.USERS.UUID.eq(player.uuid()))
-                                .execute();
+                                .where(Tables.USERS.UUID.eq(player.uuid())));
                     } catch (Throwable t) {
                         Log.err(t);
                         DiscordLogger.err(t);
@@ -158,11 +156,10 @@ public class PlayerCommands {
                         return;
                     }
                     try {
-                        Database.getContext()
+                        updateBackground(Database.getContext()
                                 .update(Tables.USERS)
                                 .set(Tables.USERS.TRANSLATOR, target.toString())
-                                .where(Tables.USERS.UUID.eq(player.uuid()))
-                                .execute();
+                                .where(Tables.USERS.UUID.eq(player.uuid())));
                     } catch (Throwable t) {
                         Log.err(t);
                         DiscordLogger.err(t);
@@ -330,16 +327,12 @@ public class PlayerCommands {
             try {
                 Rank rank = Rank.getRank(player);
                 Locale locale = Bundle.findLocale(player.locale());
-                String rankStr = rank.icon != null ?
-                        String.format("<[#%s]%s[]> %s", rank.color, rank.icon, Bundle.get("ranks." + rank.name(), locale)) :
-                        Bundle.get("ranks." + rank.name(), locale);
-
                 String[][] buttons = {
                         {Bundle.get("commands.rank.next-rank", locale)},
                         {Bundle.get("menus.close", locale)}
                 };
 
-                MenuHandler.send(player, Bundle.get("menus.rank-info.title", locale), Bundle.format("commands.rank.msg", locale, rankStr), buttons, ((menuId, option, p) -> {
+                MenuHandler.send(player, Bundle.get("menus.rank-info.title", locale), Bundle.format("commands.rank.msg", locale, rank.formatted(player)), buttons, ((menuId, option, p) -> {
                     if (option == -1) {
                         return;
                     }
@@ -355,12 +348,8 @@ public class PlayerCommands {
                         } else {
                             UsersRecord record = Database.getPlayer(p.uuid());
                             int playtime = (int) Players.totalPlaytime(p.uuid());
-                            String nextRankStr = nextRank.icon != null ?
-                                    String.format("<[#%s]%s[]> %s", nextRank.color, nextRank.icon, Bundle.get("ranks." + nextRank.name(), locale)) :
-                                    Bundle.get("ranks." + nextRank.name(), locale);
-
                             String message = Bundle.format("commands.rank.next-rank.info", locale,
-                                    nextRankStr,
+                                    nextRank.formatted(p),
                                     targetColor(record.getAttacks(), nextRank.requirements.attacks), record.getAttacks(), nextRank.requirements.attacks,
                                     targetColor(record.getWaves(), nextRank.requirements.waves), record.getWaves(), nextRank.requirements.waves,
                                     targetColor(record.getHexes(), nextRank.requirements.hexes), record.getHexes(), nextRank.requirements.hexes,
@@ -385,9 +374,7 @@ public class PlayerCommands {
             Locale locale = Bundle.findLocale(player.locale());
             String[][] buttons = new String[Rank.values().length + 1][]; // I wanted to use Seq<String> that didn't work
             for (Rank rank : Rank.values()) {
-                 buttons[rank.ordinal()] = new String[]{rank.icon != null ?
-                        String.format("<[#%s]%s[]> %s", rank.color, rank.icon, Bundle.get("ranks." + rank.name(), locale)) :
-                        Bundle.get("ranks." + rank.name(), locale)};
+                 buttons[rank.ordinal()] = new String[]{rank.formatted(player)};
             }
             buttons[Rank.values().length] = new String[]{Bundle.get("menus.close", locale)};
 
@@ -404,12 +391,8 @@ public class PlayerCommands {
                     Rank rank = Rank.values()[option];
                     UsersRecord record = Database.getPlayer(p.uuid());
                     int playtime = (int) Players.totalPlaytime(p.uuid());
-                    String rankStr = rank.icon != null ?
-                            String.format("<[#%s]%s[]> %s", rank.color, rank.icon, Bundle.get("ranks." + rank.name(), locale)) :
-                            Bundle.get("ranks." + rank.name(), locale);
-
                     String message = Bundle.format("commands.ranks.rank-info", locale,
-                            rankStr,
+                            rank.formatted(p),
                             targetColor(record.getAttacks(), rank.requirements.attacks), record.getAttacks(), rank.requirements.attacks,
                             targetColor(record.getWaves(), rank.requirements.waves), record.getWaves(), rank.requirements.waves,
                             targetColor(record.getHexes(), rank.requirements.hexes), record.getHexes(), rank.requirements.hexes,
@@ -430,11 +413,7 @@ public class PlayerCommands {
                 long playtime = Players.totalPlaytime(player.uuid());
                 Rank rank = Rank.getRank(player);
                 Locale locale = Bundle.findLocale(player.locale);
-                String rankStr = rank.icon != null ?
-                        String.format("<[#%s]%s[]> %s", rank.color, rank.icon, Bundle.get("ranks." + rank.name(), locale)) :
-                        Bundle.get("ranks." + rank.name(), locale);
-
-                String message = Bundle.format("commands.stats.msg", Bundle.findLocale(player.locale()), record.getId(), player.coloredName(), rankStr, record.getBuilt(), record.getBroken(), record.getAttacks(), record.getHexes(), record.getWaves(), record.getLogins(), record.getMessages(), record.getDeaths(), StringUtils.longToTime(playtime, locale));
+                String message = Bundle.format("commands.stats.msg", Bundle.findLocale(player.locale()), record.getId(), player.coloredName(), rank.formatted(player), record.getBuilt(), record.getBroken(), record.getAttacks(), record.getHexes(), record.getWaves(), record.getLogins(), record.getMessages(), record.getDeaths(), StringUtils.longToTime(playtime, locale));
                 String[][] buttons = {
                         {Bundle.get("commands.rank.next-rank", locale)},
                         {Bundle.get("menus.close", locale)}
@@ -454,7 +433,7 @@ public class PlayerCommands {
                             Call.menu(p.con(), 0, Bundle.get("menus.rank-info.title", locale), Bundle.format("commands.rank.next-rank.none", locale), newButtons);
                         } else {
                             String msg = Bundle.format("commands.rank.next-rank.info", locale,
-                                    rankStr,
+                                    rank.formatted(p),
                                     targetColor(record.getAttacks(), nextRank.requirements.attacks), record.getAttacks(), nextRank.requirements.attacks,
                                     targetColor(record.getWaves(), nextRank.requirements.waves), record.getWaves(), nextRank.requirements.waves,
                                     targetColor(record.getHexes(), nextRank.requirements.hexes), record.getHexes(), nextRank.requirements.hexes,

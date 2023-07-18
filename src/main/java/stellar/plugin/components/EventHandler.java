@@ -14,10 +14,7 @@ import mindustry.entities.Effect;
 import mindustry.game.EventType;
 import mindustry.game.Gamemode;
 import mindustry.game.Team;
-import mindustry.gen.Building;
-import mindustry.gen.Call;
-import mindustry.gen.Groups;
-import mindustry.gen.Player;
+import mindustry.gen.*;
 import mindustry.net.Packets;
 import org.jooq.Field;
 import stellar.plugin.Const;
@@ -43,8 +40,7 @@ import java.time.LocalDateTime;
 import java.util.Locale;
 
 import static stellar.plugin.Variables.*;
-import static stellar.plugin.util.StringUtils.longToTime;
-import static stellar.plugin.util.StringUtils.targetColor;
+import static stellar.plugin.util.NetUtils.updateBackground;
 
 @SuppressWarnings({"unused", "unchecked"})
 public class EventHandler {
@@ -118,13 +114,12 @@ public class EventHandler {
                 record.store();
 
                 if (Database.playerExists(event.player.uuid())) {
-                    Database.getContext()
+                    updateBackground(Database.getContext()
                             .update(Tables.USERS)
                             .set(Tables.USERS.NAME, event.player.name())
                             .set(Tables.USERS.LOCALE, event.player.locale())
                             .set(Tables.USERS.IP, event.player.ip())
-                            .where(Tables.USERS.UUID.eq(event.player.uuid()))
-                            .execute();
+                            .where(Tables.USERS.UUID.eq(event.player.uuid())));
 
                     UsersRecord data = Database.getContext()
                             .selectFrom(Tables.USERS)
@@ -207,11 +202,10 @@ public class EventHandler {
                         }
                         case 2 -> {
                             try {
-                                Database.getContext()
+                                updateBackground(Database.getContext()
                                         .update(Tables.USERS)
                                         .set(Tables.USERS.POPUP, (byte) 0)
-                                        .where(Tables.USERS.UUID.eq(event.player.uuid()))
-                                        .execute();
+                                        .where(Tables.USERS.UUID.eq(event.player.uuid())));
                                 Bundle.bundled(event.player, "welcome.disabled");
                             } catch (SQLException e) {
                                 Log.err(e);
@@ -634,32 +628,53 @@ public class EventHandler {
             });
 
             if (Variables.interval.get(2, 3600)) {
-                Variables.statsData.each((uuid, stats) -> {
-                    stats.each((name, value) -> {
-                        try {
-                            Field<Integer> field = (Field<Integer>) Tables.USERS.field(name);
-                            if (field == null) {
-                                Log.err("Field @ is null. UUID: @", name, uuid);
-                                return;
+                new Thread(() -> { // this creates new thread as getting new ranks may also cause some hangs
+                    Variables.statsData.each((uuid, stats) -> {
+                        stats.each((name, value) -> {
+                            try {
+                                Field<Integer> field = (Field<Integer>) Tables.USERS.field(name);
+                                if (field == null) {
+                                    Log.err("Field @ is null. UUID: @", name, uuid);
+                                    return;
+                                }
+
+                                Database.getContext()
+                                        .update(Tables.USERS)
+                                        .set(field, field.plus(value))
+                                        .where(Tables.USERS.UUID.eq(uuid))
+                                        .execute(); // don't run in the background as rank updating should be on fresh data
+
+                                stats.put(name, 0);
+                            } catch (SQLException e) {
+                                Log.err(e);
                             }
+                        });
 
-                            Database.getContext()
-                                    .update(Tables.USERS)
-                                    .set(field, field.plus(value))
-                                    .where(Tables.USERS.UUID.eq(uuid))
-                                    .execute();
-
-                            stats.put(name, 0);
-                        } catch (SQLException e) {
-                            Log.err(e);
+                        if (!Groups.player.contains(p -> p.uuid().equals(uuid))) {
+                            Variables.statsData.remove(uuid);
                         }
                     });
 
-                    if (!Groups.player.contains(p -> p.uuid().equals(uuid))) {
-                        Variables.statsData.remove(uuid);
-                    }
-                });
+                    ObjectMap<String, Rank> oldRanks = ranks.copy();
+                    ranks.clear();
+                    Groups.player.each(player -> {
+                        Rank oldRank = oldRanks.get(player.uuid());
+                        Rank newRank = oldRank;
+
+                        try {
+                            newRank = Rank.getRank(player);
+                        } catch (SQLException e) {
+                            Log.err(e);
+                            ranks.put(player.uuid(), oldRanks.get(player.uuid()));
+                        }
+
+                        if (newRank != oldRank) {
+                            Call.warningToast(player.con, Iconc.chartBar, Bundle.format("events.new-rank", Bundle.findLocale(player.locale()), newRank.formatted(player)));
+                        }
+                    });
+                }).start();
             }
+
             /*if (!donaters.containsKey(event.player.uuid())) {
                 return;
             }*/

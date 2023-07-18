@@ -1,21 +1,18 @@
 package stellar.plugin.util;
 
 import arc.util.Strings;
+import org.jooq.DMLQuery;
 
 public class NetUtils {
     public static boolean isIPInSubnet(String ipAddress, String subnet) {
         String[] subnetParts = subnet.split("/");
         String subnetAddress = subnetParts[0];
-        int subnetPrefix = Strings.parseInt(subnetParts[1]);
 
-        // Convert IP address and subnet address to integer representation
+        int subnetPrefix = Strings.parseInt(subnetParts[1]);
         int ipInt = ipToInt(ipAddress);
         int subnetInt = ipToInt(subnetAddress);
-
-        // Calculate the subnet mask
         int subnetMask = (0xFFFFFFFF << (32 - subnetPrefix));
 
-        // Check if the IP address is within the subnet
         return (ipInt & subnetMask) == (subnetInt & subnetMask);
     }
 
@@ -26,5 +23,10 @@ public class NetUtils {
             result = result << 8 | Strings.parseInt(ipParts[i]);
         }
         return result;
+    }
+
+    /** Use this to put all DML queries into separate thread to prevent hanging **/
+    public static void updateBackground(DMLQuery<?> step) {
+        new Thread(step::execute).start();
     }
 }

@@ -9,9 +9,11 @@ import stellar.plugin.types.Requirements;
 import mindustry.content.Fx;
 import mindustry.entities.Effect;
 
+import stellar.plugin.util.Bundle;
 import stellar.plugin.util.Players;
 
 import java.sql.SQLException;
+import java.util.Locale;
 
 public enum Rank {
     player(Fx.burning),
@@ -76,6 +78,13 @@ public enum Rank {
         return null;
     }
 
+    public String formatted(Player player) {
+        Locale locale = Bundle.findLocale(player.locale());
+        String bundled = Bundle.get("ranks." + this.name(), locale);
+        return icon == null ? bundled :
+                String.format("<[#%s]%s[]> %s", this.color, this.icon, bundled);
+    }
+
     public static Rank getRank(Requirements requirements) {
         Rank rank = Rank.values()[Rank.values().length - 1];
         while (true) {
@@ -93,9 +102,7 @@ public enum Rank {
 
     public static Rank getRankForced(Player player) throws SQLException {
         UsersRecord record = Database.getPlayer(player.uuid());
-        Rank rank = Rank.getRank(new Requirements(record.getAttacks(), record.getWaves(), record.getHexes(), record.getBuilt(), (int) (Players.totalPlaytime(player.uuid()) / 60)));
-        Variables.ranks.put(player.uuid(), rank);
-        return rank;
+        return Rank.getRank(new Requirements(record.getAttacks(), record.getWaves(), record.getHexes(), record.getBuilt(), (int) (Players.totalPlaytime(player.uuid()) / 60)));
     }
 
     public static Rank getRank(Player player) throws SQLException {
