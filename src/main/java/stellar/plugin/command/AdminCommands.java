@@ -1,21 +1,24 @@
 package stellar.plugin.command;
 
 import arc.Events;
+import arc.graphics.Color;
 import arc.util.CommandHandler;
 import arc.util.Log;
+import arc.util.Reflect;
 import arc.util.Strings;
 import arc.util.Structs;
 import mindustry.Vars;
 import mindustry.content.Blocks;
-import mindustry.content.Planets;
+import mindustry.content.Fx;
+import mindustry.entities.Effect;
 import mindustry.game.EventType;
 import mindustry.game.Team;
 import mindustry.gen.*;
 import mindustry.net.Packets;
-import mindustry.type.Planet;
 import mindustry.type.UnitType;
 import mindustry.world.Block;
 import mindustry.world.Tile;
+import rhino.WrappedException;
 import stellar.plugin.Const;
 import stellar.plugin.Variables;
 import stellar.plugin.bot.Bot;
@@ -23,7 +26,6 @@ import stellar.database.Database;
 import stellar.database.enums.PlayerEventTypes;
 import stellar.database.gen.Tables;
 import stellar.database.gen.tables.records.PlayerEventsRecord;
-import stellar.database.gen.tables.records.UsersRecord;
 import stellar.plugin.util.Bundle;
 import stellar.plugin.util.Players;
 import stellar.plugin.util.Translator;
@@ -91,8 +93,8 @@ public class AdminCommands {
                 return;
             }
 
-            float x = Strings.parseFloat(args[0]);
-            float y = Strings.parseFloat(args[1]);
+            float x = Strings.parseFloat(args[0]) * 8;
+            float y = Strings.parseFloat(args[1]) * 8;
 
             if (x > world.width() || x < 0 || y > world.height() || y < 0) {
                 Bundle.bundled(player, "commands.admin.tp.out-of-map");
@@ -308,6 +310,59 @@ public class AdminCommands {
                 error = true;
             }
             player.sendMessage("> " + (error ? "[#ff341c]" + output : output));
+        });
+
+        commandHandler.<Player>register("effect", "<effect> <x> <y> [rotation] [color]", "call effect", (args, player) -> {
+            if (!Variables.admins.containsKey(player.uuid())) {
+                Bundle.bundled(player, "commands.access-denied");
+                return;
+            }
+
+            String field = args[0].toLowerCase();
+            Effect effect;
+
+            try{
+                effect = Reflect.get(Fx.class.getField(field));
+            } catch (NoSuchFieldException error){
+                Bundle.bundled(player, "commands.admin.effect.cannot-find", args[0].toLowerCase());
+                return;
+            }
+
+            if (!Strings.canParseFloat(args[1]) || !Strings.canParseFloat(args[2])) {
+                Bundle.bundled(player, "commands.incorrect-format.number");
+                return;
+            }
+
+            float x = Strings.parseFloat(args[1]) * 8;
+            float y = Strings.parseFloat(args[2]) * 8;
+
+            if(args.length == 3){
+                Call.effect(effect, x, y, 0, Color.white);
+                Bundle.bundled(player, "commands.admin.effect.success");
+            }
+
+            if(!Strings.canParseFloat(args[3])){
+                Bundle.bundled(player, "commands.incorrect-format.number");
+                return;
+            }
+
+            Float rotation = Strings.parseFloat(args[3]);
+
+            if(args.length == 4){
+                Call.effect(effect, x, y, rotation, Color.white);
+                Bundle.bundled(player, "commands.admin.effect.success");
+            }
+
+            Color color;
+
+            try{
+                color = Color.valueOf(args[4]);
+            } catch (WrappedException error) {
+                Bundle.bundled(player, "commands.admin.effect.string");
+                return;
+            }
+            
+            Call.effect(effect, x, y, rotation, color);
         });
 
         /*
