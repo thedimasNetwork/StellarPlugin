@@ -324,7 +324,7 @@ public class AdminCommands {
             try{
                 effect = Reflect.get(Fx.class.getField(field));
             } catch (NoSuchFieldException error){
-                Bundle.bundled(player, "commands.admin.effect.cannot-find", args[0].toLowerCase());
+                Bundle.bundled(player, "commands.admin.effect.notfound", args[0].toLowerCase());
                 return;
             }
 
