@@ -1,6 +1,7 @@
 package stellar.plugin;
 
 import arc.files.Fi;
+import arc.struct.Seq;
 import arc.struct.StringMap;
 import arc.util.Log;
 import arc.util.Structs;
@@ -34,6 +35,7 @@ public class Const {
     public static final String BOOL_VALUES = "1, on, yes, true, вкл, да";
 
     public static final String[] PIRATES = {"valve", "igruhaorg", "tuttop", "freetp.org", "freetp"};
+    public static final Seq<String> USEFUL_COMMANDS = Seq.with("help", "rtv", "stats", "ranks");
 
     public static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy k:m"); // 04.12.2003 23:09
 

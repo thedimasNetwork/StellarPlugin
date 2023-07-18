@@ -4,6 +4,7 @@ import arc.Events;
 import arc.graphics.Color;
 import arc.math.Mathf;
 import arc.struct.ObjectMap;
+import arc.util.CommandHandler;
 import arc.util.Log;
 import arc.util.Strings;
 import mindustry.Vars;
@@ -91,7 +92,14 @@ public class EventHandler {
 
             Locale locale = Bundle.findLocale(event.player.locale);
             String rules = Bundle.get("rules", locale);
-            String welcome = Bundle.format("welcome", locale, rules);
+
+            StringBuilder commands = new StringBuilder();
+            Const.USEFUL_COMMANDS.each(name -> {
+                CommandHandler.Command command = Vars.netServer.clientCommands.getCommandList().find(cmd -> cmd.text.equals(name));
+                commands.append(String.format("[orange]/%s[] %s\n", command.text, Bundle.has(command.description, locale) ? Bundle.get(command.description, locale) : command.description));
+            });
+
+            String welcome = Bundle.format("welcome", locale, rules, commands.toString().strip());
             String title = Bundle.format("welcome.title", locale, Strings.stripColors(event.player.name()));
             String[][] buttons = {
                     { Bundle.get("menus.close", locale) },

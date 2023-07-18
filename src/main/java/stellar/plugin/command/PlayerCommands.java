@@ -216,8 +216,6 @@ public class PlayerCommands {
 
         commandHandler.<Player>register("discord", "commands.discord.description", (args, player) -> Call.openURI(player.con, config.discordUrl));
 
-        commandHandler.<Player>register("rules", "commands.rules.description", (args, player) -> Bundle.bundled(player, "rules"));
-
         commandHandler.<Player>register("hub", "commands.hub.description", (args, player) -> {
             String[] address = Const.SERVER_ADDRESS.get("hub").split(":");
             String ip = address[0];
@@ -342,6 +340,10 @@ public class PlayerCommands {
                 };
 
                 MenuHandler.send(player, Bundle.get("menus.rank-info.title", locale), Bundle.format("commands.rank.msg", locale, rankStr), buttons, ((menuId, option, p) -> {
+                    if (option == -1) {
+                        return;
+                    }
+
                     try {
                         Rank nextRank = Rank.getRank(p).getNext();
                         if (nextRank == null) {
@@ -398,7 +400,7 @@ public class PlayerCommands {
                             String.format("<[#%s]%s[]> %s", rank.color, rank.icon, Bundle.get("ranks." + rank.name(), locale)) :
                             Bundle.get("ranks." + rank.name(), locale);
 
-                    String message = Bundle.format("commands.rank.next-rank.info", locale,
+                    String message = Bundle.format("commands.ranks.rank-info", locale,
                             rankStr,
                             targetColor(record.getAttacks(), rank.requirements.attacks), record.getAttacks(), rank.requirements.attacks,
                             targetColor(record.getWaves(), rank.requirements.waves), record.getWaves(), rank.requirements.waves,
@@ -430,15 +432,15 @@ public class PlayerCommands {
                         {Bundle.get("menus.close", locale)}
                 };
                 MenuHandler.send(player, Bundle.get("menus.stats.title", locale), message, buttons, (menuId, option, p) -> {
+                    if (option == -1) {
+                        return;
+                    }
+
                     try {
                         Rank nextRank = Rank.getRank(p).getNext();
                         if (nextRank == null) {
                             Call.infoMessage(p.con(), Bundle.format("commands.rank.next-rank.none", locale));
                         } else {
-                            String nextRankStr = nextRank.icon != null ?
-                                    String.format("<[#%s]%s[]> %s", nextRank.color, nextRank.icon, Bundle.get("ranks." + nextRank.name(), locale)) :
-                                    Bundle.get("ranks." + nextRank.name(), locale);
-
                             String msg = Bundle.format("commands.rank.next-rank.info", locale,
                                     rankStr,
                                     targetColor(record.getAttacks(), nextRank.requirements.attacks), record.getAttacks(), nextRank.requirements.attacks,
