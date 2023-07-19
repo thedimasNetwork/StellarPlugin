@@ -24,10 +24,10 @@ public class Players {
     @Nullable
     public static Player findPlayer(String name) {
         String replacedName = name.replace('_', ' ');
-        return Groups.player.find(p -> name.equals(Strings.stripColors(p.name))
-                || name.equals(StringUtils.stripColorsAndGlyphs(p.name))
-                || replacedName.equals(Strings.stripColors(p.name))
-                || replacedName.equals(StringUtils.stripColorsAndGlyphs(p.name)));
+        return Groups.player.find(p -> name.equalsIgnoreCase(Strings.stripColors(p.name))
+                || name.equalsIgnoreCase(StringUtils.stripColorsAndGlyphs(p.name))
+                || replacedName.equalsIgnoreCase(Strings.stripColors(p.name))
+                || replacedName.equalsIgnoreCase(StringUtils.stripColorsAndGlyphs(p.name)));
     }
 
     public static boolean isBot(Player player) {

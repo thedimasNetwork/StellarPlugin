@@ -318,12 +318,11 @@ public class AdminCommands {
                 return;
             }
 
-            String field = args[0].toLowerCase();
             Effect effect;
 
-            try{
-                effect = Reflect.get(Fx.class.getField(field));
-            } catch (NoSuchFieldException error){
+            try {
+                effect = Reflect.get(Fx.class.getField(args[0]));
+            } catch (NoSuchFieldException error) {
                 Bundle.bundled(player, "commands.admin.effect.notfound", args[0].toLowerCase());
                 return;
             }
@@ -336,32 +335,32 @@ public class AdminCommands {
             float x = Strings.parseFloat(args[1]) * 8;
             float y = Strings.parseFloat(args[2]) * 8;
 
-            if(args.length == 3){
+            if (args.length == 3) {
                 Call.effect(effect, x, y, 0, Color.white);
                 Bundle.bundled(player, "commands.admin.effect.success");
             }
 
-            if(!Strings.canParseFloat(args[3])){
+            if (!Strings.canParseFloat(args[3])) {
                 Bundle.bundled(player, "commands.incorrect-format.number");
                 return;
             }
 
             Float rotation = Strings.parseFloat(args[3]);
 
-            if(args.length == 4){
+            if (args.length == 4) {
                 Call.effect(effect, x, y, rotation, Color.white);
                 Bundle.bundled(player, "commands.admin.effect.success");
             }
 
             Color color;
 
-            try{
+            try {
                 color = Color.valueOf(args[4]);
             } catch (WrappedException error) {
                 Bundle.bundled(player, "commands.admin.effect.string");
                 return;
             }
-            
+
             Call.effect(effect, x, y, rotation, color);
         });
 

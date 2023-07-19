@@ -1,13 +1,10 @@
 package stellar.plugin.command;
 
 import arc.Core;
-import arc.graphics.Color;
-import arc.net.DcReason;
 import arc.util.CommandHandler;
 import arc.util.Log;
 import arc.util.Strings;
 import mindustry.content.Fx;
-import mindustry.entities.Effect;
 import mindustry.gen.Groups;
 import mindustry.gen.Player;
 import mindustry.net.Packets;
@@ -94,9 +91,9 @@ public class ServerCommands {
                     Bundle.bundled("commands.rtv.votes-clear");
                 }
             } else if (args.length > 0) {
-                Log.info("RTV: некорректное действие");
+                Log.info("RTV: incorrect action");
             }
-            Log.info(rtvEnabled ? "RTV включен" : "RTV выключен");
+            Log.info(rtvEnabled ? "RTV enabled" : "RTV disabled");
         });
 
         commandHandler.register("effect", "<effect>", "Set new moving effect.", args -> {
