@@ -433,7 +433,7 @@ public class PlayerCommands {
                             Call.menu(p.con(), 0, Bundle.get("menus.rank-info.title", locale), Bundle.format("commands.rank.next-rank.none", locale), newButtons);
                         } else {
                             String msg = Bundle.format("commands.rank.next-rank.info", locale,
-                                    rank.formatted(p),
+                                    nextRank.formatted(p),
                                     targetColor(record.getAttacks(), nextRank.requirements.attacks), record.getAttacks(), nextRank.requirements.attacks,
                                     targetColor(record.getWaves(), nextRank.requirements.waves), record.getWaves(), nextRank.requirements.waves,
                                     targetColor(record.getHexes(), nextRank.requirements.hexes), record.getHexes(), nextRank.requirements.hexes,
