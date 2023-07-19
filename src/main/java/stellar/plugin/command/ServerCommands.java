@@ -2,6 +2,7 @@ package stellar.plugin.command;
 
 import arc.Core;
 import arc.graphics.Color;
+import arc.net.DcReason;
 import arc.util.CommandHandler;
 import arc.util.Log;
 import arc.util.Strings;
@@ -50,8 +51,8 @@ public class ServerCommands {
             }
 
             Bot.sendEmbed(embed);
-            Bot.shutdown();
             Core.app.exit();
+            Core.app.post(Bot::shutdown);
         });
 
         commandHandler.register("export-players", "Export players into DB", args -> {
@@ -216,6 +217,15 @@ public class ServerCommands {
                     Log.info(" - @: @", name, value);
                 });
             });
+        });
+
+        commandHandler.register("restart", "Restart the server", args -> {
+            Groups.player.each(player -> {
+                player.kick(Packets.KickReason.serverRestarting);
+            });
+            MessageEmbed embed = Util.embedBuilder("**Сервер перезапускается**", Colors.yellow);
+            Bot.sendEmbed(embed);
+            System.exit(2);
         });
     }
 
