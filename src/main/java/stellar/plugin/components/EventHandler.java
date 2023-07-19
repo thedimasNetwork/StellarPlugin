@@ -188,7 +188,6 @@ public class EventHandler {
 
             if (event.menuId > Menus.values().length - 1) {
                 MenuHandler.handle(event.menuId, event.option, event.player);
-                return;
             }
 
             switch (Menus.values()[event.menuId]) {
