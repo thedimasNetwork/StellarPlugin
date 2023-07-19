@@ -17,13 +17,13 @@ import java.util.Locale;
 
 public enum Rank {
     player(Fx.burning),
-    beginner(Color.valueOf("#fc693d"), "\uE872", new Requirements(5, 10, 2, 200, 1 * 60), player, Fx.lava),
-    active(Color.valueOf("#ff8f40"), "\uE86B", new Requirements(8, 25, 3, 500, 2 * 60), beginner, Fx.bubble, Color.valueOf("#ff8f40")),
-    expert(Color.valueOf("#f2e33d"), "\uE86E", new Requirements(12, 50, 5, 1000, 4 * 60), active, Fx.dynamicSpikes, Color.valueOf("#f2e33d")),
-    veteran(Color.valueOf("#66f556"), "\uE809", new Requirements(15, 100, 8, 2000, 8 * 60), expert, Fx.electrified),
-    elite(Color.valueOf("#8cddff"), "\uE80E", new Requirements(20, 200, 12, 5000, 16 * 60), veteran, Fx.freezing),
-    master(Color.valueOf("#547cff"), "\uE88B", new Requirements(30, 400, 16, 10000, 24 * 60), elite, Fx.fluxVapor, Color.valueOf("#547cff")),
-    legendary(Color.valueOf("#8148db"), "\uE88E", new Requirements(40, 600, 20, 20000, 36 * 60), master, Fx.vaporSmall, Color.valueOf("#8148db"));
+    beginner(Color.valueOf("#fc693d"), "\uE872", new Requirements(2, 10, 8, 200, 1 * 60), player, Fx.lava),
+    active(Color.valueOf("#ff8f40"), "\uE86B", new Requirements(5, 25, 16, 500, 2 * 60), beginner, Fx.bubble, Color.valueOf("#ff8f40")),
+    expert(Color.valueOf("#f2e33d"), "\uE86E", new Requirements(10, 50, 24, 1000, 4 * 60), active, Fx.dynamicSpikes, Color.valueOf("#f2e33d")),
+    veteran(Color.valueOf("#66f556"), "\uE809", new Requirements(15, 100, 36, 2000, 8 * 60), expert, Fx.electrified),
+    elite(Color.valueOf("#8cddff"), "\uE80E", new Requirements(20, 200, 40, 5000, 16 * 60), veteran, Fx.freezing),
+    master(Color.valueOf("#547cff"), "\uE88B", new Requirements(30, 400, 48, 10000, 24 * 60), elite, Fx.fluxVapor, Color.valueOf("#547cff")),
+    legendary(Color.valueOf("#8148db"), "\uE88E", new Requirements(40, 600, 52, 20000, 36 * 60), master, Fx.vaporSmall, Color.valueOf("#8148db"));
 
 
     public final Color color;
