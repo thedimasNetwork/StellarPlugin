@@ -79,7 +79,7 @@ public class Translator {
     public static String translateChat(Player player, Player otherPlayer, String message) {
         String locale = otherPlayer.locale;
         try {
-            locale = Database.getPlayer(player.uuid()).getTranslator();
+            locale = Database.getPlayer(otherPlayer.uuid()).getTranslator();
         } catch (Throwable t) {
             Log.err(t);
             DiscordLogger.err(t);
