@@ -159,20 +159,8 @@ public class EventHandler {
                     Call.menu(event.player.con(), Menus.welcome.ordinal(), title, welcome, buttons);
                 }
 
-                if (statsData.containsKey(event.player.uuid())) {
-                    Players.incrementStats(event.player, "logins");
-                } else {
-                    statsData.put(event.player.uuid(), ObjectMap.of(
-                            "attacks", 0,
-                            "waves", 0,
-                            "built", 0,
-                            "broken", 0,
-                            "deaths", 0,
-                            "logins", 1,
-                            "messages", 0
-                    ));
-                }
-
+                Players.incrementStats(event.player, "logins");
+                
                 Rank.getRank(event.player);
             } catch (SQLException e) {
                 Log.err(e);

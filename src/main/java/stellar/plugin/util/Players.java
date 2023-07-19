@@ -1,5 +1,6 @@
 package stellar.plugin.util;
 
+import arc.struct.ObjectMap;
 import arc.util.Log;
 import arc.util.Nullable;
 import arc.util.Strings;
@@ -40,8 +41,21 @@ public class Players {
     }
 
     public static void incrementStats(Player player, String stat) {
-       int value = Variables.statsData.get(player.uuid()).get(stat);
-       Variables.statsData.get(player.uuid()).put(stat, value + 1);
+        if (Variables.statsData.containsKey(player.uuid())) {
+            int value = Variables.statsData.get(player.uuid()).get(stat);
+            Variables.statsData.get(player.uuid()).put(stat, value + 1);  
+        } else {
+            Variables.statsData.put(player.uuid(), ObjectMap.of(
+                    "attacks", 0,
+                    "waves", 0,
+                    "built", 0,
+                    "broken", 0,
+                    "deaths", 0,
+                    "logins", 0,
+                    "messages", 0
+            ));
+            Players.incrementStats(player, stat);
+        }
     }
 
     public static long totalPlaytime(String uuid) throws SQLException { // FIXME: move into DB library
