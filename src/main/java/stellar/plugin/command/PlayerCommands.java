@@ -30,7 +30,6 @@ import stellar.plugin.util.Translator;
 import stellar.plugin.util.logger.DiscordLogger;
 
 import java.sql.SQLException;
-import java.text.MessageFormat;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
@@ -55,7 +54,7 @@ public class PlayerCommands {
                 }).start();
             });
 
-            Log.info("<T>" + Const.CHAT_LOG_FORMAT, Strings.stripColors(player.name), Strings.stripColors(message), player.locale);
+            Log.info("<T>" + Const.chatLogFormat, Strings.stripColors(player.name), Strings.stripColors(message), player.locale);
         });
 
         commandHandler.removeCommand("help");
@@ -67,7 +66,7 @@ public class PlayerCommands {
 
             Locale locale = Bundle.findLocale(player.locale);
             int hiddenCommandsCount = player.admin ? 0 : commandHandler.getCommandList().count(c -> c.description.startsWith("commands.admin"));
-            int pages = Mathf.ceil(commandHandler.getCommandList().size / Const.LIST_PAGE_SIZE - hiddenCommandsCount / Const.LIST_PAGE_SIZE);
+            int pages = Mathf.ceil(commandHandler.getCommandList().size / Const.listPageSize - hiddenCommandsCount / Const.listPageSize);
             int page = args.length > 0 ? Strings.parseInt(args[0]) : 1;
 
             if (--page >= pages || page < 0) {
@@ -152,7 +151,7 @@ public class PlayerCommands {
                 default -> {
                     Locale target = Structs.find(locales, l -> mode.equalsIgnoreCase(l.toString()));
                     if (target == null) {
-                        Bundle.bundled(player, "commands.tr.list", Const.LocaleListHolder.LOCALE_LIST);
+                        Bundle.bundled(player, "commands.tr.list", Const.LocaleListHolder.localeList);
                         return;
                     }
                     try {
@@ -197,7 +196,7 @@ public class PlayerCommands {
 
             Variables.votesRTV.add(player.uuid());          
             int cur = Variables.votesRTV.size;
-            int req = (int) Math.ceil(Const.VOTES_RATIO * Groups.player.size());
+            int req = (int) Math.ceil(Const.votesRatio * Groups.player.size());
 
             String playerName = player.coloredName();
             Bundle.bundled("commands.rtv.vote", playerName, cur, req);
@@ -209,12 +208,12 @@ public class PlayerCommands {
             }
         });
 
-        commandHandler.<Player>register("version", "commands.version.description", (arg, player) -> Bundle.bundled(player, "commands.version.msg", Const.PLUGIN_VERSION));
+        commandHandler.<Player>register("version", "commands.version.description", (arg, player) -> Bundle.bundled(player, "commands.version.msg", Const.pluginVersion));
 
         commandHandler.<Player>register("discord", "commands.discord.description", (args, player) -> Call.openURI(player.con, config.discordUrl));
 
         commandHandler.<Player>register("hub", "commands.hub.description", (args, player) -> {
-            String[] address = Const.SERVER_ADDRESS.get("hub").split(":");
+            String[] address = Const.serverAddress.get("hub").split(":");
             String ip = address[0];
             int port = Strings.parseInt(address[1]);
 
@@ -223,24 +222,24 @@ public class PlayerCommands {
 
         commandHandler.<Player>register("connect", "[list|server...]", "commands.connect.description", (args, player) -> {
             if (args.length == 0 || args[0].equalsIgnoreCase("list")) {
-                Bundle.bundled(player, "commands.connect.list", Const.SERVER_LIST);
+                Bundle.bundled(player, "commands.connect.list", Const.serverList);
                 return;
             }
 
             String serverName = args[0].toLowerCase();
-            if (!Const.SERVER_ADDRESS.containsKey(serverName)) {
-                Bundle.bundled(player, "commands.server-notfound", Const.SERVER_LIST);
+            if (!Const.serverAddress.containsKey(serverName)) {
+                Bundle.bundled(player, "commands.server-notfound", Const.serverList);
                 return;
             }
 
-            String[] address = Const.SERVER_ADDRESS.get(serverName).split(":");
+            String[] address = Const.serverAddress.get(serverName).split(":");
             String ip = address[0];
             int port = Strings.parseInt(address[1]);
             Vars.net.pingHost(ip, port, host -> Call.connect(player.con, ip, port), e -> Bundle.bundled(player, "commands.connect.server-offline"));
         });
 
         commandHandler.<Player>register("history", "[page] [detailed]", "commands.history.description", (args, player) -> {
-            boolean detailed = args.length == 2 && Structs.contains(Const.BOOL_VALUES.split(", "), args[1].toLowerCase());
+            boolean detailed = args.length == 2 && Structs.contains(Const.boolValues.split(", "), args[1].toLowerCase());
 
             if (args.length > 0 && Variables.activeHistoryPlayers.containsKey(player.uuid())) {
                 if (!Strings.canParseInt(args[0])) {
@@ -255,7 +254,7 @@ public class PlayerCommands {
                 CacheSeq<HistoryEntry> entries = Variables.getHistorySeq(mouseX, mouseY);
 
                 int page = Strings.parseInt(args[0]) - 1;
-                int pages = Mathf.ceil(entries.size / Const.LIST_PAGE_SIZE);
+                int pages = Mathf.ceil(entries.size / Const.listPageSize);
 
                 if (page >= pages || pages < 0 || page < 0) {
                     Bundle.bundled(player, "commands.under-page", page);
@@ -269,7 +268,7 @@ public class PlayerCommands {
                     result.append(Bundle.get("history.empty", locale)).append("\n");
                 }
 
-                for (int i = 6 * page; i < Math.min(Const.LIST_PAGE_SIZE * (page + 1), entries.size); i++) {
+                for (int i = 6 * page; i < Math.min(Const.listPageSize * (page + 1), entries.size); i++) {
                     HistoryEntry entry = entries.get(i);
                     result.append(entry.getMessage(locale));
                     if (detailed) {
@@ -297,13 +296,13 @@ public class PlayerCommands {
             if (args.length > 0) {
                 serverColumnName = args[0].toLowerCase();
             } else {
-                serverColumnName = Const.SERVER_COLUMN_NAME;
+                serverColumnName = Const.serverFieldName;
             }
 
             Log.debug(serverColumnName);
             Field<Long> field = (Field<Long>) Tables.playtime.field(serverColumnName);
             if (field == null) {
-                Bundle.bundled(player, "commands.server-notfound", Const.SERVER_LIST);
+                Bundle.bundled(player, "commands.server-notfound", Const.serverList);
                 return;
             }
 
@@ -317,7 +316,7 @@ public class PlayerCommands {
                 if (time == null) {
                     Log.err("Player '" + player.uuid() + "' doesn't exists");
                 }
-                Bundle.bundled(player, "commands.playtime.msg", Const.SERVER_NAMES.get(serverColumnName), StringUtils.longToTime((time == null) ? 0 : time, locale));
+                Bundle.bundled(player, "commands.playtime.msg", Const.serverNames.get(serverColumnName), StringUtils.longToTime((time == null) ? 0 : time, locale));
             } catch (Throwable t) {
                 Log.err("Failed to get playtime for player '" + player.uuid() + "'", t);
             }

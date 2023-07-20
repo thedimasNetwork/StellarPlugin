@@ -59,8 +59,8 @@ public class EventHandler {
                         BansRecord record = Database.latestBan(event.player.uuid());
                         UsersRecord admin = Database.getPlayer(record.getAdmin());
                         String adminName = admin != null ? Strings.stripColors(admin.getName()) : record.getAdmin();
-                        String banDate = record.getCreated().format(Const.DATE_FORMATTER);
-                        String unbanDate = record.getUntil() != null ? record.getUntil().format(Const.DATE_FORMATTER) : Bundle.get("events.join.banned.forever", locale);
+                        String banDate = record.getCreated().format(Const.dateFotmatter);
+                        String unbanDate = record.getUntil() != null ? record.getUntil().format(Const.dateFotmatter) : Bundle.get("events.join.banned.forever", locale);
 
                         String message = Bundle.format("events.join.banned", locale, adminName, banDate, record.getReason().strip(), unbanDate, config.discordUrl);
                         event.player.kick(message);
@@ -71,7 +71,7 @@ public class EventHandler {
                 DiscordLogger.err(e);
             }
 
-            for (String pirate : Const.PIRATES) {
+            for (String pirate : Const.pirates) {
                 if (name.toLowerCase().contains(pirate)) {
                     event.player.con.kick(Bundle.get("events.join.player-pirate", Bundle.findLocale(event.player.locale)));
                     break;
@@ -82,7 +82,7 @@ public class EventHandler {
 
         // region PlayerJoin
         Events.on(EventType.PlayerJoin.class, event -> {
-            Log.info(Const.JOIN_LOG_FORMAT, event.player.name, event.player.locale, event.player.con.address);
+            Log.info(Const.joinLogFormat, event.player.name, event.player.locale, event.player.con.address);
             String playerName = event.player.coloredName();
             Bundle.bundled("events.join.player-join", playerName);
 
@@ -90,7 +90,7 @@ public class EventHandler {
             String rules = Bundle.get("rules", locale);
 
             StringBuilder commands = new StringBuilder();
-            Const.USEFUL_COMMANDS.each(name -> {
+            Const.usefulCommands.each(name -> {
                 CommandHandler.Command command = Vars.netServer.clientCommands.getCommandList().find(cmd -> cmd.text.equals(name));
                 commands.append(String.format("[orange]/%s[] %s\n", command.text, Bundle.has(command.description, locale) ? Bundle.get(command.description, locale) : command.description));
             });
@@ -105,7 +105,7 @@ public class EventHandler {
 
             try {
                 PlayerEventsRecord record = Database.getContext().newRecord(Tables.playerEvents);
-                record.setServer(Const.SERVER_COLUMN_NAME);
+                record.setServer(Const.serverFieldName);
                 record.setTimestamp(System.currentTimeMillis() / 1000);
                 record.setType(PlayerEventTypes.JOIN.name());
                 record.setName(event.player.name());
@@ -280,7 +280,7 @@ public class EventHandler {
                             }
 
                         }
-                        Bot.sendEmbed(config.bot.bansId, Util.embedBuilder(title, message, color, LocalDateTime.now(), Const.SERVER_COLUMN_NAME));
+                        Bot.sendEmbed(config.bot.bansId, Util.embedBuilder(title, message, color, LocalDateTime.now(), Const.serverFieldName));
                         try {
                             actionEntry.storeRecord();
                         } catch (SQLException e) {
@@ -325,7 +325,7 @@ public class EventHandler {
                                 """.replace("%admin%", adminName).replace("%aid%", adminInfo.getId().toString())
                         .replace("%target%", targetName).replace("%tid%", targetInfo.getId().toString())
                         .replace("%reason%", actionEntry.getReason().strip());
-                Bot.sendEmbed(config.bot.bansId, Util.embedBuilder(title, message, Colors.purple, LocalDateTime.now(), Const.SERVER_COLUMN_NAME));
+                Bot.sendEmbed(config.bot.bansId, Util.embedBuilder(title, message, Colors.purple, LocalDateTime.now(), Const.serverFieldName));
             } else {
                 Locale locale = Bundle.findLocale(event.player.locale());
                 String[][] buttons = {
@@ -379,7 +379,7 @@ public class EventHandler {
             if (admins.containsKey(event.player.uuid())) {
                 try {
                     ServerEventsRecord record = Database.getContext().newRecord(Tables.serverEvents);
-                    record.setServer(Const.SERVER_COLUMN_NAME);
+                    record.setServer(Const.serverFieldName);
                     record.setTimestamp(System.currentTimeMillis() / 1000);
                     record.setType(ServerEventTypes.ADMIN_REQUEST.name());
                     record.setName(event.player.name);
@@ -390,7 +390,7 @@ public class EventHandler {
 
                     if (event.action == Packets.AdminAction.kick || event.action == Packets.AdminAction.ban) {
                         PlayerEventsRecord record2 = Database.getContext().newRecord(Tables.playerEvents);
-                        record2.setServer(Const.SERVER_COLUMN_NAME);
+                        record2.setServer(Const.serverFieldName);
                         record2.setTimestamp(System.currentTimeMillis() / 1000);
                         record2.setType(event.action == Packets.AdminAction.kick ? PlayerEventTypes.KICK.name() : PlayerEventTypes.BAN.name());
                         record2.setName(event.other.name);
@@ -429,7 +429,7 @@ public class EventHandler {
             if (Variables.votesRTV.contains(event.player.uuid())) {
                 Variables.votesRTV.remove(event.player.uuid());
                 int cur = Variables.votesRTV.size;
-                int req = (int) Math.ceil(Const.VOTES_RATIO * Groups.player.size());
+                int req = (int) Math.ceil(Const.votesRatio * Groups.player.size());
                 String playerName = event.player.coloredName();
                 Bundle.bundled("commands.rtv.leave", playerName, cur, req);
             }
@@ -444,7 +444,7 @@ public class EventHandler {
 
             try {
                 PlayerEventsRecord record = Database.getContext().newRecord(Tables.playerEvents);
-                record.setServer(Const.SERVER_COLUMN_NAME);
+                record.setServer(Const.serverFieldName);
                 record.setTimestamp(System.currentTimeMillis() / 1000);
                 record.setType(PlayerEventTypes.LEAVE.name());
                 record.setName(event.player.name());
@@ -464,7 +464,7 @@ public class EventHandler {
             Log.info("ThedimasPlugin: Server loaded");
             try {
                 ServerEventsRecord record = Database.getContext().newRecord(Tables.serverEvents);
-                record.setServer(Const.SERVER_COLUMN_NAME);
+                record.setServer(Const.serverFieldName);
                 record.setTimestamp(System.currentTimeMillis() / 1000);
                 record.setType(ServerEventTypes.START.name());
                 record.store();
@@ -477,7 +477,7 @@ public class EventHandler {
             try {
                 Variables.votesRTV.clear();
                 ServerEventsRecord record = Database.getContext().newRecord(Tables.serverEvents);
-                record.setServer(Const.SERVER_COLUMN_NAME);
+                record.setServer(Const.serverFieldName);
                 record.setTimestamp(System.currentTimeMillis() / 1000);
                 record.setType(ServerEventTypes.GAMEOVER.name());
                 record.store();
@@ -569,7 +569,7 @@ public class EventHandler {
             if (!event.message.startsWith("/")) {
                 try {
                     PlayerEventsRecord record = Database.getContext().newRecord(Tables.playerEvents);
-                    record.setServer(Const.SERVER_COLUMN_NAME);
+                    record.setServer(Const.serverFieldName);
                     record.setTimestamp(System.currentTimeMillis() / 1000);
                     record.setType(PlayerEventTypes.CHAT.name());
                     record.setName(event.player.name);
@@ -588,12 +588,12 @@ public class EventHandler {
                     }).start();
                 });
 
-                Log.info(Const.CHAT_LOG_FORMAT, Strings.stripColors(event.player.name), Strings.stripColors(event.message), event.player.locale);
+                Log.info(Const.chatLogFormat, Strings.stripColors(event.player.name), Strings.stripColors(event.message), event.player.locale);
                 Players.incrementStats(event.player, "messages");
             } else {
                 try {
                     PlayerEventsRecord record = Database.getContext().newRecord(Tables.playerEvents);
-                    record.setServer(Const.SERVER_COLUMN_NAME);
+                    record.setServer(Const.serverFieldName);
                     record.setTimestamp(System.currentTimeMillis() / 1000);
                     record.setType(PlayerEventTypes.KICK.name());
                     record.setName(event.player.name);

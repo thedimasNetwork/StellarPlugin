@@ -39,7 +39,7 @@ public class ServerCommands {
             MessageEmbed embed = Util.embedBuilder("**Сервер остановлен**", Colors.red);
             try {
                 ServerEventsRecord record = Database.getContext().newRecord(Tables.serverEvents);
-                record.setServer(Const.SERVER_COLUMN_NAME);
+                record.setServer(Const.serverFieldName);
                 record.setTimestamp(System.currentTimeMillis() / 1000);
                 record.setType(ServerEventTypes.STOP.name());
                 record.store();
@@ -164,7 +164,7 @@ public class ServerCommands {
                 } else {
                     message += "**Срок**: Перманентный";
                 }
-                MessageEmbed banEmbed = Util.embedBuilder("Бан (через консоль)", message, Colors.red, LocalDateTime.now(), Const.SERVER_COLUMN_NAME);
+                MessageEmbed banEmbed = Util.embedBuilder("Бан (через консоль)", message, Colors.red, LocalDateTime.now(), Const.serverFieldName);
                 Bot.sendEmbed(config.bot.bansId, banEmbed);
 
                 Log.info("Player @ / @ / #@ got banned", Strings.stripColors(record.getName()), record.getUuid(), record.getId());

@@ -90,7 +90,7 @@ public class History {
                     result.append(Bundle.get("history.empty", locale)).append("\n");
                 }
 
-                for (int i = 0; i < entries.size && i < Const.LIST_PAGE_SIZE; i++) {
+                for (int i = 0; i < entries.size && i < Const.listPageSize; i++) {
                     HistoryEntry entry = entries.get(i);
 
                     result.append(entry.getMessage(locale));

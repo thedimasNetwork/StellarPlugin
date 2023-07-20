@@ -22,23 +22,23 @@ public class Config {
         ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
         mapper.findAndRegisterModules();
 
-        if (!new Fi(Const.PLUGIN_FOLDER).exists()) {
+        if (!new Fi(Const.pluginFolder).exists()) {
             try {
-                Files.createDirectory(Path.of(Const.PLUGIN_FOLDER));
+                Files.createDirectory(Path.of(Const.pluginFolder));
             } catch (IOException e) {
                 Log.err(e);
             }
         }
 
-        if (!new Fi(Const.PLUGIN_FOLDER + "plugin.yaml").exists()) {
+        if (!new Fi(Const.pluginFolder + "plugin.yaml").exists()) {
             try (InputStream is = Config.class.getClassLoader().getResourceAsStream("plugin.yaml")) {
-                Files.copy(is, Path.of(Const.PLUGIN_FOLDER + "plugin.yaml"));
+                Files.copy(is, Path.of(Const.pluginFolder + "plugin.yaml"));
             } catch (IOException e) {
                 Log.err(e);
             }
         }
         try {
-            Variables.config = mapper.readValue(new File(Const.PLUGIN_FOLDER + "plugin.yaml"), Config.class);
+            Variables.config = mapper.readValue(new File(Const.pluginFolder + "plugin.yaml"), Config.class);
         } catch (IOException e) {
             Log.err(e);
         }

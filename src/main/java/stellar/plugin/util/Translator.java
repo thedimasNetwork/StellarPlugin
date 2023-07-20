@@ -72,7 +72,7 @@ public class Translator {
     }
 
     public static String formatChat(Player player, String translated, String message, boolean detailed) {
-        return MessageFormat.format(detailed ? Const.CHAT_FORMAT_DETAILED : Const.CHAT_FORMAT, Players.prefixName(player), translated, message);
+        return MessageFormat.format(detailed ? Const.chatFormatDetailed : Const.chatFormat, Players.prefixName(player), translated, message);
     }
 
 

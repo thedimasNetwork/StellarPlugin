@@ -55,7 +55,7 @@ public class AdminCommands {
                 }).start();
             });
 
-            Log.info("<A>" + Const.CHAT_LOG_FORMAT, Strings.stripColors(player.name), Strings.stripColors(message), player.locale);
+            Log.info("<A>" + Const.chatLogFormat, Strings.stripColors(player.name), Strings.stripColors(message), player.locale);
         });
 
         commandHandler.<Player>register("admin", "commands.admin.admin.description", (args, player) -> {
@@ -130,7 +130,7 @@ public class AdminCommands {
 
             UnitType unit = Vars.content.units().find(b -> b.name.equalsIgnoreCase(args[0]));
             if (unit == null) {
-                Bundle.bundled(player, "commands.admin.unit.notfound", Const.UNIT_LIST);
+                Bundle.bundled(player, "commands.admin.unit.notfound", Const.unitList);
                 return;
             }
 
@@ -145,7 +145,7 @@ public class AdminCommands {
 
             Team team = args.length > 2 ? Structs.find(Team.baseTeams, t -> t.name.equalsIgnoreCase(args[2])) : player.team();
             if (team == null) {
-                Bundle.bundled(player, "commands.admin.unit.team-notfound", Const.TEAM_LIST);
+                Bundle.bundled(player, "commands.admin.unit.team-notfound", Const.teamList);
                 return;
             }
 
@@ -165,7 +165,7 @@ public class AdminCommands {
 
             Team team = Structs.find(Team.baseTeams, t -> t.name.equalsIgnoreCase(args[0]));
             if (team == null) {
-                Bundle.bundled(player, "commands.admin.team.notfound", Const.TEAM_LIST);
+                Bundle.bundled(player, "commands.admin.team.notfound", Const.teamList);
                 return;
             }
 
@@ -227,7 +227,7 @@ public class AdminCommands {
             } else {
                 Team team = Structs.find(Team.baseTeams, t -> t.name.equalsIgnoreCase(args[0]));
                 if (team == null) {
-                    Bundle.bundled(player, "commands.admin.killall.team-notfound", Const.TEAM_LIST);
+                    Bundle.bundled(player, "commands.admin.killall.team-notfound", Const.teamList);
                     return;
                 }
 
@@ -481,7 +481,7 @@ public class AdminCommands {
             try {
                 found.kick(Packets.KickReason.kick);
                 PlayerEventsRecord record = Database.getContext().newRecord(Tables.playerEvents);
-                record.setServer(Const.SERVER_COLUMN_NAME);
+                record.setServer(Const.serverFieldName);
                 record.setTimestamp(System.currentTimeMillis() / 1000);
                 record.setType(PlayerEventTypes.KICK.name());
                 record.setName(found.name());

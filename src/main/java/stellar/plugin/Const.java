@@ -19,31 +19,31 @@ import static mindustry.Vars.mods;
 
 public class Const {
 
-    public static final String PLUGIN_FOLDER = "config/mods/" + mods.list().find(l -> l.main instanceof ThedimasPlugin).meta.name + "/";
-    public static final String PLUGIN_VERSION = mods.list().find(l -> l.main instanceof ThedimasPlugin).meta.version;
+    public static final String pluginFolder = "config/mods/" + mods.list().find(l -> l.main instanceof ThedimasPlugin).meta.name + "/";
+    public static final String pluginVersion = mods.list().find(l -> l.main instanceof ThedimasPlugin).meta.version;
 
-    public static final String JOIN_LOG_FORMAT = "@ has joined the server | locale: @ | IP: @";
-    public static final String CHAT_LOG_FORMAT = "@: @ | @";
+    public static final String joinLogFormat = "@ has joined the server | locale: @ | IP: @";
+    public static final String chatLogFormat = "@: @ | @";
 
-    public static final String CHAT_FORMAT = "{0}[white]: {1}";
-    public static final String CHAT_FORMAT_DETAILED = CHAT_FORMAT + " [gray]({2}[gray])";
+    public static final String chatFormat = "{0}[white]: {1}";
+    public static final String chatFormatDetailed = chatFormat + " [gray]({2}[gray])";
 
-    public static final float VOTES_RATIO = 0.6f;
+    public static final float votesRatio = 0.6f;
 
-    public static final float LIST_PAGE_SIZE = 6f;
+    public static final float listPageSize = 6f;
 
-    public static final String BOOL_VALUES = "1, on, yes, true, вкл, да";
+    public static final String boolValues = "1, on, yes, true, вкл, да";
 
-    public static final String[] PIRATES = {"valve", "igruhaorg", "tuttop", "freetp.org", "freetp"};
-    public static final Seq<String> USEFUL_COMMANDS = Seq.with("help", "rtv", "stats", "ranks");
+    public static final String[] pirates = {"valve", "igruhaorg", "tuttop", "freetp.org", "freetp"};
+    public static final Seq<String> usefulCommands = Seq.with("help", "rtv", "stats", "ranks");
 
-    public static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy k:m"); // 04.12.2003 23:09
+    public static final DateTimeFormatter dateFotmatter = DateTimeFormatter.ofPattern("dd.MM.yyyy k:m"); // 04.12.2003 23:09
 
-    public static final int MAX_IDENTICAL_IPS = 3;
+    public static final int maxIdenticalIPs = 3;
     // языки, для которых у нас есть перевод
     public static final Locale[] supportedLocales;
-    public static final String TEAM_LIST = "[white][yellow]sharded[], [red]crux[], [purple]malis[], [green]green[], [blue]blue[], [gray]derelict[]";
-    public static final String UNIT_LIST = """
+    public static final String teamList = "[white][yellow]sharded[], [red]crux[], [purple]malis[], [green]green[], [blue]blue[], [gray]derelict[]";
+    public static final String unitList = """
             [accent]Serpulo:
             [white]Ground:
             [accent]dagger [](\uF800), [accent]mace [](\uF7FF), [accent]fortress [](\uF7FE), [accent]scepter [](\uF7DB), [accent]reign [](\uF7DA)
@@ -65,7 +65,7 @@ public class Const {
             [white]Core:
             [accent]evoke [](\uF735), [accent]incite [](\uF724), [accent]emanate [](\uF719) 
             """;
-    public static final String SERVER_LIST = """
+    public static final String serverList = """
             []Hub
             PvP
             Sandbox
@@ -80,7 +80,7 @@ public class Const {
             MS_GO
             Zone_capture
             """;
-    public static final StringMap SERVER_ADDRESS = StringMap.of(
+    public static final StringMap serverAddress = StringMap.of(
             "hub", "play.thedimas.pp.ua:6567",
             "survival", "play.thedimas.pp.ua:6501",
             "attack", "play.thedimas.pp.ua:6502",
@@ -96,7 +96,7 @@ public class Const {
             "zone_capture", "play.thedimas.pp.ua:6512",
             "test", "play.thedimas.pp.ua:6666"
     );
-    public static final StringMap SERVER_NAMES = StringMap.of(
+    public static final StringMap serverNames = StringMap.of(
             "hub", "[#e6bd74]\uE829[] [#f92672]thedimas [#e6bd74]\uE810[#a6e22e]HUB[#e6bd74]\uE810[]",
             "survival", "[#e6bd74]\uE829[] [#f92672]thedimas [#e6bd74]\uE86B[#a6e22e]Survival[#e6bd74]\uE86B[]",
             "attack", "[#e6bd74]\uE829[] [#f92672]thedimas [#e6bd74]\uE86E[#a6e22e]Attack[#e6bd74]\uE86E[]",
@@ -110,8 +110,8 @@ public class Const {
             "castle_wars", "[#e6bd74]\uE829[] [#f92672]thedimas [#e6bd74]\uE807[#a6e22e]Castle Wars[#e6bd74]\uE807[]",
             "crawler_arena", "[#e6bd74]\uE829[] [#f92672]thedimas [#e6bd74]\uE871[#a6e22e]Crawler Arena[#e6bd74]\uE871[]",
             "zone_capture", "[#e6bd74]\uE829[] [#f92672]thedimas [#e6bd74]\uE853[#a6e22e]Zone Capture[#e6bd74]\uE853[]");
-    public static final String SERVER_COLUMN_NAME = Const.SERVER_ADDRESS.findKey("play.thedimas.pp.ua:" + Administration.Config.port.num(), false);
-    public static final Field<Long> PLAYTIME_FIELD = (Field<Long>) Tables.playtime.field(Const.SERVER_COLUMN_NAME);
+    public static final String serverFieldName = Const.serverAddress.findKey("play.thedimas.pp.ua:" + Administration.Config.port.num(), false);
+    public static final Field<Long> playtimeField = (Field<Long>) Tables.playtime.field(Const.serverFieldName);
 
     static {
         Fi[] files = Vars.mods.list().find(mod -> mod.main instanceof ThedimasPlugin).root.child("bundles").list();
@@ -134,8 +134,7 @@ public class Const {
     // это нужно из-за того, что Vars.locale инициализируется _не очень вовремя_
     // (из-за асинхронного запроса)
     public static class LocaleListHolder {
-
-        public static final String LOCALE_LIST;
+        public static final String localeList;
 
         static {
             StringBuilder tmp = new StringBuilder();
@@ -150,7 +149,7 @@ public class Const {
                 }
             }
 
-            LOCALE_LIST = tmp.toString();
+            localeList = tmp.toString();
         }
     }
 }
