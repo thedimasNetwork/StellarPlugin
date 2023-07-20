@@ -104,15 +104,6 @@ public class EventHandler {
             };
 
             try {
-                PlayerEventsRecord record = Database.getContext().newRecord(Tables.playerEvents);
-                record.setServer(Const.serverFieldName);
-                record.setTimestamp(System.currentTimeMillis() / 1000);
-                record.setType(PlayerEventTypes.JOIN.name());
-                record.setName(event.player.name());
-                record.setUuid(event.player.uuid());
-                record.setIp(event.player.ip());
-                record.store();
-
                 if (Database.playerExists(event.player.uuid())) {
                     updateBackground(Database.getContext()
                             .update(Tables.users)
@@ -378,26 +369,7 @@ public class EventHandler {
         Events.on(EventType.AdminRequestEvent.class, event -> {
             if (admins.containsKey(event.player.uuid())) {
                 try {
-                    ServerEventsRecord record = Database.getContext().newRecord(Tables.serverEvents);
-                    record.setServer(Const.serverFieldName);
-                    record.setTimestamp(System.currentTimeMillis() / 1000);
-                    record.setType(ServerEventTypes.ADMIN_REQUEST.name());
-                    record.setName(event.player.name);
-                    record.setUuid(event.player.uuid());
-                    record.setIp(event.player.ip());
-                    record.setRequest(event.action.name());
-                    record.store();
-
                     if (event.action == Packets.AdminAction.kick || event.action == Packets.AdminAction.ban) {
-                        PlayerEventsRecord record2 = Database.getContext().newRecord(Tables.playerEvents);
-                        record2.setServer(Const.serverFieldName);
-                        record2.setTimestamp(System.currentTimeMillis() / 1000);
-                        record2.setType(event.action == Packets.AdminAction.kick ? PlayerEventTypes.KICK.name() : PlayerEventTypes.BAN.name());
-                        record2.setName(event.other.name);
-                        record2.setUuid(event.other.uuid());
-                        record2.setIp(event.other.ip());
-                        record2.store();
-
                         int id = Mathf.random(0, Integer.MAX_VALUE - 1);
                         UsersRecord adminInfo = Database.getContext()
                                 .selectFrom(Tables.users)
@@ -441,20 +413,6 @@ public class EventHandler {
             Log.info("@ has disconnected from the server", event.player.name);
             String playerName = event.player.coloredName();
             Bundle.bundled("events.leave.player-leave", playerName);
-
-            try {
-                PlayerEventsRecord record = Database.getContext().newRecord(Tables.playerEvents);
-                record.setServer(Const.serverFieldName);
-                record.setTimestamp(System.currentTimeMillis() / 1000);
-                record.setType(PlayerEventTypes.LEAVE.name());
-                record.setName(event.player.name());
-                record.setUuid(event.player.uuid());
-                record.setIp(event.player.ip());
-                record.store();
-            } catch (SQLException e) {
-                Log.err(e);
-            }
-
             unitPlayer.remove(event.player.unit().id);
             ranks.remove(event.player.uuid());
         });
@@ -462,28 +420,9 @@ public class EventHandler {
 
         Events.on(EventType.ServerLoadEvent.class, event -> {
             Log.info("ThedimasPlugin: Server loaded");
-            try {
-                ServerEventsRecord record = Database.getContext().newRecord(Tables.serverEvents);
-                record.setServer(Const.serverFieldName);
-                record.setTimestamp(System.currentTimeMillis() / 1000);
-                record.setType(ServerEventTypes.START.name());
-                record.store();
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
-            }
         });
 
         Events.on(EventType.GameOverEvent.class, event -> {
-            try {
-                Variables.votesRTV.clear();
-                ServerEventsRecord record = Database.getContext().newRecord(Tables.serverEvents);
-                record.setServer(Const.serverFieldName);
-                record.setTimestamp(System.currentTimeMillis() / 1000);
-                record.setType(ServerEventTypes.GAMEOVER.name());
-                record.store();
-            } catch (SQLException e) {
-                Log.err(e);
-            }
             if (Vars.state.rules.mode() == Gamemode.attack && event.winner == Team.sharded) {
                 Groups.player.each(player -> {
                     Players.incrementStats(player, "attacks");
@@ -567,20 +506,6 @@ public class EventHandler {
 
         Events.on(EventType.PlayerChatEvent.class, event -> {
             if (!event.message.startsWith("/")) {
-                try {
-                    PlayerEventsRecord record = Database.getContext().newRecord(Tables.playerEvents);
-                    record.setServer(Const.serverFieldName);
-                    record.setTimestamp(System.currentTimeMillis() / 1000);
-                    record.setType(PlayerEventTypes.CHAT.name());
-                    record.setName(event.player.name);
-                    record.setUuid(event.player.uuid());
-                    record.setIp(event.player.ip());
-                    record.setMessage(event.message);
-                    record.store();
-                } catch (SQLException e) {
-                    Log.err(e);
-                }
-
                 Groups.player.each(otherPlayer -> {
                     new Thread(() -> {
                         String msg = Translator.translateChat(event.player, otherPlayer, event.message);
@@ -590,20 +515,6 @@ public class EventHandler {
 
                 Log.info(Const.chatLogFormat, Strings.stripColors(event.player.name), Strings.stripColors(event.message), event.player.locale);
                 Players.incrementStats(event.player, "messages");
-            } else {
-                try {
-                    PlayerEventsRecord record = Database.getContext().newRecord(Tables.playerEvents);
-                    record.setServer(Const.serverFieldName);
-                    record.setTimestamp(System.currentTimeMillis() / 1000);
-                    record.setType(PlayerEventTypes.KICK.name());
-                    record.setName(event.player.name);
-                    record.setUuid(event.player.uuid());
-                    record.setIp(event.player.ip());
-                    record.setMessage(event.message.replaceAll("^/", ""));
-                    record.store();
-                } catch (SQLException e) {
-                    Log.err(e);
-                }
             }
         });
 

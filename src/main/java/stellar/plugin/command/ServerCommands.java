@@ -15,9 +15,6 @@ import stellar.plugin.bot.Bot;
 import stellar.plugin.bot.Colors;
 import stellar.plugin.bot.Util;
 import stellar.database.Database;
-import stellar.database.enums.ServerEventTypes;
-import stellar.database.gen.Tables;
-import stellar.database.gen.tables.records.ServerEventsRecord;
 import stellar.database.gen.tables.records.UsersRecord;
 import stellar.plugin.util.Bundle;
 import stellar.plugin.util.Players;
@@ -37,16 +34,6 @@ public class ServerCommands {
             Groups.player.each(e -> e.kick(Packets.KickReason.serverClose));
 
             MessageEmbed embed = Util.embedBuilder("**Сервер остановлен**", Colors.red);
-            try {
-                ServerEventsRecord record = Database.getContext().newRecord(Tables.serverEvents);
-                record.setServer(Const.serverFieldName);
-                record.setTimestamp(System.currentTimeMillis() / 1000);
-                record.setType(ServerEventTypes.STOP.name());
-                record.store();
-            } catch (SQLException e) {
-                Log.err(e);
-            }
-
             Bot.sendEmbed(embed);
             Core.app.exit();
             Core.app.post(Bot::shutdown);

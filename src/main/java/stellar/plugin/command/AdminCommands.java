@@ -22,10 +22,6 @@ import rhino.WrappedException;
 import stellar.plugin.Const;
 import stellar.plugin.Variables;
 import stellar.plugin.bot.Bot;
-import stellar.database.Database;
-import stellar.database.enums.PlayerEventTypes;
-import stellar.database.gen.Tables;
-import stellar.database.gen.tables.records.PlayerEventsRecord;
 import stellar.plugin.util.Bundle;
 import stellar.plugin.util.Players;
 import stellar.plugin.util.Translator;
@@ -364,101 +360,6 @@ public class AdminCommands {
             Call.effect(effect, x, y, rotation, color);
         });
 
-        /*
-        commandHandler.removeCommand("ban");
-        commandHandler.<Player>register("ban", "<name...>", "commands.admin.ban.description", (args, player) -> {
-            if (!Variables.admins.containsKey(player.uuid())) {
-                Bundle.bundled(player, "commands.access-denied");
-                return;
-            }
-
-            Player found = Players.findPlayer(args[0]);
-            if (found == null) {
-                Bundle.bundled(player, "commands.player-notfound");
-                return;
-            }
-            String uuid = found.uuid();
-
-            if (Variables.admins.containsValue(uuid, false)) {
-                Bundle.bundled(player, "commands.admin.ban.player-is-admin");
-                return;
-            }
-
-            try {
-                Database.getContext()
-                        .update(Tables.users)
-                        .set(Tables.users.BANNED, (byte) 1)
-                        .where(Tables.users.uuid.eq(args[0]))
-                        .execute();
-
-                PlayerEventsRecord record = Database.getContext().newRecord(Tables.playerEvents);
-                record.setServer(Const.SERVER_COLUMN_NAME);
-                record.setTimestamp(System.currentTimeMillis() / 1000);
-                record.setType(PlayerEventTypes.BAN.name());
-                record.setName(found.name());
-                record.setUuid(found.uuid());
-                record.setIp(found.ip());
-                record.store();
-
-                found.kick(Packets.KickReason.banned);
-                Bundle.bundled(player, "commands.admin.ban.banned", args[0]);
-                Log.info("@ (@) has banned @ (@)", player.name(), player.uuid(), found.name(), found.uuid());
-                Bot.sendMessage(String.format("%s забанил игрока %s", player.name(), found.name()));
-            } catch (SQLException e) {
-                Log.err("Failed to ban uuid for player '@'", uuid);
-                Log.err(e);
-                DiscordLogger.err("Failed to ban uuid for player '" + uuid + "'", e);
-                Bundle.bundled(player, "commands.admin.ban.failed", args[0]);
-            }
-        });
-
-        commandHandler.removeCommand("unban");
-        commandHandler.<Player>register("unban", "<uuid>", "Разбанить игрока", (args, player) -> {
-            if (!Variables.admins.containsKey(player.uuid())) {
-                Bundle.bundled(player, "commands.access-denied");
-                return;
-            }
-
-            if (args[0].contains("'") || args[0].contains("\"")) {
-                player.sendMessage(String.format("[red]Невалидный айди![]", args[0]));
-                return;
-            }
-
-            try {
-                boolean exists = Database.getContext()
-                        .selectFrom(Tables.users)
-                        .where(Tables.users.uuid.eq(args[0]))
-                        .fetch()
-                        .size() > 0;
-
-                if (!exists) {
-                    player.sendMessage(String.format("[red]Игрок с айди %s не найден[]", args[0]));
-                    return;
-                }
-
-                Database.getContext()
-                        .update(Tables.users)
-                        .set(Tables.users.BANNED, (byte) 0)
-                        .where(Tables.users.uuid.eq(args[0]))
-                        .execute();
-
-                UsersRecord data = Database.getContext()
-                        .selectFrom(Tables.users)
-                        .where(Tables.users.uuid.eq(args[0]))
-                        .fetchOne();
-
-                player.sendMessage(String.format("[lime]Игрок с айди %s разбанен[]", args[0]));
-                Log.info("@ (@) has unbanned @ (@)", player.name(), player.uuid(), data.getName(), args[0]);
-                Bot.sendMessage(String.format("%s разбанил игрока %s", player.name(), data.getName()));
-            } catch (SQLException e) {
-                Log.err("Failed to unban uuid for player '@'", args[0]);
-                Log.err(e);
-                DiscordLogger.err("Failed to unban uuid for player '" + args[0] + "'", e);
-                player.sendMessage(String.format("[red]Не могу разбанить игрока с айди %s[]", args[0]));
-            }
-        }); // TODO: использовать бандлы
-        */
-
         commandHandler.removeCommand("kick");
         commandHandler.<Player>register("kick", "<name...>", "Выгнать игрока", (args, player) -> {
             if (!Variables.admins.containsKey(player.uuid())) {
@@ -478,19 +379,6 @@ public class AdminCommands {
                 return;
             }
 
-            try {
-                found.kick(Packets.KickReason.kick);
-                PlayerEventsRecord record = Database.getContext().newRecord(Tables.playerEvents);
-                record.setServer(Const.serverFieldName);
-                record.setTimestamp(System.currentTimeMillis() / 1000);
-                record.setType(PlayerEventTypes.KICK.name());
-                record.setName(found.name());
-                record.setUuid(found.uuid());
-                record.setIp(found.ip());
-                record.store();
-            } catch (SQLException e) {
-                Log.err(e);
-            }
             player.sendMessage(String.format("[lime]Игрок %s выгнан[]", args[0]));
             Log.info("@ (@) has kicked @ (@)", player.name(), player.uuid(), found.name(), found.uuid());
             Bot.sendMessage(String.format("%s выгнал игрока %s", player.name(), found.name()));
