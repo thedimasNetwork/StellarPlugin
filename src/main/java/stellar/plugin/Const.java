@@ -111,7 +111,7 @@ public class Const {
             "crawler_arena", "[#e6bd74]\uE829[] [#f92672]thedimas [#e6bd74]\uE871[#a6e22e]Crawler Arena[#e6bd74]\uE871[]",
             "zone_capture", "[#e6bd74]\uE829[] [#f92672]thedimas [#e6bd74]\uE853[#a6e22e]Zone Capture[#e6bd74]\uE853[]");
     public static final String SERVER_COLUMN_NAME = Const.SERVER_ADDRESS.findKey("play.thedimas.pp.ua:" + Administration.Config.port.num(), false);
-    public static final Field<Long> PLAYTIME_FIELD = (Field<Long>) Tables.PLAYTIME.field(Const.SERVER_COLUMN_NAME);
+    public static final Field<Long> PLAYTIME_FIELD = (Field<Long>) Tables.playtime.field(Const.SERVER_COLUMN_NAME);
 
     static {
         Fi[] files = Vars.mods.list().find(mod -> mod.main instanceof ThedimasPlugin).root.child("bundles").list();

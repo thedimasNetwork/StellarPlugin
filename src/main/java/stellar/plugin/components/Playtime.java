@@ -30,9 +30,9 @@ public class Playtime {
                     try {
                         long computed = Database.getPlaytime(p.uuid(), Const.PLAYTIME_FIELD) + 60;
                         updateBackground(Database.getContext()
-                                .update(Tables.PLAYTIME)
+                                .update(Tables.playtime)
                                 .set(Const.PLAYTIME_FIELD, computed)
-                                .where(Tables.PLAYTIME.UUID.eq(p.uuid())));
+                                .where(Tables.playtime.uuid.eq(p.uuid())));
                     } catch (Throwable t) {
                         Log.err("Failed to update playtime for player '" + p.uuid() + "'", t);
                         DiscordLogger.err("Failed to update playtime for player '" + p.uuid() + "'", t);

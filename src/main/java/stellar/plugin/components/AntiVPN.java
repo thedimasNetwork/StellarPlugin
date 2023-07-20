@@ -57,8 +57,8 @@ public class AntiVPN { // also includes anti ddos from gh actions servers
 
             try {
                 exists = Database.getContext()
-                        .selectFrom(Tables.IP_CACHED)
-                        .where(Tables.IP_CACHED.IP.eq(event.player.ip()))
+                        .selectFrom(Tables.ipCached)
+                        .where(Tables.ipCached.ip.eq(event.player.ip()))
                         .fetch()
                         .size() > 0;
             } catch (SQLException e) {
@@ -67,8 +67,8 @@ public class AntiVPN { // also includes anti ddos from gh actions servers
             if (exists) {
                 try {
                     IpCachedRecord record = Database.getContext()
-                            .selectFrom(Tables.IP_CACHED)
-                            .where(Tables.IP_CACHED.IP.eq(event.player.ip()))
+                            .selectFrom(Tables.ipCached)
+                            .where(Tables.ipCached.ip.eq(event.player.ip()))
                             .fetchOne();
                     if (record.getProxy() == 1 || record.getVpn() == 1) {
                         event.player.kick("No VPN is allowed");
@@ -91,7 +91,7 @@ public class AntiVPN { // also includes anti ddos from gh actions servers
 
                     Jval data = json.get(event.player.ip());
 
-                    IpCachedRecord record = Database.getContext().newRecord(Tables.IP_CACHED);
+                    IpCachedRecord record = Database.getContext().newRecord(Tables.ipCached);
                     record.setIp(event.player.ip());
                     record.setProxy((byte) (data.getString("proxy").equals("yes") ? 1 : 0));
                     record.setVpn((byte) (data.getString("vpn").equals("yes") ? 1 : 0));

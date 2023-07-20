@@ -160,14 +160,14 @@ public class DiscordListener extends ListenerAdapter {
                             }
                             builder.append("%");
                             records = Seq.with(Database.getContext()
-                                    .selectFrom(Tables.USERS)
-                                    .where(Tables.USERS.NAME.likeIgnoreCase(builder.toString()))
+                                    .selectFrom(Tables.users)
+                                    .where(Tables.users.name.likeIgnoreCase(builder.toString()))
                                     .limit(15)
                                     .fetchArray());
                             Record1<Integer> record1 = Database.getContext()
                                     .selectCount()
-                                    .from(Tables.USERS)
-                                    .where(Tables.USERS.NAME.likeIgnoreCase(builder.toString()))
+                                    .from(Tables.users)
+                                    .where(Tables.users.name.likeIgnoreCase(builder.toString()))
                                     .limit(15)
                                     .fetchOne();
                             count = record1 == null ? 0 : record1.value1();
@@ -184,14 +184,14 @@ public class DiscordListener extends ListenerAdapter {
                         }
                         case "ip" -> {
                             records = Seq.with(Database.getContext()
-                                    .selectFrom(Tables.USERS)
-                                    .where(Tables.USERS.IP.contains(query))
+                                    .selectFrom(Tables.users)
+                                    .where(Tables.users.ip.contains(query))
                                     .limit(15)
                                     .fetchArray());
                             Record1<Integer> record1 = Database.getContext()
                                     .selectCount()
-                                    .from(Tables.USERS)
-                                    .where(Tables.USERS.IP.contains(query))
+                                    .from(Tables.users)
+                                    .where(Tables.users.ip.contains(query))
                                     .limit(15)
                                     .fetchOne();
                             count = record1 == null ? 0 : record1.value1();

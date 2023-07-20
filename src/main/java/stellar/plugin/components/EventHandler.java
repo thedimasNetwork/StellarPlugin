@@ -104,7 +104,7 @@ public class EventHandler {
             };
 
             try {
-                PlayerEventsRecord record = Database.getContext().newRecord(Tables.PLAYER_EVENTS);
+                PlayerEventsRecord record = Database.getContext().newRecord(Tables.playerEvents);
                 record.setServer(Const.SERVER_COLUMN_NAME);
                 record.setTimestamp(System.currentTimeMillis() / 1000);
                 record.setType(PlayerEventTypes.JOIN.name());
@@ -115,15 +115,15 @@ public class EventHandler {
 
                 if (Database.playerExists(event.player.uuid())) {
                     updateBackground(Database.getContext()
-                            .update(Tables.USERS)
-                            .set(Tables.USERS.NAME, event.player.name())
-                            .set(Tables.USERS.LOCALE, event.player.locale())
-                            .set(Tables.USERS.IP, event.player.ip())
-                            .where(Tables.USERS.UUID.eq(event.player.uuid())));
+                            .update(Tables.users)
+                            .set(Tables.users.name, event.player.name())
+                            .set(Tables.users.locale, event.player.locale())
+                            .set(Tables.users.ip, event.player.ip())
+                            .where(Tables.users.uuid.eq(event.player.uuid())));
 
                     UsersRecord data = Database.getContext()
-                            .selectFrom(Tables.USERS)
-                            .where(Tables.USERS.UUID.eq(event.player.uuid()))
+                            .selectFrom(Tables.users)
+                            .where(Tables.users.uuid.eq(event.player.uuid()))
                             .fetchOne();
 
                     assert data != null;
@@ -144,7 +144,7 @@ public class EventHandler {
                     }
 
                 } else {
-                    UsersRecord usersRecord = Database.getContext().newRecord(Tables.USERS); // TODO: Database.createPlayer
+                    UsersRecord usersRecord = Database.getContext().newRecord(Tables.users); // TODO: Database.createPlayer
                     usersRecord.setUuid(event.player.uuid());
                     usersRecord.setIp(event.player.ip());
                     usersRecord.setName(event.player.name());
@@ -152,7 +152,7 @@ public class EventHandler {
                     usersRecord.setAdmin((byte) (event.player.admin() ? 1 : 0));
                     usersRecord.store();
 
-                    PlaytimeRecord playtimeRecord = Database.getContext().newRecord(Tables.PLAYTIME);
+                    PlaytimeRecord playtimeRecord = Database.getContext().newRecord(Tables.playtime);
                     playtimeRecord.setUuid(event.player.uuid());
                     playtimeRecord.store();
 
@@ -190,9 +190,9 @@ public class EventHandler {
                         case 2 -> {
                             try {
                                 updateBackground(Database.getContext()
-                                        .update(Tables.USERS)
-                                        .set(Tables.USERS.POPUP, (byte) 0)
-                                        .where(Tables.USERS.UUID.eq(event.player.uuid())));
+                                        .update(Tables.users)
+                                        .set(Tables.users.popup, (byte) 0)
+                                        .where(Tables.users.uuid.eq(event.player.uuid())));
                                 Bundle.bundled(event.player, "welcome.disabled");
                             } catch (SQLException e) {
                                 Log.err(e);
@@ -346,9 +346,9 @@ public class EventHandler {
         Events.on(EventType.PlayerBanEvent.class, event -> {
             try {
                 Database.getContext()
-                        .update(Tables.USERS)
-                        .set(Tables.USERS.BANNED, (byte) 1)
-                        .where(Tables.USERS.UUID.eq(event.uuid))
+                        .update(Tables.users)
+                        .set(Tables.users.BANNED, (byte) 1)
+                        .where(Tables.users.uuid.eq(event.uuid))
                         .execute();
             } catch (SQLException e) {
                 Log.err("Failed to ban uuid for player '@'", event.uuid);
@@ -363,9 +363,9 @@ public class EventHandler {
         Events.on(EventType.PlayerUnbanEvent.class, event -> {
             try {
                 Database.getContext()
-                        .update(Tables.USERS)
-                        .set(Tables.USERS.BANNED, (byte) 0)
-                        .where(Tables.USERS.UUID.eq(event.uuid))
+                        .update(Tables.users)
+                        .set(Tables.users.BANNED, (byte) 0)
+                        .where(Tables.users.uuid.eq(event.uuid))
                         .execute();
             } catch (SQLException e) {
                 Log.err("Failed to unban uuid for player '@'", event.uuid);
@@ -378,7 +378,7 @@ public class EventHandler {
         Events.on(EventType.AdminRequestEvent.class, event -> {
             if (admins.containsKey(event.player.uuid())) {
                 try {
-                    ServerEventsRecord record = Database.getContext().newRecord(Tables.SERVER_EVENTS);
+                    ServerEventsRecord record = Database.getContext().newRecord(Tables.serverEvents);
                     record.setServer(Const.SERVER_COLUMN_NAME);
                     record.setTimestamp(System.currentTimeMillis() / 1000);
                     record.setType(ServerEventTypes.ADMIN_REQUEST.name());
@@ -389,7 +389,7 @@ public class EventHandler {
                     record.store();
 
                     if (event.action == Packets.AdminAction.kick || event.action == Packets.AdminAction.ban) {
-                        PlayerEventsRecord record2 = Database.getContext().newRecord(Tables.PLAYER_EVENTS);
+                        PlayerEventsRecord record2 = Database.getContext().newRecord(Tables.playerEvents);
                         record2.setServer(Const.SERVER_COLUMN_NAME);
                         record2.setTimestamp(System.currentTimeMillis() / 1000);
                         record2.setType(event.action == Packets.AdminAction.kick ? PlayerEventTypes.KICK.name() : PlayerEventTypes.BAN.name());
@@ -400,12 +400,12 @@ public class EventHandler {
 
                         int id = Mathf.random(0, Integer.MAX_VALUE - 1);
                         UsersRecord adminInfo = Database.getContext()
-                                .selectFrom(Tables.USERS)
-                                .where(Tables.USERS.UUID.eq(event.player.uuid()))
+                                .selectFrom(Tables.users)
+                                .where(Tables.users.uuid.eq(event.player.uuid()))
                                 .fetchOne();
                         UsersRecord targetInfo = Database.getContext()
-                                .selectFrom(Tables.USERS)
-                                .where(Tables.USERS.UUID.eq(event.other.uuid()))
+                                .selectFrom(Tables.users)
+                                .where(Tables.users.uuid.eq(event.other.uuid()))
                                 .fetchOne();
 
                         AdminActionEntry entry = new AdminActionEntry(adminInfo, targetInfo, event.action);
@@ -443,7 +443,7 @@ public class EventHandler {
             Bundle.bundled("events.leave.player-leave", playerName);
 
             try {
-                PlayerEventsRecord record = Database.getContext().newRecord(Tables.PLAYER_EVENTS);
+                PlayerEventsRecord record = Database.getContext().newRecord(Tables.playerEvents);
                 record.setServer(Const.SERVER_COLUMN_NAME);
                 record.setTimestamp(System.currentTimeMillis() / 1000);
                 record.setType(PlayerEventTypes.LEAVE.name());
@@ -463,7 +463,7 @@ public class EventHandler {
         Events.on(EventType.ServerLoadEvent.class, event -> {
             Log.info("ThedimasPlugin: Server loaded");
             try {
-                ServerEventsRecord record = Database.getContext().newRecord(Tables.SERVER_EVENTS);
+                ServerEventsRecord record = Database.getContext().newRecord(Tables.serverEvents);
                 record.setServer(Const.SERVER_COLUMN_NAME);
                 record.setTimestamp(System.currentTimeMillis() / 1000);
                 record.setType(ServerEventTypes.START.name());
@@ -476,7 +476,7 @@ public class EventHandler {
         Events.on(EventType.GameOverEvent.class, event -> {
             try {
                 Variables.votesRTV.clear();
-                ServerEventsRecord record = Database.getContext().newRecord(Tables.SERVER_EVENTS);
+                ServerEventsRecord record = Database.getContext().newRecord(Tables.serverEvents);
                 record.setServer(Const.SERVER_COLUMN_NAME);
                 record.setTimestamp(System.currentTimeMillis() / 1000);
                 record.setType(ServerEventTypes.GAMEOVER.name());
@@ -568,7 +568,7 @@ public class EventHandler {
         Events.on(EventType.PlayerChatEvent.class, event -> {
             if (!event.message.startsWith("/")) {
                 try {
-                    PlayerEventsRecord record = Database.getContext().newRecord(Tables.PLAYER_EVENTS);
+                    PlayerEventsRecord record = Database.getContext().newRecord(Tables.playerEvents);
                     record.setServer(Const.SERVER_COLUMN_NAME);
                     record.setTimestamp(System.currentTimeMillis() / 1000);
                     record.setType(PlayerEventTypes.CHAT.name());
@@ -592,7 +592,7 @@ public class EventHandler {
                 Players.incrementStats(event.player, "messages");
             } else {
                 try {
-                    PlayerEventsRecord record = Database.getContext().newRecord(Tables.PLAYER_EVENTS);
+                    PlayerEventsRecord record = Database.getContext().newRecord(Tables.playerEvents);
                     record.setServer(Const.SERVER_COLUMN_NAME);
                     record.setTimestamp(System.currentTimeMillis() / 1000);
                     record.setType(PlayerEventTypes.KICK.name());
@@ -619,16 +619,16 @@ public class EventHandler {
                     Variables.statsData.each((uuid, stats) -> {
                         stats.each((name, value) -> {
                             try {
-                                Field<Integer> field = (Field<Integer>) Tables.USERS.field(name);
+                                Field<Integer> field = (Field<Integer>) Tables.users.field(name);
                                 if (field == null) {
                                     Log.err("Field @ is null. UUID: @", name, uuid);
                                     return;
                                 }
 
                                 Database.getContext()
-                                        .update(Tables.USERS)
+                                        .update(Tables.users)
                                         .set(field, field.plus(value))
-                                        .where(Tables.USERS.UUID.eq(uuid))
+                                        .where(Tables.users.uuid.eq(uuid))
                                         .execute(); // don't run in the background as rank updating should be on fresh data
 
                                 stats.put(name, 0);

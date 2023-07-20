@@ -49,9 +49,9 @@ public class Translator {
         String locale = otherPlayer.locale;
         try {
             locale = Database.getContext()
-                    .select(Tables.USERS.TRANSLATOR)
-                    .from(Tables.USERS)
-                    .where(Tables.USERS.UUID.eq(otherPlayer.uuid()))
+                    .select(Tables.users.translator)
+                    .from(Tables.users)
+                    .where(Tables.users.uuid.eq(otherPlayer.uuid()))
                     .fetchOne().value1();
         } catch (Throwable t) {
             Log.err(t);

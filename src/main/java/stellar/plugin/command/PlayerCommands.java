@@ -95,9 +95,9 @@ public class PlayerCommands {
             String locale;
             try {
                 locale = Database.getContext()
-                        .select(Tables.USERS.TRANSLATOR)
-                        .from(Tables.USERS)
-                        .where(Tables.USERS.UUID.eq(player.uuid()))
+                        .select(Tables.users.translator)
+                        .from(Tables.users)
+                        .where(Tables.users.uuid.eq(player.uuid()))
                         .fetchOne().value1();
             } catch (Throwable t) {
                 Bundle.bundled(player, "commands.tr.error");
@@ -116,9 +116,9 @@ public class PlayerCommands {
                 case "off" -> {
                     try {
                         updateBackground(Database.getContext()
-                                .update(Tables.USERS)
-                                .set(Tables.USERS.TRANSLATOR, "off")
-                                .where(Tables.USERS.UUID.eq(player.uuid())));
+                                .update(Tables.users)
+                                .set(Tables.users.translator, "off")
+                                .where(Tables.users.uuid.eq(player.uuid())));
                     } catch (Throwable t) {
                         Log.err(t);
                         DiscordLogger.err(t);
@@ -128,9 +128,9 @@ public class PlayerCommands {
                 case "auto" -> {
                     try {
                         updateBackground(Database.getContext()
-                                .update(Tables.USERS)
-                                .set(Tables.USERS.TRANSLATOR, "auto")
-                                .where(Tables.USERS.UUID.eq(player.uuid())));
+                                .update(Tables.users)
+                                .set(Tables.users.translator, "auto")
+                                .where(Tables.users.uuid.eq(player.uuid())));
                     } catch (Throwable t) {
                         Log.err(t);
                         DiscordLogger.err(t);
@@ -140,9 +140,9 @@ public class PlayerCommands {
                 case "double" -> {
                     try {
                         updateBackground(Database.getContext()
-                                .update(Tables.USERS)
-                                .set(Tables.USERS.TRANSLATOR, "double")
-                                .where(Tables.USERS.UUID.eq(player.uuid())));
+                                .update(Tables.users)
+                                .set(Tables.users.translator, "double")
+                                .where(Tables.users.uuid.eq(player.uuid())));
                     } catch (Throwable t) {
                         Log.err(t);
                         DiscordLogger.err(t);
@@ -157,9 +157,9 @@ public class PlayerCommands {
                     }
                     try {
                         updateBackground(Database.getContext()
-                                .update(Tables.USERS)
-                                .set(Tables.USERS.TRANSLATOR, target.toString())
-                                .where(Tables.USERS.UUID.eq(player.uuid())));
+                                .update(Tables.users)
+                                .set(Tables.users.translator, target.toString())
+                                .where(Tables.users.uuid.eq(player.uuid())));
                     } catch (Throwable t) {
                         Log.err(t);
                         DiscordLogger.err(t);
@@ -301,7 +301,7 @@ public class PlayerCommands {
             }
 
             Log.debug(serverColumnName);
-            Field<Long> field = (Field<Long>) Tables.PLAYTIME.field(serverColumnName);
+            Field<Long> field = (Field<Long>) Tables.playtime.field(serverColumnName);
             if (field == null) {
                 Bundle.bundled(player, "commands.server-notfound", Const.SERVER_LIST);
                 return;
@@ -310,8 +310,8 @@ public class PlayerCommands {
             try {
                 Long time = Database.getContext()
                         .select(field)
-                        .from(Tables.PLAYTIME)
-                        .where(Tables.PLAYTIME.UUID.eq(player.uuid()))
+                        .from(Tables.playtime)
+                        .where(Tables.playtime.uuid.eq(player.uuid()))
                         .fetchOne().value1();
                 Locale locale = Bundle.findLocale(player.locale());
                 if (time == null) {

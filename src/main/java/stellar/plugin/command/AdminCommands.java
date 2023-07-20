@@ -386,12 +386,12 @@ public class AdminCommands {
 
             try {
                 Database.getContext()
-                        .update(Tables.USERS)
-                        .set(Tables.USERS.BANNED, (byte) 1)
-                        .where(Tables.USERS.UUID.eq(args[0]))
+                        .update(Tables.users)
+                        .set(Tables.users.BANNED, (byte) 1)
+                        .where(Tables.users.uuid.eq(args[0]))
                         .execute();
 
-                PlayerEventsRecord record = Database.getContext().newRecord(Tables.PLAYER_EVENTS);
+                PlayerEventsRecord record = Database.getContext().newRecord(Tables.playerEvents);
                 record.setServer(Const.SERVER_COLUMN_NAME);
                 record.setTimestamp(System.currentTimeMillis() / 1000);
                 record.setType(PlayerEventTypes.BAN.name());
@@ -426,8 +426,8 @@ public class AdminCommands {
 
             try {
                 boolean exists = Database.getContext()
-                        .selectFrom(Tables.USERS)
-                        .where(Tables.USERS.UUID.eq(args[0]))
+                        .selectFrom(Tables.users)
+                        .where(Tables.users.uuid.eq(args[0]))
                         .fetch()
                         .size() > 0;
 
@@ -437,14 +437,14 @@ public class AdminCommands {
                 }
 
                 Database.getContext()
-                        .update(Tables.USERS)
-                        .set(Tables.USERS.BANNED, (byte) 0)
-                        .where(Tables.USERS.UUID.eq(args[0]))
+                        .update(Tables.users)
+                        .set(Tables.users.BANNED, (byte) 0)
+                        .where(Tables.users.uuid.eq(args[0]))
                         .execute();
 
                 UsersRecord data = Database.getContext()
-                        .selectFrom(Tables.USERS)
-                        .where(Tables.USERS.UUID.eq(args[0]))
+                        .selectFrom(Tables.users)
+                        .where(Tables.users.uuid.eq(args[0]))
                         .fetchOne();
 
                 player.sendMessage(String.format("[lime]Игрок с айди %s разбанен[]", args[0]));
@@ -480,7 +480,7 @@ public class AdminCommands {
 
             try {
                 found.kick(Packets.KickReason.kick);
-                PlayerEventsRecord record = Database.getContext().newRecord(Tables.PLAYER_EVENTS);
+                PlayerEventsRecord record = Database.getContext().newRecord(Tables.playerEvents);
                 record.setServer(Const.SERVER_COLUMN_NAME);
                 record.setTimestamp(System.currentTimeMillis() / 1000);
                 record.setType(PlayerEventTypes.KICK.name());

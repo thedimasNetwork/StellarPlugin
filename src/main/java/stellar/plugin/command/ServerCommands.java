@@ -38,7 +38,7 @@ public class ServerCommands {
 
             MessageEmbed embed = Util.embedBuilder("**Сервер остановлен**", Colors.red);
             try {
-                ServerEventsRecord record = Database.getContext().newRecord(Tables.SERVER_EVENTS);
+                ServerEventsRecord record = Database.getContext().newRecord(Tables.serverEvents);
                 record.setServer(Const.SERVER_COLUMN_NAME);
                 record.setTimestamp(System.currentTimeMillis() / 1000);
                 record.setType(ServerEventTypes.STOP.name());

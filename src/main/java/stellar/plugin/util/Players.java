@@ -60,20 +60,20 @@ public class Players {
 
     public static long totalPlaytime(String uuid) throws SQLException { // FIXME: move into DB library
         Record1<Long> result = Database.getContext().select(
-                Tables.PLAYTIME.HUB
-                        .plus(Tables.PLAYTIME.SURVIVAL)
-                        .plus(Tables.PLAYTIME.SANDBOX)
-                        .plus(Tables.PLAYTIME.ATTACK)
-                        .plus(Tables.PLAYTIME.PVP)
-                        .plus(Tables.PLAYTIME.CAMPAIGN_MAPS)
-                        .plus(Tables.PLAYTIME.MS_GO)
-                        .plus(Tables.PLAYTIME.HEX_PVP)
-                        .plus(Tables.PLAYTIME.EREKIR_HEXED)
-                        .plus(Tables.PLAYTIME.CASTLE_WARS)
-                        .plus(Tables.PLAYTIME.CRAWLER_ARENA)
-                        .plus(Tables.PLAYTIME.ZONE_CAPTURE))
-                .from(Tables.PLAYTIME)
-                .where(Tables.PLAYTIME.UUID.eq(uuid))
+                Tables.playtime.hub
+                        .plus(Tables.playtime.sandbox)
+                        .plus(Tables.playtime.sandbox)
+                        .plus(Tables.playtime.attack)
+                        .plus(Tables.playtime.pvp)
+                        .plus(Tables.playtime.campaignMaps)
+                        .plus(Tables.playtime.msGo)
+                        .plus(Tables.playtime.hexPvp)
+                        .plus(Tables.playtime.erekirHexed)
+                        .plus(Tables.playtime.castleWars)
+                        .plus(Tables.playtime.crawlerArena)
+                        .plus(Tables.playtime.zoneCapture))
+                .from(Tables.playtime)
+                .where(Tables.playtime.uuid.eq(uuid))
                 .fetchOne();
         return result == null ? 0 : result.value1();
     }
