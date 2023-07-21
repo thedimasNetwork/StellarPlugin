@@ -423,6 +423,7 @@ public class EventHandler {
         });
 
         Events.on(EventType.GameOverEvent.class, event -> {
+            Variables.votesRTV.clear();
             if (Vars.state.rules.mode() == Gamemode.attack && event.winner == Team.sharded) {
                 Groups.player.each(player -> {
                     Players.incrementStats(player, "attacks");
