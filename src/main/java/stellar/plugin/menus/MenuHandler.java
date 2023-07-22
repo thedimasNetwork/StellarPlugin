@@ -23,12 +23,13 @@ public class MenuHandler {
         return menuId;
     }
 
-    public static void handle(int menuId, int option, Player player) {
+    public static boolean handle(int menuId, int option, Player player) {
         MenuRunner runner = runners.get(menuId);
         if (runner == null) {
-            return;
+            return false;
         }
         runner.accept(menuId, option, player);
         runners.remove(menuId);
+        return true;
     }
 }

@@ -164,7 +164,9 @@ public class EventHandler {
             Log.debug("Menu &lb#@&fr: @", event.menuId, event.option);
 
             if (event.menuId > Menus.values().length - 1) {
-                MenuHandler.handle(event.menuId, event.option, event.player);
+                if (MenuHandler.handle(event.menuId, event.option, event.player)) {
+                    return;
+                }
             }
 
             if (adminActions.containsKey(event.menuId)) {
