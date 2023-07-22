@@ -418,7 +418,7 @@ public class PlayerCommands {
                         {Bundle.get("menus.close", locale)}
                 };
                 MenuHandler.send(player, Bundle.get("menus.stats.title", locale), message, buttons, (menuId, option, p) -> {
-                    if (option == -1) {
+                    if (option == -1 || option == 1) {
                         return;
                     }
 

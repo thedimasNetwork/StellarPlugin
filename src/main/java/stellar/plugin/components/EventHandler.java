@@ -23,8 +23,6 @@ import stellar.plugin.bot.Bot;
 import stellar.plugin.bot.Colors;
 import stellar.plugin.bot.Util;
 import stellar.database.Database;
-import stellar.database.enums.PlayerEventTypes;
-import stellar.database.enums.ServerEventTypes;
 import stellar.database.gen.Tables;
 import stellar.database.gen.tables.records.*;
 import stellar.plugin.enums.Menus;
@@ -169,6 +167,93 @@ public class EventHandler {
                 MenuHandler.handle(event.menuId, event.option, event.player);
             }
 
+            if (adminActions.containsKey(event.menuId)) {
+                if (!admins.containsKey(event.player.uuid())) {
+                    return;
+                }
+
+                AdminActionEntry actionEntry = adminActions.get(event.menuId);
+                int computed = actionEntry.getPeriod();
+                switch (event.option) {
+                    case 0 -> computed -= 1;
+                    case 1 -> computed += 1;
+                    case 2 -> computed -= 7;
+                    case 3 -> computed += 7;
+                    case 4 -> computed -= 30;
+                    case 5 -> computed += 30;
+                    case 6 -> computed = 0;
+                    case 7 -> computed = -1;
+                    case 8 -> {
+                    } // being processed later
+                }
+
+                if (event.option != 7 && event.option != 8) {
+                    computed = Math.max(0, computed);
+                }
+                adminActions.get(event.menuId).setPeriod(computed);
+
+                Locale locale = Bundle.findLocale(event.player.locale());
+
+                if (event.option != 8 && event.option != -1) {
+                    String[][] buttons = {
+                            {Bundle.get("menus.ban.minus-1d", locale), Bundle.get("menus.ban.plus-1d", locale)},
+                            {Bundle.get("menus.ban.minus-1w", locale), Bundle.get("menus.ban.plus-1w", locale)},
+                            {Bundle.get("menus.ban.minus-1m", locale), Bundle.get("menus.ban.plus-1m", locale)},
+                            {Bundle.get("menus.ban.reset", locale), Bundle.get("menus.ban.permanent", locale)},
+                            {Bundle.get("menus.ban.proceed", locale)}
+                    };
+
+                    String title = Bundle.format("menus.ban.title", locale, Strings.stripColors(actionEntry.getTarget().getName()));
+                    String message = Bundle.format("menus.ban.msg", locale, computed);
+                    Call.followUpMenu(event.player.con(), event.menuId, title, message, buttons);
+                } else {
+                    UsersRecord adminInfo = actionEntry.getAdmin();
+                    UsersRecord targetInfo = actionEntry.getTarget();
+                    String adminName = Strings.stripColors(adminInfo.getName());
+                    String targetName = Strings.stripColors(targetInfo.getName());
+                    Call.hideFollowUpMenu(event.menuId);
+
+                    String title, message;
+                    java.awt.Color color;
+                    if (actionEntry.getAction() == Packets.AdminAction.kick) {
+                        title = "Кик";
+                        message = """
+                                **Админ**: %admin% (%aid%)
+                                **Нарушитель**: %target% (%tid%)
+                                **Причина**: %reason%
+                                """.replace("%admin%", adminName).replace("%aid%", adminInfo.getId().toString())
+                                .replace("%target%", targetName).replace("%tid%", targetInfo.getId().toString())
+                                .replace("%reason%", actionEntry.getReason().strip());
+                        color = Colors.purple;
+                    } else {
+                        title = "Бан";
+                        message = """
+                                **Админ**: %admin% (%aid%)
+                                **Нарушитель**: %target% (%tid%)
+                                **Причина**: %reason%
+                                """.replace("%admin%", adminName).replace("%aid%", adminInfo.getId().toString())
+                                .replace("%target%", targetName).replace("%tid%", targetInfo.getId().toString())
+                                .replace("%reason%", actionEntry.getReason().strip());
+                        color = Colors.red;
+                        if (computed > -1) {
+                            message += "**Срок**: <t:%timestamp%:f>".replace("%timestamp%", (System.currentTimeMillis() / 1000 + computed * (24 * 60 * 60)) + "");
+                        } else {
+                            message += "**Срок**: Перманентный";
+                        }
+
+                    }
+                    Bot.sendEmbed(config.bot.bansId, Util.embedBuilder(title, message, color, LocalDateTime.now(), Const.serverFieldName));
+                    try {
+                        actionEntry.storeRecord();
+                    } catch (SQLException e) {
+                        Log.err(e);
+                    }
+                    Vars.netServer.admins.unbanPlayerID(actionEntry.getTarget().getUuid()); // maybe not a good idea
+                    adminActions.remove(event.menuId);
+                }
+                return;
+            }
+
             switch (Menus.values()[event.menuId]) {
                 case welcome ->  {
                     switch (event.option) {
@@ -190,95 +275,6 @@ public class EventHandler {
                                 Bundle.bundled(event.player, "welcome.disable.failed");
                             }
                         }
-                    }
-                }
-                case punishment -> {
-                    if (!admins.containsKey(event.player.uuid())) {
-                        return;
-                    }
-
-                    if (!adminActions.containsKey(event.menuId)) {
-                        Log.err("@ tried to access non-existent admin action with ID @", event.player.plainName(), event.menuId);
-                        return;
-                    }
-
-                    AdminActionEntry actionEntry = adminActions.get(event.menuId);
-                    int computed = actionEntry.getPeriod();
-                    switch (event.option) {
-                        case 0 -> computed -= 1;
-                        case 1 -> computed += 1;
-                        case 2 -> computed -= 7;
-                        case 3 -> computed += 7;
-                        case 4 -> computed -= 30;
-                        case 5 -> computed += 30;
-                        case 6 -> computed = 0;
-                        case 7 -> computed = -1;
-                        case 8 -> {} // being processed later
-                    }
-
-                    if (event.option != 7 && event.option != 8) {
-                        computed = Math.max(0, computed);
-                    }
-                    adminActions.get(event.menuId).setPeriod(computed);
-
-                    Locale locale = Bundle.findLocale(event.player.locale());
-
-                    if (event.option != 8 && event.option != -1) {
-                        String[][] buttons = {
-                                {Bundle.get("menus.ban.minus-1d", locale), Bundle.get("menus.ban.plus-1d", locale)},
-                                {Bundle.get("menus.ban.minus-1w", locale), Bundle.get("menus.ban.plus-1w", locale)},
-                                {Bundle.get("menus.ban.minus-1m", locale), Bundle.get("menus.ban.plus-1m", locale)},
-                                {Bundle.get("menus.ban.reset", locale), Bundle.get("menus.ban.permanent", locale)},
-                                {Bundle.get("menus.ban.proceed", locale)}
-                        };
-
-                        String title = Bundle.format("menus.ban.title", locale, Strings.stripColors(actionEntry.getTarget().getName()));
-                        String message = Bundle.format("menus.ban.msg", locale, computed);
-                        Call.followUpMenu(event.player.con(), event.menuId, title, message, buttons);
-                    } else {
-                        UsersRecord adminInfo = actionEntry.getAdmin();
-                        UsersRecord targetInfo = actionEntry.getTarget();
-                        String adminName = Strings.stripColors(adminInfo.getName());
-                        String targetName = Strings.stripColors(targetInfo.getName());
-                        Call.hideFollowUpMenu(event.menuId);
-
-                        String title, message;
-                        java.awt.Color color;
-                        if (actionEntry.getAction() == Packets.AdminAction.kick) {
-                            title = "Кик";
-                            message = """
-                                    **Админ**: %admin% (%aid%)
-                                    **Нарушитель**: %target% (%tid%)
-                                    **Причина**: %reason%
-                                    """.replace("%admin%", adminName).replace("%aid%", adminInfo.getId().toString())
-                                    .replace("%target%", targetName).replace("%tid%", targetInfo.getId().toString())
-                                    .replace("%reason%", actionEntry.getReason().strip());
-                            color = Colors.purple;
-                        } else {
-                            title = "Бан";
-                            message = """
-                                    **Админ**: %admin% (%aid%)
-                                    **Нарушитель**: %target% (%tid%)
-                                    **Причина**: %reason%
-                                    """.replace("%admin%", adminName).replace("%aid%", adminInfo.getId().toString())
-                                    .replace("%target%", targetName).replace("%tid%", targetInfo.getId().toString())
-                                    .replace("%reason%", actionEntry.getReason().strip());
-                            color = Colors.red;
-                            if (computed > -1) {
-                                message += "**Срок**: <t:%timestamp%:f>".replace("%timestamp%", (System.currentTimeMillis() / 1000 + computed * (24 * 60 * 60)) + "");
-                            } else {
-                                message += "**Срок**: Перманентный";
-                            }
-
-                        }
-                        Bot.sendEmbed(config.bot.bansId, Util.embedBuilder(title, message, color, LocalDateTime.now(), Const.serverFieldName));
-                        try {
-                            actionEntry.storeRecord();
-                        } catch (SQLException e) {
-                            Log.err(e);
-                        }
-                        Vars.netServer.admins.unbanPlayerID(actionEntry.getTarget().getUuid()); // maybe not a good idea
-                        adminActions.remove(event.menuId);
                     }
                 }
             }
