@@ -304,15 +304,8 @@ public class PlayerCommands {
             }
 
             try {
-                Long time = Database.getContext()
-                        .select(field)
-                        .from(Tables.playtime)
-                        .where(Tables.playtime.uuid.eq(player.uuid()))
-                        .fetchOne().value1();
+                Long time = Database.getPlaytime(player.uuid(), Const.playtimeField);
                 Locale locale = Bundle.findLocale(player.locale());
-                if (time == null) {
-                    Log.err("Player '" + player.uuid() + "' doesn't exists");
-                }
                 Bundle.bundled(player, "commands.playtime.msg", Const.serverNames.get(serverColumnName), StringUtils.longToTime((time == null) ? 0 : time, locale));
             } catch (Throwable t) {
                 Log.err("Failed to get playtime for player '" + player.uuid() + "'", t);
@@ -342,13 +335,14 @@ public class PlayerCommands {
                         if (nextRank == null) {
                             Call.menu(p.con(), 0, Bundle.get("menus.rank-info.title", locale), Bundle.format("commands.rank.next-rank.none", locale), newButtons);
                         } else {
-                            UsersRecord record = Database.getPlayer(p.uuid());
+                            StatsRecord record = Database.getStats(p.uuid());
+
                             int playtime = (int) Database.getTotalPlaytime(p.uuid());
                             String message = Bundle.format("commands.rank.next-rank.info", locale,
                                     nextRank.formatted(p),
                                     targetColor(record.getAttacks(), nextRank.requirements.attacks), record.getAttacks(), nextRank.requirements.attacks,
                                     targetColor(record.getWaves(), nextRank.requirements.waves), record.getWaves(), nextRank.requirements.waves,
-                                    targetColor(record.getHexes(), nextRank.requirements.hexes), record.getHexes(), nextRank.requirements.hexes,
+                                    targetColor(record.getHexesCaptured(), nextRank.requirements.hexes), record.getHexesCaptured(), nextRank.requirements.hexes,
                                     targetColor(record.getBuilt(), nextRank.requirements.built), record.getBuilt(), nextRank.requirements.built,
                                     targetColor(playtime, nextRank.requirements.playtime * 60), longToTime(playtime, locale), longToTime(nextRank.requirements.playtime * 60, locale)
                             );
@@ -385,13 +379,13 @@ public class PlayerCommands {
                     };
 
                     Rank rank = Rank.values()[option];
-                    UsersRecord record = Database.getPlayer(p.uuid());
+                    StatsRecord record = Database.getStats(p.uuid());
                     int playtime = (int) Database.getTotalPlaytime(p.uuid());
                     String message = Bundle.format("commands.ranks.rank-info", locale,
                             rank.formatted(p),
                             targetColor(record.getAttacks(), rank.requirements.attacks), record.getAttacks(), rank.requirements.attacks,
                             targetColor(record.getWaves(), rank.requirements.waves), record.getWaves(), rank.requirements.waves,
-                            targetColor(record.getHexes(), rank.requirements.hexes), record.getHexes(), rank.requirements.hexes,
+                            targetColor(record.getHexesCaptured(), rank.requirements.hexes), record.getHexesCaptured(), rank.requirements.hexes,
                             targetColor(record.getBuilt(), rank.requirements.built), record.getBuilt(), rank.requirements.built,
                             targetColor(playtime, rank.requirements.playtime * 60), longToTime(playtime, locale), longToTime(rank.requirements.playtime * 60, locale)
                     );
@@ -406,10 +400,15 @@ public class PlayerCommands {
         commandHandler.<Player>register("stats", "commands.stats.description", (args, player) -> {
             try {
                 UsersRecord record = Database.getPlayer(player.uuid());
+                StatsRecord statsRecord = Database.getStats(player.uuid());
                 long playtime = Database.getTotalPlaytime(player.uuid());
                 Rank rank = Rank.getRank(player);
                 Locale locale = Bundle.findLocale(player.locale);
-                String message = Bundle.format("commands.stats.msg", Bundle.findLocale(player.locale()), record.getId(), player.coloredName(), rank.formatted(player), record.getBuilt(), record.getBroken(), record.getAttacks(), record.getHexes(), record.getWaves(), record.getLogins(), record.getMessages(), record.getDeaths(), StringUtils.longToTime(playtime, locale));
+                String message = Bundle.format("commands.stats.msg",
+                        Bundle.findLocale(player.locale()), record.getId(), player.coloredName(), rank.formatted(player),
+                        statsRecord.getBuilt(), statsRecord.getBroken(),
+                        statsRecord.getAttacks(), statsRecord.getHexesCaptured(), statsRecord.getWaves(),
+                        statsRecord.getLogins(), statsRecord.getMessages(), statsRecord.getDeaths(), StringUtils.longToTime(playtime, locale));
                 String[][] buttons = {
                         {Bundle.get("commands.rank.next-rank", locale)},
                         {Bundle.get("menus.close", locale)}
@@ -430,10 +429,10 @@ public class PlayerCommands {
                         } else {
                             String msg = Bundle.format("commands.rank.next-rank.info", locale,
                                     nextRank.formatted(p),
-                                    targetColor(record.getAttacks(), nextRank.requirements.attacks), record.getAttacks(), nextRank.requirements.attacks,
-                                    targetColor(record.getWaves(), nextRank.requirements.waves), record.getWaves(), nextRank.requirements.waves,
-                                    targetColor(record.getHexes(), nextRank.requirements.hexes), record.getHexes(), nextRank.requirements.hexes,
-                                    targetColor(record.getBuilt(), nextRank.requirements.built), record.getBuilt(), nextRank.requirements.built,
+                                    targetColor(statsRecord.getAttacks(), nextRank.requirements.attacks), statsRecord.getAttacks(), nextRank.requirements.attacks,
+                                    targetColor(statsRecord.getWaves(), nextRank.requirements.waves), statsRecord.getWaves(), nextRank.requirements.waves,
+                                    targetColor(statsRecord.getHexesCaptured(), nextRank.requirements.hexes), statsRecord.getHexesCaptured(), nextRank.requirements.hexes,
+                                    targetColor(statsRecord.getBuilt(), nextRank.requirements.built), statsRecord.getBuilt(), nextRank.requirements.built,
                                     targetColor((int) playtime, nextRank.requirements.playtime * 60), longToTime(playtime, locale), longToTime(nextRank.requirements.playtime * 60, locale)
                             );
                             Call.menu(p.con(), 0, Bundle.get("menus.rank-info.title", locale), msg, newButtons);

@@ -122,9 +122,9 @@ public class EventHandler {
                       if (data.getDonated() > 0) {
                           Variables.donaters.put(event.player.uuid(), event.player.name);
                       }
-                    if (data.getPopup()) {
+                    if (data.isPopup()) {
                         Call.menu(event.player.con(), Menus.welcome.ordinal(), title, welcome, buttons); // TODO: maybe migrate to MenuHandler
-                    } else if (data.getDiscord()) {
+                    } else if (data.isDiscord()) {
                         Call.openURI(event.player.con(), config.discordUrl);
                     }
 
@@ -355,7 +355,7 @@ public class EventHandler {
                     if (event.action == Packets.AdminAction.kick || event.action == Packets.AdminAction.ban) {
                         int id = Mathf.random(0, Integer.MAX_VALUE - 1);
                         UsersRecord adminInfo = Database.getPlayer(event.player.uuid());
-                        UsersRecord targetInfo = Database.getPlayer(event.other.uuid()));
+                        UsersRecord targetInfo = Database.getPlayer(event.other.uuid());
 
                         AdminActionEntry entry = new AdminActionEntry(adminInfo, targetInfo, event.action);
                         adminActions.put(id, entry);

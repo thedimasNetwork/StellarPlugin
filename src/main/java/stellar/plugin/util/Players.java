@@ -58,26 +58,6 @@ public class Players {
         }
     }
 
-    public static long totalPlaytime(String uuid) throws SQLException { // FIXME: move into DB library
-        Record1<Long> result = Database.getContext().select(
-                Tables.playtime.hub
-                        .plus(Tables.playtime.sandbox)
-                        .plus(Tables.playtime.sandbox)
-                        .plus(Tables.playtime.attack)
-                        .plus(Tables.playtime.pvp)
-                        .plus(Tables.playtime.campaignMaps)
-                        .plus(Tables.playtime.msGo)
-                        .plus(Tables.playtime.hexPvp)
-                        .plus(Tables.playtime.erekirHexed)
-                        .plus(Tables.playtime.castleWars)
-                        .plus(Tables.playtime.crawlerArena)
-                        .plus(Tables.playtime.zoneCapture))
-                .from(Tables.playtime)
-                .where(Tables.playtime.uuid.eq(uuid))
-                .fetchOne();
-        return result == null ? 0 : result.value1();
-    }
-
     public static String prefixName(Player player) {
        try {
            Rank rank = Rank.getRank(player);
