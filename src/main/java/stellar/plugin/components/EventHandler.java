@@ -103,48 +103,33 @@ public class EventHandler {
 
             try {
                 if (Database.playerExists(event.player.uuid())) {
-                    updateBackground(Database.getContext()
+                    updateBackground(Database.getContext() // TODO: Database.updateUser
                             .update(Tables.users)
                             .set(Tables.users.name, event.player.name())
                             .set(Tables.users.locale, event.player.locale())
                             .set(Tables.users.ip, event.player.ip())
                             .where(Tables.users.uuid.eq(event.player.uuid())));
 
-                    UsersRecord data = Database.getContext()
-                            .selectFrom(Tables.users)
-                            .where(Tables.users.uuid.eq(event.player.uuid()))
-                            .fetchOne();
-
+                    UsersRecord data = Database.getPlayer(event.player.uuid());
                     assert data != null;
-                    if (data.getAdmin() == 1) {
+                    if (data.isAdmin()) {
                         Variables.admins.put(event.player.uuid(), event.player.name);
                         event.player.admin = true;
                     }
-                    if (data.getJsallowed() == 1) {
+                    if (data.isJsallowed()) {
                         Variables.jsallowed.put(event.player.uuid(), event.player.name);
                     }
-                    //  if (data.getDonated() > 0) {
-                    //      Variables.donaters.put(event.player.uuid(), event.player.name);
-                    //  }
-                    if (data.getPopup() == 1) {
-                        Call.menu(event.player.con(), Menus.welcome.ordinal(), title, welcome, buttons); // TODO: enum of menu buttons
-                    } else if (data.getDiscord() == 1) {
+                      if (data.getDonated() > 0) {
+                          Variables.donaters.put(event.player.uuid(), event.player.name);
+                      }
+                    if (data.getPopup()) {
+                        Call.menu(event.player.con(), Menus.welcome.ordinal(), title, welcome, buttons); // TODO: maybe migrate to MenuHandler
+                    } else if (data.getDiscord()) {
                         Call.openURI(event.player.con(), config.discordUrl);
                     }
 
                 } else {
-                    UsersRecord usersRecord = Database.getContext().newRecord(Tables.users); // TODO: Database.createPlayer
-                    usersRecord.setUuid(event.player.uuid());
-                    usersRecord.setIp(event.player.ip());
-                    usersRecord.setName(event.player.name());
-                    usersRecord.setLocale(event.player.locale());
-                    usersRecord.setAdmin((byte) (event.player.admin() ? 1 : 0));
-                    usersRecord.store();
-
-                    PlaytimeRecord playtimeRecord = Database.getContext().newRecord(Tables.playtime);
-                    playtimeRecord.setUuid(event.player.uuid());
-                    playtimeRecord.store();
-
+                    Database.createFullPlayer(event.player.uuid(), event.player.ip(), event.player.name(), event.player.locale(), event.player.admin());
                     Call.menu(event.player.con(), Menus.welcome.ordinal(), title, welcome, buttons);
                 }
 
@@ -269,7 +254,7 @@ public class EventHandler {
                             try {
                                 updateBackground(Database.getContext()
                                         .update(Tables.users)
-                                        .set(Tables.users.popup, (byte) 0)
+                                        .set(Tables.users.popup, false)
                                         .where(Tables.users.uuid.eq(event.player.uuid())));
                                 Bundle.bundled(event.player, "welcome.disabled");
                             } catch (SQLException e) {
@@ -369,14 +354,8 @@ public class EventHandler {
                 try {
                     if (event.action == Packets.AdminAction.kick || event.action == Packets.AdminAction.ban) {
                         int id = Mathf.random(0, Integer.MAX_VALUE - 1);
-                        UsersRecord adminInfo = Database.getContext()
-                                .selectFrom(Tables.users)
-                                .where(Tables.users.uuid.eq(event.player.uuid()))
-                                .fetchOne();
-                        UsersRecord targetInfo = Database.getContext()
-                                .selectFrom(Tables.users)
-                                .where(Tables.users.uuid.eq(event.other.uuid()))
-                                .fetchOne();
+                        UsersRecord adminInfo = Database.getPlayer(event.player.uuid());
+                        UsersRecord targetInfo = Database.getPlayer(event.other.uuid()));
 
                         AdminActionEntry entry = new AdminActionEntry(adminInfo, targetInfo, event.action);
                         adminActions.put(id, entry);

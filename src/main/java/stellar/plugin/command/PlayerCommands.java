@@ -14,6 +14,7 @@ import mindustry.gen.Call;
 import mindustry.gen.Groups;
 import mindustry.gen.Player;
 import org.jooq.Field;
+import stellar.database.gen.tables.records.StatsRecord;
 import stellar.database.gen.tables.records.UsersRecord;
 import stellar.plugin.Const;
 import stellar.plugin.Variables;
@@ -93,11 +94,7 @@ public class PlayerCommands {
         commandHandler.<Player>register("tr", "[off|auto|double|somelocale]", "commands.tr.description", (args, player) -> {
             String locale;
             try {
-                locale = Database.getContext()
-                        .select(Tables.users.translator)
-                        .from(Tables.users)
-                        .where(Tables.users.uuid.eq(player.uuid()))
-                        .fetchOne().value1();
+                locale = Database.getPlayer(player.uuid()).getTranslator();
             } catch (Throwable t) {
                 Bundle.bundled(player, "commands.tr.error");
                 Log.err(t);
@@ -346,7 +343,7 @@ public class PlayerCommands {
                             Call.menu(p.con(), 0, Bundle.get("menus.rank-info.title", locale), Bundle.format("commands.rank.next-rank.none", locale), newButtons);
                         } else {
                             UsersRecord record = Database.getPlayer(p.uuid());
-                            int playtime = (int) Players.totalPlaytime(p.uuid());
+                            int playtime = (int) Database.getTotalPlaytime(p.uuid());
                             String message = Bundle.format("commands.rank.next-rank.info", locale,
                                     nextRank.formatted(p),
                                     targetColor(record.getAttacks(), nextRank.requirements.attacks), record.getAttacks(), nextRank.requirements.attacks,
@@ -389,7 +386,7 @@ public class PlayerCommands {
 
                     Rank rank = Rank.values()[option];
                     UsersRecord record = Database.getPlayer(p.uuid());
-                    int playtime = (int) Players.totalPlaytime(p.uuid());
+                    int playtime = (int) Database.getTotalPlaytime(p.uuid());
                     String message = Bundle.format("commands.ranks.rank-info", locale,
                             rank.formatted(p),
                             targetColor(record.getAttacks(), rank.requirements.attacks), record.getAttacks(), rank.requirements.attacks,
@@ -409,7 +406,7 @@ public class PlayerCommands {
         commandHandler.<Player>register("stats", "commands.stats.description", (args, player) -> {
             try {
                 UsersRecord record = Database.getPlayer(player.uuid());
-                long playtime = Players.totalPlaytime(player.uuid());
+                long playtime = Database.getTotalPlaytime(player.uuid());
                 Rank rank = Rank.getRank(player);
                 Locale locale = Bundle.findLocale(player.locale);
                 String message = Bundle.format("commands.stats.msg", Bundle.findLocale(player.locale()), record.getId(), player.coloredName(), rank.formatted(player), record.getBuilt(), record.getBroken(), record.getAttacks(), record.getHexes(), record.getWaves(), record.getLogins(), record.getMessages(), record.getDeaths(), StringUtils.longToTime(playtime, locale));

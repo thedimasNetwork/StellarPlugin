@@ -48,11 +48,7 @@ public class Translator {
     public static String translateRaw(Player player, Player otherPlayer, String message) {
         String locale = otherPlayer.locale;
         try {
-            locale = Database.getContext()
-                    .select(Tables.users.translator)
-                    .from(Tables.users)
-                    .where(Tables.users.uuid.eq(otherPlayer.uuid()))
-                    .fetchOne().value1();
+            locale = Database.getPlayer(player.uuid()).getTranslator();
         } catch (Throwable t) {
             Log.err(t);
             DiscordLogger.err(t);

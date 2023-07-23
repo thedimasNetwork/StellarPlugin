@@ -102,7 +102,7 @@ public enum Rank {
 
     public static Rank getRankForced(Player player) throws SQLException {
         UsersRecord record = Database.getPlayer(player.uuid());
-        return Rank.getRank(new Requirements(record.getAttacks(), record.getWaves(), record.getHexes(), record.getBuilt(), (int) (Players.totalPlaytime(player.uuid()) / 60)));
+        return Rank.getRank(new Requirements(record.getAttacks(), record.getWaves(), record.getHexes(), record.getBuilt(), (int) (Database.getTotalPlaytime(player.uuid()) / 60)));
     }
 
     public static Rank getRank(Player player) throws SQLException {
