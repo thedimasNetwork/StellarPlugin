@@ -405,10 +405,28 @@ public class EventHandler {
 
         Events.on(EventType.GameOverEvent.class, event -> {
             Variables.votesRTV.clear();
-            if (Vars.state.rules.mode() == Gamemode.attack && event.winner == Team.sharded) {
-                Groups.player.each(player -> {
-                    Players.incrementStats(player, "attacks");
-                });
+            switch (Vars.state.rules.mode()) {
+                case pvp -> {
+                    if (!Vars.state.map.tags.getBool("hexed")) {
+                        Groups.player.each(player -> player.team() == event.winner, player -> {
+                            Players.incrementStats(player, "pvp");
+                        });
+                    }
+                }
+                case attack -> {
+                    if (event.winner == Team.sharded) {
+                        Groups.player.each(player -> {
+                            Players.incrementStats(player, "attacks");
+                        });
+                    }
+                }
+                case survival -> {
+                    if (Vars.state.wave >= Const.winSurvivalWaves) {
+                        Groups.player.each(player -> {
+                            Players.incrementStats(player, "survivals");
+                        });
+                    }
+                }
             }
         });
 

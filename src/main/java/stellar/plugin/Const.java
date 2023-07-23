@@ -40,6 +40,7 @@ public class Const {
     public static final DateTimeFormatter dateFotmatter = DateTimeFormatter.ofPattern("dd.MM.yyyy k:m"); // 04.12.2003 23:09
 
     public static final int maxIdenticalIPs = 3;
+    public static final int winSurvivalWaves = 50;
     // языки, для которых у нас есть перевод
     public static final Locale[] supportedLocales;
     public static final String teamList = "[white][yellow]sharded[], [red]crux[], [purple]malis[], [green]green[], [blue]blue[], [gray]derelict[]";
