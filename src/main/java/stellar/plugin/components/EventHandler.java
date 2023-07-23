@@ -17,6 +17,8 @@ import mindustry.game.Gamemode;
 import mindustry.game.Team;
 import mindustry.gen.*;
 import mindustry.net.Packets;
+import mindustry.world.blocks.defense.turrets.ItemTurret;
+import mindustry.world.blocks.defense.turrets.Turret;
 import org.jooq.DMLQuery;
 import org.jooq.Field;
 import org.jooq.UpdateSetFirstStep;
@@ -449,13 +451,6 @@ public class EventHandler {
         });
 
         Events.on(EventType.UnitDestroyEvent.class, event -> {
-            Log.debug("== @ died ==", event.unit.type().name);
-            Log.debug("- Player: @", event.unit.getPlayer());
-            Log.debug("- Controller: @", event.unit.getControllerName());
-            Log.debug("- Last commanded: @", event.unit.lastCommanded());
-            Log.debug("== Workaround: ==");
-            Log.debug("- Player: @", Groups.player.getByID(unitPlayer.get(event.unit.id())));
-
             Player player = event.unit.getPlayer();
             if (player == null) {
                 player = Groups.player.getByID(unitPlayer.get(event.unit.id()));
@@ -465,8 +460,20 @@ public class EventHandler {
                 return;
             }
 
-            Log.debug(player);
             Players.incrementStats(player, "deaths");
+        });
+
+        Events.on(EventType.UnitBulletDestroyEvent.class, event -> {
+            if (event.bullet.owner() instanceof Unitc unitc) {
+                if (unitc.controller() instanceof Playerc player) {
+                    Players.incrementStats((Player) player, "kills");
+                }
+            } else if (event.bullet.owner() instanceof ItemTurret.ItemTurretBuild turret) {
+                if (turret.unit().controller() instanceof Playerc player) {
+                    Players.incrementStats((Player) player, "kills");
+                }
+            }
+            Log.debug(event.bullet.owner().getClass().getName());
         });
 
         // region ториевые реакторы
