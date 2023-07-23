@@ -3,6 +3,7 @@ package stellar.plugin.command;
 import arc.Core;
 import arc.Events;
 import arc.math.Mathf;
+import arc.struct.ObjectMap;
 import arc.util.CommandHandler;
 import arc.util.Log;
 import arc.util.Strings;
@@ -14,6 +15,7 @@ import mindustry.gen.Call;
 import mindustry.gen.Groups;
 import mindustry.gen.Player;
 import org.jooq.Field;
+import stellar.database.enums.MessageType;
 import stellar.database.gen.tables.records.StatsRecord;
 import stellar.database.gen.tables.records.UsersRecord;
 import stellar.plugin.Const;
@@ -56,6 +58,13 @@ public class PlayerCommands {
             });
 
             Log.info("<T>" + Const.chatLogFormat, Strings.stripColors(player.name), Strings.stripColors(message), player.locale);
+            new Thread(() -> {
+                try {
+                    Database.createMessage(Const.serverFieldName, player.uuid(), player.team().name, MessageType.team, message, player.locale());
+                } catch (SQLException e) {
+                    Log.err(e);
+                }
+            }).start();
         });
 
         commandHandler.removeCommand("help");
@@ -465,6 +474,7 @@ public class PlayerCommands {
                 try {
                     playerDetailed = Database.getPlayer(player.uuid()).getTranslator().equals("double");
                     targetDetailed = Database.getPlayer(player.uuid()).getTranslator().equals("double");
+                    Database.createMessage(Const.serverFieldName, player.uuid(), target.uuid(), MessageType.direct, args[1], player.locale());
                 } catch (SQLException e) {
                     Log.err(e);
                 }
@@ -499,6 +509,48 @@ public class PlayerCommands {
                 } catch (IllegalArgumentException e) {
                     player.sendMessage("not found");
                 }
+            });
+
+            commandHandler.<Player>register("corestats", "[id]", "Get core stats for you or specified player by ID.", (args, player) -> {
+                Player target = player;
+                if (args.length >= 1) {
+                    if (!Strings.canParseInt(args[0])) {
+                        Bundle.bundled(player, "commands.incorrect-format.number");
+                        return;
+                    }
+
+                    UsersRecord record;
+                    try {
+                        record = Database.getPlayer(Strings.parseInt(args[0]));
+                    } catch (SQLException e) {
+                        Log.err(e);
+                        player.sendMessage("[scarlet]AAAAAA...[]");
+                        return;
+                    }
+
+                    target = record != null ? Players.getPlayer(record.getUuid()) : null;
+                    if (target == null) {
+                        Bundle.bundled(player, "commands.player-notfound");
+                        return;
+                    }
+                }
+
+                StringBuilder builder = new StringBuilder();
+                ObjectMap<String, Integer> stats = Variables.statsData.get(target.uuid());
+
+                if (stats == null) {
+                    player.sendMessage("[teal]Null...[]");
+                    return;
+                } else if (stats.isEmpty()) {
+                    player.sendMessage("[teal]Empty...[]");
+                    return;
+                }
+
+                builder.append(target.coloredName()).append("[white]:\n");
+                stats.each((stat, value) -> {
+                    builder.append(String.format(" - %s: [%s]%s[]", stat, value == 0 ? "white" : "accent", value)).append("\n");
+                });
+                player.sendMessage(builder.toString());
             });
         }
         // endregion

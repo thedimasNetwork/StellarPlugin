@@ -23,6 +23,7 @@ import org.jooq.DMLQuery;
 import org.jooq.Field;
 import org.jooq.UpdateSetFirstStep;
 import org.jooq.UpdateSetMoreStep;
+import stellar.database.enums.MessageType;
 import stellar.plugin.Const;
 import stellar.plugin.Variables;
 import stellar.plugin.bot.Bot;
@@ -522,6 +523,13 @@ public class EventHandler {
 
                 Log.info(Const.chatLogFormat, Strings.stripColors(event.player.name), Strings.stripColors(event.message), event.player.locale);
                 Players.incrementStats(event.player, "messages");
+                new Thread(() -> {
+                    try {
+                        Database.createMessage(Const.serverFieldName, event.player.uuid(), null, MessageType.global, event.message, event.player.locale());
+                    } catch (SQLException e) {
+                        Log.err(e);
+                    }
+                }).start();
             }
         });
 

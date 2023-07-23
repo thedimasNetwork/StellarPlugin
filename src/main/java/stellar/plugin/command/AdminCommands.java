@@ -19,6 +19,8 @@ import mindustry.type.UnitType;
 import mindustry.world.Block;
 import mindustry.world.Tile;
 import rhino.WrappedException;
+import stellar.database.Database;
+import stellar.database.enums.MessageType;
 import stellar.plugin.Const;
 import stellar.plugin.Variables;
 import stellar.plugin.bot.Bot;
@@ -52,6 +54,13 @@ public class AdminCommands {
             });
 
             Log.info("<A>" + Const.chatLogFormat, Strings.stripColors(player.name), Strings.stripColors(message), player.locale);
+            new Thread(() -> {
+                try {
+                    Database.createMessage(Const.serverFieldName, player.uuid(), null, MessageType.admin, message, player.locale());
+                } catch (SQLException e) {
+                    Log.err(e);
+                }
+            }).start();
         });
 
         commandHandler.<Player>register("admin", "commands.admin.admin.description", (args, player) -> {

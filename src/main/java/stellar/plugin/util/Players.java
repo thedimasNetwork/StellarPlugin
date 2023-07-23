@@ -22,11 +22,11 @@ public class Players {
 
     @Nullable
     public static Player findPlayer(String name) {
-        String replacedName = name.replace('_', ' ');
-        return Groups.player.find(p -> name.equalsIgnoreCase(Strings.stripColors(p.name))
-                || name.equalsIgnoreCase(StringUtils.stripColorsAndGlyphs(p.name))
-                || replacedName.equalsIgnoreCase(Strings.stripColors(p.name))
-                || replacedName.equalsIgnoreCase(StringUtils.stripColorsAndGlyphs(p.name)));
+        String replacedName = name.replace('_', ' ').strip();
+        return Groups.player.find(p -> name.equalsIgnoreCase(Strings.stripColors(p.name).strip())
+                || name.equalsIgnoreCase(StringUtils.stripColorsAndGlyphs(p.name).strip())
+                || replacedName.equalsIgnoreCase(Strings.stripColors(p.name).strip())
+                || replacedName.equalsIgnoreCase(StringUtils.stripColorsAndGlyphs(p.name).strip()));
     }
 
     public static boolean isBot(Player player) {
