@@ -3,6 +3,7 @@ package stellar.plugin.components;
 import arc.graphics.Color;
 import mindustry.gen.Player;
 import stellar.database.Database;
+import stellar.database.gen.tables.records.StatsRecord;
 import stellar.database.gen.tables.records.UsersRecord;
 import stellar.plugin.Variables;
 import stellar.plugin.types.Requirements;
@@ -101,8 +102,8 @@ public enum Rank {
     }
 
     public static Rank getRankForced(Player player) throws SQLException {
-        UsersRecord record = Database.getPlayer(player.uuid());
-        return Rank.getRank(new Requirements(record.getAttacks(), record.getWaves(), record.getHexes(), record.getBuilt(), (int) (Database.getTotalPlaytime(player.uuid()) / 60)));
+        StatsRecord record = Database.getStats(player.uuid());
+        return Rank.getRank(new Requirements(record.getAttacks(), record.getWaves(), record.getHexesCaptured(), record.getBuilt(), (int) (Database.getTotalPlaytime(player.uuid()) / 60)));
     }
 
     public static Rank getRank(Player player) throws SQLException {

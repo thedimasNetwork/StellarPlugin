@@ -17,7 +17,6 @@ public class Playtime {
     public static void load() {
         Events.run(EventType.Trigger.update, () -> {
             if (interval.get(1, 3600)) { // 1 minute
-                Log.debug(Const.serverFieldName);
                 if (Const.playtimeField == null) {
                     Log.err("Server @ does not exist in the Database!", Const.serverFieldName);
                     DiscordLogger.err("Сервер " + Const.serverFieldName + " не существует в базе данных!");

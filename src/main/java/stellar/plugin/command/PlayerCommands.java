@@ -296,7 +296,6 @@ public class PlayerCommands {
                 serverColumnName = Const.serverFieldName;
             }
 
-            Log.debug(serverColumnName);
             Field<Long> field = (Field<Long>) Tables.playtime.field(serverColumnName);
             if (field == null) {
                 Bundle.bundled(player, "commands.server-notfound", Const.serverList);

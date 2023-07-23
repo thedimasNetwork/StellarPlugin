@@ -224,7 +224,7 @@ public class DiscordListener extends ListenerAdapter {
                                     Последний айпи: %s
                                     Администратор: %s
                                     Забанен: %s
-                                    """, record.getUuid(), record.getName(), record.getId(), record.getIp(), StringUtils.fancyBool(record.getAdmin() == 1), banned);
+                                    """, record.getUuid(), record.getName(), record.getId(), record.getIp(), StringUtils.fancyBool(record.isAdmin()), banned);
                         embedBuilder.addField(Strings.stripColors("**" + record.getName()) + "**", message, false);
                     });
                     event.replyEmbeds(embedBuilder.build()).setEphemeral(true).queue();

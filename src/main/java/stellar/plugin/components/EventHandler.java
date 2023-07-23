@@ -7,6 +7,7 @@ import arc.struct.ObjectMap;
 import arc.util.CommandHandler;
 import arc.util.Log;
 import arc.util.Strings;
+import arc.util.Timer;
 import mindustry.Vars;
 import mindustry.content.Blocks;
 import mindustry.content.Items;
@@ -16,7 +17,10 @@ import mindustry.game.Gamemode;
 import mindustry.game.Team;
 import mindustry.gen.*;
 import mindustry.net.Packets;
+import org.jooq.DMLQuery;
 import org.jooq.Field;
+import org.jooq.UpdateSetFirstStep;
+import org.jooq.UpdateSetMoreStep;
 import stellar.plugin.Const;
 import stellar.plugin.Variables;
 import stellar.plugin.bot.Bot;
@@ -506,25 +510,24 @@ public class EventHandler {
             if (Variables.interval.get(2, 3600)) {
                 new Thread(() -> { // this creates new thread as getting new ranks may also cause some hangs
                     Variables.statsData.each((uuid, stats) -> {
-                        stats.each((name, value) -> {
-                            try {
-                                Field<Integer> field = (Field<Integer>) Tables.users.field(name);
+                        try {
+                            UpdateSetMoreStep<StatsRecord> query = (UpdateSetMoreStep<StatsRecord>) Database.getContext()
+                                    .update(Tables.stats); // omg... looks bad
+                            stats.each((name, value) -> {
+                                Field<Integer> field = (Field<Integer>) Tables.stats.field(name);
                                 if (field == null) {
                                     Log.err("Field @ is null. UUID: @", name, uuid);
                                     return;
                                 }
-
-                                Database.getContext()
-                                        .update(Tables.users)
-                                        .set(field, field.plus(value))
-                                        .where(Tables.users.uuid.eq(uuid))
-                                        .execute(); // don't run in the background as rank updating should be on fresh data
-
+                                query.set(field, field.plus(value));
                                 stats.put(name, 0);
-                            } catch (SQLException e) {
-                                Log.err(e);
-                            }
-                        });
+                            });
+                            query.where(Tables.stats.uuid.eq(uuid))
+                                    .execute(); // don't run in the background as rank updating should be on fresh data
+
+                        } catch (SQLException e) {
+                            Log.err(e);
+                        }
 
                         if (!Groups.player.contains(p -> p.uuid().equals(uuid))) {
                             Variables.statsData.remove(uuid);

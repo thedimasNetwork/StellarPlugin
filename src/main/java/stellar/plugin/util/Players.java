@@ -6,8 +6,7 @@ import arc.util.Nullable;
 import arc.util.Strings;
 import mindustry.gen.Groups;
 import mindustry.gen.Player;
-import org.jooq.Record1;
-import stellar.database.Database;
+import org.jooq.Field;
 import stellar.database.gen.Tables;
 import stellar.plugin.Variables;
 import stellar.plugin.components.Rank;
@@ -45,15 +44,14 @@ public class Players {
             int value = Variables.statsData.get(player.uuid()).get(stat);
             Variables.statsData.get(player.uuid()).put(stat, value + 1);  
         } else {
-            Variables.statsData.put(player.uuid(), ObjectMap.of(
-                    "attacks", 0,
-                    "waves", 0,
-                    "built", 0,
-                    "broken", 0,
-                    "deaths", 0,
-                    "logins", 0,
-                    "messages", 0
-            ));
+            ObjectMap<String, Integer> statsMap = new ObjectMap<>();
+            for (Field<?> field : Tables.stats.fields()) {
+                if (field.getType() == Integer.class || field.getType() == Long.class) {
+                    Tables.playtime.erekirHexed.getUnqualifiedName();
+                    statsMap.put(field.getName(), 0);
+                }
+            }
+            Variables.statsData.put(player.uuid(), statsMap);
             Players.incrementStats(player, stat);
         }
     }
