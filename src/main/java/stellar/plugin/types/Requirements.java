@@ -1,34 +1,30 @@
 package stellar.plugin.types;
 
 public class Requirements {
-    public final int attacks, waves, hexes, built, playtime;
+    public final int built, waves, wins, playtime;
 
-    public Requirements(int attacks, int waves, int hexes, Long longbuilt, int playtime) {
-        this.attacks = attacks;
+    public Requirements(int built, int waves, int wins, int playtime) {
+        this.built = built;
         this.waves = waves;
-        this.hexes = hexes;
-        this.built = longbuilt.intValue();
+        this.wins = wins;
         this.playtime = playtime;
     }
 
-    public Requirements(int attacks, int waves, int hexes, int built, int playtime) {
-        this.attacks = attacks;
-        this.waves = waves;
-        this.hexes = hexes;
+    public Requirements(int built, int waves, int attack, int survival, int hex, int pvp, int playtime) {
         this.built = built;
+        this.waves = waves;
+        this.wins = attack + survival + hex + pvp;
         this.playtime = playtime;
+    }
+
+    public static Requirements empty() {
+        return new Requirements(0, 0, 0, 0);
     }
 
     public boolean match(Requirements requirements) {
-        return requirements.attacks >= this.attacks &&
+        return requirements.built >= this.built &&
                 requirements.waves >= this.waves &&
-                requirements.hexes >= this.hexes &&
-                requirements.built >= this.built &&
+                requirements.wins >= this.wins &&
                 requirements.playtime >= this.playtime;
-    }
-
-    @Override
-    public String toString() {
-        return String.format("a%s;w%s;h%s;b%s;p%s", attacks, waves, hexes, built, playtime);
     }
 }
