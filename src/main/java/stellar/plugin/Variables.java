@@ -20,7 +20,7 @@ public class Variables {
     public static final StringMap donaters = new StringMap();
     public static final StringMap jsallowed = new StringMap();
     public static Config config;
-    public static CacheSeq<HistoryEntry>[][] history = new CacheSeq[2048][2048];
+    public static CacheSeq<HistoryEntry>[][] history = new CacheSeq[][] {};
     public static final Seq<String> blacklistedSubnets = new Seq<>();
     public static final IntMap<AdminActionEntry> adminActions = new IntMap<>();
     public static final ObjectMap<String, ObjectMap<String, Integer>> statsData = new ObjectMap<>(); // uuid -> [field -> increase,...]
@@ -31,7 +31,7 @@ public class Variables {
         CacheSeq<HistoryEntry> seq = history[x][y];
         if (seq == null) {
             history[x][y] = seq = Seqs.newBuilder()
-                    .maximumSize(15)
+                    .maximumSize(8)
                     .expireAfterWrite(Duration.ofMillis(1800000L))
                     .build();
         }
