@@ -33,6 +33,7 @@ import stellar.database.Database;
 import stellar.database.gen.Tables;
 import stellar.database.gen.tables.records.*;
 import stellar.plugin.enums.Menus;
+import stellar.plugin.history.struct.CacheSeq;
 import stellar.plugin.menus.MenuHandler;
 import stellar.plugin.types.AdminActionEntry;
 import stellar.plugin.util.Bundle;
@@ -404,6 +405,10 @@ public class EventHandler {
 
         Events.on(EventType.ServerLoadEvent.class, event -> {
             Log.info("ThedimasPlugin: Server loaded");
+        });
+
+        Events.on(EventType.WorldLoadEndEvent.class, event -> {
+            history = new CacheSeq[Vars.world.width()][Vars.world.height()];
         });
 
         Events.on(EventType.GameOverEvent.class, event -> {
