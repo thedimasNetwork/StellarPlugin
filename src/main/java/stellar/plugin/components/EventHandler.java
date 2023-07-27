@@ -545,57 +545,6 @@ public class EventHandler {
                 }
             });
 
-            if (Variables.interval.get(2, 3600)) {
-                new Thread(() -> { // this creates new thread as getting new ranks may also cause some hangs
-                    Variables.statsData.each((uuid, stats) -> {
-                        try {
-                            UpdateSetMoreStep<StatsRecord> query = (UpdateSetMoreStep<StatsRecord>) Database.getContext()
-                                    .update(Tables.stats); // omg... looks bad
-                            stats.each((name, value) -> {
-                                Field<Integer> field = (Field<Integer>) Tables.stats.field(name);
-                                if (field == null) {
-                                    Log.err("Field @ is null. UUID: @", name, uuid);
-                                    return;
-                                }
-                                query.set(field, field.plus(value));
-                                stats.put(name, 0);
-                            });
-                            query.where(Tables.stats.uuid.eq(uuid))
-                                    .execute(); // don't run in the background as rank updating should be on fresh data
-
-                        } catch (SQLException e) {
-                            Log.err(e);
-                        }
-
-                        if (!Groups.player.contains(p -> p.uuid().equals(uuid))) {
-                            Variables.statsData.remove(uuid);
-                        }
-                    });
-
-                    ObjectMap<String, Rank> oldRanks = ranks.copy();
-                    ranks.clear();
-                    Groups.player.each(player -> {
-                        Rank oldRank = oldRanks.get(player.uuid());
-                        Rank newRank = oldRank;
-
-                        try {
-                            newRank = Rank.getRank(player);
-                        } catch (SQLException e) {
-                            Log.err(e);
-                            ranks.put(player.uuid(), oldRanks.get(player.uuid()));
-                        }
-
-                        if (newRank != oldRank) {
-                            Call.warningToast(player.con, Iconc.chartBar, Bundle.format("events.new-rank", Bundle.findLocale(player.locale()), newRank.formatted(player)));
-                        }
-                    });
-                }).start();
-            }
-
-            /*if (!donaters.containsKey(event.player.uuid())) {
-                return;
-            }*/
-            
             Groups.player.each(p -> {
                 if (p.unit().moving()) {
                     try {

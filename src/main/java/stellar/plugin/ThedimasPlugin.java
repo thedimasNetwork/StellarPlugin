@@ -11,7 +11,7 @@ import stellar.plugin.command.ServerCommands;
 import stellar.plugin.components.AntiVPN;
 import stellar.plugin.components.EventHandler;
 import stellar.plugin.components.LaunchPad;
-import stellar.plugin.components.Playtime;
+import stellar.plugin.components.Activity;
 import stellar.plugin.history.History;
 
 import static mindustry.Vars.netServer;
@@ -29,7 +29,7 @@ public class ThedimasPlugin extends Plugin {
         Database.load(config.database.ip, config.database.port, config.database.name, config.database.user, config.database.password);
         LaunchPad.load();
         EventHandler.load();
-        Playtime.load();
+        Activity.load();
         History.load();
         AntiVPN.load();
         Log.info("All components loaded");
