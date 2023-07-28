@@ -4,6 +4,7 @@ import arc.graphics.Color;
 import arc.struct.ObjectMap;
 import arc.util.Nullable;
 import mindustry.gen.Player;
+import org.jetbrains.annotations.NotNull;
 import stellar.database.Database;
 import stellar.database.enums.PlayerStatus;
 import stellar.database.gen.tables.records.StatsRecord;
@@ -122,6 +123,7 @@ public enum Rank {
         this.special = special;
     }
 
+    @Nullable
     public Rank getNext() {
         for (Rank rank : Rank.values()) {
             if (rank.prevRank == this) {
@@ -138,6 +140,7 @@ public enum Rank {
                 String.format("<[#%s]%s[]> %s", this.color, this.icon, bundled);
     }
 
+    @NotNull
     public static Rank getRank(Requirements requirements) {
         int index = Rank.values().length - 1;
         while (true) {
