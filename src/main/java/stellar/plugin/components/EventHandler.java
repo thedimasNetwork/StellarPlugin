@@ -120,15 +120,16 @@ public class EventHandler {
 
                     UsersRecord data = Database.getPlayer(event.player.uuid());
                     assert data != null;
-                    if (data.isAdmin()) {
-                        Variables.admins.put(event.player.uuid(), event.player.name);
+                    if (data.getStatus().ordinal() > 0) {
+                        admins.put(event.player.uuid(), event.player.name);
+                        specialRanks.put(event.player.uuid(), Rank.getRank(data.getStatus()));
                         event.player.admin = true;
                     }
                     if (data.isJsallowed()) {
-                        Variables.jsallowed.put(event.player.uuid(), event.player.name);
+                        jsallowed.put(event.player.uuid(), event.player.name);
                     }
                       if (data.getDonated() > 0) {
-                          Variables.donaters.put(event.player.uuid(), event.player.name);
+                          donaters.put(event.player.uuid(), event.player.name);
                       }
                     if (data.isPopup()) {
                         Call.menu(event.player.con(), Menus.welcome.ordinal(), title, welcome, buttons); // TODO: maybe migrate to MenuHandler
@@ -383,23 +384,25 @@ public class EventHandler {
 
         // region отключение
         Events.on(EventType.PlayerLeave.class, event -> {
-            if (Variables.votesRTV.contains(event.player.uuid())) {
-                Variables.votesRTV.remove(event.player.uuid());
-                int cur = Variables.votesRTV.size;
+            if (votesRTV.contains(event.player.uuid())) {
+                votesRTV.remove(event.player.uuid());
+                int cur = votesRTV.size;
                 int req = (int) Math.ceil(Const.votesRatio * Groups.player.size());
                 String playerName = event.player.coloredName();
                 Bundle.bundled("commands.rtv.leave", playerName, cur, req);
             }
 
-            Variables.admins.remove(event.player.uuid());
-            Variables.jsallowed.remove(event.player.uuid());
-            Variables.donaters.remove(event.player.uuid());
-            Variables.activeHistoryPlayers.remove(event.player.uuid());
+            admins.remove(event.player.uuid());
+            jsallowed.remove(event.player.uuid());
+            donaters.remove(event.player.uuid());
+            activeHistoryPlayers.remove(event.player.uuid());
+            unitPlayer.remove(event.player.unit().id);
+            ranks.remove(event.player.uuid());
+            specialRanks.remove(event.player.uuid());
+
             Log.info("@ has disconnected from the server", event.player.name);
             String playerName = event.player.coloredName();
             Bundle.bundled("events.leave.player-leave", playerName);
-            unitPlayer.remove(event.player.unit().id);
-            ranks.remove(event.player.uuid());
         });
         // endregion
 
@@ -412,7 +415,7 @@ public class EventHandler {
         });
 
         Events.on(EventType.GameOverEvent.class, event -> {
-            Variables.votesRTV.clear();
+            votesRTV.clear();
             switch (Vars.state.rules.mode()) {
                 case pvp -> {
                     if (!Vars.state.map.tags.getBool("hexed")) {

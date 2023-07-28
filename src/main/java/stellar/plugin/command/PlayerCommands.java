@@ -37,8 +37,7 @@ import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 import static mindustry.Vars.*;
-import static stellar.plugin.Variables.config;
-import static stellar.plugin.Variables.jsallowed;
+import static stellar.plugin.Variables.*;
 import static stellar.plugin.util.NetUtils.updateBackground;
 import static stellar.plugin.util.StringUtils.longToTime;
 import static stellar.plugin.util.StringUtils.targetColor;
@@ -411,16 +410,30 @@ public class PlayerCommands {
                 StatsRecord statsRecord = Database.getStats(player.uuid());
                 long playtime = Database.getTotalPlaytime(player.uuid());
                 Rank rank = Rank.getRank(player);
+                Rank specialRank = specialRanks.get(player.uuid());
                 Locale locale = Bundle.findLocale(player.locale);
                 String message = Bundle.format("commands.stats.msg",
-                        Bundle.findLocale(player.locale()), record.getId(), player.coloredName(), rank.formatted(player),
+                        Bundle.findLocale(player.locale()), record.getId(), player.coloredName(),
+                        rank.formatted(player),
                         statsRecord.getBuilt(), statsRecord.getBroken(),
                         statsRecord.getAttacks(), statsRecord.getHexesCaptured(), statsRecord.getWaves(),
                         statsRecord.getLogins(), statsRecord.getMessages(), statsRecord.getDeaths(), StringUtils.longToTime(playtime, locale));
+
+                if (specialRank != null) {
+                    message = Bundle.format("commands.stats.msg.with-status",
+                            Bundle.findLocale(player.locale()), record.getId(), player.coloredName(),
+                            rank.formatted(player), specialRank.formatted(player),
+                            statsRecord.getBuilt(), statsRecord.getBroken(),
+                            statsRecord.getAttacks(), statsRecord.getHexesCaptured(), statsRecord.getWaves(),
+                            statsRecord.getLogins(), statsRecord.getMessages(), statsRecord.getDeaths(), StringUtils.longToTime(playtime, locale));
+
+                }
+
                 String[][] buttons = {
                         {Bundle.get("commands.rank.next-rank", locale)},
                         {Bundle.get("menus.close", locale)}
                 };
+
                 MenuHandler.send(player, Bundle.get("menus.stats.title", locale), message, buttons, (menuId, option, p) -> {
                     if (option == -1 || option == 1) {
                         return;

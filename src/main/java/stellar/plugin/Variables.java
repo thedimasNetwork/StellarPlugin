@@ -26,6 +26,7 @@ public class Variables {
     public static final ObjectMap<String, ObjectMap<String, Integer>> statsData = new ObjectMap<>(); // uuid -> [field -> increase,...]
     public static final IntIntMap unitPlayer = new IntIntMap();
     public static final ObjectMap<String, Rank> ranks = new ObjectMap<>();
+    public static final ObjectMap<String, Rank> specialRanks = new ObjectMap<>();
 
     public static CacheSeq<HistoryEntry> getHistorySeq(int x, int y) {
         CacheSeq<HistoryEntry> seq = history[x][y];

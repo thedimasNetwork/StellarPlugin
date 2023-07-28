@@ -45,7 +45,6 @@ public class DiscordListener extends ListenerAdapter {
             return;
         }
 
-        // \uE80D
         String name = event.getAuthor().getName();
         String message = event.getMessage().getContentStripped();
         String format = "<[blue]\uE80D[]> %s: %s";
@@ -222,9 +221,9 @@ public class DiscordListener extends ListenerAdapter {
                                     Имя: %s
                                     Айди: %s
                                     Последний айпи: %s
-                                    Администратор: %s
+                                    Статус: %s
                                     Забанен: %s
-                                    """, record.getUuid(), record.getName(), record.getId(), record.getIp(), StringUtils.fancyBool(record.isAdmin()), banned);
+                                    """, record.getUuid(), record.getName(), record.getId(), record.getIp(), record.getStatus().name(), banned);
                         embedBuilder.addField(Strings.stripColors("**" + record.getName()) + "**", message, false);
                     });
                     event.replyEmbeds(embedBuilder.build()).setEphemeral(true).queue();
