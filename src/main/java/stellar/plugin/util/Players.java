@@ -15,10 +15,10 @@ import java.sql.SQLException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Players {
-   @Nullable
-   public static Player getPlayer(String uuid) {
-       return Groups.player.find(player -> player.uuid().equals(uuid));
-   }
+    @Nullable
+    public static Player getPlayer(String uuid) {
+        return Groups.player.find(player -> player.uuid().equals(uuid));
+    }
 
     @Nullable
     public static Player findPlayer(String name) {
@@ -42,7 +42,7 @@ public class Players {
     public static void incrementStats(Player player, String stat) {
         if (Variables.statsData.containsKey(player.uuid())) {
             int value = Variables.statsData.get(player.uuid()).get(stat);
-            Variables.statsData.get(player.uuid()).put(stat, value + 1);  
+            Variables.statsData.get(player.uuid()).put(stat, value + 1);
         } else {
             ObjectMap<String, Integer> statsMap = new ObjectMap<>();
             for (Field<?> field : Tables.stats.fields()) {
@@ -57,17 +57,17 @@ public class Players {
     }
 
     public static String prefixName(Player player) {
-       try {
-           Rank rank = Rank.getRank(player);
-           if (rank.icon == null) {
-               return player.admin() ? "<\uE82C> " + player.coloredName() : player.coloredName();
-           } else {
-               return player.admin() ? String.format("<[#%s]\uE82C[]> %s", rank.color, player.coloredName()) :
-                       String.format("<[#%s]%s[]> %s", rank.color, rank.icon, player.coloredName());
-           }
-       } catch (SQLException e) {
-           Log.err(e);
-           return player.admin() ? "<\uE872> " + player.coloredName() : player.coloredName();
-       }
+        try {
+            Rank rank = Rank.getRank(player);
+            if (rank.icon == null) {
+                return player.admin() ? "<\uE82C> " + player.coloredName() : player.coloredName();
+            } else {
+                return player.admin() ? String.format("<[#%s]\uE82C[]> %s", rank.color, player.coloredName()) :
+                        String.format("<[#%s]%s[]> %s", rank.color, rank.icon, player.coloredName());
+            }
+        } catch (SQLException e) {
+            Log.err(e);
+            return player.admin() ? "<\uE872> " + player.coloredName() : player.coloredName();
+        }
     }
 }

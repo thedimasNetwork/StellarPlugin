@@ -8,10 +8,10 @@ import stellar.plugin.bot.Bot;
 import stellar.plugin.command.AdminCommands;
 import stellar.plugin.command.PlayerCommands;
 import stellar.plugin.command.ServerCommands;
+import stellar.plugin.components.Activity;
 import stellar.plugin.components.AntiVPN;
 import stellar.plugin.components.EventHandler;
 import stellar.plugin.components.LaunchPad;
-import stellar.plugin.components.Activity;
 import stellar.plugin.history.History;
 
 import static mindustry.Vars.netServer;

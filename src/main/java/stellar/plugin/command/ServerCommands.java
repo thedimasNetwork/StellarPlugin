@@ -9,13 +9,13 @@ import mindustry.gen.Groups;
 import mindustry.gen.Player;
 import mindustry.net.Packets;
 import net.dv8tion.jda.api.entities.MessageEmbed;
+import stellar.database.Database;
+import stellar.database.gen.tables.records.UsersRecord;
 import stellar.plugin.Const;
 import stellar.plugin.Variables;
 import stellar.plugin.bot.Bot;
 import stellar.plugin.bot.Colors;
 import stellar.plugin.bot.Util;
-import stellar.database.Database;
-import stellar.database.gen.tables.records.UsersRecord;
 import stellar.plugin.util.Bundle;
 import stellar.plugin.util.Players;
 import stellar.plugin.util.StringUtils;
@@ -141,10 +141,10 @@ public class ServerCommands {
 
                 Database.ban("console", record.getUuid(), period, reason);
                 String message = """
-                                **Админ**: `<консоль>`
-                                **Нарушитель**: %target% (%tid%)
-                                **Причина**: %reason%
-                                """.replace("%target%", Strings.stripColors(record.getName())).replace("%tid%", record.getId().toString())
+                        **Админ**: `<консоль>`
+                        **Нарушитель**: %target% (%tid%)
+                        **Причина**: %reason%
+                        """.replace("%target%", Strings.stripColors(record.getName())).replace("%tid%", record.getId().toString())
                         .replace("%reason%", reason);
                 if (period > -1) {
                     message += "**Срок**: <t:%timestamp%:f>".replace("%timestamp%", (System.currentTimeMillis() / 1000 + period * (24 * 60 * 60)) + "");
@@ -184,9 +184,9 @@ public class ServerCommands {
                 Log.info("Player @ / @ / #@ got unbanned", Strings.stripColors(record.getName()), record.getUuid(), record.getId());
 
                 String message = """
-                            **Админ**: `<консоль>`
-                            **Нарушитель**: %target% (%tid%)
-                            """.replace("%target%", Strings.stripColors(record.getName())).replace("%tid%", record.getId().toString());
+                        **Админ**: `<консоль>`
+                        **Нарушитель**: %target% (%tid%)
+                        """.replace("%target%", Strings.stripColors(record.getName())).replace("%tid%", record.getId().toString());
                 MessageEmbed unbanEmbed = Util.embedBuilder("Разбан (через консоль)", message, Colors.green, LocalDateTime.now());
                 Bot.sendEmbed(config.bot.bansId, unbanEmbed);
             } catch (IllegalArgumentException | SQLException e) {

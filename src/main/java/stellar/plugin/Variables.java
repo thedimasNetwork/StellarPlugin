@@ -19,14 +19,14 @@ public class Variables {
     public static final StringMap admins = new StringMap();
     public static final StringMap donaters = new StringMap();
     public static final StringMap jsallowed = new StringMap();
-    public static Config config;
-    public static CacheSeq<HistoryEntry>[][] history = new CacheSeq[][] {};
     public static final Seq<String> blacklistedSubnets = new Seq<>();
     public static final IntMap<AdminActionEntry> adminActions = new IntMap<>();
     public static final ObjectMap<String, ObjectMap<String, Integer>> statsData = new ObjectMap<>(); // uuid -> [field -> increase,...]
     public static final IntIntMap unitPlayer = new IntIntMap();
     public static final ObjectMap<String, Rank> ranks = new ObjectMap<>();
     public static final ObjectMap<String, Rank> specialRanks = new ObjectMap<>();
+    public static Config config;
+    public static CacheSeq<HistoryEntry>[][] history = new CacheSeq[][]{};
 
     public static CacheSeq<HistoryEntry> getHistorySeq(int x, int y) {
         CacheSeq<HistoryEntry> seq = history[x][y];

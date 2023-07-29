@@ -13,6 +13,7 @@ import mindustry.gen.Player;
 
 public class MenuHandler {
     private static final IntMap<MenuRunner> runners = new IntMap<>();
+
     public static int send(Player player, String title, String message, String[][] buttons, MenuRunner runner) {
         int menuId = Mathf.random(Integer.MAX_VALUE - 1);
         while (runners.containsKey(menuId)) {

@@ -217,13 +217,13 @@ public class DiscordListener extends ListenerAdapter {
                             Log.err(e);
                         }
                         String message = String.format("""
-                                    UUID: `%s`
-                                    Имя: %s
-                                    Айди: %s
-                                    Последний айпи: %s
-                                    Статус: %s
-                                    Забанен: %s
-                                    """, record.getUuid(), record.getName(), record.getId(), record.getIp(), record.getStatus().name(), banned);
+                                UUID: `%s`
+                                Имя: %s
+                                Айди: %s
+                                Последний айпи: %s
+                                Статус: %s
+                                Забанен: %s
+                                """, record.getUuid(), record.getName(), record.getId(), record.getIp(), record.getStatus().name(), banned);
                         embedBuilder.addField(Strings.stripColors("**" + record.getName()) + "**", message, false);
                     });
                     event.replyEmbeds(embedBuilder.build()).setEphemeral(true).queue();

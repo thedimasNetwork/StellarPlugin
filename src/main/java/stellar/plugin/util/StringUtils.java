@@ -43,6 +43,6 @@ public class StringUtils {
 
     public static String longToTime(long seconds, Locale locale) {
         return seconds < 60 * 60 ? Bundle.format("formats.playtime.short", locale, seconds / 60) :
-                Bundle.format("formats.playtime", locale, seconds / (60 * 60),  (seconds % (60 * 60)) / 60);
+                Bundle.format("formats.playtime", locale, seconds / (60 * 60), (seconds % (60 * 60)) / 60);
     }
 }

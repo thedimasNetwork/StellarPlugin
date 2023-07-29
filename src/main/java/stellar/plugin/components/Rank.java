@@ -3,6 +3,8 @@ package stellar.plugin.components;
 import arc.graphics.Color;
 import arc.struct.ObjectMap;
 import arc.util.Nullable;
+import mindustry.content.Fx;
+import mindustry.entities.Effect;
 import mindustry.gen.Player;
 import org.jetbrains.annotations.NotNull;
 import stellar.database.Database;
@@ -10,9 +12,6 @@ import stellar.database.enums.PlayerStatus;
 import stellar.database.gen.tables.records.StatsRecord;
 import stellar.plugin.Variables;
 import stellar.plugin.types.Requirements;
-import mindustry.content.Fx;
-import mindustry.entities.Effect;
-
 import stellar.plugin.util.Bundle;
 
 import java.sql.SQLException;
@@ -22,7 +21,7 @@ public enum Rank {
     // region basic
     player(Fx.none),
     verified(new Requirements(500, 0, 0, 30), player, Fx.artilleryTrail),
-    beginner(Color.valueOf("#fc693d"), "\uE872", new Requirements(5000, 50, 8, 1 * 60), verified, Fx.lava),
+    beginner(Color.valueOf("#fc693d"), "\uE872", new Requirements(5000, 50, 8, 60), verified, Fx.lava),
     active(Color.valueOf("#ff8f40"), "\uE86B", new Requirements(7500, 100, 16, 2 * 60), beginner, Fx.bubble, Color.valueOf("#ff8f40")),
     expert(Color.valueOf("#f2e33d"), "\uE86E", new Requirements(10000, 250, 32, 4 * 60), active, Fx.dynamicSpikes, Color.valueOf("#f2e33d")),
     veteran(Color.valueOf("#66f556"), "\uE809", new Requirements(15000, 500, 64, 8 * 60), expert, Fx.greenCloud),
@@ -38,6 +37,12 @@ public enum Rank {
     console(Color.white, "\uE80F", true),
     owner(Color.white, "\uF7AA", true);
 
+    private static final ObjectMap<PlayerStatus, Rank> statusRanks = ObjectMap.of( // maybe need some optimization
+//            PlayerStatus.basic, null,
+            PlayerStatus.admin, Rank.admin,
+            PlayerStatus.console, Rank.console,
+            PlayerStatus.owner, Rank.owner
+    );
     public final Color color;
     public final String icon;
     public final Requirements requirements;
@@ -45,13 +50,6 @@ public enum Rank {
     public final Effect effect;
     public final Color effectColor;
     public final boolean special;
-
-    private static final ObjectMap<PlayerStatus, Rank> statusRanks = ObjectMap.of( // maybe need some optimization
-//            PlayerStatus.basic, null,
-            PlayerStatus.admin, Rank.admin,
-            PlayerStatus.console, Rank.console,
-            PlayerStatus.owner, Rank.owner
-    );
 
     Rank(Effect effect) {
         this.color = null;
@@ -123,23 +121,6 @@ public enum Rank {
         this.special = special;
     }
 
-    @Nullable
-    public Rank getNext() {
-        for (Rank rank : Rank.values()) {
-            if (rank.prevRank == this) {
-                return rank;
-            }
-        }
-        return null;
-    }
-
-    public String formatted(Player player) {
-        Locale locale = Bundle.findLocale(player.locale());
-        String bundled = Bundle.get("ranks." + this.name(), locale);
-        return icon == null ? bundled :
-                String.format("<[#%s]%s[]> %s", this.color, this.icon, bundled);
-    }
-
     @NotNull
     public static Rank getRank(Requirements requirements) {
         int index = Rank.values().length - 1;
@@ -189,6 +170,23 @@ public enum Rank {
             Variables.ranks.put(player.uuid(), rank);
             return rank;
         }
+    }
+
+    @Nullable
+    public Rank getNext() {
+        for (Rank rank : Rank.values()) {
+            if (rank.prevRank == this) {
+                return rank;
+            }
+        }
+        return null;
+    }
+
+    public String formatted(Player player) {
+        Locale locale = Bundle.findLocale(player.locale());
+        String bundled = Bundle.get("ranks." + this.name(), locale);
+        return icon == null ? bundled :
+                String.format("<[#%s]%s[]> %s", this.color, this.icon, bundled);
     }
 
     // Greater Than or Equal

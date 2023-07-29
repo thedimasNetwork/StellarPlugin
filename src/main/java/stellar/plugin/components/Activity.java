@@ -9,10 +9,10 @@ import mindustry.gen.Iconc;
 import mindustry.gen.Player;
 import org.jooq.Field;
 import org.jooq.UpdateSetMoreStep;
-import stellar.database.gen.tables.records.StatsRecord;
-import stellar.plugin.Const;
 import stellar.database.Database;
 import stellar.database.gen.Tables;
+import stellar.database.gen.tables.records.StatsRecord;
+import stellar.plugin.Const;
 import stellar.plugin.Variables;
 import stellar.plugin.util.Bundle;
 import stellar.plugin.util.logger.DiscordLogger;
@@ -88,7 +88,7 @@ public class Activity {
                         ranks.put(player.uuid(), oldRanks.get(player.uuid()));
                     }
 
-                    if ( newRank != null && oldRank != null && newRank != oldRank) {
+                    if (newRank != null && oldRank != null && newRank != oldRank) {
                         Call.warningToast(player.con, Iconc.chartBar, Bundle.format("events.new-rank", Bundle.findLocale(player.locale()), newRank.formatted(player)));
                     }
                 });

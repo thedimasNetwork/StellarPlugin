@@ -3,11 +3,9 @@ package stellar.plugin.components;
 import arc.Events;
 import arc.graphics.Color;
 import arc.math.Mathf;
-import arc.struct.ObjectMap;
 import arc.util.CommandHandler;
 import arc.util.Log;
 import arc.util.Strings;
-import arc.util.Timer;
 import mindustry.Vars;
 import mindustry.content.Blocks;
 import mindustry.content.Items;
@@ -18,20 +16,15 @@ import mindustry.game.Team;
 import mindustry.gen.*;
 import mindustry.net.Packets;
 import mindustry.world.blocks.defense.turrets.ItemTurret;
-import mindustry.world.blocks.defense.turrets.Turret;
-import org.jooq.DMLQuery;
-import org.jooq.Field;
-import org.jooq.UpdateSetFirstStep;
-import org.jooq.UpdateSetMoreStep;
+import stellar.database.Database;
 import stellar.database.enums.MessageType;
+import stellar.database.gen.Tables;
+import stellar.database.gen.tables.records.BansRecord;
+import stellar.database.gen.tables.records.UsersRecord;
 import stellar.plugin.Const;
-import stellar.plugin.Variables;
 import stellar.plugin.bot.Bot;
 import stellar.plugin.bot.Colors;
 import stellar.plugin.bot.Util;
-import stellar.database.Database;
-import stellar.database.gen.Tables;
-import stellar.database.gen.tables.records.*;
 import stellar.plugin.enums.Menus;
 import stellar.plugin.history.struct.CacheSeq;
 import stellar.plugin.menus.MenuHandler;
@@ -104,9 +97,9 @@ public class EventHandler {
             String welcome = Bundle.format("welcome", locale, rules, commands.toString().strip());
             String title = Bundle.format("welcome.title", locale, Strings.stripColors(event.player.name()));
             String[][] buttons = {
-                    { Bundle.get("menus.close", locale) },
-                    { Bundle.get("welcome.discord", locale) },
-                    { Bundle.get("welcome.disable", locale) }
+                    {Bundle.get("menus.close", locale)},
+                    {Bundle.get("welcome.discord", locale)},
+                    {Bundle.get("welcome.disable", locale)}
             };
 
             try {
@@ -128,9 +121,9 @@ public class EventHandler {
                     if (data.isJsallowed()) {
                         jsallowed.put(event.player.uuid(), event.player.name);
                     }
-                      if (data.getDonated() > 0) {
-                          donaters.put(event.player.uuid(), event.player.name);
-                      }
+                    if (data.getDonated() > 0) {
+                        donaters.put(event.player.uuid(), event.player.name);
+                    }
                     if (data.isPopup()) {
                         Call.menu(event.player.con(), Menus.welcome.ordinal(), title, welcome, buttons); // TODO: maybe migrate to MenuHandler
                     } else if (data.isDiscord()) {
@@ -143,7 +136,7 @@ public class EventHandler {
                 }
 
                 Players.incrementStats(event.player, "logins");
-                
+
                 Rank.getRank(event.player);
             } catch (SQLException e) {
                 Log.err(e);
@@ -250,26 +243,24 @@ public class EventHandler {
                 return;
             }
 
-            switch (Menus.values()[event.menuId]) {
-                case welcome ->  {
-                    switch (event.option) {
-                        case 0 -> {
-                            // do nothing, it's close button
-                        }
-                        case 1 -> {
-                            Call.openURI(event.player.con(), config.discordUrl);
-                        }
-                        case 2 -> {
-                            try {
-                                updateBackground(Database.getContext()
-                                        .update(Tables.users)
-                                        .set(Tables.users.popup, false)
-                                        .where(Tables.users.uuid.eq(event.player.uuid())));
-                                Bundle.bundled(event.player, "welcome.disabled");
-                            } catch (SQLException e) {
-                                Log.err(e);
-                                Bundle.bundled(event.player, "welcome.disable.failed");
-                            }
+            if (Menus.values()[event.menuId] == Menus.welcome) {
+                switch (event.option) {
+                    case 0 -> {
+                        // do nothing, it's close button
+                    }
+                    case 1 -> {
+                        Call.openURI(event.player.con(), config.discordUrl);
+                    }
+                    case 2 -> {
+                        try {
+                            updateBackground(Database.getContext()
+                                    .update(Tables.users)
+                                    .set(Tables.users.popup, false)
+                                    .where(Tables.users.uuid.eq(event.player.uuid())));
+                            Bundle.bundled(event.player, "welcome.disabled");
+                        } catch (SQLException e) {
+                            Log.err(e);
+                            Bundle.bundled(event.player, "welcome.disable.failed");
                         }
                     }
                 }
@@ -302,10 +293,10 @@ public class EventHandler {
 
                 String title = "Кик";
                 String message = """
-                                **Админ**: %admin% (%aid%)
-                                **Нарушитель**: %target% (%tid%)
-                                **Причина**: %reason%
-                                """.replace("%admin%", adminName).replace("%aid%", adminInfo.getId().toString())
+                        **Админ**: %admin% (%aid%)
+                        **Нарушитель**: %target% (%tid%)
+                        **Причина**: %reason%
+                        """.replace("%admin%", adminName).replace("%aid%", adminInfo.getId().toString())
                         .replace("%target%", targetName).replace("%tid%", targetInfo.getId().toString())
                         .replace("%reason%", actionEntry.getReason().strip());
                 Bot.sendEmbed(config.bot.bansId, Util.embedBuilder(title, message, Colors.purple, LocalDateTime.now(), Const.serverFieldName));
@@ -555,7 +546,8 @@ public class EventHandler {
                         Effect effect = rank.effect;
                         Color effectColor = rank.effectColor == null ? Color.white : rank.effectColor;
                         Call.effect(effect, p.x, p.y, 0, effectColor);
-                    } catch (SQLException ignored) { } // it can't throw as it calls the DB only when a player joins
+                    } catch (SQLException ignored) {
+                    } // it can't throw as it calls the DB only when a player joins
                 }
             });
         });

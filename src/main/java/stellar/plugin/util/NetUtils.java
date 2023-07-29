@@ -25,7 +25,9 @@ public class NetUtils {
         return result;
     }
 
-    /** Use this to put all DML queries into separate thread to prevent hanging **/
+    /**
+     * Use this to put all DML queries into separate thread to prevent hanging
+     **/
     public static void updateBackground(DMLQuery<?> step) {
         new Thread(step::execute).start();
     }

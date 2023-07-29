@@ -15,13 +15,13 @@ import mindustry.gen.Call;
 import mindustry.gen.Groups;
 import mindustry.gen.Player;
 import org.jooq.Field;
+import stellar.database.Database;
 import stellar.database.enums.MessageType;
+import stellar.database.gen.Tables;
 import stellar.database.gen.tables.records.StatsRecord;
 import stellar.database.gen.tables.records.UsersRecord;
 import stellar.plugin.Const;
 import stellar.plugin.Variables;
-import stellar.database.Database;
-import stellar.database.gen.Tables;
 import stellar.plugin.components.Rank;
 import stellar.plugin.history.entry.HistoryEntry;
 import stellar.plugin.history.struct.CacheSeq;
@@ -36,7 +36,8 @@ import java.sql.SQLException;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
-import static mindustry.Vars.*;
+import static mindustry.Vars.locales;
+import static mindustry.Vars.world;
 import static stellar.plugin.Variables.*;
 import static stellar.plugin.util.NetUtils.updateBackground;
 import static stellar.plugin.util.StringUtils.longToTime;
@@ -199,7 +200,7 @@ public class PlayerCommands {
                 return;
             }
 
-            Variables.votesRTV.add(player.uuid());          
+            Variables.votesRTV.add(player.uuid());
             int cur = Variables.votesRTV.size;
             int req = (int) Math.ceil(Const.votesRatio * Groups.player.size());
 
@@ -335,7 +336,7 @@ public class PlayerCommands {
 
                     try {
                         Rank nextRank = Rank.getRank(p).getNext();
-                        String[][] newButtons = new String[][] {
+                        String[][] newButtons = new String[][]{
                                 {Bundle.get("menus.close", locale)}
                         };
 
@@ -351,7 +352,7 @@ public class PlayerCommands {
                                     targetColor(wins, nextRank.requirements.wins), wins, nextRank.requirements.wins,
                                     targetColor(record.getWaves(), nextRank.requirements.waves), record.getWaves(), nextRank.requirements.waves,
                                     targetColor(record.getBuilt(), nextRank.requirements.built), record.getBuilt(), nextRank.requirements.built,
-                                    targetColor(playtime, nextRank.requirements.playtime * 60), longToTime(playtime, locale), longToTime(nextRank.requirements.playtime * 60, locale)
+                                    targetColor(playtime, nextRank.requirements.playtime * 60), longToTime(playtime, locale), longToTime(nextRank.requirements.playtime * 60L, locale)
                             );
                             Call.menu(p.con(), 0, Bundle.get("menus.rank-info.title", locale), message, newButtons);
                         }
@@ -371,7 +372,7 @@ public class PlayerCommands {
             Locale locale = Bundle.findLocale(player.locale());
             String[][] buttons = new String[Rank.values().length + 1][]; // I wanted to use Seq<String> that didn't work
             for (Rank rank : Rank.values()) {
-                 buttons[rank.ordinal()] = new String[]{rank.formatted(player)};
+                buttons[rank.ordinal()] = new String[]{rank.formatted(player)};
             }
             buttons[Rank.values().length] = new String[]{Bundle.get("menus.close", locale)};
 
@@ -381,7 +382,7 @@ public class PlayerCommands {
                 }
 
                 try {
-                    String[][] newButtons = new String[][] {
+                    String[][] newButtons = new String[][]{
                             {Bundle.get("menus.close", locale)}
                     };
 
@@ -394,7 +395,7 @@ public class PlayerCommands {
                             targetColor(wins, rank.requirements.wins), wins, rank.requirements.wins,
                             targetColor(record.getWaves(), rank.requirements.waves), record.getWaves(), rank.requirements.waves,
                             targetColor(record.getBuilt(), rank.requirements.built), record.getBuilt(), rank.requirements.built,
-                            targetColor(playtime, rank.requirements.playtime * 60), longToTime(playtime, locale), longToTime(rank.requirements.playtime * 60, locale)
+                            targetColor(playtime, rank.requirements.playtime * 60), longToTime(playtime, locale), longToTime(rank.requirements.playtime * 60L, locale)
                     );
                     Call.menu(p.con(), 0, Bundle.get("menus.rank-info.title", locale), message, newButtons);
                 } catch (SQLException e) {
@@ -441,7 +442,7 @@ public class PlayerCommands {
 
                     try {
                         Rank nextRank = Rank.getRank(p).getNext();
-                        String[][] newButtons = new String[][] {
+                        String[][] newButtons = new String[][]{
                                 {Bundle.get("menus.close", locale)}
                         };
 
@@ -454,7 +455,7 @@ public class PlayerCommands {
                                     targetColor(wins, nextRank.requirements.wins), wins, nextRank.requirements.wins,
                                     targetColor(statsRecord.getWaves(), nextRank.requirements.waves), statsRecord.getWaves(), nextRank.requirements.waves,
                                     targetColor(statsRecord.getBuilt(), nextRank.requirements.built), statsRecord.getBuilt(), nextRank.requirements.built,
-                                    targetColor((int) playtime, nextRank.requirements.playtime * 60), longToTime(playtime, locale), longToTime(nextRank.requirements.playtime * 60, locale)
+                                    targetColor((int) playtime, nextRank.requirements.playtime * 60), longToTime(playtime, locale), longToTime(nextRank.requirements.playtime * 60L, locale)
                             );
                             Call.menu(p.con(), 0, Bundle.get("menus.rank-info.title", locale), msg, newButtons);
                         }

@@ -9,11 +9,11 @@ import mindustry.Vars;
 import mindustry.game.EventType;
 import mindustry.net.NetConnection;
 import mindustry.net.Packets;
-import stellar.plugin.Const;
-import stellar.plugin.Variables;
 import stellar.database.Database;
 import stellar.database.gen.Tables;
 import stellar.database.gen.tables.records.IpCachedRecord;
+import stellar.plugin.Const;
+import stellar.plugin.Variables;
 import stellar.plugin.util.Players;
 
 import java.sql.SQLException;
