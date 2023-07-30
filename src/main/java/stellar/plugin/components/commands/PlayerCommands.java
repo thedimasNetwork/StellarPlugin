@@ -431,37 +431,45 @@ public class PlayerCommands {
                 }
 
                 String[][] buttons = {
+                        {Bundle.get("commands.stats.hex", locale)},
                         {Bundle.get("commands.rank.next-rank", locale)},
                         {Bundle.get("menus.close", locale)}
                 };
 
                 MenuHandler.send(player, Bundle.get("menus.stats.title", locale), message, buttons, (menuId, option, p) -> {
-                    if (option == -1 || option == 1) {
+                    if (option == -1 || option == 2) {
                         return;
                     }
 
-                    try {
-                        Rank nextRank = Rank.getRank(p).getNext();
-                        String[][] newButtons = new String[][]{
-                                {Bundle.get("menus.close", locale)}
-                        };
+                    String[][] newButtons = new String[][]{
+                            {Bundle.get("menus.close", locale)}
+                    };
 
-                        if (nextRank == null) {
-                            Call.menu(p.con(), 0, Bundle.get("menus.rank-info.title", locale), Bundle.format("commands.rank.next-rank.none", locale), newButtons);
-                        } else {
-                            int wins = statsRecord.getAttacks() + statsRecord.getSurvivals() + statsRecord.getHexWins() + statsRecord.getPvp();
-                            String msg = Bundle.format("commands.rank.next-rank.info", locale,
-                                    nextRank.formatted(p),
-                                    targetColor(wins, nextRank.requirements.wins), wins, nextRank.requirements.wins,
-                                    targetColor(statsRecord.getWaves(), nextRank.requirements.waves), statsRecord.getWaves(), nextRank.requirements.waves,
-                                    targetColor(statsRecord.getBuilt(), nextRank.requirements.built), statsRecord.getBuilt(), nextRank.requirements.built,
-                                    targetColor((int) playtime, nextRank.requirements.playtime * 60), longToTime(playtime, locale), longToTime(nextRank.requirements.playtime * 60L, locale)
-                            );
-                            Call.menu(p.con(), 0, Bundle.get("menus.rank-info.title", locale), msg, newButtons);
+                    if (option == 0) {
+                        String msg = Bundle.format("commands.stats.msg.hex", locale,
+                                statsRecord.getHexesCaptured(), statsRecord.getHexesLost(), statsRecord.getHexesDestroyed(),
+                                statsRecord.getHexWins(), statsRecord.getHexLosses()); // TODO: hex score
+                        Call.menu(p.con(), 0, Bundle.get("menus.stats.title", locale), msg, newButtons);
+                    } else if (option == 1) {
+                        try {
+                            Rank nextRank = Rank.getRank(p).getNext();
+                            if (nextRank == null) {
+                                Call.menu(p.con(), 0, Bundle.get("menus.rank-info.title", locale), Bundle.format("commands.rank.next-rank.none", locale), newButtons);
+                            } else {
+                                int wins = statsRecord.getAttacks() + statsRecord.getSurvivals() + statsRecord.getHexWins() + statsRecord.getPvp();
+                                String msg = Bundle.format("commands.rank.next-rank.info", locale,
+                                        nextRank.formatted(p),
+                                        targetColor(wins, nextRank.requirements.wins), wins, nextRank.requirements.wins,
+                                        targetColor(statsRecord.getWaves(), nextRank.requirements.waves), statsRecord.getWaves(), nextRank.requirements.waves,
+                                        targetColor(statsRecord.getBuilt(), nextRank.requirements.built), statsRecord.getBuilt(), nextRank.requirements.built,
+                                        targetColor((int) playtime, nextRank.requirements.playtime * 60), longToTime(playtime, locale), longToTime(nextRank.requirements.playtime * 60L, locale)
+                                );
+                                Call.menu(p.con(), 0, Bundle.get("menus.rank-info.title", locale), msg, newButtons);
+                            }
+                        } catch (SQLException e) {
+                            Log.err(e);
+                            Bundle.bundled(p, "commands.rank.error");
                         }
-                    } catch (SQLException e) {
-                        Log.err(e);
-                        Bundle.bundled(p, "commands.rank.error");
                     }
                 });
             } catch (SQLException e) {
