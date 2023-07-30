@@ -1,10 +1,13 @@
 package stellar.plugin.history;
 
 import arc.Events;
+import arc.graphics.Color;
 import arc.struct.Seq;
 import arc.util.Pack;
+import mindustry.content.Fx;
 import mindustry.game.EventType;
 import mindustry.gen.Building;
+import mindustry.gen.Call;
 import mindustry.net.Administration;
 import mindustry.world.Tile;
 import mindustry.world.blocks.logic.LogicBlock;
@@ -21,8 +24,8 @@ import stellar.plugin.util.Bundle;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
-import static mindustry.Vars.netServer;
-import static mindustry.Vars.world;
+import static mindustry.Vars.*;
+import static stellar.plugin.Variables.activeHistoryPlayers;
 
 public class History {
     public static void load() {
@@ -32,7 +35,7 @@ public class History {
                 HistoryEntry entry = new RotateEntry(action.player, action.tile.build.block, action.rotation);
                 Variables.getHistorySeq(action.tile.x, action.tile.y).add(entry);
             }
-            return true;
+            return !activeHistoryPlayers.containsKey(action.player.uuid());
         });
 
         Events.on(EventType.BlockBuildEndEvent.class, event -> {
@@ -76,6 +79,7 @@ public class History {
             if (Variables.activeHistoryPlayers.containsKey(event.player.uuid())) {
                 int x = event.tile.x;
                 int y = event.tile.y;
+                Call.effect(event.player.con, Fx.tapBlock, event.tile.x * tilesize, event.tile.y * tilesize, 0, Color.white);
 
                 CacheSeq<HistoryEntry> entries = Variables.getHistorySeq(x, y);
 
