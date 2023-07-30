@@ -5,13 +5,13 @@ import arc.util.Log;
 import mindustry.mod.Plugin;
 import stellar.database.Database;
 import stellar.plugin.bot.Bot;
-import stellar.plugin.command.AdminCommands;
-import stellar.plugin.command.PlayerCommands;
-import stellar.plugin.command.ServerCommands;
 import stellar.plugin.components.Activity;
 import stellar.plugin.components.AntiVPN;
 import stellar.plugin.components.EventHandler;
 import stellar.plugin.components.LaunchPad;
+import stellar.plugin.components.commands.AdminCommands;
+import stellar.plugin.components.commands.PlayerCommands;
+import stellar.plugin.components.commands.ServerCommands;
 import stellar.plugin.history.History;
 
 import static mindustry.Vars.netServer;

@@ -1,4 +1,4 @@
-package stellar.plugin.command;
+package stellar.plugin.components.commands;
 
 import arc.Events;
 import arc.graphics.Color;
