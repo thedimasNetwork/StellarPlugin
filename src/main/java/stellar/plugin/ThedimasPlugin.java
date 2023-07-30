@@ -2,6 +2,7 @@ package stellar.plugin;
 
 import arc.util.CommandHandler;
 import arc.util.Log;
+import arc.util.Timer;
 import mindustry.mod.Plugin;
 import stellar.database.Database;
 import stellar.plugin.bot.Bot;
@@ -33,6 +34,11 @@ public class ThedimasPlugin extends Plugin {
         History.load();
         AntiVPN.load();
         Log.info("All components loaded");
+
+        Timer.schedule(() -> {
+            Log.warn("Collecting garbage");
+            System.gc();
+        }, 600, 600);
     }
 
     @Override
