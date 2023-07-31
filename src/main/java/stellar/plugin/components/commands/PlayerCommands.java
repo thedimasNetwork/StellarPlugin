@@ -14,6 +14,7 @@ import mindustry.game.Team;
 import mindustry.gen.Call;
 import mindustry.gen.Groups;
 import mindustry.gen.Player;
+import mindustry.net.CrashSender;
 import org.jooq.Field;
 import stellar.database.Database;
 import stellar.database.enums.MessageType;
@@ -417,7 +418,7 @@ public class PlayerCommands {
                         Bundle.findLocale(player.locale()), record.getId(), player.coloredName(),
                         rank.formatted(player),
                         statsRecord.getBuilt(), statsRecord.getBroken(),
-                        statsRecord.getAttacks(), statsRecord.getHexesCaptured(), statsRecord.getWaves(),
+                        statsRecord.getAttacks(), statsRecord.getSurvivals(), statsRecord.getHexWins(), statsRecord.getWaves(),
                         statsRecord.getLogins(), statsRecord.getMessages(), statsRecord.getDeaths(), StringUtils.longToTime(playtime, locale));
 
                 if (specialRank != null) {
@@ -425,9 +426,8 @@ public class PlayerCommands {
                             Bundle.findLocale(player.locale()), record.getId(), player.coloredName(),
                             rank.formatted(player), specialRank.formatted(player),
                             statsRecord.getBuilt(), statsRecord.getBroken(),
-                            statsRecord.getAttacks(), statsRecord.getHexesCaptured(), statsRecord.getWaves(),
+                            statsRecord.getAttacks(), statsRecord.getSurvivals(), statsRecord.getHexWins(), statsRecord.getWaves(),
                             statsRecord.getLogins(), statsRecord.getMessages(), statsRecord.getDeaths(), StringUtils.longToTime(playtime, locale));
-
                 }
 
                 String[][] buttons = {
