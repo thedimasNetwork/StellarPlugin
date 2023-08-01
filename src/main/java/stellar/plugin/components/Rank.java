@@ -31,11 +31,13 @@ public enum Rank {
     // endregion
 
     // region special
+    // TODO: make something with donater/developer
     //donater(Color.white, "\uE810", true),
     //developer(Color.white, "\uF120", true),
-    admin(Color.white, "\uE817", true),
+    admin(Color.white, "\uE817", true), // or \uE82C
     console(Color.white, "\uE80F", true),
     owner(Color.white, "\uF7AA", true);
+    //endregion
 
     private static final ObjectMap<PlayerStatus, Rank> statusRanks = ObjectMap.of( // maybe need some optimization
 //            PlayerStatus.basic, null,
@@ -180,6 +182,10 @@ public enum Rank {
             }
         }
         return null;
+    }
+
+    public static Rank max(Rank rank, Rank other) {
+        return Rank.values()[Math.max(rank.ordinal(), other.ordinal())];
     }
 
     public String formatted(Player player) {

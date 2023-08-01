@@ -2,6 +2,7 @@ package stellar.plugin;
 
 import arc.struct.*;
 import arc.util.Interval;
+import stellar.plugin.commands.CommandManager;
 import stellar.plugin.components.Rank;
 import stellar.plugin.history.entry.HistoryEntry;
 import stellar.plugin.history.struct.CacheSeq;
@@ -26,6 +27,7 @@ public class Variables {
     public static final ObjectMap<String, Rank> ranks = new ObjectMap<>();
     public static final ObjectMap<String, Rank> specialRanks = new ObjectMap<>();
     public static Config config;
+    public static CommandManager commandManager = new CommandManager();
     public static CacheSeq<HistoryEntry>[][] history = new CacheSeq[][]{};
 
     public static CacheSeq<HistoryEntry> getHistorySeq(int x, int y) {

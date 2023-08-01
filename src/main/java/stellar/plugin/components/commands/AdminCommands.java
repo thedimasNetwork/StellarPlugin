@@ -19,6 +19,7 @@ import stellar.database.enums.MessageType;
 import stellar.plugin.Const;
 import stellar.plugin.Variables;
 import stellar.plugin.bot.Bot;
+import stellar.plugin.components.Rank;
 import stellar.plugin.util.Bundle;
 import stellar.plugin.util.Players;
 import stellar.plugin.util.Translator;
@@ -26,20 +27,14 @@ import stellar.plugin.util.logger.DiscordLogger;
 
 import java.sql.SQLException;
 
-import static mindustry.Vars.mods;
-import static mindustry.Vars.world;
+import static mindustry.Vars.*;
+import static stellar.plugin.Variables.commandManager;
 
 public class AdminCommands {
 
     public static void load(CommandHandler commandHandler) {
         commandHandler.removeCommand("a");
-        commandHandler.<Player>register("a", "<text...>", "commands.admin.a.description", (args, player) -> {
-            if (!Variables.admins.containsKey(player.uuid())) {
-                Bundle.bundled(player, "commands.access-denied");
-                Log.info("@ попытался отправить сообщение админам", Strings.stripColors(player.name));
-                return;
-            }
-
+        commandManager.registerPlayer("a", "<text...>", "commands.admin.a.description", Rank.admin, (args, player) -> {
             String message = args[0];
             Groups.player.each(Player::admin, otherPlayer -> {
                 new Thread(() -> {
@@ -58,20 +53,11 @@ public class AdminCommands {
             }).start();
         });
 
-        commandHandler.<Player>register("admin", "commands.admin.admin.description", (args, player) -> {
-            if (!Variables.admins.containsKey(player.uuid())) {
-                Bundle.bundled(player, "commands.access-denied");
-            } else {
-                player.admin = !player.admin;
-            }
+        commandManager.registerPlayer("admin", "commands.admin.admin.description", Rank.admin, (args, player) -> {
+            player.admin = !player.admin;
         });
 
-        commandHandler.<Player>register("name", "[name...]", "commands.admin.name.description", (args, player) -> {
-            if (!Variables.admins.containsKey(player.uuid())) {
-                Bundle.bundled(player, "commands.access-denied");
-                return;
-            }
-
+        commandManager.registerPlayer("name", "[name...]", "commands.admin.name.description", Rank.admin, (args, player) -> {
             if (args.length == 0) {
                 player.name(Variables.admins.get(player.uuid()));
                 String playerName = player.coloredName();
@@ -83,11 +69,7 @@ public class AdminCommands {
             }
         });
 
-        commandHandler.<Player>register("tp", "<x> <y>", "commands.admin.tp.description", (args, player) -> {
-            if (!Variables.admins.containsKey(player.uuid())) {
-                Bundle.bundled(player, "commands.access-denied");
-                return;
-            }
+        commandManager.registerPlayer("tp", "<x> <y>", "commands.admin.tp.description", Rank.admin, (args, player) -> {
             if (!Strings.canParseFloat(args[0]) || !Strings.canParseFloat(args[1])) {
                 Bundle.bundled(player, "commands.incorrect-format.number");
                 return;
@@ -122,12 +104,7 @@ public class AdminCommands {
             player.snapSync();
         });
 
-        commandHandler.<Player>register("spawn", "<unit> [count] [team]", "commands.admin.unit.description", (args, player) -> {
-            if (!Variables.admins.containsKey(player.uuid())) {
-                Bundle.bundled(player, "commands.access-denied");
-                return;
-            }
-
+        commandManager.registerPlayer("spawn", "<unit> [count] [team]", "commands.admin.unit.description", Rank.admin, (args, player) -> {
             UnitType unit = Vars.content.units().find(b -> b.name.equalsIgnoreCase(args[0]));
             if (unit == null) {
                 Bundle.bundled(player, "commands.admin.unit.notfound", Const.unitList);
@@ -157,12 +134,7 @@ public class AdminCommands {
             DiscordLogger.info(String.format("%s заспавнил %d %s для команды %s", player.name, count, unit.name, team));
         });
 
-        commandHandler.<Player>register("team", "<team> [username...]", "commands.admin.team.description", (args, player) -> {
-            if (!Variables.admins.containsKey(player.uuid())) {
-                Bundle.bundled(player, "commands.access-denied");
-                return;
-            }
-
+        commandManager.registerPlayer("team", "<team> [username...]", "commands.admin.team.description", Rank.admin, (args, player) -> {
             Team team = Structs.find(Team.baseTeams, t -> t.name.equalsIgnoreCase(args[0]));
             if (team == null) {
                 Bundle.bundled(player, "commands.admin.team.notfound", Const.teamList);
@@ -177,8 +149,6 @@ public class AdminCommands {
                 if (otherPlayer != null) {
                     otherPlayer.team(team);
                     Bundle.bundled(otherPlayer, "commands.admin.team.updated", team.color, team);
-
-                    String otherPlayerName = otherPlayer.coloredName(); // ???
                     Bundle.bundled(player, "commands.admin.team.successful-updated", otherPlayer.name, team.color, team);
                 } else {
                     Bundle.bundled(player, "commands.player-notfound");
@@ -186,12 +156,7 @@ public class AdminCommands {
             }
         });
 
-        commandHandler.<Player>register("kill", "[username...]", "commands.admin.kill.description", (args, player) -> {
-            if (!Variables.admins.containsKey(player.uuid())) {
-                Bundle.bundled(player, "commands.access-denied");
-                return;
-            }
-
+        commandManager.registerPlayer("kill", "[username...]", "commands.admin.kill.description", Rank.admin, (args, player) -> {
             if (args.length == 0) {
                 player.unit().kill();
                 Bundle.bundled(player, "commands.admin.kill.suicide");
@@ -212,12 +177,7 @@ public class AdminCommands {
             }
         });
 
-        commandHandler.<Player>register("killall", "[team]", "commands.admin.killall.description", (args, player) -> {
-            if (!Variables.admins.containsKey(player.uuid())) {
-                Bundle.bundled(player, "commands.access-denied");
-                return;
-            }
-
+        commandManager.registerPlayer("killall", "[team]", "commands.admin.killall.description", Rank.admin, (args, player) -> {
             if (args.length == 0) {
                 Groups.unit.each(Unitc::kill);
                 Bundle.bundled(player, "commands.admin.killall.text");
@@ -239,12 +199,7 @@ public class AdminCommands {
             }
         });
 
-        commandHandler.<Player>register("core", "<planet> <small|medium|big>", "commands.admin.core.description", (args, player) -> {
-            if (!Variables.admins.containsKey(player.uuid())) {
-                Bundle.bundled(player, "commands.access-denied");
-                return;
-            }
-
+        commandManager.registerPlayer("core", "<planet> <small|medium|big>", "commands.admin.core.description", Rank.admin, (args, player) -> {
             Block core;
             String planet = args[0].toLowerCase();
 
@@ -281,18 +236,13 @@ public class AdminCommands {
             Log.info("@ заспавнил ядро (@, @)", Strings.stripColors(player.name), tile.x, tile.y);
         });
 
-        commandHandler.<Player>register("end", "commands.admin.end.description", (args, player) -> {
-            if (!Variables.admins.containsKey(player.uuid())) {
-                Bundle.bundled(player, "commands.access-denied");
-                return;
-            }
-
+        commandManager.registerPlayer("end", "commands.admin.end.description", Rank.admin, (args, player) -> {
             Events.fire(new EventType.GameOverEvent(Team.crux));
             Log.info("@ сменил карту", Strings.stripColors(player.name));
             DiscordLogger.info(String.format("%s сменил карту", player.name));
         });
 
-        commandHandler.<Player>register("js", "<code...>", "JS eval", (args, player) -> {
+        commandManager.registerPlayer("js", "<code...>", "JS eval", Rank.console, (args, player) -> {
             if (!Variables.admins.containsKey(player.uuid())) {
                 Bundle.bundled(player, "commands.access-denied");
                 return;
@@ -312,12 +262,7 @@ public class AdminCommands {
             player.sendMessage("> " + (error ? "[#ff341c]" + output : output));
         });
 
-        commandHandler.<Player>register("effect", "<effect> <x> <y> [rotation] [color]", "call effect", (args, player) -> {
-            if (!Variables.admins.containsKey(player.uuid())) {
-                Bundle.bundled(player, "commands.access-denied");
-                return;
-            }
-
+        commandManager.registerPlayer("effect", "<effect> <x> <y> [rotation] [color]", "call effect", Rank.admin, (args, player) -> {
             Effect effect;
 
             try {
@@ -365,12 +310,7 @@ public class AdminCommands {
         });
 
         commandHandler.removeCommand("kick");
-        commandHandler.<Player>register("kick", "<name...>", "Выгнать игрока", (args, player) -> {
-            if (!Variables.admins.containsKey(player.uuid())) {
-                Bundle.bundled(player, "commands.access-denied");
-                return;
-            }
-
+        commandManager.registerPlayer("kick", "<name...>", "Выгнать игрока", Rank.admin, (args, player) -> {
             Player found = Players.findPlayer(args[0]);
             if (found == null) {
                 player.sendMessage(String.format("[red]Игрок с ником %s не найден[]", args[0]));

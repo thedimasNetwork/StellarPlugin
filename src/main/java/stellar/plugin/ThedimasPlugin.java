@@ -16,6 +16,7 @@ import stellar.plugin.components.commands.ServerCommands;
 import stellar.plugin.history.History;
 
 import static mindustry.Vars.netServer;
+import static stellar.plugin.Variables.commandManager;
 import static stellar.plugin.Variables.config;
 
 @SuppressWarnings({"unused"})
@@ -48,6 +49,7 @@ public class ThedimasPlugin extends Plugin {
 
     @Override
     public void registerClientCommands(CommandHandler handler) {
+        commandManager.setClientHandler(handler);
         PlayerCommands.load(handler);
         AdminCommands.load(handler);
     }

@@ -1,5 +1,6 @@
 package stellar.plugin.components;
 
+import arc.Core;
 import arc.struct.ObjectMap;
 import arc.util.Log;
 import arc.util.Timer;
