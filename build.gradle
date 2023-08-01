@@ -42,7 +42,13 @@ dependencies {
     annotationProcessor "org.projectlombok:lombok:$lombokVersion"
     compileOnly "org.projectlombok:lombok:$lombokVersion"
 
-    compileOnly ("com.github.Anuken.MindustryJitpack:core:$mindustryVersion") { exclude module: "flabel" }
+    compileOnly ("com.github.Anuken.MindustryJitpack:core:$mindustryVersion") {
+        exclude module: "flabel"
+        exclude module: "freetype"
+        exclude module: "g3d"
+        exclude module: "fx"
+        exclude module: "arcnet"
+    }
     compileOnly "com.github.Anuken.Arc:arc-core:$mindustryVersion"
 
     implementation "com.github.thedimasNetwork:DiscordWebhook:$discordWebhookVersion"
