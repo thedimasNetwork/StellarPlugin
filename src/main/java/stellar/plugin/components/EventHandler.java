@@ -58,8 +58,8 @@ public class EventHandler {
                         BansRecord record = Database.latestBan(event.player.uuid());
                         UsersRecord admin = Database.getPlayer(record.getAdmin());
                         String adminName = admin != null ? Strings.stripColors(admin.getName()) : record.getAdmin();
-                        String banDate = record.getCreated().format(Const.dateFotmatter);
-                        String unbanDate = record.getUntil() != null ? record.getUntil().format(Const.dateFotmatter) : Bundle.get("events.join.banned.forever", locale);
+                        String banDate = record.getCreated().format(Const.dateFormatter);
+                        String unbanDate = record.getUntil() != null ? record.getUntil().format(Const.dateFormatter) : Bundle.get("events.join.banned.forever", locale);
 
                         String message = Bundle.format("events.join.banned", locale, adminName, banDate, record.getReason().strip(), unbanDate, config.discordUrl);
                         event.player.kick(message);
