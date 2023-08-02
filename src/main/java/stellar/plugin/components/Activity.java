@@ -36,7 +36,7 @@ public class Activity {
                 for (Player p : Groups.player) {
                     try {
                         long computed = Database.getPlaytime(p.uuid(), Const.playtimeField) + 60;
-                        updateBackground(Database.getContext() // TODO: Database.updatePlaytime
+                         updateBackground(Database.getContext() // TODO: Database.updatePlaytime
                                 .update(Tables.playtime)
                                 .set(Const.playtimeField, computed)
                                 .where(Tables.playtime.uuid.eq(p.uuid())));

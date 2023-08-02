@@ -1,6 +1,7 @@
 package stellar.plugin;
 
 import arc.files.Fi;
+import arc.struct.ObjectMap;
 import arc.struct.Seq;
 import arc.struct.StringMap;
 import arc.util.Log;
@@ -110,7 +111,36 @@ public class Const {
             "hex_pvp", "[#e6bd74]\uE829[] [#f92672]thedimas [#e6bd74]\uE861[#a6e22e]Hex PvP[#e6bd74]\uE861[]",
             "castle_wars", "[#e6bd74]\uE829[] [#f92672]thedimas [#e6bd74]\uE807[#a6e22e]Castle Wars[#e6bd74]\uE807[]",
             "crawler_arena", "[#e6bd74]\uE829[] [#f92672]thedimas [#e6bd74]\uE871[#a6e22e]Crawler Arena[#e6bd74]\uE871[]",
-            "zone_capture", "[#e6bd74]\uE829[] [#f92672]thedimas [#e6bd74]\uE853[#a6e22e]Zone Capture[#e6bd74]\uE853[]");
+            "zone_capture", "[#e6bd74]\uE829[] [#f92672]thedimas [#e6bd74]\uE853[#a6e22e]Zone Capture[#e6bd74]\uE853[]"
+    );
+    public static final StringMap translatorLocales = StringMap.of( // Top 25 locales by popularity on the server
+            "ru", "Русский",
+            "en", "English",
+            "es", "Español",
+            "zh", "简体中文",
+            "uk_UA", "Українська",
+            "vi", "Tiếng Việt",
+            "pt", "Português",
+            "th", "ไทย",
+            "in", "Indonesian",
+            "fr", "Français",
+            "pl", "Polski",
+            "tr", "Türkçe",
+            "de", "Deutsch",
+            "ko", "한국어",
+            "it", "Italiano",
+            "cs", "Čeština",
+            "ja", "日本語",
+            "ar", "العربية",
+            "hu", "Magyar",
+            "ro", "Română",
+            "nl", "Nederlands",
+            "fa", "فارسی",
+            "fil", "Filipino",
+            "sk", "Slovenčina",
+            "ms", "Malay"
+    );
+
     public static final String serverFieldName = Const.serverAddress.findKey("play.thedimas.pp.ua:" + Administration.Config.port.num(), false);
     public static final Field<Long> playtimeField = (Field<Long>) Tables.playtime.field(Const.serverFieldName);
 
@@ -129,28 +159,5 @@ public class Const {
 
     public static Locale defaultLocale() {
         return Structs.find(supportedLocales, l -> l.toString().equals("en"));
-    }
-
-    // для отложенной инициализации
-    // это нужно из-за того, что Vars.locale инициализируется _не очень вовремя_
-    // (из-за асинхронного запроса)
-    public static class LocaleListHolder {
-        public static final String localeList;
-
-        static {
-            StringBuilder tmp = new StringBuilder();
-
-            for (int i = 0; i < Vars.locales.length; i++) {
-                tmp.append(Vars.locales[i].toString());
-                if (i != Vars.locales.length - 1) {
-                    tmp.append(", ");
-                }
-                if (i % 6 == 0) {
-                    tmp.append("\n");
-                }
-            }
-
-            localeList = tmp.toString();
-        }
     }
 }

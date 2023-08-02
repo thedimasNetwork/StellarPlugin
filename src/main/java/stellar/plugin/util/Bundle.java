@@ -25,25 +25,6 @@ public class Bundle {
 
     private static final ObjectMap<Locale, MessageFormat> formats = new ObjectMap<>();
 
-    static {
-        Http.get(ghApi + "/search/code?q=name+repo:Anuken/Mindustry+filename:bundle&per_page=100", res -> {
-            Jval json = Jval.read(res.getResultAsString());
-            Seq<String> names = json.get("items").asArray().map(obj -> obj.getString("name"))
-                    .filter(str -> str.endsWith(".properties") && !str.equals("bundle.properties"))
-                    .map(str -> str.substring("bundle".length() + 1, str.lastIndexOf('.')))
-                    .add("en");
-
-            locales = new Locale[names.size];
-            for (int i = 0; i < locales.length; i++) {
-                locales[i] = Bundle.parseLocale(names.get(i));
-            }
-
-            Arrays.sort(locales, Structs.comparing(l -> l.getDisplayName(l), String.CASE_INSENSITIVE_ORDER));
-            locales = Seq.with(locales).add(new Locale("router")).toArray(Locale.class);
-            Log.debug("Fetched locales: @", Arrays.toString(Const.supportedLocales));
-        }, Log::err);
-    }
-
     private Bundle() {
     }
 

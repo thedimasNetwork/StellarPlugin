@@ -4,6 +4,7 @@ import arc.Core;
 import arc.Events;
 import arc.math.Mathf;
 import arc.struct.ObjectMap;
+import arc.struct.Seq;
 import arc.util.CommandHandler;
 import arc.util.Log;
 import arc.util.Strings;
@@ -118,60 +119,50 @@ public class PlayerCommands {
             }
 
             String mode = args[0].toLowerCase();
-            switch (mode) {
-                case "off" -> {
-                    try {
-                        updateBackground(Database.getContext()
+            try {
+                switch (mode) {
+                    case "off" -> {
+                        Database.getContext()
                                 .update(Tables.users)
                                 .set(Tables.users.translator, "off")
-                                .where(Tables.users.uuid.eq(player.uuid())));
-                    } catch (Throwable t) {
-                        Log.err(t);
-                        DiscordLogger.err(t);
+                                .where(Tables.users.uuid.eq(player.uuid()))
+                                .executeAsync();
+                        Bundle.bundled(player, "commands.tr.disabled");
                     }
-                    Bundle.bundled(player, "commands.tr.disabled");
-                }
-                case "auto" -> {
-                    try {
-                        updateBackground(Database.getContext()
+                    case "auto" -> {
+                        Database.getContext()
                                 .update(Tables.users)
                                 .set(Tables.users.translator, "auto")
-                                .where(Tables.users.uuid.eq(player.uuid())));
-                    } catch (Throwable t) {
-                        Log.err(t);
-                        DiscordLogger.err(t);
+                                .where(Tables.users.uuid.eq(player.uuid()))
+                                .executeAsync();
+                        Bundle.bundled(player, "commands.tr.auto");
                     }
-                    Bundle.bundled(player, "commands.tr.auto");
-                }
-                case "double" -> {
-                    try {
-                        updateBackground(Database.getContext()
+                    case "double" -> {
+                        Database.getContext()
                                 .update(Tables.users)
                                 .set(Tables.users.translator, "double")
-                                .where(Tables.users.uuid.eq(player.uuid())));
-                    } catch (Throwable t) {
-                        Log.err(t);
-                        DiscordLogger.err(t);
+                                .where(Tables.users.uuid.eq(player.uuid()))
+                                .executeAsync();
+                        Bundle.bundled(player, "commands.tr.double");
                     }
-                    Bundle.bundled(player, "commands.tr.double");
-                }
-                default -> {
-                    Locale target = Structs.find(locales, l -> mode.equalsIgnoreCase(l.toString()));
-                    if (target == null) {
-                        Bundle.bundled(player, "commands.tr.list", Const.LocaleListHolder.localeList);
-                        return;
-                    }
-                    try {
-                        updateBackground(Database.getContext()
+                    default -> {
+                        String target = Const.translatorLocales.get(mode);
+                        if (target == null) {
+                            Bundle.bundled(player, "commands.tr.list", String.join(", ", Const.translatorLocales.keys())); // TODO: settings menu
+                            return;
+                        }
+
+                        Database.getContext()
                                 .update(Tables.users)
-                                .set(Tables.users.translator, target.toString())
-                                .where(Tables.users.uuid.eq(player.uuid())));
-                    } catch (Throwable t) {
-                        Log.err(t);
-                        DiscordLogger.err(t);
+                                .set(Tables.users.translator, target)
+                                .where(Tables.users.uuid.eq(player.uuid()))
+                                .executeAsync();
+                        Bundle.bundled(player, "commands.tr.set", target);
                     }
-                    Bundle.bundled(player, "commands.tr.set", target);
                 }
+            } catch (Throwable t) {
+                Log.err(t);
+                DiscordLogger.err(t);
             }
         });
 
