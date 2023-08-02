@@ -251,14 +251,6 @@ public class AdminCommands {
         });
 
         commandManager.registerPlayer("js", "<code...>", "JS eval", Rank.console, (args, player) -> {
-            if (!Variables.admins.containsKey(player.uuid())) {
-                Bundle.bundled(player, "commands.access-denied");
-                return;
-            }
-            if (!Variables.jsallowed.containsKey(player.uuid())) {
-                Bundle.bundled(player, "commands.admin.access-denied");
-                return;
-            }
             String output = mods.getScripts().runConsole(args[0]);
             boolean error = false;
             try {
@@ -336,6 +328,20 @@ public class AdminCommands {
             Bot.sendMessage(String.format("%s выгнал игрока %s", player.name(), found.name()));
         }); // TODO: использовать бандлы
 
+        commandManager.registerPlayer("execute", "<name> <command> [args...]", "Execute command as a player", Rank.console, (args, player) -> {
+            Player target = Players.findPlayer(args[0]);
+            if (target == null) {
+                Bundle.bundled("commands.player-notfound");
+                return;
+            }
+
+            String command = "/" + args[1];
+            if (args.length > 2) {
+                command += " " + args[2];
+            }
+            commandHandler.handleMessage(command, target);
+        });
+
         commandManager.registerPlayer("kills", "<selector...>", "Kill entities by specified selector.", Rank.console, (args, player) -> {
             if (args[0].length() < 2 || !args[0].startsWith("@")) {
                 player.sendMessage("[scarlet]Invalid selector![]");
@@ -396,9 +402,6 @@ public class AdminCommands {
                             Object obj = entity;
                             Field field = null;
                             Method method = null;
-                            /* Notes for finishing
-                             * Make kind of player.unit.type=gamma
-                             */
                             for (String part : fieldName.split("\\.")) {
                                 if (field != null) {
                                     obj = field.get(obj);
