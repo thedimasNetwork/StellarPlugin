@@ -118,9 +118,6 @@ public class EventHandler {
                         specialRanks.put(event.player.uuid(), Rank.getRank(data.getStatus()));
                         event.player.admin = true;
                     }
-                    if (data.isJsallowed()) {
-                        jsallowed.put(event.player.uuid(), event.player.name);
-                    }
                     if (data.getDonated() > 0) {
                         donaters.put(event.player.uuid(), event.player.name);
                     }
@@ -384,7 +381,6 @@ public class EventHandler {
             }
 
             admins.remove(event.player.uuid());
-            jsallowed.remove(event.player.uuid());
             donaters.remove(event.player.uuid());
             activeHistoryPlayers.remove(event.player.uuid());
             unitPlayer.remove(event.player.unit().id);

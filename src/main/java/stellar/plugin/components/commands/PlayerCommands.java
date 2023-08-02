@@ -359,11 +359,11 @@ public class PlayerCommands {
                         }
                     } catch (SQLException e) {
                         Log.err(e);
-                        Bundle.bundled(p, "commands.rank.error");
+                        Bundle.bundled(p, "commands.unknown-error");
                     }
                 }));
             } catch (SQLException e) {
-                Bundle.bundled(player, "commands.rank.error");
+                Bundle.bundled(player, "commands.unknown-error");
                 Log.err(e);
             }
         });
@@ -401,7 +401,7 @@ public class PlayerCommands {
                     Call.menu(p.con(), 0, Bundle.get("menus.rank-info.title", locale), message, newButtons);
                 } catch (SQLException e) {
                     Log.err(e);
-                    Bundle.bundled(p, "commands.rank.error");
+                    Bundle.bundled(p, "commands.unknown-error");
                 }
             });
         });
@@ -468,13 +468,13 @@ public class PlayerCommands {
                             }
                         } catch (SQLException e) {
                             Log.err(e);
-                            Bundle.bundled(p, "commands.rank.error");
+                            Bundle.bundled(p, "commands.unknown-error");
                         }
                     }
                 });
             } catch (SQLException e) {
                 Log.err(e);
-                Bundle.bundled(player, "commands.stats.error");
+                Bundle.bundled(player, "commands.unknown-error");
             }
         });
 
@@ -521,10 +521,6 @@ public class PlayerCommands {
             });
 
             commandHandler.<Player>register("setrank", "<rank>", "Set your rank temporary. [accent]Debug only![]", (args, player) -> {
-                if (!jsallowed.containsKey(player.uuid())) {
-                    Bundle.bundled(player, "commands.access-denied");
-                    return;
-                }
                 try {
                     Variables.ranks.put(player.uuid(), Rank.valueOf(args[0]));
                     player.sendMessage(String.format("Your new rank is %s", args[0]));

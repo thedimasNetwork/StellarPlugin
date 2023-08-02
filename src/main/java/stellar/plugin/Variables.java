@@ -19,7 +19,6 @@ public class Variables {
     // uuid -> name
     public static final StringMap admins = new StringMap();
     public static final StringMap donaters = new StringMap();
-    public static final StringMap jsallowed = new StringMap();
     public static final Seq<String> blacklistedSubnets = new Seq<>();
     public static final IntMap<AdminActionEntry> adminActions = new IntMap<>();
     public static final ObjectMap<String, ObjectMap<String, Integer>> statsData = new ObjectMap<>(); // uuid -> [field -> increase,...]
