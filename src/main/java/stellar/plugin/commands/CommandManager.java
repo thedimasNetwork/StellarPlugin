@@ -36,7 +36,6 @@ public class CommandManager {
                 Log.err(e);
             }
 
-            Log.debug(Rank.max(playerRank, specialRank).name());
             if (!Rank.max(playerRank, specialRank).gte(rank)) {
                 Bundle.bundled(player, "commands.access-denied", rank.formatted(player));
                 return;

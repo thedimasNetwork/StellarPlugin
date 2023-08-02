@@ -2,11 +2,13 @@ package stellar.plugin.components.commands;
 
 import arc.Events;
 import arc.graphics.Color;
+import arc.struct.Seq;
 import arc.util.*;
 import mindustry.Vars;
 import mindustry.content.Blocks;
 import mindustry.content.Fx;
 import mindustry.entities.Effect;
+import mindustry.entities.Units;
 import mindustry.game.EventType;
 import mindustry.game.Team;
 import mindustry.gen.*;
@@ -25,7 +27,13 @@ import stellar.plugin.util.Players;
 import stellar.plugin.util.Translator;
 import stellar.plugin.util.logger.DiscordLogger;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.sql.SQLException;
+import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static mindustry.Vars.*;
 import static stellar.plugin.Variables.commandManager;
@@ -327,5 +335,125 @@ public class AdminCommands {
             Log.info("@ (@) has kicked @ (@)", player.name(), player.uuid(), found.name(), found.uuid());
             Bot.sendMessage(String.format("%s выгнал игрока %s", player.name(), found.name()));
         }); // TODO: использовать бандлы
+
+        commandManager.registerPlayer("kills", "<selector...>", "Kill entities by specified selector.", Rank.console, (args, player) -> {
+            if (args[0].length() < 2 || !args[0].startsWith("@")) {
+                player.sendMessage("[scarlet]Invalid selector![]");
+                return;
+            }
+            String selector = args[0].substring(0, 2);
+            Seq<Entityc> entities = new Seq<>();
+
+            switch (selector) {
+                case "@p" -> {
+                    entities.add(Units.closest(player.team(), player.x(), player.y(), unit -> unit.isPlayer() && !unit.equals(player.unit())));
+                }
+                case "@r" -> {
+                    Seq<Player> players = new Seq<>();
+                    Groups.player.copy(players);
+                    entities.add(players.random());
+                }
+                case "@e" -> Groups.all.each(entities::add);
+                case "@a" -> Groups.player.each(entities::add);
+                case "@u" -> Groups.unit.each(entities::add);
+                case "@s" -> entities.add(player);
+                default -> {
+                    player.sendMessage("[scarlet]Invalid selector![]");
+                    return;
+                }
+            }
+            entities = entities.filter(Objects::nonNull);
+
+            if (args[0].length() > 2) {
+                Pattern argumentsPattern = Pattern.compile("\\[(.*?)\\]");
+                Pattern comparatorPattern = Pattern.compile("(>|>=|<|<=|=|!=|~|!~)");
+
+                Matcher argumentsMatcher = argumentsPattern.matcher(args[0]);
+                if (!argumentsMatcher.find()) {
+                    player.sendMessage("[scarlet]Invalid arguments![]");
+                    return;
+                }
+
+                Log.info(argumentsMatcher.group(1));
+                for (String argument : argumentsMatcher.group(1).split(",")) {
+                    String[] split = argument.split(comparatorPattern.pattern());
+
+                    if (split.length != 2) {
+                        player.sendMessage(String.format("[scarlet]Invalid key %s![]", split[0]));
+                        return;
+                    }
+
+                    Matcher comparatorMatcher = comparatorPattern.matcher(argument);
+                    if (!comparatorMatcher.find()) {
+                        player.sendMessage(String.format("[scarlet]Invalid comparator in parameter %s![]", argument));
+                        return;
+                    }
+
+                    String fieldName = split[0], value = split[1], comparator = comparatorMatcher.group();
+
+                    entities.filter(entity -> {
+                        try {
+                            Object obj = entity;
+                            Field field = null;
+                            Method method = null;
+                            /* Notes for finishing
+                             * Make kind of player.unit.type=gamma
+                             */
+                            for (String part : fieldName.split("\\.")) {
+                                if (field != null) {
+                                    obj = field.get(obj);
+                                } else if (method != null) {
+                                    obj = method.invoke(obj);
+                                }
+                                if (part.endsWith("()")) {
+                                    method = obj.getClass().getMethod(part.replace("()", ""));
+                                    field = null;
+                                } else {
+                                    field = obj.getClass().getField(part);
+                                    method = null;
+                                }
+                                Log.debug("@: @ | @", obj, field, part);
+                            }
+                            Log.debug(obj.getClass().getName());
+                            return Players.fieldCompare(field, obj, value, comparator);
+                        } catch (NoSuchMethodException | NoSuchFieldException e) {
+                            Log.debug("-- DOES NOT EXIST --");
+                            Log.debug(entity);
+                            Log.debug("-------");
+                            return false;
+                        } catch (IllegalAccessException e) {
+                            Log.debug("-- ILLEGAL! --");
+                            Log.debug(entity);
+                            Log.debug("-------");
+                            return false;
+                        } catch (InvocationTargetException e) {
+                            Log.debug("-- WRONG TARGET! --");
+                            Log.debug(entity);
+                            Log.debug("-------");
+                            return false;
+                        }
+                    });
+                    player.sendMessage(String.format("Key: [accent]%s[], value: [accent]%s[], comparator: [accent]%s[]", fieldName, value, comparator));
+                }
+            }
+
+            if (entities.size <= 0) {
+                player.sendMessage("[scarlet]No entities found[]");
+                return;
+            }
+            entities.each(entity -> {
+                try {
+                    if (entity instanceof Player p) {
+                         p.unit().kill();
+                    } else {
+                        entity.getClass().getMethod("kill").invoke(entity);
+                    }
+                } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+                    player.sendMessage(String.format("Unable to kill %s (#%d)", entity.getClass().getName(), entity.id()));
+                    Log.err(e);
+                }
+            });
+            player.sendMessage(String.format("Killed %d entities", entities.size));
+        });
     }
 }

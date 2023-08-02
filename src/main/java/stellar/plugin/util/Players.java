@@ -3,9 +3,12 @@ package stellar.plugin.util;
 import arc.struct.ObjectMap;
 import arc.util.Log;
 import arc.util.Nullable;
+import arc.util.Reflect;
 import arc.util.Strings;
+import mindustry.ctype.UnlockableContent;
 import mindustry.gen.Groups;
 import mindustry.gen.Player;
+import mindustry.type.UnitType;
 import org.jooq.Field;
 import stellar.database.gen.Tables;
 import stellar.plugin.Variables;
@@ -69,5 +72,77 @@ public class Players {
             Log.err(e);
             return player.admin() ? "<\uE872> " + player.coloredName() : player.coloredName();
         }
+    }
+
+    // I have no clue how this works...
+    public static boolean fieldCompare(java.lang.reflect.Field field, Object object, String value, String comparator) {
+        Log.debug(field.getType());
+        try {
+            if (UnlockableContent.class.isAssignableFrom(field.getType())) {
+                Log.debug("A1");
+                boolean result = false;
+                if (comparator.endsWith("=")) {
+                    result = ((UnlockableContent) field.get(object)).name.equals(value);
+                } else if (comparator.endsWith("~")) {
+                    String sn = StringUtils.stripColorsAndGlyphs(((UnlockableContent) field.get(object)).name);
+                    String sv = StringUtils.stripColorsAndGlyphs(value);
+                    result = sn.equalsIgnoreCase(sv);
+                }
+                return comparator.startsWith("!") != result;
+            } else if (Number.class.isAssignableFrom(field.getType())) {
+                Log.debug("B1");
+                if (!Strings.canParseInt(value)) {
+                    Log.debug("B2");
+                    return false;
+                }
+                int fv = field.getInt(object);
+                int v = Strings.parseInt(value);
+                Log.debug("B3");
+                switch (comparator) {
+                    case ">=" -> {
+                        return fv >= v;
+                    }
+                    case ">" -> {
+                        return fv > v;
+                    }
+                    case "<=" -> {
+                        return fv <= v;
+                    }
+                    case "<" -> {
+                        return fv < v;
+                    }
+                    case "=", "~"  -> {
+                        return fv == v;
+                    }
+                    case "!=", "!~" -> {
+                        return fv != v;
+                    }
+                }
+            } else if (String.class.isAssignableFrom(field.getType())) {
+                Log.debug("C1");
+                boolean result = false;
+                if (comparator.endsWith("=")) {
+                    result = field.get(object).equals(value);
+                } else if (comparator.endsWith("~")) {
+                    String sn = StringUtils.stripColorsAndGlyphs((String) field.get(object));
+                    String sv = StringUtils.stripColorsAndGlyphs(value);
+                    result = sv.equalsIgnoreCase(sn);
+                }
+                return comparator.startsWith("!") != result;
+            } else {
+                boolean result = false;
+                if (comparator.endsWith("=")) {
+                    result = field.get(object).toString().equals(value);
+                } else if (comparator.endsWith("~")) {
+                    result = field.get(object).toString().equalsIgnoreCase(value);
+                }
+                return comparator.startsWith("!") != result;
+            }
+        } catch (IllegalAccessException e) {
+            Log.debug("D1");
+            return false;
+        }
+        Log.debug("E1");
+        return false;
     }
 }
