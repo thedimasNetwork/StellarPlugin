@@ -22,7 +22,7 @@ public class Const {
     public static final String pluginFolder = "config/mods/" + mods.list().find(l -> l.main instanceof ThedimasPlugin).meta.name + "/";
     public static final String pluginVersion = mods.list().find(l -> l.main instanceof ThedimasPlugin).meta.version;
 
-    public static final String joinLogFormat = "@ has joined the server | locale: @ | IP: @";
+    public static final String joinLogFormat = "@ has joined the server | UUID: @ | IP: @ | Locale: @";
     public static final String chatLogFormat = "@: @ | @";
 
     public static final String chatFormat = "{0}[white]: {1}";

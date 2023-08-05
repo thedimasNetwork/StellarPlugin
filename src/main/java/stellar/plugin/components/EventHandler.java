@@ -81,7 +81,7 @@ public class EventHandler {
 
         // region PlayerJoin
         Events.on(EventType.PlayerJoin.class, event -> {
-            Log.info(Const.joinLogFormat, event.player.name, event.player.locale, event.player.con.address);
+            Log.info(Const.joinLogFormat, event.player.name(), event.player.uuid(), event.player.ip(), event.player.locale());
             String playerName = event.player.coloredName();
             Bundle.bundled("events.join.player-join", playerName);
 
