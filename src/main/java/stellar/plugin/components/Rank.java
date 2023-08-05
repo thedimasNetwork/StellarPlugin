@@ -8,6 +8,7 @@ import mindustry.entities.Effect;
 import mindustry.gen.Player;
 import org.jetbrains.annotations.NotNull;
 import stellar.database.Database;
+import stellar.database.DatabaseAsync;
 import stellar.database.enums.PlayerStatus;
 import stellar.database.gen.tables.records.StatsRecord;
 import stellar.plugin.Variables;
@@ -16,6 +17,7 @@ import stellar.plugin.util.Bundle;
 
 import java.sql.SQLException;
 import java.util.Locale;
+import java.util.concurrent.CompletableFuture;
 
 public enum Rank {
     // region basic
@@ -155,23 +157,31 @@ public enum Rank {
         if (Variables.ranks.containsKey(player.uuid())) {
             return Variables.ranks.get(player.uuid());
         }
-        Rank rank = Rank.getRank(player, true);
+        Rank rank = Rank.getRankForced(player);
         Variables.ranks.put(player.uuid(), rank);
         return rank;
     }
 
-    public static Rank getRank(Player player, boolean forced) throws SQLException {
-        if (forced) {
-            StatsRecord record = Database.getStats(player.uuid());
-            return Rank.getRank(new Requirements(record.getBuilt(), record.getWaves(), record.getAttacks(), record.getSurvivals(), record.getHexWins(), record.getPvp(), (int) (Database.getTotalPlaytime(player.uuid()) / 60)));
-        } else {
-            if (Variables.ranks.containsKey(player.uuid())) {
-                return Variables.ranks.get(player.uuid());
+    public static Rank getRankForced(Player player) throws SQLException {
+        StatsRecord record = Database.getStats(player.uuid());
+        return Rank.getRank(new Requirements(record.getBuilt(), record.getWaves(), record.getAttacks(), record.getSurvivals(), record.getHexWins(), record.getPvp(), (int) (Database.getTotalPlaytime(player.uuid()) / 60)));
+    }
+
+    public static CompletableFuture<Rank> getRankAsync(Player player) throws SQLException {
+        CompletableFuture.runAsync(() -> {
+            if (!Variables.ranks.containsKey(player.uuid())) {
+                Rank.getRankForcedAsync(player).thenAcceptAsync(rank -> {
+                    Variables.ranks.put(player.uuid(), rank);
+                };
             }
-            Rank rank = Rank.getRank(player, true);
-            Variables.ranks.put(player.uuid(), rank);
-            return rank;
-        }
+
+        });
+    }
+
+    public static CompletableFuture<Rank> getRankForcedAsync(Player player) {
+        return DatabaseAsync.getStatsAsync(player.uuid()).thenCombineAsync(DatabaseAsync.getTotalPlaytimeAsync(player.uuid()), (record, playtime) ->
+                Rank.getRank(new Requirements(record.getBuilt(), record.getWaves(), record.getAttacks(), record.getSurvivals(), record.getHexWins(), record.getPvp(), (int) (playtime / 60)))
+        );
     }
 
     @Nullable

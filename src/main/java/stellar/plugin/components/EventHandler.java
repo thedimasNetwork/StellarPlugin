@@ -17,6 +17,7 @@ import mindustry.gen.*;
 import mindustry.net.Packets;
 import mindustry.world.blocks.defense.turrets.ItemTurret;
 import stellar.database.Database;
+import stellar.database.DatabaseAsync;
 import stellar.database.enums.MessageType;
 import stellar.database.gen.Tables;
 import stellar.database.gen.tables.records.BansRecord;
@@ -102,6 +103,43 @@ public class EventHandler {
                     {Bundle.get("welcome.disable", locale)}
             };
 
+            DatabaseAsync.playerExistsAsync(event.player.uuid()).thenApplyAsync(exists -> {
+                if (exists) {
+                    DatabaseAsync.getContextAsync().thenComposeAsync(context -> context
+                            .update(Tables.users) // TODO: Database.updatePlayer
+                            .set(Tables.users.name, event.player.name())
+                            .set(Tables.users.locale, event.player.locale())
+                            .set(Tables.users.ip, event.player.ip())
+                            .where(Tables.users.uuid.eq(event.player.uuid()))
+                            .executeAsync()
+                    ).thenComposeAsync(ignored ->
+                            DatabaseAsync.getPlayerAsync(event.player.uuid())
+                    ).thenApplyAsync(data -> {
+                        if (data.getStatus().ordinal() > 0) {
+                            admins.put(event.player.uuid(), event.player.name);
+                            specialRanks.put(event.player.uuid(), Rank.getRank(data.getStatus()));
+                            event.player.admin = true;
+                        }
+                        if (data.getDonated() > 0) {
+                            donaters.put(event.player.uuid(), event.player.name);
+                        }
+                        if (data.isPopup()) {
+                            Call.menu(event.player.con(), Menus.welcome.ordinal(), title, welcome, buttons); // TODO: maybe migrate to MenuHandler
+                        } else if (data.isDiscord()) {
+                            Call.openURI(event.player.con(), config.discordUrl);
+                        }
+                        return null;
+                    });
+                } else {
+                    DatabaseAsync.createFullPlayerAsync(event.player.uuid(), event.player.ip(), event.player.name(), event.player.locale(), event.player.admin()).thenComposeAsync(ignored -> {
+                        Call.menu(event.player.con(), Menus.welcome.ordinal(), title, welcome, buttons);
+                        Players.incrementStats(event.player, "logins");
+                        Rank.getRank(event.player);
+                    });
+                }
+                return null;
+            });
+
             try {
                 if (Database.playerExists(event.player.uuid())) {
                     updateBackground(Database.getContext() // TODO: Database.updateUser
@@ -113,28 +151,10 @@ public class EventHandler {
 
                     UsersRecord data = Database.getPlayer(event.player.uuid());
                     assert data != null;
-                    if (data.getStatus().ordinal() > 0) {
-                        admins.put(event.player.uuid(), event.player.name);
-                        specialRanks.put(event.player.uuid(), Rank.getRank(data.getStatus()));
-                        event.player.admin = true;
-                    }
-                    if (data.getDonated() > 0) {
-                        donaters.put(event.player.uuid(), event.player.name);
-                    }
-                    if (data.isPopup()) {
-                        Call.menu(event.player.con(), Menus.welcome.ordinal(), title, welcome, buttons); // TODO: maybe migrate to MenuHandler
-                    } else if (data.isDiscord()) {
-                        Call.openURI(event.player.con(), config.discordUrl);
-                    }
 
                 } else {
-                    Database.createFullPlayer(event.player.uuid(), event.player.ip(), event.player.name(), event.player.locale(), event.player.admin());
-                    Call.menu(event.player.con(), Menus.welcome.ordinal(), title, welcome, buttons);
                 }
 
-                Players.incrementStats(event.player, "logins");
-
-                Rank.getRank(event.player);
             } catch (SQLException e) {
                 Log.err(e);
                 DiscordLogger.err(e);
