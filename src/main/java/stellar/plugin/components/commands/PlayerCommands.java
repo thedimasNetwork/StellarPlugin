@@ -15,9 +15,9 @@ import mindustry.game.Team;
 import mindustry.gen.Call;
 import mindustry.gen.Groups;
 import mindustry.gen.Player;
-import mindustry.net.CrashSender;
 import org.jooq.Field;
 import stellar.database.Database;
+import stellar.database.DatabaseAsync;
 import stellar.database.enums.MessageType;
 import stellar.database.gen.Tables;
 import stellar.database.gen.tables.records.StatsRecord;
@@ -38,10 +38,8 @@ import java.sql.SQLException;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
-import static mindustry.Vars.locales;
 import static mindustry.Vars.world;
 import static stellar.plugin.Variables.*;
-import static stellar.plugin.util.NetUtils.updateBackground;
 import static stellar.plugin.util.StringUtils.longToTime;
 import static stellar.plugin.util.StringUtils.targetColor;
 
@@ -103,67 +101,40 @@ public class PlayerCommands {
         });
 
         commandHandler.<Player>register("tr", "[off|auto|double|somelocale]", "commands.tr.description", (args, player) -> {
-            String locale;
-            try {
-                locale = Database.getPlayer(player.uuid()).getTranslator();
-            } catch (Throwable t) {
-                Bundle.bundled(player, "commands.tr.error");
-                Log.err(t);
-                DiscordLogger.err(t);
-                return;
-            }
-
             if (args.length == 0) {
-                Bundle.bundled(player, "commands.tr.current", locale);
+                DatabaseAsync.getPlayerAsync(player.uuid()).thenAcceptAsync(record -> {
+                    Bundle.bundled(player, "commands.tr.current", record.getTranslator());
+                }).exceptionally(t -> {
+                    Bundle.bundled(player, "commands.tr.error");
+                    Log.err(t);
+                    DiscordLogger.err(t);
+                    return null;
+                });
                 return;
             }
 
             String mode = args[0].toLowerCase();
-            try {
-                switch (mode) {
-                    case "off" -> {
-                        Database.getContext()
-                                .update(Tables.users)
-                                .set(Tables.users.translator, "off")
-                                .where(Tables.users.uuid.eq(player.uuid()))
-                                .executeAsync();
-                        Bundle.bundled(player, "commands.tr.disabled");
-                    }
-                    case "auto" -> {
-                        Database.getContext()
-                                .update(Tables.users)
-                                .set(Tables.users.translator, "auto")
-                                .where(Tables.users.uuid.eq(player.uuid()))
-                                .executeAsync();
-                        Bundle.bundled(player, "commands.tr.auto");
-                    }
-                    case "double" -> {
-                        Database.getContext()
-                                .update(Tables.users)
-                                .set(Tables.users.translator, "double")
-                                .where(Tables.users.uuid.eq(player.uuid()))
-                                .executeAsync();
-                        Bundle.bundled(player, "commands.tr.double");
-                    }
-                    default -> {
-                        String target = Const.translatorLocales.get(mode);
-                        if (target == null) {
-                            Bundle.bundled(player, "commands.tr.list", String.join(", ", Const.translatorLocales.keys())); // TODO: settings menu
-                            return;
-                        }
-
-                        Database.getContext()
-                                .update(Tables.users)
-                                .set(Tables.users.translator, target)
-                                .where(Tables.users.uuid.eq(player.uuid()))
-                                .executeAsync();
-                        Bundle.bundled(player, "commands.tr.set", target);
-                    }
+            if (Seq.with("off", "auto", "double").contains(mode)) {
+                Bundle.bundled(player, "commands.tr." + mode);
+            } else {
+                String target = Const.translatorLocales.get(mode);
+                if (target == null) {
+                    Bundle.bundled(player, "commands.tr.list", String.join(", ", Const.translatorLocales.keys())); // TODO: settings menu
+                    return;
                 }
-            } catch (Throwable t) {
-                Log.err(t);
-                DiscordLogger.err(t);
+                Bundle.bundled(player, "commands.tr.set", target);
             }
+
+            DatabaseAsync.getContextAsync().thenAcceptAsync(context -> context
+                            .update(Tables.users)
+                            .set(Tables.users.translator, "off")
+                            .where(Tables.users.uuid.eq(player.uuid()))
+                            .executeAsync())
+                    .exceptionally(t -> {
+                        Log.err("Unable to update translator", t);
+                        DiscordLogger.err("Unable to update translator", t);
+                        return null;
+                    });
         });
 
         commandHandler.<Player>register("rtv", "[on|off]", "commands.rtv.description", (args, player) -> {
