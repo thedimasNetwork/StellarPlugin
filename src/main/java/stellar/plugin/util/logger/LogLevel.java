@@ -6,10 +6,10 @@ import java.awt.*;
 
 public enum LogLevel {
 
-    INFO("INFO", Colors.blue),
-    WARN("WARN", Colors.yellow),
-    ERR("ERROR", Colors.red),
-    DEBUG("DEBUG", Colors.green);
+    debug("DEBUG", Colors.green),
+    info("INFO", Colors.blue),
+    warn("WARN", Colors.yellow),
+    err("ERROR", Colors.red);
 
     public final String name;
     public final Color color;

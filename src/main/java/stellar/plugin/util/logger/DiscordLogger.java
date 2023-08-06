@@ -42,42 +42,42 @@ public class DiscordLogger {
     }
 
     public static void info(String text) {
-        log(LogLevel.INFO, text);
+        log(LogLevel.info, text);
     }
 
     public static void infoTag(String tag, String text) {
-        log(LogLevel.INFO, "[" + tag + "] " + text);
+        log(LogLevel.info, "[" + tag + "] " + text);
     }
 
     public static void warn(String text) {
-        log(LogLevel.WARN, text);
+        log(LogLevel.warn, text);
     }
 
     public static void warnTag(String tag, String text) {
-        log(LogLevel.WARN, "[" + tag + "] " + text);
+        log(LogLevel.warn, "[" + tag + "] " + text);
     }
 
     public static void err(String text) {
-        log(LogLevel.ERR, text);
+        log(LogLevel.err, text);
     }
 
     public static void err(Throwable th) {
-        log(LogLevel.ERR, null, th);
+        log(LogLevel.err, null, th);
     }
 
     public static void err(String text, Throwable th) {
-        log(LogLevel.ERR, text, th);
+        log(LogLevel.err, text, th);
     }
 
     public static void errTag(String tag, String text) {
-        log(LogLevel.ERR, "[" + tag + "] " + text);
+        log(LogLevel.err, "[" + tag + "] " + text);
     }
 
     public static void debug(String text) {
-        log(LogLevel.DEBUG, text);
+        log(LogLevel.debug, text);
     }
 
     public static void debugTag(String tag, String text) {
-        log(LogLevel.DEBUG, "[" + tag + "] " + text);
+        log(LogLevel.debug, "[" + tag + "] " + text);
     }
 }
