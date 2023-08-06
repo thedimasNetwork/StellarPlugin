@@ -28,6 +28,7 @@ ext {
     discordWebhookVersion = "v1.6"
     jacksonYamlVersion = "2.13.0"
     jdaVersion = "5.0.0-alpha.18"
+    okhttpVersion = "4.9.3"
     mysqlVersion = "8.0.30"
     jooqVersion = "3.17.0"
     databaseVersion = "72c615399d"
@@ -53,6 +54,8 @@ dependencies {
 
     implementation "com.github.thedimasNetwork:DiscordWebhook:$discordWebhookVersion"
     implementation ("net.dv8tion:JDA:$jdaVersion") { exclude module: "opus-java" }
+    compileOnly "com.squareup.okhttp3:okhttp:$okhttpVersion"
+
     implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:$jacksonYamlVersion"
 
     compileOnly "org.jooq:jooq:$jooqVersion"

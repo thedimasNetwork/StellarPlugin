@@ -2,6 +2,7 @@ package stellar.plugin;
 
 import arc.struct.*;
 import arc.util.Interval;
+import okhttp3.OkHttpClient;
 import stellar.plugin.commands.CommandManager;
 import stellar.plugin.components.Rank;
 import stellar.plugin.history.entry.HistoryEntry;
@@ -28,6 +29,7 @@ public class Variables {
     public static Config config;
     public static CommandManager commandManager = new CommandManager();
     public static CacheSeq<HistoryEntry>[][] history = new CacheSeq[][]{};
+    public static OkHttpClient httpClient = new OkHttpClient();
 
     public static CacheSeq<HistoryEntry> getHistorySeq(int x, int y) {
         CacheSeq<HistoryEntry> seq = history[x][y];
