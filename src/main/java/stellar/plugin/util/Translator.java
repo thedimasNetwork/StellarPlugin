@@ -21,6 +21,7 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.text.MessageFormat;
+import java.util.concurrent.CompletableFuture;
 
 public class Translator {
     private static final JsonReader jsonReader = new JsonReader();
@@ -43,8 +44,18 @@ public class Translator {
             JsonValue json = jsonReader.parse(response.body().string());
             return json.get(0).get(0).asString();
         } catch (Throwable t) {
-            throw new IOException("Failed to get translation.", t);
+            throw new IOException("Failed to translate.", t);
         }
+    }
+
+    public static CompletableFuture<String> translateAsync(String text, String langTo, String langFrom) {
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                return translate(text, langTo, langFrom);
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to translate", e);
+            }
+        });
     }
 
     public static String translateRaw(Player player, Player otherPlayer, String message) {
@@ -60,7 +71,7 @@ public class Translator {
         if (!otherPlayer.locale.equals(player.locale()) && !locale.equals("off")) {
             try {
                 String targetLocale = locale.equals("auto") || locale.equals("double") ? otherPlayer.locale : locale;
-                translated = Translator.translate(message, targetLocale.split("#")[0], "auto");
+                translated = translate(message, targetLocale.split("#")[0], "auto");
             } catch (Throwable t) {
                 Log.err(t);
             }
@@ -69,10 +80,13 @@ public class Translator {
         return translated;
     }
 
+    public static CompletableFuture<String> translateRawAsync(Player player, Player otherPlayer, String message) {
+        return CompletableFuture.supplyAsync(() -> translateRaw(player, otherPlayer, message));
+    }
+
     public static String formatChat(Player player, String translated, String message, boolean detailed) {
         return MessageFormat.format(detailed ? Const.chatFormatDetailed : Const.chatFormat, Players.prefixName(player), translated, message);
     }
-
 
     public static String translateChat(Player player, Player otherPlayer, String message) {
         String locale = otherPlayer.locale;
@@ -83,6 +97,10 @@ public class Translator {
             DiscordLogger.err(t);
         }
 
-        return Translator.formatChat(player, Translator.translateRaw(player, otherPlayer, message), message, locale.equals("double"));
+        return formatChat(player, translateRaw(player, otherPlayer, message), message, locale.equals("double"));
+    }
+
+    public static CompletableFuture<String> translateChatAsync(Player player, Player otherPlayer, String message) {
+        return CompletableFuture.supplyAsync(() -> translateChat(player, otherPlayer, message));
     }
 }
