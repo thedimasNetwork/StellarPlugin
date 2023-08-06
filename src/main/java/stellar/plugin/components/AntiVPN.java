@@ -4,21 +4,30 @@ import arc.Events;
 import arc.struct.Seq;
 import arc.util.Http;
 import arc.util.Log;
+import arc.util.serialization.Json;
+import arc.util.serialization.JsonReader;
+import arc.util.serialization.JsonValue;
 import arc.util.serialization.Jval;
 import mindustry.Vars;
 import mindustry.game.EventType;
 import mindustry.net.NetConnection;
 import mindustry.net.Packets;
+import okhttp3.HttpUrl;
+import okhttp3.Request;
+import okhttp3.Response;
 import stellar.database.Database;
+import stellar.database.DatabaseAsync;
 import stellar.database.gen.Tables;
 import stellar.database.gen.tables.records.IpCachedRecord;
 import stellar.plugin.Const;
 import stellar.plugin.Variables;
 import stellar.plugin.util.Players;
 
+import java.io.IOException;
 import java.sql.SQLException;
 
 public class AntiVPN { // also includes anti ddos from gh actions servers
+    private static JsonReader jsonReader = new JsonReader();
     public static void load() {
         Vars.net.handleServer(Packets.Connect.class, (con, packet) -> {
             Events.fire(new EventType.ConnectionEvent(con));
@@ -53,57 +62,52 @@ public class AntiVPN { // also includes anti ddos from gh actions servers
                 return;
             }
 
-            boolean exists = false;
+//            boolean exists = false;
 
-            try {
-                exists = Database.getContext()
-                        .selectFrom(Tables.ipCached)
+            DatabaseAsync.getContextAsync().thenApplyAsync(context -> {
+                boolean exists = context.selectFrom(Tables.ipCached)
                         .where(Tables.ipCached.ip.eq(event.player.ip()))
                         .fetch()
                         .size() > 0;
-            } catch (SQLException e) {
-                Log.err(e);
-            }
-            if (exists) {
-                try {
-                    IpCachedRecord record = Database.getContext()
-                            .selectFrom(Tables.ipCached)
+
+                if (exists) {
+                    return context.selectFrom(Tables.ipCached)
                             .where(Tables.ipCached.ip.eq(event.player.ip()))
                             .fetchOne();
-                    if (record.isProxy() || record.isVpn()) {
-                        event.player.kick("No VPN is allowed");
+                } else {
+                    Log.debug("Trying to get info...");
+                    HttpUrl url = HttpUrl.parse("http://proxycheck.io/v2/" + event.player.ip()).newBuilder()
+                            .addQueryParameter("vpn", "3")
+                            .addQueryParameter("risk", "2")
+                            .addQueryParameter("key", Variables.config.pcToken)
+                            .build();
+
+                    Request request = new Request.Builder()
+                            .url(url)
+                            .build();
+
+                    try (Response response = Variables.httpClient.newCall(request).execute()) {
+                        JsonValue json = jsonReader.parse(response.body().string());
+                        JsonValue data = json.get(event.player.ip());
+
+                        IpCachedRecord record = context.newRecord(Tables.ipCached) // TODO: Database.createIp
+                                .setIp(event.player.ip())
+                                .setProxy(data.getString("proxy").equals("yes"))
+                                .setVpn(data.getString("vpn").equals("yes"))
+                                .setType(data.getString("type"))
+                                .setRisk((short) data.getInt("risk", 0));
+                        record.store();
+                        return record;
+                    } catch (Throwable t) {
+                        Log.err("Failed to get IP info.", t);
+                        return null;
                     }
-                } catch (SQLException e) {
-                    Log.err(e);
                 }
-            } else {
-                Log.debug("Trying to get info...");
-                String url = "http://proxycheck.io/v2/" + event.player.ip() + "?vpn=3&risk=2&key=" + Variables.config.pcToken;
-                Http.get(url, res -> {
-                    String resp = res.getResultAsString();
-                    Log.debug(resp);
-                    Jval json = Jval.read(resp);
-
-                    if (json.getString("status").equals("denied") || json.getString("status").equals("error")) {
-                        Log.err(resp);
-                        return;
-                    }
-
-                    Jval data = json.get(event.player.ip());
-
-                    Database.getContext().newRecord(Tables.ipCached) // TODO: Database.createIp
-                            .setIp(event.player.ip())
-                            .setProxy(data.getString("proxy").equals("yes"))
-                            .setVpn(data.getString("vpn").equals("yes"))
-                            .setType(data.getString("type"))
-                            .setRisk((short) data.getInt("risk", 0))
-                            .store();
-
-                    if (!(data.getString("proxy").equals("no") && data.getString("vpn").equals("no"))) {
-                        event.player.kick("No VPN is allowed"); // TODO: bundles
-                    }
-                }, Log::err);
-            }
+            }).thenAcceptAsync(record -> {
+                if (record.isVpn() || record.isProxy()) {
+                    event.player.kick("No VPN is allowed");
+                }
+            });
         });
     }
 }
