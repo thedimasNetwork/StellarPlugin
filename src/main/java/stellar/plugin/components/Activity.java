@@ -83,7 +83,7 @@ public class Activity {
                     Rank newRank = oldRank;
 
                     try {
-                        newRank = Rank.getRank(player);
+                        newRank = Rank.getRank(player); // TODO: Async
                     } catch (SQLException e) {
                         Log.err(e);
                         ranks.put(player.uuid(), oldRanks.get(player.uuid()));

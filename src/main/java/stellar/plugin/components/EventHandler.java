@@ -23,6 +23,7 @@ import stellar.database.gen.Tables;
 import stellar.database.gen.tables.records.BansRecord;
 import stellar.database.gen.tables.records.UsersRecord;
 import stellar.plugin.Const;
+import stellar.plugin.Variables;
 import stellar.plugin.bot.Bot;
 import stellar.plugin.bot.Colors;
 import stellar.plugin.bot.Util;
@@ -117,7 +118,7 @@ public class EventHandler {
                     ).thenApplyAsync(data -> {
                         if (data.getStatus().ordinal() > 0) {
                             admins.put(event.player.uuid(), event.player.name);
-                            specialRanks.put(event.player.uuid(), Rank.getRank(data.getStatus()));
+                            specialRanks.put(event.player.uuid(), Rank.getSpecialRank(data.getStatus()));
                             event.player.admin = true;
                         }
                         if (data.getDonated() > 0) {
@@ -134,8 +135,8 @@ public class EventHandler {
                     DatabaseAsync.createFullPlayerAsync(event.player.uuid(), event.player.ip(), event.player.name(), event.player.locale(), event.player.admin()).thenComposeAsync(ignored -> {
                         Call.menu(event.player.con(), Menus.welcome.ordinal(), title, welcome, buttons);
                         Players.incrementStats(event.player, "logins");
-                        Rank.getRank(event.player);
-                    });
+                        return null;
+                    }).thenComposeAsync(ignored -> Rank.getRankAsync(event.player));
                 }
                 return null;
             });
@@ -557,13 +558,10 @@ public class EventHandler {
 
             Groups.player.each(p -> {
                 if (p.unit().moving()) {
-                    try {
-                        Rank rank = Rank.getRank(p);
-                        Effect effect = rank.effect;
-                        Color effectColor = rank.effectColor == null ? Color.white : rank.effectColor;
-                        Call.effect(effect, p.x, p.y, 0, effectColor);
-                    } catch (SQLException ignored) {
-                    } // it can't throw as it calls the DB only when a player joins
+                    Rank rank = ranks.get(p.uuid(), Rank.player);
+                    Effect effect = rank.effect;
+                    Color effectColor = rank.effectColor == null ? Color.white : rank.effectColor;
+                    Call.effect(effect, p.x, p.y, 0, effectColor);
                 }
             });
         });

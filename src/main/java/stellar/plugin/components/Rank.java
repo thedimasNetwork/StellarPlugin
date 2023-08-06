@@ -149,7 +149,7 @@ public enum Rank {
     }
 
     @Nullable
-    public static Rank getRank(PlayerStatus playerStatus) {
+    public static Rank getSpecialRank(PlayerStatus playerStatus) {
         return statusRanks.get(playerStatus);
     }
 
@@ -167,16 +167,19 @@ public enum Rank {
         return Rank.getRank(new Requirements(record.getBuilt(), record.getWaves(), record.getAttacks(), record.getSurvivals(), record.getHexWins(), record.getPvp(), (int) (Database.getTotalPlaytime(player.uuid()) / 60)));
     }
 
-    public static CompletableFuture<Rank> getRankAsync(Player player) throws SQLException {
-        CompletableFuture.runAsync(() -> {
-            if (!Variables.ranks.containsKey(player.uuid())) {
-                Rank.getRankForcedAsync(player).thenAcceptAsync(rank -> {
-                    Variables.ranks.put(player.uuid(), rank);
-                };
+    public static CompletableFuture<Rank> getRankAsync(Player player) {
+        return CompletableFuture.supplyAsync(() -> {
+            if (Variables.ranks.containsKey(player.uuid())) {
+                return Variables.ranks.get(player.uuid());
+            } else {
+                try {
+                    return getRankForced(player);
+                } catch (SQLException e) {
+                    throw new RuntimeException("Failed to get rank", e);
+                }
             }
-
         });
-    }
+    };
 
     public static CompletableFuture<Rank> getRankForcedAsync(Player player) {
         return DatabaseAsync.getStatsAsync(player.uuid()).thenCombineAsync(DatabaseAsync.getTotalPlaytimeAsync(player.uuid()), (record, playtime) ->

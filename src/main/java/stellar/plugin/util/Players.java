@@ -60,17 +60,12 @@ public class Players {
     }
 
     public static String prefixName(Player player) {
-        try {
-            Rank rank = Rank.getRank(player);
-            if (rank.icon == null) {
-                return player.admin() ? "<\uE82C> " + player.coloredName() : player.coloredName();
-            } else {
-                return player.admin() ? String.format("<[#%s]\uE82C[]> %s", rank.color, player.coloredName()) :
-                        String.format("<[#%s]%s[]> %s", rank.color, rank.icon, player.coloredName());
-            }
-        } catch (SQLException e) {
-            Log.err(e);
-            return player.admin() ? "<\uE872> " + player.coloredName() : player.coloredName();
+        Rank rank = Variables.ranks.get(player.uuid(), Rank.player);
+        if (rank.icon == null) {
+            return player.admin() ? "<\uE82C> " + player.coloredName() : player.coloredName();
+        } else {
+            return player.admin() ? String.format("<[#%s]\uE82C[]> %s", rank.color, player.coloredName()) :
+                    String.format("<[#%s]%s[]> %s", rank.color, rank.icon, player.coloredName());
         }
     }
 

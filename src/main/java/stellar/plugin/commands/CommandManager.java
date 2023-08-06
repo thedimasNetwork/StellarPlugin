@@ -8,6 +8,7 @@ import arc.util.Log;
 import lombok.Getter;
 import lombok.Setter;
 import mindustry.gen.Player;
+import stellar.database.DatabaseAsync;
 import stellar.plugin.Variables;
 import stellar.plugin.components.Rank;
 import stellar.plugin.util.Bundle;
@@ -27,14 +28,8 @@ public class CommandManager {
         commands.add(name);
 
         clientHandler.<Player>register(name, params, description, (args, player) -> {
-            Rank playerRank = Rank.player;
-            Rank specialRank = Rank.player;
-            try {
-                playerRank = Rank.getRank(player);
-                specialRank = Variables.specialRanks.get(player.uuid());
-            } catch (SQLException e) {
-                Log.err(e);
-            }
+            Rank playerRank = Variables.ranks.get(player.uuid(), Rank.player);
+            Rank specialRank = Variables.specialRanks.get(player.uuid(), Rank.player);
 
             if (!Rank.max(playerRank, specialRank).gte(rank)) {
                 Bundle.bundled(player, "commands.access-denied", rank.formatted(player));
