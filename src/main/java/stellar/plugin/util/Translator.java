@@ -1,11 +1,10 @@
 package stellar.plugin.util;
 
 import arc.util.Log;
-import arc.util.io.Streams;
 import arc.util.serialization.JsonReader;
 import arc.util.serialization.JsonValue;
 import mindustry.gen.Player;
-import okhttp3.OkHttpClient;
+import okhttp3.HttpUrl;
 import okhttp3.Request;
 import okhttp3.Response;
 import stellar.database.Database;
@@ -13,13 +12,7 @@ import stellar.plugin.Const;
 import stellar.plugin.Variables;
 import stellar.plugin.util.logger.DiscordLogger;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.text.MessageFormat;
 import java.util.concurrent.CompletableFuture;
 
@@ -32,13 +25,17 @@ public class Translator {
          * Url:  https://translate.googleapis.com/translate_a/single?client=gtx&sl=ru_RU&tl=en_US&dt=t&q=Привет
          * Resp: [[["Hi","Привет",null,null,10]],null,"ru",null,null,null,null,[]]
          */
-        String urlStr = "https://clients5.google.com/translate_a/t?client=dict-chrome-ex&dt=t" +
-                "&tl=" + langTo +
-                "&sl=" + langFrom + // NOTE: use "&sl=auto" for automatic translations
-                "&q=" + URLEncoder.encode(text, StandardCharsets.UTF_8);
+
+        HttpUrl url = HttpUrl.parse("https://clients5.google.com/translate_a/t").newBuilder()
+                .addQueryParameter("client", "dict-chrome-ex")
+                .addQueryParameter("dt", "t")
+                .addQueryParameter("tl", langTo)
+                .addQueryParameter("sl", langFrom) // NOTE: use "auto" for automatic translations
+                .addQueryParameter("q", text)
+                .build();
 
         Request request = new Request.Builder()
-                .url(urlStr)
+                .url(url)
                 .build();
         try (Response response = Variables.httpClient.newCall(request).execute()) {
             JsonValue json = jsonReader.parse(response.body().string());
