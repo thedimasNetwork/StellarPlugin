@@ -3,7 +3,7 @@ package stellar.plugin.types;
 import lombok.Getter;
 import lombok.Setter;
 import mindustry.net.Packets;
-import stellar.database.Database;
+import stellar.database.DatabaseAsync;
 import stellar.database.gen.tables.records.UsersRecord;
 
 import java.sql.SQLException;
@@ -28,6 +28,6 @@ public class AdminActionEntry {
     }
 
     public void storeRecord() throws SQLException {
-        Database.ban(this.getAdmin().getUuid(), this.getTarget().getUuid(), getPeriod(), getReason());
+        DatabaseAsync.banAsync(this.getAdmin().getUuid(), this.getTarget().getUuid(), getPeriod(), getReason());
     }
 }

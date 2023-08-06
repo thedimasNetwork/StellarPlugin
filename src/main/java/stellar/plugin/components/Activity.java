@@ -1,7 +1,7 @@
 package stellar.plugin.components;
 
-import arc.Core;
 import arc.struct.ObjectMap;
+import arc.struct.Seq;
 import arc.util.Log;
 import arc.util.Timer;
 import mindustry.gen.Call;
@@ -10,7 +10,7 @@ import mindustry.gen.Iconc;
 import mindustry.gen.Player;
 import org.jooq.Field;
 import org.jooq.UpdateSetMoreStep;
-import stellar.database.Database;
+import stellar.database.DatabaseAsync;
 import stellar.database.gen.Tables;
 import stellar.database.gen.tables.records.StatsRecord;
 import stellar.plugin.Const;
@@ -19,6 +19,7 @@ import stellar.plugin.util.Bundle;
 import stellar.plugin.util.logger.DiscordLogger;
 
 import java.sql.SQLException;
+import java.util.concurrent.CompletableFuture;
 
 import static stellar.plugin.Variables.ranks;
 import static stellar.plugin.util.NetUtils.updateBackground;
@@ -26,74 +27,49 @@ import static stellar.plugin.util.NetUtils.updateBackground;
 public class Activity {
     public static void load() {
         Timer.schedule(() -> {
-            new Thread(() -> {
-                if (Const.playtimeField == null) {
-                    Log.err("Server @ does not exist in the Database!", Const.serverFieldName);
-                    DiscordLogger.err("Сервер " + Const.serverFieldName + " не существует в базе данных!");
-                    return;
-                }
+            if (Const.playtimeField == null) {
+                Log.err("Server @ does not exist in the Database!", Const.serverFieldName);
+                DiscordLogger.err("Сервер " + Const.serverFieldName + " не существует в базе данных!");
+                return;
+            }
 
-                for (Player p : Groups.player) {
-                    try {
-                        long computed = Database.getPlaytime(p.uuid(), Const.playtimeField) + 60;
-                         updateBackground(Database.getContext() // TODO: Database.updatePlaytime
-                                .update(Tables.playtime)
-                                .set(Const.playtimeField, computed)
-                                .where(Tables.playtime.uuid.eq(p.uuid())));
-                    } catch (Throwable t) {
-                        Log.err("Failed to update playtime for player '" + p.uuid() + "'", t);
-                        DiscordLogger.err("Failed to update playtime for player '" + p.uuid() + "'", t);
-                    }
-                }
+            ObjectMap<String, Rank> oldRanks = ranks.copy();
+            ranks.clear();
 
-                Variables.statsData.each((uuid, stats) -> {
-                    try {
-                        UpdateSetMoreStep<StatsRecord> query = (UpdateSetMoreStep<StatsRecord>) Database.getContext()
-                                .update(Tables.stats); // omg... looks bad
-                        stats.each((name, value) -> {
-                            Field<Integer> field = (Field<Integer>) Tables.stats.field(name);
-                            if (field == null) {
-                                Log.err("Field @ is null. UUID: @", name, uuid);
-                                return;
-                            }
+            for (Player p : Groups.player) {
+                DatabaseAsync.getContextAsync().thenComposeAsync(context -> context.update(Tables.playtime)
+                        .set(Const.playtimeField, Const.playtimeField.plus(60))
+                        .where(Tables.playtime.uuid.eq(p.uuid()))
+                        .executeAsync()
+                ).thenComposeAsync(ignored -> DatabaseAsync.getContextAsync()).thenAcceptAsync(context -> {
+                    ObjectMap<String, Integer> stats = Variables.statsData.get(p.uuid(), new ObjectMap<>());
+                    UpdateSetMoreStep<StatsRecord> query = (UpdateSetMoreStep<StatsRecord>) context.update(Tables.stats);
+                    stats.each((stat, value) -> {
+                        Field<Integer> field = (Field<Integer>) Tables.stats.field(stat);
+                        if (field == null) {
+                            Log.err("Field @ is null. UUID: @", stat, p.uuid());
+                            return;
+                        }
 
-                            if (value == 0) {
-                                return;
-                            }
+                        if (value == 0) {
+                            return;
+                        }
 
-                            query.set(field, field.plus(value));
-                            stats.put(name, 0);
-                        });
-                        query.where(Tables.stats.uuid.eq(uuid))
-                                .execute(); // don't run in the background as rank updating should be on fresh data
-
-                    } catch (SQLException e) {
-                        Log.err(e);
-                    }
-
-                    if (!Groups.player.contains(p -> p.uuid().equals(uuid))) {
-                        Variables.statsData.remove(uuid);
-                    }
-                });
-
-                ObjectMap<String, Rank> oldRanks = ranks.copy();
-                ranks.clear();
-                Groups.player.each(player -> {
-                    Rank oldRank = oldRanks.get(player.uuid());
-                    Rank newRank = oldRank;
-
-                    try {
-                        newRank = Rank.getRank(player); // TODO: Async
-                    } catch (SQLException e) {
-                        Log.err(e);
-                        ranks.put(player.uuid(), oldRanks.get(player.uuid()));
-                    }
-
+                        query.set(field, field.plus(value));
+                        stats.put(stat, 0);
+                    });
+                    query.where(Tables.stats.uuid.eq(p.uuid()));
+                }).thenComposeAsync(ignored ->
+                        Rank.getRankAsync(p)
+                ).thenAcceptAsync(newRank -> {
+                    Rank oldRank = oldRanks.get(p.uuid());
+                    ranks.put(p.uuid(), newRank);
                     if (newRank != null && oldRank != null && newRank != oldRank) {
-                        Call.warningToast(player.con, Iconc.chartBar, Bundle.format("events.new-rank", Bundle.findLocale(player.locale()), newRank.formatted(player)));
+                        Call.warningToast(p.con, Iconc.chartBar, Bundle.format("events.new-rank", Bundle.findLocale(p.locale()), newRank.formatted(p)));
                     }
+
                 });
-            }).start();
+            }
         }, 0, 60);
     }
 }
