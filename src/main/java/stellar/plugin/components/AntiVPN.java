@@ -43,26 +43,29 @@ public class AntiVPN { // also includes anti ddos from gh actions servers
          * https://www.gstatic.com/ipranges/cloud.json
          * https://ip-ranges.amazonaws.com/ip-ranges.json
          */
-        Http.get("https://api.github.com/meta", res -> {
-            Jval json = Jval.read(res.getResultAsString());
-            json.get("actions").asArray().each(subnet -> {
-                if (subnet.asString().contains(":")) {
+        Request ghRequest = new Request.Builder()
+                .url("https://api.github.com/meta")
+                .build();
+
+        try (Response response = Variables.httpClient.newCall(ghRequest).execute()) {
+            JsonValue json = jsonReader.parse(response.body().string());
+            for (String subnet : json.get("actions").asStringArray()) {
+                if (subnet.contains(":")) {
                     return; // skipping IPv6
                 }
-                Variables.blacklistedSubnets.add(subnet.asString());
-            });
+                Variables.blacklistedSubnets.add(subnet);
+            }
             Log.info("Fetched @ Github Actions subnets", Variables.blacklistedSubnets.size);
-        }, err -> {
-            Log.err("Failed to fetch Github Actions subnets", err);
-        });
+
+        } catch (Throwable t) {
+            Log.err("Failed to fetch Github Actions subnets", t);
+        }
 
         Events.on(EventType.PlayerConnect.class, event -> {
             if (Players.isBot(event.player)) {
                 event.player.kick(Packets.KickReason.typeMismatch);
                 return;
             }
-
-//            boolean exists = false;
 
             DatabaseAsync.getContextAsync().thenApplyAsync(context -> {
                 boolean exists = context.selectFrom(Tables.ipCached)
@@ -82,11 +85,11 @@ public class AntiVPN { // also includes anti ddos from gh actions servers
                             .addQueryParameter("key", Variables.config.pcToken)
                             .build();
 
-                    Request request = new Request.Builder()
+                    Request ipRequest = new Request.Builder()
                             .url(url)
                             .build();
 
-                    try (Response response = Variables.httpClient.newCall(request).execute()) {
+                    try (Response response = Variables.httpClient.newCall(ipRequest).execute()) {
                         JsonValue json = jsonReader.parse(response.body().string());
                         JsonValue data = json.get(event.player.ip());
 
