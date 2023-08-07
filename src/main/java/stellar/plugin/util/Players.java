@@ -3,18 +3,15 @@ package stellar.plugin.util;
 import arc.struct.ObjectMap;
 import arc.util.Log;
 import arc.util.Nullable;
-import arc.util.Reflect;
 import arc.util.Strings;
 import mindustry.ctype.UnlockableContent;
 import mindustry.gen.Groups;
 import mindustry.gen.Player;
-import mindustry.type.UnitType;
 import org.jooq.Field;
 import stellar.database.gen.Tables;
 import stellar.plugin.Variables;
 import stellar.plugin.components.Rank;
 
-import java.sql.SQLException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Players {
@@ -105,7 +102,7 @@ public class Players {
                     case "<" -> {
                         return fv < v;
                     }
-                    case "=", "~"  -> {
+                    case "=", "~" -> {
                         return fv == v;
                     }
                     case "!=", "!~" -> {

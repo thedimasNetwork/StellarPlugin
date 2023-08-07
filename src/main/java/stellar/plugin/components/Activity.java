@@ -1,7 +1,6 @@
 package stellar.plugin.components;
 
 import arc.struct.ObjectMap;
-import arc.struct.Seq;
 import arc.util.Log;
 import arc.util.Timer;
 import mindustry.gen.Call;
@@ -18,11 +17,7 @@ import stellar.plugin.Variables;
 import stellar.plugin.util.Bundle;
 import stellar.plugin.util.logger.DiscordLogger;
 
-import java.sql.SQLException;
-import java.util.concurrent.CompletableFuture;
-
 import static stellar.plugin.Variables.ranks;
-import static stellar.plugin.util.NetUtils.updateBackground;
 
 public class Activity {
     public static void load() {

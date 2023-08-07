@@ -2,12 +2,9 @@ package stellar.plugin.components;
 
 import arc.Events;
 import arc.struct.Seq;
-import arc.util.Http;
 import arc.util.Log;
-import arc.util.serialization.Json;
 import arc.util.serialization.JsonReader;
 import arc.util.serialization.JsonValue;
-import arc.util.serialization.Jval;
 import mindustry.Vars;
 import mindustry.game.EventType;
 import mindustry.net.NetConnection;
@@ -15,7 +12,6 @@ import mindustry.net.Packets;
 import okhttp3.HttpUrl;
 import okhttp3.Request;
 import okhttp3.Response;
-import stellar.database.Database;
 import stellar.database.DatabaseAsync;
 import stellar.database.gen.Tables;
 import stellar.database.gen.tables.records.IpCachedRecord;
@@ -23,11 +19,9 @@ import stellar.plugin.Const;
 import stellar.plugin.Variables;
 import stellar.plugin.util.Players;
 
-import java.io.IOException;
-import java.sql.SQLException;
-
 public class AntiVPN { // also includes anti ddos from gh actions servers
-    private static JsonReader jsonReader = new JsonReader();
+    private static final JsonReader jsonReader = new JsonReader();
+
     public static void load() {
         Vars.net.handleServer(Packets.Connect.class, (con, packet) -> {
             Events.fire(new EventType.ConnectionEvent(con));

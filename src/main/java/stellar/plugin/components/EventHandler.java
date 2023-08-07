@@ -14,17 +14,14 @@ import mindustry.game.EventType;
 import mindustry.game.Gamemode;
 import mindustry.game.Team;
 import mindustry.gen.*;
-import mindustry.net.Administration;
 import mindustry.net.Packets;
 import mindustry.world.blocks.defense.turrets.ItemTurret;
 import stellar.database.Database;
 import stellar.database.DatabaseAsync;
 import stellar.database.enums.MessageType;
 import stellar.database.gen.Tables;
-import stellar.database.gen.tables.records.BansRecord;
 import stellar.database.gen.tables.records.UsersRecord;
 import stellar.plugin.Const;
-import stellar.plugin.Variables;
 import stellar.plugin.bot.Bot;
 import stellar.plugin.bot.Colors;
 import stellar.plugin.bot.Util;
@@ -40,10 +37,8 @@ import stellar.plugin.util.logger.DiscordLogger;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.Locale;
-import java.util.concurrent.CompletableFuture;
 
 import static stellar.plugin.Variables.*;
-import static stellar.plugin.util.NetUtils.updateBackground;
 
 @SuppressWarnings({"unused", "unchecked"})
 public class EventHandler {

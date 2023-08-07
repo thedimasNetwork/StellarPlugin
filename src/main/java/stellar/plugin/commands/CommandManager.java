@@ -1,25 +1,19 @@
 package stellar.plugin.commands;
 
-import arc.func.Cons;
 import arc.struct.Seq;
-import arc.struct.StringMap;
 import arc.util.CommandHandler;
-import arc.util.Log;
 import lombok.Getter;
 import lombok.Setter;
 import mindustry.gen.Player;
-import stellar.database.DatabaseAsync;
 import stellar.plugin.Variables;
 import stellar.plugin.components.Rank;
 import stellar.plugin.util.Bundle;
 
-import java.sql.SQLException;
-
 @Getter
 public class CommandManager {
+    private final Seq<String> commands = new Seq<>();
     @Setter
     private CommandHandler clientHandler;
-    private final Seq<String> commands = new Seq<>();
 
     public void registerPlayer(String name, String params, String description, Rank rank, CommandRunner runner) { // TODO: Command type
         if (clientHandler == null) {

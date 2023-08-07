@@ -35,7 +35,8 @@ import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static mindustry.Vars.*;
+import static mindustry.Vars.mods;
+import static mindustry.Vars.world;
 import static stellar.plugin.Variables.commandManager;
 
 public class AdminCommands {
@@ -447,7 +448,7 @@ public class AdminCommands {
             entities.each(entity -> {
                 try {
                     if (entity instanceof Player p) {
-                         p.unit().kill();
+                        p.unit().kill();
                     } else {
                         entity.getClass().getMethod("kill").invoke(entity);
                     }

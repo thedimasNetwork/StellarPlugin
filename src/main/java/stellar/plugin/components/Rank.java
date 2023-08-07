@@ -179,12 +179,16 @@ public enum Rank {
                 }
             }
         });
-    };
+    }
 
     public static CompletableFuture<Rank> getRankForcedAsync(Player player) {
         return DatabaseAsync.getStatsAsync(player.uuid()).thenCombineAsync(DatabaseAsync.getTotalPlaytimeAsync(player.uuid()), (record, playtime) ->
                 Rank.getRank(new Requirements(record.getBuilt(), record.getWaves(), record.getAttacks(), record.getSurvivals(), record.getHexWins(), record.getPvp(), (int) (playtime / 60)))
         );
+    }
+
+    public static Rank max(Rank rank, Rank other) {
+        return Rank.values()[Math.max(rank.ordinal(), other.ordinal())];
     }
 
     @Nullable
@@ -195,10 +199,6 @@ public enum Rank {
             }
         }
         return null;
-    }
-
-    public static Rank max(Rank rank, Rank other) {
-        return Rank.values()[Math.max(rank.ordinal(), other.ordinal())];
     }
 
     public String formatted(Player player) {

@@ -1,23 +1,15 @@
 package stellar.plugin.util;
 
 import arc.struct.ObjectMap;
-import arc.struct.Seq;
 import arc.struct.StringMap;
-import arc.util.Http;
-import arc.util.Log;
 import arc.util.Structs;
-import arc.util.serialization.Jval;
 import mindustry.gen.Groups;
 import mindustry.gen.Player;
 import stellar.plugin.Const;
 
 import java.text.MessageFormat;
-import java.util.Arrays;
 import java.util.Locale;
 import java.util.ResourceBundle;
-
-import static mindustry.Vars.ghApi;
-import static mindustry.Vars.locales;
 
 public class Bundle {
 
