@@ -39,6 +39,7 @@ import stellar.plugin.util.logger.DiscordLogger;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.Locale;
+import java.util.concurrent.CompletableFuture;
 
 import static stellar.plugin.Variables.*;
 import static stellar.plugin.util.NetUtils.updateBackground;
@@ -53,31 +54,43 @@ public class EventHandler {
             }
             String uuid = event.player.uuid();
             String name = event.player.name;
-            try {
-                if (Database.playerExists(event.player.uuid())) {
-                    if (Database.isBanned(event.player.uuid())) {
-                        Locale locale = Bundle.findLocale(event.player.locale());
-                        BansRecord record = Database.latestBan(event.player.uuid());
-                        UsersRecord admin = Database.getPlayer(record.getAdmin());
-                        String adminName = admin != null ? Strings.stripColors(admin.getName()) : record.getAdmin();
-                        String banDate = record.getCreated().format(Const.dateFormatter);
-                        String unbanDate = record.getUntil() != null ? record.getUntil().format(Const.dateFormatter) : Bundle.get("events.join.banned.forever", locale);
+            DatabaseAsync.playerExistsAsync(uuid).thenComposeAsync(exists -> {
+                if (!exists) {
+                    throw new IllegalArgumentException("Player does not exist.");
+                }
+                return DatabaseAsync.isBannedAsync(uuid);
+            }).thenComposeAsync(isBanned -> {
+                if (!isBanned) {
+                    throw new IllegalArgumentException("Player is not banned.");
+                }
+                return DatabaseAsync.latestBanAsync(uuid).thenCombineAsync(DatabaseAsync.getContextAsync(), (record, context) -> {
+                    Locale locale = Bundle.findLocale(event.player.locale());
+                    UsersRecord admin = context // FIXME: use
+                            .selectFrom(Tables.users)
+                            .where(Tables.users.uuid.eq(record.getAdmin()))
+                            .fetchOne();
 
-                        String message = Bundle.format("events.join.banned", locale, adminName, banDate, record.getReason().strip(), unbanDate, config.discordUrl);
-                        event.player.kick(message);
+                    String adminName = admin != null ? Strings.stripColors(admin.getName()) : record.getAdmin();
+                    String banDate = record.getCreated().format(Const.dateFormatter);
+                    String unbanDate = record.getUntil() != null ? record.getUntil().format(Const.dateFormatter) : Bundle.get("events.join.banned.forever", locale);
+
+                    String message = Bundle.format("events.join.banned", locale, adminName, banDate, record.getReason().strip(), unbanDate, config.discordUrl);
+                    event.player.kick(message);
+                    return null;
+                });
+            }).thenRunAsync(() -> {
+                for (String pirate : Const.pirates) {
+                    if (name.toLowerCase().contains(pirate)) {
+                        event.player.con.kick(Bundle.get("events.join.player-pirate", Bundle.findLocale(event.player.locale)));
+                        break;
                     }
                 }
-            } catch (SQLException e) {
-                Log.err(e);
-                DiscordLogger.err(e);
-            }
-
-            for (String pirate : Const.pirates) {
-                if (name.toLowerCase().contains(pirate)) {
-                    event.player.con.kick(Bundle.get("events.join.player-pirate", Bundle.findLocale(event.player.locale)));
-                    break;
+            }).exceptionally(t -> {
+                if (!(t.getCause() instanceof IllegalArgumentException)) {
+                    Log.err(t);
                 }
-            }
+                return null;
+            });
         });
         // endregion
 
@@ -104,7 +117,7 @@ public class EventHandler {
                     {Bundle.get("welcome.disable", locale)}
             };
 
-            DatabaseAsync.playerExistsAsync(event.player.uuid()).thenApplyAsync(exists -> {
+            DatabaseAsync.playerExistsAsync(event.player.uuid()).thenAcceptAsync(exists -> {
                 if (exists) {
                     DatabaseAsync.getContextAsync().thenComposeAsync(context -> context
                             .update(Tables.users) // TODO: Database.updatePlayer
@@ -115,7 +128,7 @@ public class EventHandler {
                             .executeAsync()
                     ).thenComposeAsync(ignored ->
                             DatabaseAsync.getPlayerAsync(event.player.uuid())
-                    ).thenApplyAsync(data -> {
+                    ).thenAcceptAsync(data -> {
                         if (data.getStatus().ordinal() > 0) {
                             admins.put(event.player.uuid(), event.player.name);
                             specialRanks.put(event.player.uuid(), Rank.getSpecialRank(data.getStatus()));
@@ -129,39 +142,17 @@ public class EventHandler {
                         } else if (data.isDiscord()) {
                             Call.openURI(event.player.con(), config.discordUrl);
                         }
-                        return null;
                     });
                 } else {
-                    DatabaseAsync.createFullPlayerAsync(event.player.uuid(), event.player.ip(), event.player.name(), event.player.locale(), event.player.admin()).thenComposeAsync(ignored -> {
+                    DatabaseAsync.createFullPlayerAsync(event.player.uuid(), event.player.ip(), event.player.name(), event.player.locale(), event.player.admin()).thenAcceptAsync(ignored -> {
                         Call.menu(event.player.con(), Menus.welcome.ordinal(), title, welcome, buttons);
-                        Players.incrementStats(event.player, "logins");
-                        return null;
                     }).thenComposeAsync(ignored -> Rank.getRankAsync(event.player));
                 }
+                Players.incrementStats(event.player, "logins");
+            }).exceptionally(t -> {
+                Log.err("Failed to fetch player data.", t);
                 return null;
             });
-
-            try {
-                if (Database.playerExists(event.player.uuid())) {
-                    updateBackground(Database.getContext() // TODO: Database.updateUser
-                            .update(Tables.users)
-                            .set(Tables.users.name, event.player.name())
-                            .set(Tables.users.locale, event.player.locale())
-                            .set(Tables.users.ip, event.player.ip())
-                            .where(Tables.users.uuid.eq(event.player.uuid())));
-
-                    UsersRecord data = Database.getPlayer(event.player.uuid());
-                    assert data != null;
-
-                } else {
-                }
-
-            } catch (SQLException e) {
-                Log.err(e);
-                DiscordLogger.err(e);
-                Call.menu(event.player.con(), Menus.welcome.ordinal(), title, welcome, buttons);
-                ranks.put(event.player.uuid(), Rank.player);
-            }
         });
         // endregion
 
@@ -332,40 +323,6 @@ public class EventHandler {
                 Call.followUpMenu(event.player.con(), event.textInputId, title, message, buttons);
             }
         });
-
-        /*
-        // region баны
-        Events.on(EventType.PlayerBanEvent.class, event -> {
-            try {
-                Database.getContext()
-                        .update(Tables.users)
-                        .set(Tables.users.BANNED, (byte) 1)
-                        .where(Tables.users.uuid.eq(event.uuid))
-                        .execute();
-            } catch (SQLException e) {
-                Log.err("Failed to ban uuid for player '@'", event.uuid);
-                Log.err(e);
-                DiscordLogger.err("Failed to ban uuid for player '" + event.uuid + "'", e);
-            }
-        });
-
-        // I just deleted IP ban/unban part, haha
-        // It isn't used anyway
-
-        Events.on(EventType.PlayerUnbanEvent.class, event -> {
-            try {
-                Database.getContext()
-                        .update(Tables.users)
-                        .set(Tables.users.BANNED, (byte) 0)
-                        .where(Tables.users.uuid.eq(event.uuid))
-                        .execute();
-            } catch (SQLException e) {
-                Log.err("Failed to unban uuid for player '@'", event.uuid);
-                Log.err(e);
-                DiscordLogger.err("Failed to unban uuid for player '" + event.uuid + "'", e);
-            }
-        });
-        */
 
         Events.on(EventType.AdminRequestEvent.class, event -> {
             if (admins.containsKey(event.player.uuid())) {

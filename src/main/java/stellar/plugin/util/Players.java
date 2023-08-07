@@ -50,7 +50,6 @@ public class Players {
             ObjectMap<String, Integer> statsMap = new ObjectMap<>();
             for (Field<?> field : Tables.stats.fields()) {
                 if (field.getType() == Integer.class || field.getType() == Long.class) {
-                    Tables.playtime.erekirHexed.getUnqualifiedName();
                     statsMap.put(field.getName(), 0);
                 }
             }

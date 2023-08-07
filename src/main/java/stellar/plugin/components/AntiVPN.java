@@ -68,13 +68,15 @@ public class AntiVPN { // also includes anti ddos from gh actions servers
             }
 
             DatabaseAsync.getContextAsync().thenApplyAsync(context -> {
-                boolean exists = context.selectFrom(Tables.ipCached)
+                boolean exists = context
+                        .selectFrom(Tables.ipCached)
                         .where(Tables.ipCached.ip.eq(event.player.ip()))
                         .fetch()
                         .size() > 0;
 
                 if (exists) {
-                    return context.selectFrom(Tables.ipCached)
+                    return context
+                            .selectFrom(Tables.ipCached)
                             .where(Tables.ipCached.ip.eq(event.player.ip()))
                             .fetchOne();
                 } else {
@@ -93,7 +95,8 @@ public class AntiVPN { // also includes anti ddos from gh actions servers
                         JsonValue json = jsonReader.parse(response.body().string());
                         JsonValue data = json.get(event.player.ip());
 
-                        IpCachedRecord record = context.newRecord(Tables.ipCached) // TODO: Database.createIp
+                        IpCachedRecord record = context
+                                .newRecord(Tables.ipCached) // TODO: Database.createIp
                                 .setIp(event.player.ip())
                                 .setProxy(data.getString("proxy").equals("yes"))
                                 .setVpn(data.getString("vpn").equals("yes"))
