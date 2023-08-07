@@ -16,7 +16,7 @@ import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.concurrent.CompletableFuture;
 
-public class Translator {
+public class Translator { // TODO: normal async logic
     private static final JsonReader jsonReader = new JsonReader();
 
     public static String translate(String text, String langTo, String langFrom) throws IOException {

@@ -14,6 +14,7 @@ import mindustry.game.EventType;
 import mindustry.game.Gamemode;
 import mindustry.game.Team;
 import mindustry.gen.*;
+import mindustry.net.Administration;
 import mindustry.net.Packets;
 import mindustry.world.blocks.defense.turrets.ItemTurret;
 import stellar.database.Database;
@@ -65,7 +66,7 @@ public class EventHandler {
                 }
                 return DatabaseAsync.latestBanAsync(uuid).thenCombineAsync(DatabaseAsync.getContextAsync(), (record, context) -> {
                     Locale locale = Bundle.findLocale(event.player.locale());
-                    UsersRecord admin = context // FIXME: use
+                    UsersRecord admin = context
                             .selectFrom(Tables.users)
                             .where(Tables.users.uuid.eq(record.getAdmin()))
                             .fetchOne();
@@ -261,16 +262,20 @@ public class EventHandler {
                         Call.openURI(event.player.con(), config.discordUrl);
                     }
                     case 2 -> {
-                        try {
-                            updateBackground(Database.getContext()
-                                    .update(Tables.users)
-                                    .set(Tables.users.popup, false)
-                                    .where(Tables.users.uuid.eq(event.player.uuid())));
-                            Bundle.bundled(event.player, "welcome.disabled");
-                        } catch (SQLException e) {
-                            Log.err(e);
-                            Bundle.bundled(event.player, "welcome.disable.failed");
-                        }
+                        DatabaseAsync.getContextAsync().thenComposeAsync(context -> context
+                                .update(Tables.users)
+                                .set(Tables.users.popup, false)
+                                .where(Tables.users.uuid.eq(event.player.uuid()))
+                                .executeAsync()
+                        ).handle((ignored, t) -> {
+                            if (t != null) {
+                                Log.err(t);
+                                Bundle.bundled(event.player, "welcome.disable.failed");
+                            } else {
+                                Bundle.bundled(event.player, "welcome.disabled");
+                            }
+                            return null;
+                        });
                     }
                 }
             }
@@ -325,30 +330,28 @@ public class EventHandler {
         });
 
         Events.on(EventType.AdminRequestEvent.class, event -> {
-            if (admins.containsKey(event.player.uuid())) {
-                try {
-                    if (event.action == Packets.AdminAction.kick || event.action == Packets.AdminAction.ban) {
-                        int id = Mathf.random(0, Integer.MAX_VALUE - 1);
-                        UsersRecord adminInfo = Database.getPlayer(event.player.uuid());
-                        UsersRecord targetInfo = Database.getPlayer(event.other.uuid());
-
-                        AdminActionEntry entry = new AdminActionEntry(adminInfo, targetInfo, event.action);
-                        adminActions.put(id, entry);
-                        Locale locale = Bundle.findLocale(event.player.locale());
-                        String title = Bundle.format("inputs.punishment.title", locale, event.other.plainName());
-                        String message = Bundle.get("inputs.punishment.msg", locale);
-                        Call.textInput(event.player.con(), id, title, message, 64, "", false);
-                    }
-                } catch (SQLException e) {
-                    Log.err(e);
-                }
-            } else {
+            if (!admins.containsKey(event.player.uuid())) {
                 event.player.sendMessage("[scarlet]?![]");
+                return;
             }
+            if (!(event.action == Packets.AdminAction.kick || event.action == Packets.AdminAction.ban)) {
+                return;
+            }
+
+            DatabaseAsync.getPlayerAsync(event.player.uuid()).thenCombineAsync(DatabaseAsync.getPlayerAsync(event.other.uuid()), (adminInfo, targetInfo) -> {
+                int id = Mathf.random(0, Integer.MAX_VALUE - 1);
+                AdminActionEntry entry = new AdminActionEntry(adminInfo, targetInfo, event.action);
+                adminActions.put(id, entry);
+                Locale locale = Bundle.findLocale(event.player.locale());
+                String title = Bundle.format("inputs.punishment.title", locale, event.other.plainName());
+                String message = Bundle.get("inputs.punishment.msg", locale);
+                Call.textInput(event.player.con(), id, title, message, 64, "", false);
+                return null;
+            });
         });
         // endregion
 
-        // region отключение
+        // region PlayerDisconnect
         Events.on(EventType.PlayerLeave.class, event -> {
             if (votesRTV.contains(event.player.uuid())) {
                 votesRTV.remove(event.player.uuid());
@@ -377,10 +380,10 @@ public class EventHandler {
 
         Events.on(EventType.WorldLoadEndEvent.class, event -> {
             history = new CacheSeq[Vars.world.width()][Vars.world.height()];
+            votesRTV.clear();
         });
 
         Events.on(EventType.GameOverEvent.class, event -> {
-            votesRTV.clear();
             switch (Vars.state.rules.mode()) {
                 case pvp -> {
                     if (!Vars.state.map.tags.getBool("hexed")) {
