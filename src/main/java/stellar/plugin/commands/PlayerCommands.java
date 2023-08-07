@@ -1,4 +1,4 @@
-package stellar.plugin.components.commands;
+package stellar.plugin.commands;
 
 import arc.Core;
 import arc.Events;
@@ -27,7 +27,7 @@ import stellar.plugin.Variables;
 import stellar.plugin.components.Rank;
 import stellar.plugin.history.entry.HistoryEntry;
 import stellar.plugin.history.struct.CacheSeq;
-import stellar.plugin.menus.MenuHandler;
+import stellar.plugin.util.menus.MenuHandler;
 import stellar.plugin.util.Bundle;
 import stellar.plugin.util.Players;
 import stellar.plugin.util.StringUtils;

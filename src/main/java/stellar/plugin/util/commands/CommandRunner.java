@@ -1,4 +1,4 @@
-package stellar.plugin.commands;
+package stellar.plugin.util.commands;
 
 import mindustry.gen.Player;
 

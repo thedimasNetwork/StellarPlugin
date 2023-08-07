@@ -10,9 +10,9 @@ import stellar.plugin.components.Activity;
 import stellar.plugin.components.AntiVPN;
 import stellar.plugin.components.EventHandler;
 import stellar.plugin.components.LaunchPad;
-import stellar.plugin.components.commands.AdminCommands;
-import stellar.plugin.components.commands.PlayerCommands;
-import stellar.plugin.components.commands.ServerCommands;
+import stellar.plugin.commands.AdminCommands;
+import stellar.plugin.commands.PlayerCommands;
+import stellar.plugin.commands.ServerCommands;
 import stellar.plugin.history.History;
 
 import static mindustry.Vars.netServer;

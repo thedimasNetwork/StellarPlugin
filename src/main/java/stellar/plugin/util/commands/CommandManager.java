@@ -1,4 +1,4 @@
-package stellar.plugin.commands;
+package stellar.plugin.util.commands;
 
 import arc.struct.Seq;
 import arc.util.CommandHandler;

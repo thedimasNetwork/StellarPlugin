@@ -3,7 +3,7 @@ package stellar.plugin;
 import arc.struct.*;
 import arc.util.Interval;
 import okhttp3.OkHttpClient;
-import stellar.plugin.commands.CommandManager;
+import stellar.plugin.util.commands.CommandManager;
 import stellar.plugin.components.Rank;
 import stellar.plugin.history.entry.HistoryEntry;
 import stellar.plugin.history.struct.CacheSeq;

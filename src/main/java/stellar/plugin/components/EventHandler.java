@@ -27,7 +27,7 @@ import stellar.plugin.bot.Colors;
 import stellar.plugin.bot.Util;
 import stellar.plugin.enums.Menus;
 import stellar.plugin.history.struct.CacheSeq;
-import stellar.plugin.menus.MenuHandler;
+import stellar.plugin.util.menus.MenuHandler;
 import stellar.plugin.types.AdminActionEntry;
 import stellar.plugin.util.Bundle;
 import stellar.plugin.util.Players;

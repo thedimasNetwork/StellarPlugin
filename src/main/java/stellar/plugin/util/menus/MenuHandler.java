@@ -1,4 +1,4 @@
-package stellar.plugin.menus;
+package stellar.plugin.util.menus;
 
 import arc.math.Mathf;
 import arc.struct.IntMap;
