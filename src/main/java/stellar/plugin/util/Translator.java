@@ -10,7 +10,6 @@ import okhttp3.Response;
 import stellar.database.Database;
 import stellar.plugin.Const;
 import stellar.plugin.Variables;
-import stellar.plugin.util.logger.DiscordLogger;
 
 import java.io.IOException;
 import java.text.MessageFormat;

@@ -52,7 +52,6 @@ dependencies {
     }
     compileOnly "com.github.Anuken.Arc:arc-core:$mindustryVersion"
 
-    implementation "com.github.thedimasNetwork:DiscordWebhook:$discordWebhookVersion"
     implementation ("net.dv8tion:JDA:$jdaVersion") { exclude module: "opus-java" }
     compileOnly "com.squareup.okhttp3:okhttp:$okhttpVersion"
 

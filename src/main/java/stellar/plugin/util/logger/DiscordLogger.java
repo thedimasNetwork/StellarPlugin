@@ -4,16 +4,25 @@ import arc.struct.ObjectMap;
 import arc.util.Log;
 import arc.util.Nullable;
 import arc.util.Strings;
+import arc.util.serialization.Jval;
 import mindustry.net.Administration;
-import webhook.Webhook;
-import webhook.embed.Embed;
-import webhook.http.Part;
+import okhttp3.MediaType;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+import stellar.plugin.Const;
+import stellar.plugin.Variables;
 
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
+import java.util.concurrent.CompletableFuture;
 
 import static stellar.plugin.Variables.config;
+import static stellar.plugin.Variables.httpClient;
 
+/* TODO
+ * Multiple argument and format as in the Arc logger
+ */
 @SuppressWarnings("unused")
 public class DiscordLogger {
     private static ObjectMap<LogLevel, Log.LogLevel> levels = ObjectMap.of(
@@ -28,32 +37,55 @@ public class DiscordLogger {
     }
 
     public static void log(LogLevel level, String text, @Nullable Throwable th) {
-        Embed embed = new Embed();
+        Jval json = Jval.newObject();
+        json.put("content", Jval.NULL);
+
+        int rgb = level.color.getRed();
+        rgb = (rgb << 8) + level.color.getGreen();
+        rgb = (rgb << 8) + level.color.getBlue();
+
+        Jval embed = Jval.newObject();
+        embed.put("title", level.name)
+                .put("color", rgb)
+                .put("timestamp", Instant.now().toString())
+                .put("footer", Jval.newObject()
+                        .put("text", Const.serverFieldName)
+                );
+
         if (text != null) {
-            embed.addField(level.name, text);
-        } else {
-            embed.setTitle(level.name);
+            embed.put("description", text);
         }
-        embed.setColor(level.color)
-                .setFooter(Administration.Config.serverName.string(), null)
-                .setTimestamp(Instant.now().toString());
 
-        new Webhook(config.webhookUrl)
-                .addEmbed(embed)
-                .execute();
+        if (th != null) {
+            embed.put("fields", Jval.newArray().add(
+                    Jval.newObject()
+                            .put("name", "Traceback")
+                            .put("value", "```java\n" + Strings.getStackTrace(th) + "\n```")
+            ));
+        }
 
-        if (th == null) {
-            Log.log(levels.get(level), text);
-        } else {
-            Webhook.sendMultipart(config.webhookUrl, Part.ofBytes("file0", "text/plain",
-                    Strings.getStackTrace(th).getBytes(StandardCharsets.UTF_8),
-                    "StackTrace" + Instant.now().toEpochMilli() + ".txt"));
-            if (text != null) {
-                Log.log(levels.get(level), text + ": " + Strings.getStackTrace(th));
-            } else {
-                Log.log(levels.get(level), Strings.getStackTrace(th));
+        json.put("embeds", Jval.newArray().add(embed));
+
+        CompletableFuture.supplyAsync(() -> {
+            Request request = new Request.Builder()
+                    .url(config.webhookUrl)
+                    .post(RequestBody.create(json.toString(), MediaType.parse("application/json"))).build();
+
+            try (Response response = httpClient.newCall(request).execute()) {
+                return response.body().string();
+            } catch (Throwable t) {
+                Log.err("Failed to send webhook!", t);
+                return null;
             }
-        }
+        }).handleAsync((response, throwable) -> {
+            Log.debug(json.toString());
+            if (throwable != null) {
+                Log.err(throwable);
+                return null;
+            }
+            Log.debug(response);
+            return null;
+        });
     }
 
     public static void info(String text) {
@@ -61,7 +93,7 @@ public class DiscordLogger {
     }
 
     public static void infoTag(String tag, String text) {
-        log(LogLevel.info, "[" + tag + "] " + text);
+        log(LogLevel.info, "**[" + tag + "]** " + text);
     }
 
     public static void warn(String text) {
@@ -69,7 +101,7 @@ public class DiscordLogger {
     }
 
     public static void warnTag(String tag, String text) {
-        log(LogLevel.warn, "[" + tag + "] " + text);
+        log(LogLevel.warn, "**[" + tag + "]** " + text);
     }
 
     public static void err(String text) {
@@ -85,7 +117,7 @@ public class DiscordLogger {
     }
 
     public static void errTag(String tag, String text) {
-        log(LogLevel.err, "[" + tag + "] " + text);
+        log(LogLevel.err, "**[" + tag + "]** " + text);
     }
 
     public static void debug(String text) {
@@ -93,6 +125,6 @@ public class DiscordLogger {
     }
 
     public static void debugTag(String tag, String text) {
-        log(LogLevel.debug, "[" + tag + "] " + text);
+        log(LogLevel.debug, "**[" + tag + "]** " + text);
     }
 }
