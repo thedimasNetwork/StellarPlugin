@@ -84,11 +84,6 @@ public class EventHandler {
                         break;
                     }
                 }
-            }).exceptionally(t -> {
-                if (!(t.getCause() instanceof IllegalArgumentException)) {
-                    Log.err(t);
-                }
-                return null;
             });
         });
         // endregion
@@ -147,9 +142,13 @@ public class EventHandler {
                     }).thenComposeAsync(ignored -> Rank.getRankAsync(event.player));
                 }
                 Players.incrementStats(event.player, "logins");
-            }).exceptionally(t -> {
-                Log.err("Failed to fetch player data.", t);
-                return null;
+                DatabaseAsync.createLoginAsync(
+                        Const.serverFieldName,
+                        event.player.uuid(),
+                        event.player.ip(),
+                        event.player.name(),
+                        event.player.locale()
+                );
             });
         });
         // endregion

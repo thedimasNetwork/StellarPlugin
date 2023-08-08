@@ -99,12 +99,7 @@ public class PlayerCommands {
                         player.uuid()
                 ).thenAcceptAsync(record ->
                         Bundle.bundled(player, "commands.tr.current", record.getTranslator())
-                ).exceptionally(t -> {
-                    Bundle.bundled(player, "commands.tr.error");
-                    Log.err(t);
-                    DiscordLogger.err(t);
-                    return null;
-                });
+                );
                 return;
             }
 
@@ -124,12 +119,8 @@ public class PlayerCommands {
                             .update(Tables.users)
                             .set(Tables.users.translator, mode)
                             .where(Tables.users.uuid.eq(player.uuid()))
-                            .executeAsync())
-                    .exceptionally(t -> {
-                        Log.err("Unable to update translator", t);
-                        DiscordLogger.err("Unable to update translator", t);
-                        return null;
-                    });
+                            .executeAsync()
+                    );
         });
 
         commandHandler.<Player>register("rtv", "[on|off]", "commands.rtv.description", (args, player) -> {
