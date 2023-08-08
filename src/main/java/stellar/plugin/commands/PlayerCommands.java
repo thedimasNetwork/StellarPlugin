@@ -32,7 +32,6 @@ import stellar.plugin.util.Bundle;
 import stellar.plugin.util.Players;
 import stellar.plugin.util.StringUtils;
 import stellar.plugin.util.Translator;
-import stellar.plugin.util.logger.DiscordLogger;
 
 import java.sql.SQLException;
 import java.util.Locale;

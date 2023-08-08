@@ -1,5 +1,7 @@
 package stellar.plugin.util.logger;
 
+import arc.struct.ObjectMap;
+import arc.util.Log;
 import arc.util.Nullable;
 import arc.util.Strings;
 import mindustry.net.Administration;
@@ -14,6 +16,12 @@ import static stellar.plugin.Variables.config;
 
 @SuppressWarnings("unused")
 public class DiscordLogger {
+    private static ObjectMap<LogLevel, Log.LogLevel> levels = ObjectMap.of(
+            LogLevel.debug, Log.LogLevel.debug,
+            LogLevel.info, Log.LogLevel.info,
+            LogLevel.warn, Log.LogLevel.warn,
+            LogLevel.err, Log.LogLevel.err
+    );
 
     public static void log(LogLevel level, String text) {
         log(level, text, null);
@@ -34,10 +42,17 @@ public class DiscordLogger {
                 .addEmbed(embed)
                 .execute();
 
-        if (th != null) {
+        if (th == null) {
+            Log.log(levels.get(level), text);
+        } else {
             Webhook.sendMultipart(config.webhookUrl, Part.ofBytes("file0", "text/plain",
                     Strings.getStackTrace(th).getBytes(StandardCharsets.UTF_8),
                     "StackTrace" + Instant.now().toEpochMilli() + ".txt"));
+            if (text != null) {
+                Log.log(levels.get(level), text + ": " + Strings.getStackTrace(th));
+            } else {
+                Log.log(levels.get(level), Strings.getStackTrace(th));
+            }
         }
     }
 

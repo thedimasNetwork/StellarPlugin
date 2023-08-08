@@ -31,7 +31,6 @@ import stellar.plugin.types.AdminActionEntry;
 import stellar.plugin.util.Bundle;
 import stellar.plugin.util.Players;
 import stellar.plugin.util.Translator;
-import stellar.plugin.util.logger.DiscordLogger;
 
 import java.sql.SQLException;
 import java.time.LocalDateTime;
@@ -463,8 +462,7 @@ public class EventHandler {
                     Bundle.bundled(p, "events.deposit.thorium-in-reactor", playerName, building.tileX(), building.tileY());
                 });
 
-                Log.info("@ положил торий в реактор (@, @)", target.name, building.tileX(), building.tileY());
-                DiscordLogger.warn(String.format("%s положил торий в реактор (%f, %f)", event.player.name, event.tile.x, event.tile.y));
+                Log.info("@ put thorium into reactor (@, @)", target.name, building.tileX(), building.tileY());
             }
         });
 
@@ -478,9 +476,7 @@ public class EventHandler {
                     Groups.player.each(o -> o.team() == player.team(), p -> {
                         Bundle.bundled(p, "events.build-select.reactor-near-core", playerName, event.tile.x, event.tile.y);
                     });
-
-                    Log.info("@ начал строить ториевый реактор близко к ядру (@, @)", player.name, event.tile.x, event.tile.y);
-                    DiscordLogger.warn(String.format("%s начал строить ториевый реактор близко к ядру (%d, %d)", player.name, event.tile.x, event.tile.y));
+                    Log.info("@ is building a thorium reactor near the core (@, @)", player.name, event.tile.x, event.tile.y);
                 }
             }
         });

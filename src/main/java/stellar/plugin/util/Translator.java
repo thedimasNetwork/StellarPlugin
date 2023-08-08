@@ -61,7 +61,6 @@ public class Translator { // TODO: normal async logic
             locale = Database.getPlayer(player.uuid()).getTranslator();
         } catch (Throwable t) {
             Log.err(t);
-            DiscordLogger.err(t);
         }
 
         String translated = message;
@@ -91,7 +90,6 @@ public class Translator { // TODO: normal async logic
             locale = Database.getPlayer(otherPlayer.uuid()).getTranslator();
         } catch (Throwable t) {
             Log.err(t);
-            DiscordLogger.err(t);
         }
 
         return formatChat(player, translateRaw(player, otherPlayer, message), message, locale.equals("double"));

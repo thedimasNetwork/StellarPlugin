@@ -32,7 +32,6 @@ import stellar.plugin.util.logger.DiscordLogger;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.sql.SQLException;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
