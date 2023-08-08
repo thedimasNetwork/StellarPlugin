@@ -103,8 +103,8 @@ public class AdminCommands {
             player.unit().health = health;
             player.unit().ammo = ammo;
             player.unit().spawnedByCore = spawnedByCore;
-
             player.snapSync();
+            DiscordLogger.info(String.format("%s teleported to (%d, %d)", player.plainName(), x, y));
         });
 
         commandManager.registerPlayer("spawn", "<unit> [count] [team]", "commands.admin.unit.description", Rank.admin, (args, player) -> {
@@ -134,7 +134,7 @@ public class AdminCommands {
             }
 
             Bundle.bundled(player, "commands.admin.unit.text", count, unit, team.color, team);
-            DiscordLogger.info(String.format("%s заспавнил %d %s для команды %s", player.name, count, unit.name, team));
+            DiscordLogger.info(String.format("%s spawned %d %s for the %s team", player.plainName(), count, unit.name, team));
         });
 
         commandManager.registerPlayer("team", "<team> [username...]", "commands.admin.team.description", Rank.admin, (args, player) -> {
@@ -147,12 +147,14 @@ public class AdminCommands {
             if (args.length == 1) {
                 player.team(team);
                 Bundle.bundled(player, "commands.admin.team.changed", team.color, team);
+                DiscordLogger.info(String.format("%s changed theirs team to %s", player.plainName(), team));
             } else {
                 Player otherPlayer = Players.findPlayer(args[1]);
                 if (otherPlayer != null) {
                     otherPlayer.team(team);
                     Bundle.bundled(otherPlayer, "commands.admin.team.updated", team.color, team);
                     Bundle.bundled(player, "commands.admin.team.successful-updated", otherPlayer.name, team.color, team);
+                    DiscordLogger.info(String.format("%s changed %s's team to %s", player.plainName(), otherPlayer.plainName(), team));
                 } else {
                     Bundle.bundled(player, "commands.player-notfound");
                 }
@@ -164,19 +166,17 @@ public class AdminCommands {
                 player.unit().kill();
                 Bundle.bundled(player, "commands.admin.kill.suicide");
 
-                Log.info("@ убил сам себя", Strings.stripColors(player.name));
+                DiscordLogger.info(String.format("%s killed themself", player.plainName()));
                 return;
             }
 
             Player otherPlayer = Players.findPlayer(args[0]);
             if (otherPlayer != null) {
                 otherPlayer.unit().kill();
-                String otherPlayerName = otherPlayer.coloredName();
-                Bundle.bundled(player, "commands.admin.kill.kill-another", otherPlayerName);
-
-                Log.info("@ убил @", Strings.stripColors(player.name), Strings.stripColors(otherPlayerName));
+                Bundle.bundled(player, "commands.admin.kill.kill-another", otherPlayer.coloredName());
+                DiscordLogger.info(String.format("%s killed %s", player.plainName(), otherPlayer.plainName()));
             } else {
-                player.sendMessage("[scarlet]Игрока с таким ником нет на сервере");
+                Bundle.bundled(player, "commands.player-notfound");
             }
         });
 
@@ -184,9 +184,7 @@ public class AdminCommands {
             if (args.length == 0) {
                 Groups.unit.each(Unitc::kill);
                 Bundle.bundled(player, "commands.admin.killall.text");
-
-                Log.info("@ убил всех...", Strings.stripColors(player.name));
-                DiscordLogger.info(String.format("%s убил всех...", player.name));
+                DiscordLogger.info(String.format("%s killed all units", player.plainName()));
             } else {
                 Team team = Structs.find(Team.baseTeams, t -> t.name.equalsIgnoreCase(args[0]));
                 if (team == null) {
@@ -194,11 +192,9 @@ public class AdminCommands {
                     return;
                 }
 
-                Groups.unit.each(u -> u.team == team, Unitc::kill); // Надеюсь, оно работает
+                Groups.unit.each(u -> u.team == team, Unitc::kill);
                 Bundle.bundled(player, "commands.admin.killall.text-teamed", team.color, team);
-
-                Log.info("@ убил всех с команды @...", Strings.stripColors(player.name), team);
-                DiscordLogger.info(String.format("%s убил всех с команды %s...", player.name, team));
+                DiscordLogger.info(String.format("%s killed all units from the %s team", player.plainName(), team));
             }
         });
 
@@ -233,16 +229,13 @@ public class AdminCommands {
 
             Tile tile = player.tileOn();
             Call.constructFinish(tile, core, player.unit(), (byte) 0, player.team(), false);
-
             Bundle.bundled(player, tile.block() == core ? "commands.admin.core.success" : "commands.admin.core.failed");
-
-            Log.info("@ заспавнил ядро (@, @)", Strings.stripColors(player.name), tile.x, tile.y);
+            DiscordLogger.info(String.format("%s spawned a core (%d, %d)", Strings.stripColors(player.name), tile.x, tile.y));
         });
 
         commandManager.registerPlayer("end", "commands.admin.end.description", Rank.admin, (args, player) -> {
             Events.fire(new EventType.GameOverEvent(Team.crux));
-            Log.info("@ сменил карту", Strings.stripColors(player.name));
-            DiscordLogger.info(String.format("%s сменил карту", player.name));
+            DiscordLogger.info(String.format("%s ended the game", player.plainName()));
         });
 
         commandManager.registerPlayer("js", "<code...>", "JS eval", Rank.console, (args, player) -> {
@@ -255,6 +248,7 @@ public class AdminCommands {
                 error = true;
             }
             player.sendMessage("> " + (error ? "[#ff341c]" + output : output));
+            DiscordLogger.info(String.format("%s has executed JS code: `%s`", player.plainName(), args[0]));
         });
 
         commandManager.registerPlayer("effect", "<effect> <x> <y> [rotation] [color]", "call effect", Rank.admin, (args, player) -> {
@@ -319,8 +313,6 @@ public class AdminCommands {
             }
 
             player.sendMessage(String.format("[lime]Игрок %s выгнан[]", args[0]));
-            Log.info("@ (@) has kicked @ (@)", player.name(), player.uuid(), found.name(), found.uuid());
-            Bot.sendMessage(String.format("%s выгнал игрока %s", player.name(), found.name()));
         }); // TODO: использовать бандлы
 
         commandManager.registerPlayer("execute", "<name> <command> [args...]", "Execute command as a player", Rank.console, (args, player) -> {
@@ -335,9 +327,10 @@ public class AdminCommands {
                 command += " " + args[2];
             }
             commandHandler.handleMessage(command, target);
+            DiscordLogger.warn(String.format("%s has executed command `%s` as %s", player.plainName(), command, target.plainName()));
         });
 
-        commandManager.registerPlayer("kills", "<selector...>", "Kill entities by specified selector.", Rank.console, (args, player) -> {
+        commandManager.registerPlayer("kills", "<selector...>", "Kill entities by specified selector.", Rank.console, (args, player) -> { // Very WIP
             if (args[0].length() < 2 || !args[0].startsWith("@")) {
                 player.sendMessage("[scarlet]Invalid selector![]");
                 return;

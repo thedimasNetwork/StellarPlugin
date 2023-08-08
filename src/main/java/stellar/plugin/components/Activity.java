@@ -23,8 +23,7 @@ public class Activity {
     public static void load() {
         Timer.schedule(() -> {
             if (Const.playtimeField == null) {
-                Log.err("Server @ does not exist in the Database!", Const.serverFieldName);
-                DiscordLogger.err("Сервер " + Const.serverFieldName + " не существует в базе данных!");
+                DiscordLogger.err("Server " + Const.serverFieldName + " does not exist in the Database!");
                 return;
             }
 
