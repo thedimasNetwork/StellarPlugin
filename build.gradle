@@ -31,7 +31,7 @@ ext {
     okhttpVersion = "4.9.3"
     mysqlVersion = "8.0.30"
     jooqVersion = "3.17.0"
-    databaseVersion = "72c615399d"
+    databaseVersion = "df5123c9bb"
 }
 
 repositories {

@@ -36,7 +36,9 @@ public class Activity {
                         .set(Const.playtimeField, Const.playtimeField.plus(60))
                         .where(Tables.playtime.uuid.eq(p.uuid()))
                         .executeAsync()
-                ).thenComposeAsync(ignored -> DatabaseAsync.getContextAsync()).thenAcceptAsync(context -> {
+                ).thenComposeAsync(ignored ->
+                        DatabaseAsync.getContextAsync()
+                ).thenAcceptAsync(context -> {
                     ObjectMap<String, Integer> stats = Variables.statsData.get(p.uuid(), new ObjectMap<>());
                     UpdateSetMoreStep<StatsRecord> query = (UpdateSetMoreStep<StatsRecord>) context.update(Tables.stats);
                     stats.each((stat, value) -> {

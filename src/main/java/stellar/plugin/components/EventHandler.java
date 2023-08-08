@@ -16,7 +16,6 @@ import mindustry.game.Team;
 import mindustry.gen.*;
 import mindustry.net.Packets;
 import mindustry.world.blocks.defense.turrets.ItemTurret;
-import stellar.database.Database;
 import stellar.database.DatabaseAsync;
 import stellar.database.enums.MessageType;
 import stellar.database.gen.Tables;
@@ -50,7 +49,9 @@ public class EventHandler {
             }
             String uuid = event.player.uuid();
             String name = event.player.name;
-            DatabaseAsync.playerExistsAsync(uuid).thenComposeAsync(exists -> {
+            DatabaseAsync.playerExistsAsync(
+                    uuid
+            ).thenComposeAsync(exists -> {
                 if (!exists) {
                     throw new IllegalArgumentException("Player does not exist.");
                 }
@@ -59,7 +60,9 @@ public class EventHandler {
                 if (!isBanned) {
                     throw new IllegalArgumentException("Player is not banned.");
                 }
-                return DatabaseAsync.latestBanAsync(uuid).thenCombineAsync(DatabaseAsync.getContextAsync(), (record, context) -> {
+                return DatabaseAsync.latestBanAsync(
+                        uuid
+                ).thenCombineAsync(DatabaseAsync.getContextAsync(), (record, context) -> {
                     Locale locale = Bundle.findLocale(event.player.locale());
                     UsersRecord admin = context
                             .selectFrom(Tables.users)
@@ -113,15 +116,12 @@ public class EventHandler {
                     {Bundle.get("welcome.disable", locale)}
             };
 
-            DatabaseAsync.playerExistsAsync(event.player.uuid()).thenAcceptAsync(exists -> {
+            DatabaseAsync.playerExistsAsync(
+                    event.player.uuid()
+            ).thenAcceptAsync(exists -> {
                 if (exists) {
-                    DatabaseAsync.getContextAsync().thenComposeAsync(context -> context
-                            .update(Tables.users) // TODO: Database.updatePlayer
-                            .set(Tables.users.name, event.player.name())
-                            .set(Tables.users.locale, event.player.locale())
-                            .set(Tables.users.ip, event.player.ip())
-                            .where(Tables.users.uuid.eq(event.player.uuid()))
-                            .executeAsync()
+                    DatabaseAsync.updatePlayerAsync(
+                            event.player.uuid(), event.player.name(), event.player.locale(), event.player.ip()
                     ).thenComposeAsync(ignored ->
                             DatabaseAsync.getPlayerAsync(event.player.uuid())
                     ).thenAcceptAsync(data -> {
@@ -140,7 +140,9 @@ public class EventHandler {
                         }
                     });
                 } else {
-                    DatabaseAsync.createFullPlayerAsync(event.player.uuid(), event.player.ip(), event.player.name(), event.player.locale(), event.player.admin()).thenAcceptAsync(ignored -> {
+                    DatabaseAsync.createFullPlayerAsync(
+                            event.player.uuid(), event.player.ip(), event.player.name(), event.player.locale(), event.player.admin()
+                    ).thenAcceptAsync(ignored -> {
                         Call.menu(event.player.con(), Menus.welcome.ordinal(), title, welcome, buttons);
                     }).thenComposeAsync(ignored -> Rank.getRankAsync(event.player));
                 }
@@ -333,7 +335,9 @@ public class EventHandler {
                 return;
             }
 
-            DatabaseAsync.getPlayerAsync(event.player.uuid()).thenCombineAsync(DatabaseAsync.getPlayerAsync(event.other.uuid()), (adminInfo, targetInfo) -> {
+            DatabaseAsync.getPlayerAsync(
+                    event.player.uuid()
+            ).thenCombineAsync(DatabaseAsync.getPlayerAsync(event.other.uuid()), (adminInfo, targetInfo) -> {
                 int id = Mathf.random(0, Integer.MAX_VALUE - 1);
                 AdminActionEntry entry = new AdminActionEntry(adminInfo, targetInfo, event.action);
                 adminActions.put(id, entry);
@@ -486,21 +490,12 @@ public class EventHandler {
         Events.on(EventType.PlayerChatEvent.class, event -> {
             if (!event.message.startsWith("/")) {
                 Groups.player.each(otherPlayer -> {
-                    new Thread(() -> {
-                        String msg = Translator.translateChat(event.player, otherPlayer, event.message);
-                        otherPlayer.sendMessage(msg);
-                    }).start();
+                    Translator.translateChatAsync(event.player, otherPlayer, event.message).thenAcceptAsync(otherPlayer::sendMessage);
                 });
 
                 Log.info(Const.chatLogFormat, Strings.stripColors(event.player.name), Strings.stripColors(event.message), event.player.locale);
                 Players.incrementStats(event.player, "messages");
-                new Thread(() -> {
-                    try {
-                        Database.createMessage(Const.serverFieldName, event.player.uuid(), null, MessageType.global, event.message, event.player.locale());
-                    } catch (SQLException e) {
-                        Log.err(e);
-                    }
-                }).start();
+                DatabaseAsync.createMessageAsync(Const.serverFieldName, event.player.uuid(), null, MessageType.global, event.message, event.player.locale());
             }
         });
 

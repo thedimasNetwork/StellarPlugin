@@ -51,20 +51,13 @@ public class PlayerCommands {
         commandHandler.<Player>register("t", "<text...>", "commands.t.description", (args, player) -> {
             String message = args[0];
             Groups.player.each(o -> o.team() == player.team(), otherPlayer -> {
-                new Thread(() -> {
-                    String msg = Translator.translateChat(player, otherPlayer, message);
-                    otherPlayer.sendMessage("<[#" + player.team().color + "]T[]>" + msg);
-                }).start();
+                Translator.translateChatAsync(player, otherPlayer, message).thenAcceptAsync(msg ->
+                        otherPlayer.sendMessage("<[#" + player.team().color + "]T[]>" + msg)
+                );
             });
 
             Log.info("<T>" + Const.chatLogFormat, Strings.stripColors(player.name), Strings.stripColors(message), player.locale);
-            new Thread(() -> {
-                try {
-                    Database.createMessage(Const.serverFieldName, player.uuid(), player.team().name, MessageType.team, message, player.locale());
-                } catch (SQLException e) {
-                    Log.err(e);
-                }
-            }).start();
+            DatabaseAsync.createMessageAsync(Const.serverFieldName, player.uuid(), player.team().name, MessageType.team, message, player.locale());
         });
 
         commandHandler.removeCommand("help");
@@ -102,9 +95,11 @@ public class PlayerCommands {
 
         commandHandler.<Player>register("tr", "[off|auto|double|somelocale]", "commands.tr.description", (args, player) -> {
             if (args.length == 0) {
-                DatabaseAsync.getPlayerAsync(player.uuid()).thenAcceptAsync(record -> {
-                    Bundle.bundled(player, "commands.tr.current", record.getTranslator());
-                }).exceptionally(t -> {
+                DatabaseAsync.getPlayerAsync(
+                        player.uuid()
+                ).thenAcceptAsync(record ->
+                        Bundle.bundled(player, "commands.tr.current", record.getTranslator())
+                ).exceptionally(t -> {
                     Bundle.bundled(player, "commands.tr.error");
                     Log.err(t);
                     DiscordLogger.err(t);
@@ -127,7 +122,7 @@ public class PlayerCommands {
 
             DatabaseAsync.getContextAsync().thenAcceptAsync(context -> context
                             .update(Tables.users)
-                            .set(Tables.users.translator, "off")
+                            .set(Tables.users.translator, mode)
                             .where(Tables.users.uuid.eq(player.uuid()))
                             .executeAsync())
                     .exceptionally(t -> {
@@ -274,13 +269,12 @@ public class PlayerCommands {
                 return;
             }
 
-            try {
-                Long time = Database.getPlaytime(player.uuid(), Const.playtimeField);
+            DatabaseAsync.getPlaytimeAsync(
+                    player.uuid(), Const.playtimeField
+            ).thenAcceptAsync(time -> {
                 Locale locale = Bundle.findLocale(player.locale());
                 Bundle.bundled(player, "commands.playtime.msg", Const.serverNames.get(serverColumnName), StringUtils.longToTime((time == null) ? 0 : time, locale));
-            } catch (Throwable t) {
-                Log.err("Failed to get playtime for player '" + player.uuid() + "'", t);
-            }
+            });
         });
 
         commandHandler.<Player>register("rank", "commands.rank.description", (args, player) -> {
@@ -295,32 +289,28 @@ public class PlayerCommands {
                 if (option == -1) {
                     return;
                 }
+                Rank nextRank = rank.getNext();
+                String[][] newButtons = new String[][]{
+                        {Bundle.get("menus.close", locale)}
+                };
 
-                try {
-                    Rank nextRank = rank.getNext();
-                    String[][] newButtons = new String[][]{
-                            {Bundle.get("menus.close", locale)}
-                    };
-
-                    if (nextRank == null) {
-                        Call.menu(p.con(), 0, Bundle.get("menus.rank-info.title", locale), Bundle.format("commands.rank.next-rank.none", locale), newButtons);
-                    } else {
-                        StatsRecord record = Database.getStats(p.uuid());
-
-                        int playtime = (int) Database.getTotalPlaytime(p.uuid());
+                if (nextRank == null) {
+                    Call.menu(p.con(), 0, Bundle.get("menus.rank-info.title", locale), Bundle.format("commands.rank.next-rank.none", locale), newButtons);
+                } else {
+                    DatabaseAsync.getStatsAsync(
+                            p.uuid()
+                    ).thenCombineAsync(DatabaseAsync.getTotalPlaytimeAsync(p.uuid()), (record, playtime) -> {
                         int wins = record.getAttacks() + record.getSurvivals() + record.getHexWins() + record.getPvp();
                         String message = Bundle.format("commands.rank.next-rank.info", locale,
                                 nextRank.formatted(p),
                                 targetColor(wins, nextRank.requirements.wins), wins, nextRank.requirements.wins,
                                 targetColor(record.getWaves(), nextRank.requirements.waves), record.getWaves(), nextRank.requirements.waves,
                                 targetColor(record.getBuilt(), nextRank.requirements.built), record.getBuilt(), nextRank.requirements.built,
-                                targetColor(playtime, nextRank.requirements.playtime * 60), longToTime(playtime, locale), longToTime(nextRank.requirements.playtime * 60L, locale)
+                                targetColor(playtime.intValue(), nextRank.requirements.playtime * 60), longToTime(playtime, locale), longToTime(nextRank.requirements.playtime * 60L, locale)
                         );
                         Call.menu(p.con(), 0, Bundle.get("menus.rank-info.title", locale), message, newButtons);
-                    }
-                } catch (SQLException e) {
-                    Log.err(e);
-                    Bundle.bundled(p, "commands.unknown-error");
+                        return null;
+                    });
                 }
             }));
         });
@@ -339,95 +329,90 @@ public class PlayerCommands {
                     return;
                 }
 
-                try {
+                DatabaseAsync.getStatsAsync(
+                        p.uuid()
+                ).thenCombineAsync(DatabaseAsync.getTotalPlaytimeAsync(p.uuid()), (record, playtime) -> {
                     String[][] newButtons = new String[][]{
                             {Bundle.get("menus.close", locale)}
                     };
 
                     Rank rank = Rank.values()[option];
-                    StatsRecord record = Database.getStats(p.uuid());
-                    int playtime = (int) Database.getTotalPlaytime(p.uuid());
                     int wins = record.getAttacks() + record.getSurvivals() + record.getHexWins() + record.getPvp();
                     String message = Bundle.format("commands.ranks.rank-info", locale,
                             rank.formatted(p),
                             targetColor(wins, rank.requirements.wins), wins, rank.requirements.wins,
                             targetColor(record.getWaves(), rank.requirements.waves), record.getWaves(), rank.requirements.waves,
                             targetColor(record.getBuilt(), rank.requirements.built), record.getBuilt(), rank.requirements.built,
-                            targetColor(playtime, rank.requirements.playtime * 60), longToTime(playtime, locale), longToTime(rank.requirements.playtime * 60L, locale)
+                            targetColor(playtime.intValue(), rank.requirements.playtime * 60), longToTime(playtime, locale), longToTime(rank.requirements.playtime * 60L, locale)
                     );
                     Call.menu(p.con(), 0, Bundle.get("menus.rank-info.title", locale), message, newButtons);
-                } catch (SQLException e) {
-                    Log.err(e);
-                    Bundle.bundled(p, "commands.unknown-error");
-                }
+                    return null;
+                });
             });
         });
 
         commandHandler.<Player>register("stats", "commands.stats.description", (args, player) -> {
-            try {
-                UsersRecord record = Database.getPlayer(player.uuid());
-                StatsRecord statsRecord = Database.getStats(player.uuid());
-                long playtime = Database.getTotalPlaytime(player.uuid());
-                Rank rank = ranks.get(player.uuid(), Rank.player);
-                Rank specialRank = specialRanks.get(player.uuid());
-                Locale locale = Bundle.findLocale(player.locale);
-                String message = Bundle.format("commands.stats.msg",
-                        Bundle.findLocale(player.locale()), record.getId(), player.coloredName(),
-                        rank.formatted(player),
-                        statsRecord.getBuilt(), statsRecord.getBroken(),
-                        statsRecord.getAttacks(), statsRecord.getSurvivals(), statsRecord.getHexWins(), statsRecord.getWaves(),
-                        statsRecord.getLogins(), statsRecord.getMessages(), statsRecord.getDeaths(), StringUtils.longToTime(playtime, locale));
+            DatabaseAsync.getPlayerAsync(
+                    player.uuid()
+            ).thenCombineAsync(DatabaseAsync.getStatsAsync(player.uuid()), (record, statsRecord) ->
+                    DatabaseAsync.getTotalPlaytimeAsync(player.uuid()).thenAcceptAsync(playtime -> {
+                        Rank rank = ranks.get(player.uuid(), Rank.player);
+                        Rank specialRank = specialRanks.get(player.uuid());
+                        Locale locale = Bundle.findLocale(player.locale);
+                        String message = Bundle.format("commands.stats.msg",
+                                Bundle.findLocale(player.locale()), record.getId(), player.coloredName(),
+                                rank.formatted(player),
+                                statsRecord.getBuilt(), statsRecord.getBroken(),
+                                statsRecord.getAttacks(), statsRecord.getSurvivals(), statsRecord.getHexWins(), statsRecord.getWaves(),
+                                statsRecord.getLogins(), statsRecord.getMessages(), statsRecord.getDeaths(), StringUtils.longToTime(playtime, locale));
 
-                if (specialRank != null) {
-                    message = Bundle.format("commands.stats.msg.with-status",
-                            Bundle.findLocale(player.locale()), record.getId(), player.coloredName(),
-                            rank.formatted(player), specialRank.formatted(player),
-                            statsRecord.getBuilt(), statsRecord.getBroken(),
-                            statsRecord.getAttacks(), statsRecord.getSurvivals(), statsRecord.getHexWins(), statsRecord.getWaves(),
-                            statsRecord.getLogins(), statsRecord.getMessages(), statsRecord.getDeaths(), StringUtils.longToTime(playtime, locale));
-                }
-
-                String[][] buttons = {
-                        {Bundle.get("commands.stats.hex", locale)},
-                        {Bundle.get("commands.rank.next-rank", locale)},
-                        {Bundle.get("menus.close", locale)}
-                };
-
-                MenuHandler.send(player, Bundle.get("menus.stats.title", locale), message, buttons, (menuId, option, p) -> {
-                    if (option == -1 || option == 2) {
-                        return;
-                    }
-
-                    String[][] newButtons = new String[][]{
-                            {Bundle.get("menus.close", locale)}
-                    };
-
-                    if (option == 0) {
-                        String msg = Bundle.format("commands.stats.msg.hex", locale,
-                                statsRecord.getHexesCaptured(), statsRecord.getHexesLost(), statsRecord.getHexesDestroyed(),
-                                statsRecord.getHexWins(), statsRecord.getHexLosses()); // TODO: hex score
-                        Call.menu(p.con(), 0, Bundle.get("menus.stats.title", locale), msg, newButtons);
-                    } else if (option == 1) {
-                        Rank nextRank = rank.getNext();
-                        if (nextRank == null) {
-                            Call.menu(p.con(), 0, Bundle.get("menus.rank-info.title", locale), Bundle.format("commands.rank.next-rank.none", locale), newButtons);
-                        } else {
-                            int wins = statsRecord.getAttacks() + statsRecord.getSurvivals() + statsRecord.getHexWins() + statsRecord.getPvp();
-                            String msg = Bundle.format("commands.rank.next-rank.info", locale,
-                                    nextRank.formatted(p),
-                                    targetColor(wins, nextRank.requirements.wins), wins, nextRank.requirements.wins,
-                                    targetColor(statsRecord.getWaves(), nextRank.requirements.waves), statsRecord.getWaves(), nextRank.requirements.waves,
-                                    targetColor(statsRecord.getBuilt(), nextRank.requirements.built), statsRecord.getBuilt(), nextRank.requirements.built,
-                                    targetColor((int) playtime, nextRank.requirements.playtime * 60), longToTime(playtime, locale), longToTime(nextRank.requirements.playtime * 60L, locale)
-                            );
-                            Call.menu(p.con(), 0, Bundle.get("menus.rank-info.title", locale), msg, newButtons);
+                        if (specialRank != null) {
+                            message = Bundle.format("commands.stats.msg.with-status",
+                                    Bundle.findLocale(player.locale()), record.getId(), player.coloredName(),
+                                    rank.formatted(player), specialRank.formatted(player),
+                                    statsRecord.getBuilt(), statsRecord.getBroken(),
+                                    statsRecord.getAttacks(), statsRecord.getSurvivals(), statsRecord.getHexWins(), statsRecord.getWaves(),
+                                    statsRecord.getLogins(), statsRecord.getMessages(), statsRecord.getDeaths(), StringUtils.longToTime(playtime, locale));
                         }
-                    }
-                });
-            } catch (SQLException e) {
-                Log.err(e);
-                Bundle.bundled(player, "commands.unknown-error");
-            }
+
+                        String[][] buttons = {
+                                {Bundle.get("commands.stats.hex", locale)},
+                                {Bundle.get("commands.rank.next-rank", locale)},
+                                {Bundle.get("menus.close", locale)}
+                        };
+
+                        MenuHandler.send(player, Bundle.get("menus.stats.title", locale), message, buttons, (menuId, option, p) -> {
+                            if (option == -1 || option == 2) {
+                                return;
+                            }
+
+                            String[][] newButtons = new String[][]{
+                                    {Bundle.get("menus.close", locale)}
+                            };
+
+                            if (option == 0) {
+                                String msg = Bundle.format("commands.stats.msg.hex", locale,
+                                        statsRecord.getHexesCaptured(), statsRecord.getHexesLost(), statsRecord.getHexesDestroyed(),
+                                        statsRecord.getHexWins(), statsRecord.getHexLosses()); // TODO: hex score
+                                Call.menu(p.con(), 0, Bundle.get("menus.stats.title", locale), msg, newButtons);
+                            } else if (option == 1) {
+                                Rank nextRank = rank.getNext();
+                                if (nextRank == null) {
+                                    Call.menu(p.con(), 0, Bundle.get("menus.rank-info.title", locale), Bundle.format("commands.rank.next-rank.none", locale), newButtons);
+                                } else {
+                                    int wins = statsRecord.getAttacks() + statsRecord.getSurvivals() + statsRecord.getHexWins() + statsRecord.getPvp();
+                                    String msg = Bundle.format("commands.rank.next-rank.info", locale,
+                                            nextRank.formatted(p),
+                                            targetColor(wins, nextRank.requirements.wins), wins, nextRank.requirements.wins,
+                                            targetColor(statsRecord.getWaves(), nextRank.requirements.waves), statsRecord.getWaves(), nextRank.requirements.waves,
+                                            targetColor(statsRecord.getBuilt(), nextRank.requirements.built), statsRecord.getBuilt(), nextRank.requirements.built,
+                                            targetColor(playtime.intValue(), nextRank.requirements.playtime * 60), longToTime(playtime, locale), longToTime(nextRank.requirements.playtime * 60L, locale)
+                                    );
+                                    Call.menu(p.con(), 0, Bundle.get("menus.rank-info.title", locale), msg, newButtons);
+                                }
+                            }
+                        });
+                    }));
         });
 
         commandHandler.<Player>register("msg", "<player_name> <message...>", "commands.msg.description", (args, player) -> {
@@ -442,20 +427,21 @@ public class PlayerCommands {
                 return;
             }
 
-            new Thread(() -> {
-                boolean playerDetailed = false;
-                boolean targetDetailed = false;
-                try {
-                    playerDetailed = Database.getPlayer(player.uuid()).getTranslator().equals("double");
-                    targetDetailed = Database.getPlayer(player.uuid()).getTranslator().equals("double");
-                    Database.createMessage(Const.serverFieldName, player.uuid(), target.uuid(), MessageType.direct, args[1], player.locale());
-                } catch (SQLException e) {
-                    Log.err(e);
-                }
-
-                Bundle.bundled(player, "commands.msg.to", Strings.stripColors(target.name()), String.format(playerDetailed ? "%s (%s)" : "%s", args[1], args[1]));
-                Bundle.bundled(target, "commands.msg.from", Strings.stripColors(player.name()), String.format(targetDetailed ? "%s (%s)" : "%s", Translator.translateRaw(player, target, args[1]), args[1]));
-            }).start();
+            Translator.translateRawAsync(
+                    player, target, args[1]
+            ).thenAcceptAsync(translated ->
+                DatabaseAsync.getPlayerAsync(
+                        player.uuid()
+                ).thenCombineAsync(DatabaseAsync.getPlayerAsync(target.uuid()), (playerInfo, targetInfo) -> {
+                    boolean playerDetailed = playerInfo.getTranslator().equals("double");
+                    boolean targetDetailed = targetInfo.getTranslator().equals("double");
+                    Bundle.bundled(player, "commands.msg.to", Strings.stripColors(target.name()), String.format(playerDetailed ? "%s (%s)" : "%s", args[1], args[1]));
+                    Translator.translateRawAsync(player, target, args[1]).thenAcceptAsync(msg -> {
+                        Bundle.bundled(target, "commands.msg.from", Strings.stripColors(player.name()), String.format(targetDetailed ? "%s (%s)" : "%s", msg, args[1]));
+                    });
+                    return null;
+                })
+            );
         });
 
         // region debug commands

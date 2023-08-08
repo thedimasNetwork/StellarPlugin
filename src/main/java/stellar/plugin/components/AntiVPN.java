@@ -19,6 +19,8 @@ import stellar.plugin.Const;
 import stellar.plugin.Variables;
 import stellar.plugin.util.Players;
 
+import java.util.concurrent.CompletableFuture;
+
 public class AntiVPN { // also includes anti ddos from gh actions servers
     private static final JsonReader jsonReader = new JsonReader();
 
@@ -61,7 +63,7 @@ public class AntiVPN { // also includes anti ddos from gh actions servers
                 return;
             }
 
-            DatabaseAsync.getContextAsync().thenApplyAsync(context -> {
+            DatabaseAsync.getContextAsync().thenComposeAsync(context -> {
                 boolean exists = context
                         .selectFrom(Tables.ipCached)
                         .where(Tables.ipCached.ip.eq(event.player.ip()))
@@ -69,10 +71,10 @@ public class AntiVPN { // also includes anti ddos from gh actions servers
                         .size() > 0;
 
                 if (exists) {
-                    return context
+                    return CompletableFuture.supplyAsync(() -> context // TODO: Database.getIpInfo
                             .selectFrom(Tables.ipCached)
                             .where(Tables.ipCached.ip.eq(event.player.ip()))
-                            .fetchOne();
+                            .fetchOne());
                 } else {
                     Log.debug("Trying to get info...");
                     HttpUrl url = HttpUrl.parse("http://proxycheck.io/v2/" + event.player.ip()).newBuilder()
@@ -88,16 +90,13 @@ public class AntiVPN { // also includes anti ddos from gh actions servers
                     try (Response response = Variables.httpClient.newCall(ipRequest).execute()) {
                         JsonValue json = jsonReader.parse(response.body().string());
                         JsonValue data = json.get(event.player.ip());
-
-                        IpCachedRecord record = context
-                                .newRecord(Tables.ipCached) // TODO: Database.createIp
-                                .setIp(event.player.ip())
-                                .setProxy(data.getString("proxy").equals("yes"))
-                                .setVpn(data.getString("vpn").equals("yes"))
-                                .setType(data.getString("type"))
-                                .setRisk((short) data.getInt("risk", 0));
-                        record.store();
-                        return record;
+                        return DatabaseAsync.createIpAsync(
+                                event.player.ip(),
+                                data.getString("proxy").equals("yes"),
+                                data.getString("vpn").equals("yes"),
+                                data.getString("type"),
+                                data.getInt("risk", 0)
+                        );
                     } catch (Throwable t) {
                         Log.err("Failed to get IP info.", t);
                         return null;

@@ -12,11 +12,13 @@ import mindustry.entities.Units;
 import mindustry.game.EventType;
 import mindustry.game.Team;
 import mindustry.gen.*;
+import mindustry.graphics.Pal;
 import mindustry.type.UnitType;
 import mindustry.world.Block;
 import mindustry.world.Tile;
 import rhino.WrappedException;
 import stellar.database.Database;
+import stellar.database.DatabaseAsync;
 import stellar.database.enums.MessageType;
 import stellar.plugin.Const;
 import stellar.plugin.Variables;
@@ -46,20 +48,13 @@ public class AdminCommands {
         commandManager.registerPlayer("a", "<text...>", "commands.admin.a.description", Rank.admin, (args, player) -> {
             String message = args[0];
             Groups.player.each(Player::admin, otherPlayer -> {
-                new Thread(() -> {
-                    String msg = Translator.translateChat(player, otherPlayer, message);
+                Translator.translateChatAsync(player, otherPlayer, message).thenAcceptAsync(msg -> {
                     otherPlayer.sendMessage("<[scarlet]A[]> " + msg);
-                }).start();
+                });
             });
 
             Log.info("<A>" + Const.chatLogFormat, Strings.stripColors(player.name), Strings.stripColors(message), player.locale);
-            new Thread(() -> {
-                try {
-                    Database.createMessage(Const.serverFieldName, player.uuid(), null, MessageType.admin, message, player.locale());
-                } catch (SQLException e) {
-                    Log.err(e);
-                }
-            }).start();
+            DatabaseAsync.createMessageAsync(Const.serverFieldName, player.uuid(), null, MessageType.admin, message, player.locale());
         });
 
         commandManager.registerPlayer("admin", "commands.admin.admin.description", Rank.admin, (args, player) -> {
