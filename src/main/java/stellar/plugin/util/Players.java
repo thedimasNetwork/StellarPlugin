@@ -57,11 +57,12 @@ public class Players {
 
     public static String prefixName(Player player) {
         Rank rank = Variables.ranks.get(player.uuid(), Rank.player);
+        Rank specialRank = Variables.specialRanks.get(player.uuid());
+
         if (rank.icon == null) {
-            return player.admin() ? "<\uE82C> " + player.coloredName() : player.coloredName();
+            return player.admin() ? String.format("<%s> %s", specialRank.icon, player.coloredName()) : player.coloredName();
         } else {
-            return player.admin() ? String.format("<[#%s]\uE82C[]> %s", rank.color, player.coloredName()) :
-                    String.format("<[#%s]%s[]> %s", rank.color, rank.icon, player.coloredName());
+            return String.format("<[#%s]%s[]> %s", rank.color, player.admin() ? specialRank.icon : rank.icon, player.coloredName());
         }
     }
 

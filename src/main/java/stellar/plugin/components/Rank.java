@@ -38,7 +38,7 @@ public enum Rank {
     //developer(Color.white, "\uF120", true),
     admin(Color.white, "\uE817", true), // or \uE82C
     console(Color.white, "\uE80F", true),
-    owner(Color.white, "\uF7AA", true);
+    owner(Color.white, "\uE87C", true);
     //endregion
 
     private static final ObjectMap<PlayerStatus, Rank> statusRanks = ObjectMap.of( // maybe need some optimization
