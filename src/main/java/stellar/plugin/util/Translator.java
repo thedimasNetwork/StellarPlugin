@@ -8,6 +8,8 @@ import okhttp3.HttpUrl;
 import okhttp3.Request;
 import okhttp3.Response;
 import stellar.database.Database;
+import stellar.database.DatabaseAsync;
+import stellar.database.gen.tables.records.UsersRecord;
 import stellar.plugin.Const;
 import stellar.plugin.Variables;
 
@@ -18,7 +20,7 @@ import java.util.concurrent.CompletableFuture;
 public class Translator { // TODO: normal async logic
     private static final JsonReader jsonReader = new JsonReader();
 
-    public static String translate(String text, String langTo, String langFrom) throws IOException {
+    public static String translate(String text, String langTo, String langFrom) {
         /*
          * Второй вариант переводчика. Ответ парсить сложнее
          * Url:  https://translate.googleapis.com/translate_a/single?client=gtx&sl=ru_RU&tl=en_US&dt=t&q=Привет
@@ -28,8 +30,8 @@ public class Translator { // TODO: normal async logic
         HttpUrl url = HttpUrl.parse("https://clients5.google.com/translate_a/t").newBuilder()
                 .addQueryParameter("client", "dict-chrome-ex")
                 .addQueryParameter("dt", "t")
-                .addQueryParameter("tl", langTo)
                 .addQueryParameter("sl", langFrom) // NOTE: use "auto" for automatic translations
+                .addQueryParameter("tl", langTo)
                 .addQueryParameter("q", text)
                 .build();
 
@@ -40,18 +42,9 @@ public class Translator { // TODO: normal async logic
             JsonValue json = jsonReader.parse(response.body().string());
             return json.get(0).get(0).asString();
         } catch (Throwable t) {
-            throw new IOException("Failed to translate.", t);
+            Log.err("Failed to translate", t);
+            return text;
         }
-    }
-
-    public static CompletableFuture<String> translateAsync(String text, String langTo, String langFrom) {
-        return CompletableFuture.supplyAsync(() -> {
-            try {
-                return translate(text, langTo, langFrom);
-            } catch (IOException e) {
-                throw new RuntimeException("Failed to translate", e);
-            }
-        });
     }
 
     public static String translateRaw(Player player, Player otherPlayer, String message) {
@@ -64,23 +57,11 @@ public class Translator { // TODO: normal async logic
 
         String translated = message;
         if (!otherPlayer.locale.equals(player.locale()) && !locale.equals("off")) {
-            try {
-                String targetLocale = locale.equals("auto") || locale.equals("double") ? otherPlayer.locale : locale;
-                translated = translate(message, targetLocale.split("#")[0], "auto");
-            } catch (Throwable t) {
-                Log.err(t);
-            }
+            String targetLocale = locale.equals("auto") || locale.equals("double") ? otherPlayer.locale : locale;
+            translated = translate(message, targetLocale.split("#")[0], "auto");
         }
 
         return translated;
-    }
-
-    public static CompletableFuture<String> translateRawAsync(Player player, Player otherPlayer, String message) {
-        return CompletableFuture.supplyAsync(() -> translateRaw(player, otherPlayer, message));
-    }
-
-    public static String formatChat(Player player, String translated, String message, boolean detailed) {
-        return MessageFormat.format(detailed ? Const.chatFormatDetailed : Const.chatFormat, Players.prefixName(player), translated, message);
     }
 
     public static String translateChat(Player player, Player otherPlayer, String message) {
@@ -94,7 +75,37 @@ public class Translator { // TODO: normal async logic
         return formatChat(player, translateRaw(player, otherPlayer, message), message, locale.equals("double"));
     }
 
-    public static CompletableFuture<String> translateChatAsync(Player player, Player otherPlayer, String message) {
-        return CompletableFuture.supplyAsync(() -> translateChat(player, otherPlayer, message));
+    public static CompletableFuture<String> translateAsync(String text, String langTo, String langFrom) {
+        return CompletableFuture.supplyAsync(() -> translate(text, langTo, langFrom));
     }
+
+    public static CompletableFuture<String> translateRawAsync(Player player, Player otherPlayer, String message) {
+        return DatabaseAsync.getPlayerAsync(otherPlayer.uuid()).thenComposeAsync(record -> {
+            String locale = record.getTranslator();
+            if (!otherPlayer.locale.equals(player.locale()) && !locale.equals("off")) {
+                String targetLocale = locale.equals("auto") || locale.equals("double") ? otherPlayer.locale : locale;
+                return translateAsync(
+                        message, targetLocale.split("#")[0], "auto"
+                ).exceptionally((t) -> {
+                    Log.err(t);
+                    return message;
+                });
+            }
+
+            return CompletableFuture.supplyAsync(() -> message);
+        });
+    }
+
+    public static CompletableFuture<String> translateChatAsync(Player player, Player otherPlayer, String message) {
+        return DatabaseAsync.getPlayerAsync(
+                otherPlayer.uuid()
+        ).thenCombineAsync(translateRawAsync(player, otherPlayer, message), (record, translated) ->
+            formatChat(player, translated, message, record.getTranslator().equals("double"))
+        );
+    }
+
+    public static String formatChat(Player player, String translated, String message, boolean detailed) {
+        return MessageFormat.format(detailed ? Const.chatFormatDetailed : Const.chatFormat, Players.prefixName(player), translated, message);
+    }
+
 }
