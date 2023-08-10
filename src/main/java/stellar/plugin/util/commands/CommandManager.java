@@ -2,12 +2,16 @@ package stellar.plugin.util.commands;
 
 import arc.struct.Seq;
 import arc.util.CommandHandler;
+import arc.util.Log;
 import lombok.Getter;
 import lombok.Setter;
 import mindustry.gen.Player;
 import stellar.plugin.Variables;
 import stellar.plugin.components.Rank;
 import stellar.plugin.util.Bundle;
+import stellar.plugin.util.logger.DiscordLogger;
+
+import java.util.concurrent.CompletableFuture;
 
 @Getter
 public class CommandManager {
@@ -30,7 +34,14 @@ public class CommandManager {
                 return;
             }
 
-            runner.acceptPlayer(args, player);
+            CompletableFuture.runAsync(() ->
+                    runner.acceptPlayer(args, player)
+            ).exceptionally(t -> {
+                Log.err("Failed to accept command @ from @", name, player.plainName());
+                Log.err(t);
+                DiscordLogger.err(String.format("Failed to accept command %s from %s", name, player.plainName()), t);
+                return null;
+            });
         });
     }
 
