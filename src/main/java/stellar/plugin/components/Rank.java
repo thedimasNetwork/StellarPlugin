@@ -36,6 +36,7 @@ public enum Rank {
 
     // region special
     // TODO: make something with donater/developer
+    // TODO: colors for spectial ranks and better owner icon
     //donater(Color.white, "\uE810", true),
     //developer(Color.white, "\uF120", true),
     admin(Color.white, "\uE817", true), // or \uE82C

@@ -30,6 +30,7 @@ import stellar.plugin.util.Bundle;
 import stellar.plugin.util.Players;
 import stellar.plugin.util.StringUtils;
 import stellar.plugin.util.Translator;
+import stellar.plugin.util.commands.Command;
 import stellar.plugin.util.logger.DiscordLogger;
 import stellar.plugin.util.menus.MenuHandler;
 
@@ -72,9 +73,16 @@ public class PlayerCommands {
                 return;
             }
 
+            Seq<Command> legacyCommands = commandHandler.getCommandList()
+                    .filter(c -> commandManager.getCommand(c.text) == null)
+                    .map(Command::fromArc);
+            Seq<Command> commands = legacyCommands
+                    .add(commandManager.getCommandList()
+                            .sort(c -> commandHandler.getCommandList().map(c1 -> c1.text).indexOf(c.getName())) // keeping same order
+                            .sort(c -> c.getRank().ordinal()));
             Locale locale = Bundle.findLocale(player.locale);
-            int hiddenCommandsCount = player.admin ? 0 : commandHandler.getCommandList().count(c -> c.description.startsWith("commands.admin"));
-            int pages = Mathf.ceil(commandHandler.getCommandList().size / Const.listPageSize - hiddenCommandsCount / Const.listPageSize);
+            int hiddenCommandsCount = player.admin ? 0 : commands.count(c -> !c.isAllowed(player));
+            int pages = Mathf.ceil(commands.size / Const.listPageSize - hiddenCommandsCount / Const.listPageSize);
             int page = args.length > 0 ? Strings.parseInt(args[0]) : 1;
 
             if (--page >= pages || page < 0) {
@@ -85,14 +93,14 @@ public class PlayerCommands {
             StringBuilder result = new StringBuilder();
             result.append(Bundle.format("commands.help.page", locale, page + 1, pages)).append("\n\n");
 
-            commandHandler.getCommandList().sort(c -> c.description.startsWith("commands.admin") ? 1 : -1);
-
-            for (int i = 6 * page; i < Math.min(6 * (page + 1), commandHandler.getCommandList().size - hiddenCommandsCount); i++) {
-                CommandHandler.Command command = commandHandler.getCommandList().get(i);
-                result.append("[orange] /").append(command.text).append("[white] ")
-                        .append(command.paramText)
+            for (int i = 6 * page; i < Math.min(6 * (page + 1), commands.size - hiddenCommandsCount); i++) {
+                Command command = commands.get(i);
+                result.append("[orange] /").append(command.getName()).append("[white] ")
+                        .append(command.getParamText())
                         .append("[lightgray] - ")
-                        .append(Bundle.has(command.description, locale) ? Bundle.get(command.description, locale) : command.description)
+                        .append(Bundle.has(command.getDescription(), locale) ? Bundle.get(command.getDescription(), locale) : command.getDescription())
+                        .append("[white] ~ ") // TODO: maybe remove this, idk
+                        .append(command.getRank().formatted(player))
                         .append("\n");
             }
             player.sendMessage(result.toString());

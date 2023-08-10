@@ -38,7 +38,7 @@ public class Activity {
                         .executeAsync()
                 ).thenComposeAsync(ignored ->
                         DatabaseAsync.getContextAsync()
-                ).thenAcceptAsync(context -> {
+                ).thenComposeAsync(context -> {
                     ObjectMap<String, Integer> stats = Variables.statsData.get(p.uuid(), new ObjectMap<>());
                     UpdateSetMoreStep<StatsRecord> query = (UpdateSetMoreStep<StatsRecord>) context.update(Tables.stats);
                     stats.each((stat, value) -> {
@@ -56,6 +56,7 @@ public class Activity {
                         stats.put(stat, 0);
                     });
                     query.where(Tables.stats.uuid.eq(p.uuid()));
+                    return query.executeAsync();
                 }).thenComposeAsync(ignored ->
                         Rank.getRankAsync(p)
                 ).thenAcceptAsync(newRank -> {

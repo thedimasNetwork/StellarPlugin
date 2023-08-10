@@ -84,8 +84,10 @@ public class EventHandler {
                     }
                 }
             }).exceptionally(t -> {
-                Log.err(t);
-                DiscordLogger.err(t);
+                if (!(t.getCause() instanceof IllegalArgumentException) && !(t instanceof IllegalArgumentException)) {
+                    Log.err(t);
+                    DiscordLogger.err(t);
+                }
                 return null;
             });
         });
@@ -116,9 +118,10 @@ public class EventHandler {
 
             DatabaseAsync.playerExistsAsync(
                     event.player.uuid()
-            ).thenAcceptAsync(exists -> {
+            ).thenComposeAsync(exists -> {
+                Players.incrementStats(event.player, "logins");
                 if (exists) {
-                    DatabaseAsync.updatePlayerAsync(
+                    return DatabaseAsync.updatePlayerAsync(
                             event.player.uuid(), event.player.name(), event.player.locale(), event.player.ip()
                     ).thenComposeAsync(ignored ->
                             DatabaseAsync.getPlayerAsync(event.player.uuid())
@@ -142,31 +145,25 @@ public class EventHandler {
                         return null;
                     });
                 } else {
-                    DatabaseAsync.createFullPlayerAsync(
+                    return DatabaseAsync.createFullPlayerAsync(
                             event.player.uuid(), event.player.ip(), event.player.name(), event.player.locale(), event.player.admin()
                     ).thenAcceptAsync(ignored -> {
                         Call.menu(event.player.con(), Menus.welcome.ordinal(), title, welcome, buttons);
-                    }).thenComposeAsync(ignored ->
-                            Rank.getRankAsync(event.player)
-                    ).exceptionally(t -> {
+                    }).thenAcceptAsync(ignored -> {
+                        Rank.getRankAsync(event.player);
+                    }).exceptionally(t -> {
                         Log.err(t);
                         DiscordLogger.err(t);
                         return null;
                     });
                 }
-                Players.incrementStats(event.player, "logins");
-                DatabaseAsync.createLoginAsync(
-                        Const.serverFieldName,
-                        event.player.uuid(),
-                        event.player.ip(),
-                        event.player.name(),
-                        event.player.locale()
-                ).exceptionally(t -> {
-                    Log.err(t);
-                    DiscordLogger.err(t);
-                    return null;
-                });
-            }).exceptionally(t -> {
+            }).thenComposeAsync(ignored -> DatabaseAsync.createLoginAsync(
+                            Const.serverFieldName,
+                            event.player.uuid(),
+                            event.player.ip(),
+                            event.player.name(),
+                            event.player.locale())
+            ).exceptionally(t -> {
                 Log.err(t);
                 DiscordLogger.err(t);
                 return null;

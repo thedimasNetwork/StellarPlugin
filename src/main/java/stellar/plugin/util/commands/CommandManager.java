@@ -1,8 +1,10 @@
 package stellar.plugin.util.commands;
 
+import arc.struct.ObjectMap;
 import arc.struct.Seq;
 import arc.util.CommandHandler;
 import arc.util.Log;
+import arc.util.Nullable;
 import lombok.Getter;
 import lombok.Setter;
 import mindustry.gen.Player;
@@ -13,18 +15,22 @@ import stellar.plugin.util.logger.DiscordLogger;
 
 import java.util.concurrent.CompletableFuture;
 
-@Getter
 public class CommandManager {
-    private final Seq<String> commands = new Seq<>();
+    private final ObjectMap<String, Command> commands = new ObjectMap<>();
+    private final Seq<Command> orderedCommands = new Seq<>();
+
+    @Getter
     @Setter
     private CommandHandler clientHandler;
 
-    public void registerPlayer(String name, String params, String description, Rank rank, CommandRunner runner) { // TODO: Command type
+    public void registerPlayer(String name, String params, String description, Rank rank, CommandRunner runner) {
         if (clientHandler == null) {
             throw new IllegalArgumentException("ClientHandler is null!");
         }
-        commands.add(name);
 
+        Command cmd = new Command(name, params, description, rank, runner);
+        commands.put(name, cmd);
+        orderedCommands.add(cmd);
         clientHandler.<Player>register(name, params, description, (args, player) -> {
             Rank playerRank = Variables.ranks.get(player.uuid(), Rank.player);
             Rank specialRank = Variables.specialRanks.get(player.uuid(), Rank.player);
@@ -55,5 +61,14 @@ public class CommandManager {
 
     public void registerPlayer(String name, String description, CommandRunner runner) {
         registerPlayer(name, "", description, Rank.player, runner);
+    }
+
+    public Seq<Command> getCommandList() {
+        return this.orderedCommands.copy();
+    }
+
+    @Nullable
+    public Command getCommand(String name) {
+        return commands.get(name);
     }
 }

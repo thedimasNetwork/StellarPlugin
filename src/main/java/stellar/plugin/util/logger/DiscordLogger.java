@@ -49,16 +49,12 @@ public class DiscordLogger {
                         .put("text", Const.serverFieldName)
                 );
 
-        if (text != null) {
+        if (text != null && th != null) {
+            embed.put("description", String.format("### Message\n%s\n### Traceback\n```java\n%s\n```", text, Strings.getStackTrace(th).strip()));
+        } else if (text != null) {
             embed.put("description", text);
-        }
-
-        if (th != null) {
-            embed.put("fields", Jval.newArray().add(
-                    Jval.newObject()
-                            .put("name", "Traceback")
-                            .put("value", "```java\n" + Strings.getStackTrace(th) + "\n```")
-            ));
+        } else if (th != null) {
+            embed.put("description", "```java\n" + Strings.getStackTrace(th) + "\n```");
         }
 
         json.put("embeds", Jval.newArray().add(embed));
@@ -71,7 +67,7 @@ public class DiscordLogger {
             try (Response response = httpClient.newCall(request).execute()) {
                 return response.body().string();
             } catch (Throwable t) {
-                Log.err("Failed to send webhook!", t);
+                Log.err("Failed to send webhook", t);
                 return null;
             }
         }).handleAsync((response, throwable) -> {
