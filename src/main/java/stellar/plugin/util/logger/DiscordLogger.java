@@ -5,15 +5,12 @@ import arc.util.Log;
 import arc.util.Nullable;
 import arc.util.Strings;
 import arc.util.serialization.Jval;
-import mindustry.net.Administration;
 import okhttp3.MediaType;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 import stellar.plugin.Const;
-import stellar.plugin.Variables;
 
-import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.concurrent.CompletableFuture;
 
@@ -25,7 +22,7 @@ import static stellar.plugin.Variables.httpClient;
  */
 @SuppressWarnings("unused")
 public class DiscordLogger {
-    private static ObjectMap<LogLevel, Log.LogLevel> levels = ObjectMap.of(
+    private static final ObjectMap<LogLevel, Log.LogLevel> levels = ObjectMap.of(
             LogLevel.debug, Log.LogLevel.debug,
             LogLevel.info, Log.LogLevel.info,
             LogLevel.warn, Log.LogLevel.warn,

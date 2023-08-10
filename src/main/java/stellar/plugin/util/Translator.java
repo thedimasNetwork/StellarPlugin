@@ -9,12 +9,10 @@ import okhttp3.Request;
 import okhttp3.Response;
 import stellar.database.Database;
 import stellar.database.DatabaseAsync;
-import stellar.database.gen.tables.records.UsersRecord;
 import stellar.plugin.Const;
 import stellar.plugin.Variables;
 import stellar.plugin.util.logger.DiscordLogger;
 
-import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.concurrent.CompletableFuture;
 
@@ -105,7 +103,7 @@ public class Translator { // TODO: normal async logic
         return DatabaseAsync.getPlayerAsync(
                 otherPlayer.uuid()
         ).thenCombineAsync(translateRawAsync(player, otherPlayer, message), (record, translated) ->
-            formatChat(player, translated, message, record.getTranslator().equals("double"))
+                formatChat(player, translated, message, record.getTranslator().equals("double"))
         ).exceptionally(t -> {
             Log.err(t);
             DiscordLogger.err(t);

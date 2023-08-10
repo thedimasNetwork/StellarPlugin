@@ -1,7 +1,6 @@
 package stellar.plugin.util;
 
 import arc.util.Strings;
-import org.jooq.DMLQuery;
 
 public class NetUtils {
     public static boolean isIPInSubnet(String ipAddress, String subnet) {

@@ -8,8 +8,6 @@ import stellar.database.DatabaseAsync;
 import stellar.database.gen.tables.records.UsersRecord;
 import stellar.plugin.util.logger.DiscordLogger;
 
-import java.sql.SQLException;
-
 @Getter
 public class AdminActionEntry {
     private final UsersRecord admin;

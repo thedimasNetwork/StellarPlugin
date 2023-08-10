@@ -14,7 +14,6 @@ import okhttp3.Request;
 import okhttp3.Response;
 import stellar.database.DatabaseAsync;
 import stellar.database.gen.Tables;
-import stellar.database.gen.tables.records.IpCachedRecord;
 import stellar.plugin.Const;
 import stellar.plugin.Variables;
 import stellar.plugin.util.Players;

@@ -20,19 +20,18 @@ import stellar.database.Database;
 import stellar.database.DatabaseAsync;
 import stellar.database.enums.MessageType;
 import stellar.database.gen.Tables;
-import stellar.database.gen.tables.records.StatsRecord;
 import stellar.database.gen.tables.records.UsersRecord;
 import stellar.plugin.Const;
 import stellar.plugin.Variables;
 import stellar.plugin.components.Rank;
 import stellar.plugin.history.entry.HistoryEntry;
 import stellar.plugin.history.struct.CacheSeq;
-import stellar.plugin.util.logger.DiscordLogger;
-import stellar.plugin.util.menus.MenuHandler;
 import stellar.plugin.util.Bundle;
 import stellar.plugin.util.Players;
 import stellar.plugin.util.StringUtils;
 import stellar.plugin.util.Translator;
+import stellar.plugin.util.logger.DiscordLogger;
+import stellar.plugin.util.menus.MenuHandler;
 
 import java.sql.SQLException;
 import java.util.Locale;
@@ -452,17 +451,17 @@ public class PlayerCommands {
             Translator.translateRawAsync(
                     player, target, args[1]
             ).thenAcceptAsync(translated ->
-                DatabaseAsync.getPlayerAsync(
-                        player.uuid()
-                ).thenCombineAsync(DatabaseAsync.getPlayerAsync(target.uuid()), (playerInfo, targetInfo) -> {
-                    boolean playerDetailed = playerInfo.getTranslator().equals("double");
-                    boolean targetDetailed = targetInfo.getTranslator().equals("double");
-                    Bundle.bundled(player, "commands.msg.to", Strings.stripColors(target.name()), String.format(playerDetailed ? "%s (%s)" : "%s", args[1], args[1]));
-                    Translator.translateRawAsync(player, target, args[1]).thenAcceptAsync(msg -> {
-                        Bundle.bundled(target, "commands.msg.from", Strings.stripColors(player.name()), String.format(targetDetailed ? "%s (%s)" : "%s", msg, args[1]));
-                    });
-                    return null;
-                })
+                    DatabaseAsync.getPlayerAsync(
+                            player.uuid()
+                    ).thenCombineAsync(DatabaseAsync.getPlayerAsync(target.uuid()), (playerInfo, targetInfo) -> {
+                        boolean playerDetailed = playerInfo.getTranslator().equals("double");
+                        boolean targetDetailed = targetInfo.getTranslator().equals("double");
+                        Bundle.bundled(player, "commands.msg.to", Strings.stripColors(target.name()), String.format(playerDetailed ? "%s (%s)" : "%s", args[1], args[1]));
+                        Translator.translateRawAsync(player, target, args[1]).thenAcceptAsync(msg -> {
+                            Bundle.bundled(target, "commands.msg.from", Strings.stripColors(player.name()), String.format(targetDetailed ? "%s (%s)" : "%s", msg, args[1]));
+                        });
+                        return null;
+                    })
             ).exceptionally(t -> {
                 Log.err(t);
                 DiscordLogger.err(t);
