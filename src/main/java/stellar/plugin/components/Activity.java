@@ -65,6 +65,10 @@ public class Activity {
                         Call.warningToast(p.con, Iconc.chartBar, Bundle.format("events.new-rank", Bundle.findLocale(p.locale()), newRank.formatted(p)));
                     }
 
+                }).exceptionally(t -> {
+                    Log.err(t);
+                    DiscordLogger.err(t);
+                    return null;
                 });
             }
         }, 0, 60);

@@ -2,6 +2,7 @@ package stellar.plugin.components;
 
 import arc.graphics.Color;
 import arc.struct.ObjectMap;
+import arc.util.Log;
 import arc.util.Nullable;
 import mindustry.content.Fx;
 import mindustry.entities.Effect;
@@ -14,6 +15,7 @@ import stellar.database.gen.tables.records.StatsRecord;
 import stellar.plugin.Variables;
 import stellar.plugin.types.Requirements;
 import stellar.plugin.util.Bundle;
+import stellar.plugin.util.logger.DiscordLogger;
 
 import java.sql.SQLException;
 import java.util.Locale;
@@ -186,7 +188,11 @@ public enum Rank {
                 player.uuid()
         ).thenCombineAsync(DatabaseAsync.getTotalPlaytimeAsync(player.uuid()), (record, playtime) ->
                 Rank.getRank(new Requirements(record.getBuilt(), record.getWaves(), record.getAttacks(), record.getSurvivals(), record.getHexWins(), record.getPvp(), (int) (playtime / 60)))
-        );
+        ).exceptionally(t -> {
+            Log.err(t);
+            DiscordLogger.err(t);
+            return null;
+        });
     }
 
     public static Rank max(Rank rank, Rank other) {

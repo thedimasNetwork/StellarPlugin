@@ -26,6 +26,7 @@ import stellar.plugin.bot.Colors;
 import stellar.plugin.bot.Util;
 import stellar.plugin.enums.Menus;
 import stellar.plugin.history.struct.CacheSeq;
+import stellar.plugin.util.logger.DiscordLogger;
 import stellar.plugin.util.menus.MenuHandler;
 import stellar.plugin.types.AdminActionEntry;
 import stellar.plugin.util.Bundle;
@@ -83,6 +84,10 @@ public class EventHandler {
                         break;
                     }
                 }
+            }).exceptionally(t -> {
+                Log.err(t);
+                DiscordLogger.err(t);
+                return null;
             });
         });
         // endregion
@@ -132,13 +137,23 @@ public class EventHandler {
                         } else if (data.isDiscord()) {
                             Call.openURI(event.player.con(), config.discordUrl);
                         }
+                    }).exceptionally(t -> {
+                        Log.err(t);
+                        DiscordLogger.err(t);
+                        return null;
                     });
                 } else {
                     DatabaseAsync.createFullPlayerAsync(
                             event.player.uuid(), event.player.ip(), event.player.name(), event.player.locale(), event.player.admin()
                     ).thenAcceptAsync(ignored -> {
                         Call.menu(event.player.con(), Menus.welcome.ordinal(), title, welcome, buttons);
-                    }).thenComposeAsync(ignored -> Rank.getRankAsync(event.player));
+                    }).thenComposeAsync(ignored ->
+                            Rank.getRankAsync(event.player)
+                    ).exceptionally(t -> {
+                        Log.err(t);
+                        DiscordLogger.err(t);
+                        return null;
+                    });
                 }
                 Players.incrementStats(event.player, "logins");
                 DatabaseAsync.createLoginAsync(
@@ -147,7 +162,15 @@ public class EventHandler {
                         event.player.ip(),
                         event.player.name(),
                         event.player.locale()
-                );
+                ).exceptionally(t -> {
+                    Log.err(t);
+                    DiscordLogger.err(t);
+                    return null;
+                });
+            }).exceptionally(t -> {
+                Log.err(t);
+                DiscordLogger.err(t);
+                return null;
             });
         });
         // endregion
@@ -237,11 +260,7 @@ public class EventHandler {
 
                     }
                     Bot.sendEmbed(config.bot.bansId, Util.embedBuilder(title, message, color, LocalDateTime.now(), Const.serverFieldName));
-                    try {
-                        actionEntry.storeRecord();
-                    } catch (SQLException e) {
-                        Log.err(e);
-                    }
+                    actionEntry.storeRecord();
                     Vars.netServer.admins.unbanPlayerID(actionEntry.getTarget().getUuid()); // maybe not a good idea
                     adminActions.remove(event.menuId);
                 }
@@ -269,6 +288,10 @@ public class EventHandler {
                             } else {
                                 Bundle.bundled(event.player, "welcome.disabled");
                             }
+                            return null;
+                        }).exceptionally(t -> {
+                            Log.err(t);
+                            DiscordLogger.err(t);
                             return null;
                         });
                     }
@@ -343,6 +366,10 @@ public class EventHandler {
                 String title = Bundle.format("inputs.punishment.title", locale, event.other.plainName());
                 String message = Bundle.get("inputs.punishment.msg", locale);
                 Call.textInput(event.player.con(), id, title, message, 64, "", false);
+                return null;
+            }).exceptionally(t -> {
+                Log.err(t);
+                DiscordLogger.err(t);
                 return null;
             });
         });
@@ -490,7 +517,13 @@ public class EventHandler {
 
                 Log.info(Const.chatLogFormat, Strings.stripColors(event.player.name), Strings.stripColors(event.message), event.player.locale);
                 Players.incrementStats(event.player, "messages");
-                DatabaseAsync.createMessageAsync(Const.serverFieldName, event.player.uuid(), null, MessageType.global, event.message, event.player.locale());
+                DatabaseAsync.createMessageAsync(
+                        Const.serverFieldName, event.player.uuid(), null, MessageType.global, event.message, event.player.locale()
+                ).exceptionally(t -> {
+                    Log.err(t);
+                    DiscordLogger.err(t);
+                    return null;
+                });
             }
         });
 

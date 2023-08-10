@@ -27,6 +27,7 @@ import stellar.plugin.Variables;
 import stellar.plugin.components.Rank;
 import stellar.plugin.history.entry.HistoryEntry;
 import stellar.plugin.history.struct.CacheSeq;
+import stellar.plugin.util.logger.DiscordLogger;
 import stellar.plugin.util.menus.MenuHandler;
 import stellar.plugin.util.Bundle;
 import stellar.plugin.util.Players;
@@ -56,7 +57,13 @@ public class PlayerCommands {
             });
 
             Log.info("<T>" + Const.chatLogFormat, Strings.stripColors(player.name), Strings.stripColors(message), player.locale);
-            DatabaseAsync.createMessageAsync(Const.serverFieldName, player.uuid(), player.team().name, MessageType.team, message, player.locale());
+            DatabaseAsync.createMessageAsync(
+                    Const.serverFieldName, player.uuid(), player.team().name, MessageType.team, message, player.locale()
+            ).exceptionally(t -> {
+                Log.err(t);
+                DiscordLogger.err(t);
+                return null;
+            });
         });
 
         commandHandler.removeCommand("help");
@@ -98,7 +105,11 @@ public class PlayerCommands {
                         player.uuid()
                 ).thenAcceptAsync(record ->
                         Bundle.bundled(player, "commands.tr.current", record.getTranslator())
-                );
+                ).exceptionally(t -> {
+                    Log.err(t);
+                    DiscordLogger.err(t);
+                    return null;
+                });
                 return;
             }
 
@@ -115,11 +126,15 @@ public class PlayerCommands {
             }
 
             DatabaseAsync.getContextAsync().thenAcceptAsync(context -> context
-                            .update(Tables.users)
-                            .set(Tables.users.translator, mode)
-                            .where(Tables.users.uuid.eq(player.uuid()))
-                            .executeAsync()
-                    );
+                    .update(Tables.users)
+                    .set(Tables.users.translator, mode)
+                    .where(Tables.users.uuid.eq(player.uuid()))
+                    .executeAsync()
+            ).exceptionally(t -> {
+                Log.err(t);
+                DiscordLogger.err(t);
+                return null;
+            });
         });
 
         commandHandler.<Player>register("rtv", "[on|off]", "commands.rtv.description", (args, player) -> {
@@ -264,6 +279,10 @@ public class PlayerCommands {
             ).thenAcceptAsync(time -> {
                 Locale locale = Bundle.findLocale(player.locale());
                 Bundle.bundled(player, "commands.playtime.msg", Const.serverNames.get(serverColumnName), StringUtils.longToTime((time == null) ? 0 : time, locale));
+            }).exceptionally(t -> {
+                Log.err(t);
+                DiscordLogger.err(t);
+                return null;
             });
         });
 
@@ -299,6 +318,10 @@ public class PlayerCommands {
                                 targetColor(playtime.intValue(), nextRank.requirements.playtime * 60), longToTime(playtime, locale), longToTime(nextRank.requirements.playtime * 60L, locale)
                         );
                         Call.menu(p.con(), 0, Bundle.get("menus.rank-info.title", locale), message, newButtons);
+                        return null;
+                    }).exceptionally(t -> {
+                        Log.err(t);
+                        DiscordLogger.err(t);
                         return null;
                     });
                 }
@@ -336,6 +359,10 @@ public class PlayerCommands {
                             targetColor(playtime.intValue(), rank.requirements.playtime * 60), longToTime(playtime, locale), longToTime(rank.requirements.playtime * 60L, locale)
                     );
                     Call.menu(p.con(), 0, Bundle.get("menus.rank-info.title", locale), message, newButtons);
+                    return null;
+                }).exceptionally(t -> {
+                    Log.err(t);
+                    DiscordLogger.err(t);
                     return null;
                 });
             });
@@ -402,7 +429,12 @@ public class PlayerCommands {
                                 }
                             }
                         });
-                    }));
+                    })
+            ).exceptionally(t -> {
+                Log.err(t);
+                DiscordLogger.err(t);
+                return null;
+            });
         });
 
         commandHandler.<Player>register("msg", "<player_name> <message...>", "commands.msg.description", (args, player) -> {
@@ -431,7 +463,11 @@ public class PlayerCommands {
                     });
                     return null;
                 })
-            );
+            ).exceptionally(t -> {
+                Log.err(t);
+                DiscordLogger.err(t);
+                return null;
+            });
         });
 
         // region debug commands

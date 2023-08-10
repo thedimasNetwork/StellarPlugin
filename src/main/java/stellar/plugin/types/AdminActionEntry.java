@@ -1,10 +1,12 @@
 package stellar.plugin.types;
 
+import arc.util.Log;
 import lombok.Getter;
 import lombok.Setter;
 import mindustry.net.Packets;
 import stellar.database.DatabaseAsync;
 import stellar.database.gen.tables.records.UsersRecord;
+import stellar.plugin.util.logger.DiscordLogger;
 
 import java.sql.SQLException;
 
@@ -27,7 +29,13 @@ public class AdminActionEntry {
         this.period = 0;
     }
 
-    public void storeRecord() throws SQLException {
-        DatabaseAsync.banAsync(this.getAdmin().getUuid(), this.getTarget().getUuid(), getPeriod(), getReason());
+    public void storeRecord() {
+        DatabaseAsync.banAsync(
+                this.getAdmin().getUuid(), this.getTarget().getUuid(), getPeriod(), getReason()
+        ).exceptionally(t -> {
+            Log.err(t);
+            DiscordLogger.err(t);
+            return null;
+        });
     }
 }

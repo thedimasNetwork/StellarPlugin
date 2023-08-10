@@ -12,6 +12,7 @@ import stellar.database.DatabaseAsync;
 import stellar.database.gen.tables.records.UsersRecord;
 import stellar.plugin.Const;
 import stellar.plugin.Variables;
+import stellar.plugin.util.logger.DiscordLogger;
 
 import java.io.IOException;
 import java.text.MessageFormat;
@@ -86,13 +87,17 @@ public class Translator { // TODO: normal async logic
                 String targetLocale = locale.equals("auto") || locale.equals("double") ? otherPlayer.locale : locale;
                 return translateAsync(
                         message, targetLocale.split("#")[0], "auto"
-                ).exceptionally((t) -> {
+                ).exceptionally(t -> {
                     Log.err(t);
-                    return message;
+                    DiscordLogger.err(t);
+                    return null;
                 });
             }
-
             return CompletableFuture.supplyAsync(() -> message);
+        }).exceptionally(t -> {
+            Log.err(t);
+            DiscordLogger.err(t);
+            return null;
         });
     }
 
@@ -101,7 +106,11 @@ public class Translator { // TODO: normal async logic
                 otherPlayer.uuid()
         ).thenCombineAsync(translateRawAsync(player, otherPlayer, message), (record, translated) ->
             formatChat(player, translated, message, record.getTranslator().equals("double"))
-        );
+        ).exceptionally(t -> {
+            Log.err(t);
+            DiscordLogger.err(t);
+            return null;
+        });
     }
 
     public static String formatChat(Player player, String translated, String message, boolean detailed) {

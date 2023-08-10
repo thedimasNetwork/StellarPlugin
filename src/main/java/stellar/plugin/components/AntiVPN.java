@@ -18,6 +18,7 @@ import stellar.database.gen.tables.records.IpCachedRecord;
 import stellar.plugin.Const;
 import stellar.plugin.Variables;
 import stellar.plugin.util.Players;
+import stellar.plugin.util.logger.DiscordLogger;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -96,9 +97,14 @@ public class AntiVPN { // also includes anti ddos from gh actions servers
                                 data.getString("vpn").equals("yes"),
                                 data.getString("type"),
                                 data.getInt("risk", 0)
-                        );
+                        ).exceptionally(t -> {
+                            Log.err(t);
+                            DiscordLogger.err(t);
+                            return null;
+                        });
                     } catch (Throwable t) {
-                        Log.err("Failed to get IP info.", t);
+                        Log.err("Failed to get IP info", t);
+                        DiscordLogger.err("Failed to get IP info", t);
                         return null;
                     }
                 }
@@ -106,6 +112,10 @@ public class AntiVPN { // also includes anti ddos from gh actions servers
                 if (record.isVpn() || record.isProxy()) {
                     event.player.kick("No VPN is allowed");
                 }
+            }).exceptionally(t -> {
+                Log.err(t);
+                DiscordLogger.err(t);
+                return null;
             });
         });
     }

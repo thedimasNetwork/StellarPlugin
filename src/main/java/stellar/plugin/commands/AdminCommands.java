@@ -53,7 +53,13 @@ public class AdminCommands {
             });
 
             Log.info("<A>" + Const.chatLogFormat, Strings.stripColors(player.name), Strings.stripColors(message), player.locale);
-            DatabaseAsync.createMessageAsync(Const.serverFieldName, player.uuid(), null, MessageType.admin, message, player.locale());
+            DatabaseAsync.createMessageAsync(
+                    Const.serverFieldName, player.uuid(), null, MessageType.admin, message, player.locale()
+            ).exceptionally(t -> {
+                Log.err(t);
+                DiscordLogger.err(t);
+                return null;
+            });
         });
 
         commandManager.registerPlayer("admin", "commands.admin.admin.description", Rank.admin, (args, player) -> {
