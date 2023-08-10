@@ -48,7 +48,7 @@ public class PlayerCommands {
 
     public static void load(CommandHandler commandHandler) {
         commandHandler.removeCommand("t");
-        commandHandler.<Player>register("t", "<text...>", "commands.t.description", (args, player) -> {
+        commandManager.registerPlayer("t", "<text...>", "commands.t.description", (args, player) -> {
             String message = args[0];
             Groups.player.each(o -> o.team() == player.team(), otherPlayer -> {
                 Translator.translateChatAsync(player, otherPlayer, message).thenAcceptAsync(msg ->
@@ -67,7 +67,7 @@ public class PlayerCommands {
         });
 
         commandHandler.removeCommand("help");
-        commandHandler.<Player>register("help", "[page]", "commands.help.description", (args, player) -> {
+        commandManager.registerPlayer("help", "[page]", "commands.help.description", (args, player) -> {
             if (args.length > 0 && !Strings.canParseInt(args[0])) {
                 Bundle.bundled(player, "commands.page-not-int");
                 return;
@@ -99,7 +99,7 @@ public class PlayerCommands {
             player.sendMessage(result.toString());
         });
 
-        commandHandler.<Player>register("tr", "[off|auto|double|somelocale]", "commands.tr.description", (args, player) -> {
+        commandManager.registerPlayer("tr", "[off|auto|double|somelocale]", "commands.tr.description", (args, player) -> {
             if (args.length == 0) {
                 DatabaseAsync.getPlayerAsync(
                         player.uuid()
@@ -137,7 +137,7 @@ public class PlayerCommands {
             });
         });
 
-        commandHandler.<Player>register("rtv", "[on|off]", "commands.rtv.description", (args, player) -> {
+        commandManager.registerPlayer("rtv", "[on|off]", "commands.rtv.description", (args, player) -> {
             boolean rtvEnabled = Core.settings.getBool("rtv");
 
             if (args.length > 0) {
@@ -177,11 +177,11 @@ public class PlayerCommands {
             }
         });
 
-        commandHandler.<Player>register("version", "commands.version.description", (arg, player) -> Bundle.bundled(player, "commands.version.msg", Const.pluginVersion));
+        commandManager.registerPlayer("version", "commands.version.description", (arg, player) -> Bundle.bundled(player, "commands.version.msg", Const.pluginVersion));
 
-        commandHandler.<Player>register("discord", "commands.discord.description", (args, player) -> Call.openURI(player.con, config.discordUrl));
+        commandManager.registerPlayer("discord", "commands.discord.description", (args, player) -> Call.openURI(player.con, config.discordUrl));
 
-        commandHandler.<Player>register("hub", "commands.hub.description", (args, player) -> {
+        commandManager.registerPlayer("hub", "commands.hub.description", (args, player) -> {
             String[] address = Const.serverAddress.get("hub").split(":");
             String ip = address[0];
             int port = Strings.parseInt(address[1]);
@@ -189,7 +189,7 @@ public class PlayerCommands {
             Call.connect(player.con, ip, port);
         });
 
-        commandHandler.<Player>register("connect", "[list|server...]", "commands.connect.description", (args, player) -> {
+        commandManager.registerPlayer("connect", "[list|server...]", "commands.connect.description", (args, player) -> {
             if (args.length == 0 || args[0].equalsIgnoreCase("list")) {
                 Bundle.bundled(player, "commands.connect.list", Const.serverList);
                 return;
@@ -207,7 +207,7 @@ public class PlayerCommands {
             Vars.net.pingHost(ip, port, host -> Call.connect(player.con, ip, port), e -> Bundle.bundled(player, "commands.connect.server-offline"));
         });
 
-        commandHandler.<Player>register("history", "[page] [detailed]", "commands.history.description", (args, player) -> {
+        commandManager.registerPlayer("history", "[page] [detailed]", "commands.history.description", (args, player) -> {
             boolean detailed = args.length == 2 && Structs.contains(Const.boolValues.split(", "), args[1].toLowerCase());
 
             if (args.length > 0 && Variables.activeHistoryPlayers.containsKey(player.uuid())) {
@@ -260,7 +260,7 @@ public class PlayerCommands {
             }
         });
 
-        commandHandler.<Player>register("playtime", "[server...]", "commands.playtime.description", (args, player) -> {
+        commandManager.registerPlayer("playtime", "[server...]", "commands.playtime.description", (args, player) -> {
             String serverColumnName;
             if (args.length > 0) {
                 serverColumnName = args[0].toLowerCase();
@@ -286,7 +286,7 @@ public class PlayerCommands {
             });
         });
 
-        commandHandler.<Player>register("rank", "commands.rank.description", (args, player) -> {
+        commandManager.registerPlayer("rank", "commands.rank.description", (args, player) -> {
             Rank rank = ranks.get(player.uuid(), Rank.player); // TODO: Async
             Locale locale = Bundle.findLocale(player.locale());
             String[][] buttons = {
@@ -328,7 +328,7 @@ public class PlayerCommands {
             }));
         });
 
-        commandHandler.<Player>register("ranks", "commands.ranks.description", (args, player) -> {
+        commandManager.registerPlayer("ranks", "commands.ranks.description", (args, player) -> {
             StringBuilder builder = new StringBuilder();
             Locale locale = Bundle.findLocale(player.locale());
             String[][] buttons = new String[Rank.values().length + 1][]; // I wanted to use Seq<String> that didn't work
@@ -368,7 +368,7 @@ public class PlayerCommands {
             });
         });
 
-        commandHandler.<Player>register("stats", "commands.stats.description", (args, player) -> {
+        commandManager.registerPlayer("stats", "commands.stats.description", (args, player) -> {
             DatabaseAsync.getPlayerAsync(
                     player.uuid()
             ).thenCombineAsync(DatabaseAsync.getStatsAsync(player.uuid()), (record, statsRecord) ->
@@ -437,7 +437,7 @@ public class PlayerCommands {
             });
         });
 
-        commandHandler.<Player>register("msg", "<player_name> <message...>", "commands.msg.description", (args, player) -> {
+        commandManager.registerPlayer("msg", "<player_name> <message...>", "commands.msg.description", (args, player) -> {
             Player target = Players.findPlayer(StringUtils.stripColorsAndGlyphs(args[0]).strip());
             if (target == null) {
                 Bundle.bundled(player, "commands.player-notfound");
@@ -473,7 +473,7 @@ public class PlayerCommands {
         // region debug commands
         // TODO: effect, set block/floor/overlay commands
         if (Core.settings.getBool("debug")) {
-            commandHandler.<Player>register("test-menu", "[some-text...]", "Test menu", (args, player) -> {
+            commandManager.registerPlayer("test-menu", "[some-text...]", "Test menu", (args, player) -> {
                 String[][] buttons = new String[][]{
                         {"A", "B", "C"},
                         {"D", "E"}
@@ -484,7 +484,7 @@ public class PlayerCommands {
                 });
             });
 
-            commandHandler.<Player>register("setrank", "<rank>", "Set your rank temporary. [accent]Debug only![]", (args, player) -> {
+            commandManager.registerPlayer("setrank", "<rank>", "Set your rank temporary. [accent]Debug only![]", (args, player) -> {
                 try {
                     Variables.ranks.put(player.uuid(), Rank.valueOf(args[0]));
                     player.sendMessage(String.format("Your new rank is %s", args[0]));
@@ -493,7 +493,7 @@ public class PlayerCommands {
                 }
             });
 
-            commandHandler.<Player>register("corestats", "[id]", "Get core stats for you or specified player by ID.", (args, player) -> {
+            commandManager.registerPlayer("corestats", "[id]", "Get core stats for you or specified player by ID.", (args, player) -> {
                 Player target = player;
                 if (args.length >= 1) {
                     if (!Strings.canParseInt(args[0])) {

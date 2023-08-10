@@ -38,11 +38,11 @@ public class CommandManager {
         registerPlayer(name, "", description, rank, runner);
     }
 
-//    public void registerPlayer(String name, String params, String description, CommandRunner runner) {
-//        registerPlayer(name, params, description, Rank.player, runner);
-//    }
-//
-//    public void registerPlayer(String name, String description, CommandRunner runner) {
-//        registerPlayer(name, "", description, Rank.player, runner);
-//    }
+    public void registerPlayer(String name, String params, String description, CommandRunner runner) {
+        registerPlayer(name, params, description, Rank.player, runner);
+    }
+
+    public void registerPlayer(String name, String description, CommandRunner runner) {
+        registerPlayer(name, "", description, Rank.player, runner);
+    }
 }
