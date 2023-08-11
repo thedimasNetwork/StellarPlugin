@@ -336,26 +336,51 @@ public class PlayerCommands {
         });
 
         commandManager.registerPlayer("ranks", "commands.ranks.description", (args, player) -> {
-            StringBuilder builder = new StringBuilder();
             Locale locale = Bundle.findLocale(player.locale());
-            String[][] buttons = new String[Rank.values().length + 1][]; // I wanted to use Seq<String> that didn't work
-            for (Rank rank : Rank.values()) {
-                buttons[rank.ordinal()] = new String[]{rank.formatted(player)};
-            }
-            buttons[Rank.values().length] = new String[]{Bundle.get("menus.close", locale)};
+            Seq<Rank> ranks = Seq.select(Rank.values(), r -> !r.special);
+            Seq<Rank> specRanks = Seq.select(Rank.values(), r -> r.special);
 
-            MenuHandler.send(player, Bundle.get("menus.ranks-info.title", locale), "", buttons, (menuId, option, p) -> {
-                if (option >= Rank.values().length || option < 0) {
+            String[][] buttons = new String[ranks.size + 2][]; // I wanted to use Seq<String> that didn't work
+            ranks.filter(r -> !r.special).each(rank -> {
+                buttons[rank.ordinal()] = new String[]{rank.formatted(player)};
+            });
+
+            String title = Bundle.get("menus.ranks-info.title", locale);
+            String close = Bundle.get("menus.close", locale);
+
+            buttons[ranks.size] = new String[]{Bundle.get("menus.special-ranks", locale)};
+            buttons[ranks.size + 1] = new String[]{close};
+
+            String[][] closeButton = new String[][]{
+                    {Bundle.get("menus.close", locale)}
+            };
+
+            MenuHandler.send(player, title, "", buttons, (menuId, option, p) -> {
+                if (option > Rank.values().length || option < 0) {
+                    return;
+                }
+
+                if (option == ranks.size) {
+                    String[][] newButtons = new String[specRanks.size + 1][];
+                    for (int i = 0; i < specRanks.size; i++) {
+                        newButtons[i] = new String[]{specRanks.get(i).formatted(player)};
+                    }
+                    newButtons[specRanks.size] = new String[]{close};
+
+                    MenuHandler.send(player, title, "", newButtons, (m, o, pl) -> {
+                        if (o > Rank.values().length || o < 0) {
+                            return;
+                        }
+                        Rank rank = specRanks.get(o);
+                        String message = Bundle.format("commands.ranks.special-info", locale, rank.formatted(pl));
+                        Call.menu(pl.con(), 0, Bundle.get("menus.rank-info.title", locale), message, closeButton);
+                    });
                     return;
                 }
 
                 DatabaseAsync.getStatsAsync(
                         p.uuid()
                 ).thenCombineAsync(DatabaseAsync.getTotalPlaytimeAsync(p.uuid()), (record, playtime) -> {
-                    String[][] newButtons = new String[][]{
-                            {Bundle.get("menus.close", locale)}
-                    };
-
                     Rank rank = Rank.values()[option];
                     int wins = record.getAttacks() + record.getSurvivals() + record.getHexWins() + record.getPvp();
                     String message = Bundle.format("commands.ranks.rank-info", locale,
@@ -365,7 +390,7 @@ public class PlayerCommands {
                             targetColor(record.getBuilt(), rank.requirements.built), record.getBuilt(), rank.requirements.built,
                             targetColor(playtime.intValue(), rank.requirements.playtime * 60), longToTime(playtime, locale), longToTime(rank.requirements.playtime * 60L, locale)
                     );
-                    Call.menu(p.con(), 0, Bundle.get("menus.rank-info.title", locale), message, newButtons);
+                    Call.menu(p.con(), 0, Bundle.get("menus.rank-info.title", locale), message, closeButton);
                     return null;
                 }).exceptionally(t -> {
                     Log.err(t);
