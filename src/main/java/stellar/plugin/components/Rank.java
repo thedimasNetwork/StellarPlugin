@@ -25,7 +25,7 @@ public enum Rank {
     // region basic
     player(Fx.none),
     verified(new Requirements(500, 0, 0, 30), player, Fx.artilleryTrail),
-    beginner(Color.valueOf("#fc693d"), "\uE872", new Requirements(5000, 50, 8, 60), verified, Fx.lava),
+    beginner(Color.valueOf("#fc473d"), "\uE872", new Requirements(5000, 50, 8, 60), verified, Fx.lava),
     active(Color.valueOf("#ff8f40"), "\uE86B", new Requirements(7500, 100, 16, 2 * 60), beginner, Fx.bubble, Color.valueOf("#ff8f40")),
     expert(Color.valueOf("#f2e33d"), "\uE86E", new Requirements(10000, 250, 32, 4 * 60), active, Fx.dynamicSpikes, Color.valueOf("#f2e33d")),
     veteran(Color.valueOf("#66f556"), "\uE809", new Requirements(15000, 500, 64, 8 * 60), expert, Fx.greenCloud),
