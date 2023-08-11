@@ -24,7 +24,7 @@ import java.util.concurrent.CompletableFuture;
 public enum Rank {
     // region basic
     player(Fx.none),
-    verified(new Requirements(500, 0, 0, 30), player, Fx.artilleryTrail),
+    verified(new Requirements(500, 0, 0, 30), player, Fx.none),
     beginner(Color.valueOf("#fc473d"), "\uE872", new Requirements(5000, 50, 8, 60), verified, Fx.lava),
     active(Color.valueOf("#ff8f40"), "\uE86B", new Requirements(7500, 100, 16, 2 * 60), beginner, Fx.bubble, Color.valueOf("#ff8f40")),
     expert(Color.valueOf("#f2e33d"), "\uE86E", new Requirements(10000, 250, 32, 4 * 60), active, Fx.dynamicSpikes, Color.valueOf("#f2e33d")),
@@ -37,11 +37,11 @@ public enum Rank {
     // region special
     // TODO: make something with donater/developer
     // TODO: colors for spectial ranks and better owner icon
-    //donater(Color.white, "\uE810", true),
-    //developer(Color.white, "\uF120", true),
-    admin(Color.white, "\uE817", true), // or \uE82C
-    console(Color.white, "\uE80F", true),
-    owner(Color.white, "\uE87C", true);
+//    donater(Color.gold, "\uE810", true),
+//    developer(Color.orange, "\uE869", true),
+    admin(Color.valueOf("#87ceeb"), "\uE817", true), // or \uE82C
+    console(Color.valueOf("#6c87fd"), "\uE80F", true),
+    owner(Color.valueOf("#a27ce5"), "\uE82C", true);
     //endregion
 
     private static final ObjectMap<PlayerStatus, Rank> statusRanks = ObjectMap.of( // maybe need some optimization
