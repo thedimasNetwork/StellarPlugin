@@ -24,11 +24,11 @@ ext {
 
 ext {
     mindustryVersion = "v145"
-    lombokVersion = "1.18.24"
+    lombokVersion = '1.18.26'
     discordWebhookVersion = "v1.6"
-    jacksonYamlVersion = "2.13.0"
+    jacksonYamlVersion = '2.14.2'
     jdaVersion = "5.0.0-alpha.18"
-    okhttpVersion = "4.9.3"
+    okhttpVersion = '4.10.0'
     mysqlVersion = "8.0.30"
     jooqVersion = "3.17.0"
     databaseVersion = "ee150bbb7e"
