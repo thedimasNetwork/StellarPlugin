@@ -502,6 +502,13 @@ public class PlayerCommands {
             });
         });
 
+        commandManager.registerPlayer("players", "commands.players.description", (args, player) -> {
+            for (int i = 0; i < Groups.player.size(); ) {
+                Player other = Groups.player.index(i);
+                player.sendMessage(String.format("[yellow]%d.[] %s[white] - [accent]%d[][]", ++i, other.coloredName(), other.id()));
+            }
+        });
+
         // region debug commands
         // TODO: effect, set block/floor/overlay commands
         if (Core.settings.getBool("debug")) {
