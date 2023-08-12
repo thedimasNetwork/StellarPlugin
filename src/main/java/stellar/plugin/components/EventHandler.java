@@ -461,6 +461,10 @@ public class EventHandler {
         });
 
         Events.on(EventType.UnitBulletDestroyEvent.class, event -> {
+            if (event.bullet.owner() == null) {
+                return;
+            }
+
             if (event.bullet.owner() instanceof Unitc unitc) {
                 if (unitc.controller() instanceof Playerc player) {
                     Players.incrementStats((Player) player, "kills");
