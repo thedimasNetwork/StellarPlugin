@@ -69,6 +69,10 @@ public class CommandManager {
 
     @Nullable
     public Command getCommand(String name) {
-        return commands.get(name);
+        if (commands.containsKey(name)) {
+            return commands.get(name);
+        } else {
+            return Command.fromArc(clientHandler.getCommandList().find(c -> c.text.equals(name)));
+        }
     }
 }

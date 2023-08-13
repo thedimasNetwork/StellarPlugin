@@ -15,8 +15,10 @@ public class Command {
     private final CommandRunner runner;
 
     public boolean isAllowed(Player player) {
-        return Rank.max(Variables.ranks.get(player.uuid(), Rank.player), Variables.specialRanks.get(player.uuid()))
-                .gte(this.rank);
+        return Rank.max(
+                Variables.ranks.get(player.uuid(), Rank.player),
+                Variables.specialRanks.get(player.uuid(), Rank.player)
+        ).gte(this.rank);
     }
 
     public static Command fromArc(CommandHandler.Command command, Rank rank) {
