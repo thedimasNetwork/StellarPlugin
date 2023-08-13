@@ -15,6 +15,7 @@ import mindustry.gen.Player;
 import mindustry.maps.Map;
 import mindustry.net.Packets;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
@@ -23,6 +24,7 @@ import org.jooq.Record1;
 import stellar.database.Database;
 import stellar.database.gen.Tables;
 import stellar.database.gen.tables.records.UsersRecord;
+import stellar.plugin.Const;
 import stellar.plugin.util.Players;
 import stellar.plugin.util.StringUtils;
 import stellar.plugin.util.logger.DiscordLogger;
@@ -214,6 +216,7 @@ public class DiscordListener extends ListenerAdapter {
                             .setFooter(count > 15 ? "Показано только 15 записей. Задайте запрос конкретнее" : null) // TODO: pages
                             .setColor(Colors.blue);
 
+                    boolean admin = event.getMember().hasPermission(Permission.ADMINISTRATOR);
                     records.each(record -> {
                         String banned = "???";
                         try {
@@ -221,6 +224,11 @@ public class DiscordListener extends ListenerAdapter {
                         } catch (SQLException e) {
                             Log.err(e);
                         }
+
+                        String uuid = admin ? record.getUuid() : StringUtils.obfuscate(record.getUuid(), 5, false);
+                        String ip = admin ? record.getIp() : StringUtils.obfuscate(record.getIp(), true);
+                        String status = Const.statusNames.get(record.getStatus(), record.getStatus().name());
+
                         String message = String.format("""
                                 UUID: `%s`
                                 Имя: %s
@@ -228,7 +236,7 @@ public class DiscordListener extends ListenerAdapter {
                                 Последний айпи: %s
                                 Статус: %s
                                 Забанен: %s
-                                """, record.getUuid(), record.getName(), record.getId(), record.getIp(), record.getStatus().name(), banned);
+                                """, uuid, record.getName(), record.getId(), ip, status, banned);
                         embedBuilder.addField(Strings.stripColors("**" + record.getName()) + "**", message, false);
                     });
                     event.replyEmbeds(embedBuilder.build()).setEphemeral(true).queue();

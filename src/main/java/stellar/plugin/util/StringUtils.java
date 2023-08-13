@@ -45,4 +45,20 @@ public class StringUtils {
         return seconds < 60 * 60 ? Bundle.format("formats.playtime.short", locale, seconds / 60) :
                 Bundle.format("formats.playtime", locale, seconds / (60 * 60), (seconds % (60 * 60)) / 60);
     }
+
+    public static String repeat(String string, int number) {
+        StringBuilder builder = new StringBuilder();
+        for (int i = 0; i < number; i++) {
+            builder.append(string);
+        }
+        return builder.toString();
+    }
+
+    public static String obfuscate(String string, boolean escape) {
+        return obfuscate(string, 2, escape);
+    }
+
+    public static String obfuscate(String string, int chars, boolean escape) {
+        return string.substring(0, chars) + repeat(escape ? "\\*" : "*", string.length() - chars * 2) + string.substring(string.length() - chars);
+    }
 }

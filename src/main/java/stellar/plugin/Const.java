@@ -1,6 +1,7 @@
 package stellar.plugin;
 
 import arc.files.Fi;
+import arc.struct.ObjectMap;
 import arc.struct.Seq;
 import arc.struct.StringMap;
 import arc.util.Log;
@@ -8,6 +9,7 @@ import arc.util.Structs;
 import mindustry.Vars;
 import mindustry.net.Administration;
 import org.jooq.Field;
+import stellar.database.enums.PlayerStatus;
 import stellar.database.gen.Tables;
 import stellar.plugin.util.Bundle;
 
@@ -138,6 +140,13 @@ public class Const {
             "fil", "Filipino",
             "sk", "Slovenčina",
             "ms", "Malay"
+    );
+
+    public static final ObjectMap<PlayerStatus, String> statusNames = ObjectMap.of(
+            PlayerStatus.basic, "Игрок :bust_in_silhouette:",
+            PlayerStatus.admin, "Админ :hammer:",
+            PlayerStatus.console, "Консоль :wrench:",
+            PlayerStatus.owner, "Владелец :crown:"
     );
 
     public static final String serverFieldName = Const.serverAddress.findKey("play.thedimas.pp.ua:" + Administration.Config.port.num(), false);
