@@ -16,7 +16,7 @@ import stellar.plugin.util.logger.DiscordLogger;
 import java.text.MessageFormat;
 import java.util.concurrent.CompletableFuture;
 
-public class Translator { // TODO: normal async logic
+public class Translator {
     private static final JsonReader jsonReader = new JsonReader();
 
     public static String translate(String text, String langTo, String langFrom) {
@@ -88,14 +88,14 @@ public class Translator { // TODO: normal async logic
                 ).exceptionally(t -> {
                     Log.err(t);
                     DiscordLogger.err(t);
-                    return null;
+                    return message;
                 });
             }
             return CompletableFuture.supplyAsync(() -> message);
         }).exceptionally(t -> {
             Log.err(t);
             DiscordLogger.err(t);
-            return null;
+            return message;
         });
     }
 
@@ -104,11 +104,7 @@ public class Translator { // TODO: normal async logic
                 otherPlayer.uuid()
         ).thenCombineAsync(translateRawAsync(player, otherPlayer, message), (record, translated) ->
                 formatChat(player, translated, message, record.getTranslator().equals("double"))
-        ).exceptionally(t -> {
-            Log.err(t);
-            DiscordLogger.err(t);
-            return null;
-        });
+        );
     }
 
     public static String formatChat(Player player, String translated, String message, boolean detailed) {

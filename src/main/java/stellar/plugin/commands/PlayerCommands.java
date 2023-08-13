@@ -490,9 +490,7 @@ public class PlayerCommands {
                         boolean playerDetailed = playerInfo.getTranslator().equals("double");
                         boolean targetDetailed = targetInfo.getTranslator().equals("double");
                         Bundle.bundled(player, "commands.msg.to", Strings.stripColors(target.name()), String.format(playerDetailed ? "%s (%s)" : "%s", args[1], args[1]));
-                        Translator.translateRawAsync(player, target, args[1]).thenAcceptAsync(msg -> {
-                            Bundle.bundled(target, "commands.msg.from", Strings.stripColors(player.name()), String.format(targetDetailed ? "%s (%s)" : "%s", msg, args[1]));
-                        });
+                        Bundle.bundled(target, "commands.msg.from", Strings.stripColors(player.name()), String.format(targetDetailed ? "%s (%s)" : "%s", translated, args[1]));
                         return null;
                     })
             ).exceptionally(t -> {
