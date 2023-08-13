@@ -25,6 +25,7 @@ import stellar.database.gen.Tables;
 import stellar.database.gen.tables.records.UsersRecord;
 import stellar.plugin.util.Players;
 import stellar.plugin.util.StringUtils;
+import stellar.plugin.util.logger.DiscordLogger;
 
 import java.io.File;
 import java.lang.management.ManagementFactory;
@@ -142,11 +143,15 @@ public class DiscordListener extends ListenerAdapter {
                     return;
                 }
 
+                String type = event.getOption("type").getAsString();
                 String query = event.getOption("query").getAsString();
+
+                DiscordLogger.info(String.format("<@%s> gathered some info where %s is `%s`", event.getMember().getId(), type, query));
+
                 try {
                     Seq<UsersRecord> records = new Seq<>();
-                    Integer count = 0;
-                    switch (event.getOption("type").getAsString()) {
+                    int count = 0;
+                    switch (type) {
                         case "uuid" -> {
                             UsersRecord record = Database.getPlayer(query);
                             records = record != null ? Seq.with(record) : new Seq<>();
