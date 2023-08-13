@@ -2,6 +2,7 @@ package stellar.plugin;
 
 import arc.util.CommandHandler;
 import arc.util.Log;
+import arc.util.Time;
 import arc.util.Timer;
 import mindustry.mod.Plugin;
 import stellar.database.Database;
@@ -14,6 +15,9 @@ import stellar.plugin.components.AntiVPN;
 import stellar.plugin.components.EventHandler;
 import stellar.plugin.components.LaunchPad;
 import stellar.plugin.history.History;
+
+import java.time.Instant;
+import java.util.concurrent.CompletableFuture;
 
 import static mindustry.Vars.netServer;
 import static stellar.plugin.Variables.commandManager;
@@ -37,8 +41,13 @@ public class ThedimasPlugin extends Plugin {
         Log.info("All components loaded");
 
         Timer.schedule(() -> {
-            Log.warn("Collecting garbage");
-            System.gc();
+            long start = Time.millis();
+            CompletableFuture.runAsync(() -> {
+                Log.warn("Collecting garbage");
+                System.gc();
+            }).thenRunAsync(() -> {
+                Log.info("Garbage was collected in @ secs", (Time.millis() - start) / 1000f);
+            });
         }, 600, 600);
     }
 
