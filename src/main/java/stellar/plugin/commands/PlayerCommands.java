@@ -368,7 +368,7 @@ public class PlayerCommands {
                     newButtons[specRanks.size] = new String[]{close};
 
                     MenuHandler.send(player, title, "", newButtons, (m, o, pl) -> {
-                        if (o > Rank.values().length || o < 0) {
+                        if (o > Rank.values().length - 1 || o < 0) {
                             return;
                         }
                         Rank rank = specRanks.get(o);

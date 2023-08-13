@@ -105,6 +105,11 @@ public class EventHandler {
             StringBuilder commands = new StringBuilder();
             Const.usefulCommands.each(name -> {
                 CommandHandler.Command command = Vars.netServer.clientCommands.getCommandList().find(cmd -> cmd.text.equals(name));
+                if (command == null) {
+                    Log.err("Command @ is null!", name);
+                    DiscordLogger.err("Command " + name + " is null");
+                    return;
+                }
                 commands.append(String.format("[orange]/%s[] %s\n", command.text, Bundle.has(command.description, locale) ? Bundle.get(command.description, locale) : command.description));
             });
 

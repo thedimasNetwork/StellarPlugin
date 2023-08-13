@@ -15,7 +15,7 @@ public class Command {
     private final CommandRunner runner;
 
     public boolean isAllowed(Player player) {
-        return Rank.max(Variables.ranks.get(player.uuid()), Variables.specialRanks.get(player.uuid()))
+        return Rank.max(Variables.ranks.get(player.uuid(), Rank.player), Variables.specialRanks.get(player.uuid()))
                 .gte(this.rank);
     }
 
