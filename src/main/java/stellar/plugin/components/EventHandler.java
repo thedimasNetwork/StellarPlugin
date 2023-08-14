@@ -30,6 +30,7 @@ import stellar.plugin.types.AdminActionEntry;
 import stellar.plugin.util.Bundle;
 import stellar.plugin.util.Players;
 import stellar.plugin.util.Translator;
+import stellar.plugin.util.commands.Command;
 import stellar.plugin.util.logger.DiscordLogger;
 import stellar.plugin.util.menus.MenuHandler;
 
@@ -104,13 +105,13 @@ public class EventHandler {
 
             StringBuilder commands = new StringBuilder();
             Const.usefulCommands.each(name -> {
-                CommandHandler.Command command = Vars.netServer.clientCommands.getCommandList().find(cmd -> cmd.text.equals(name));
+                Command command = commandManager.getCommand(name);
                 if (command == null) {
                     Log.err("Command @ is null!", name);
                     DiscordLogger.err("Command " + name + " is null");
                     return;
                 }
-                commands.append(String.format("[orange]/%s[] %s\n", command.text, Bundle.has(command.description, locale) ? Bundle.get(command.description, locale) : command.description));
+                commands.append(String.format("[orange]/%s[] %s\n", command.getName(), Bundle.has(command.getDescription(), locale) ? Bundle.get(command.getDescription(), locale) : command.getDescription()));
             });
 
             String welcome = Bundle.format("welcome", locale, rules, commands.toString().strip());
