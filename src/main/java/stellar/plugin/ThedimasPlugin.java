@@ -15,6 +15,7 @@ import stellar.plugin.components.AntiVPN;
 import stellar.plugin.components.EventHandler;
 import stellar.plugin.components.LaunchPad;
 import stellar.plugin.components.history.History;
+import thedimas.util.Bundle;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -31,6 +32,7 @@ public class ThedimasPlugin extends Plugin {
 
         Config.load();
         Bot.load();
+        Bundle.load(ThedimasPlugin.class);
         Database.load(config.database.ip, config.database.port, config.database.name, config.database.user, config.database.password);
         LaunchPad.load();
         EventHandler.load();
