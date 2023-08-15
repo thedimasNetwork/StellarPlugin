@@ -26,7 +26,7 @@ import stellar.plugin.components.bot.Util;
 import stellar.plugin.enums.Menus;
 import stellar.plugin.components.history.struct.CacheSeq;
 import stellar.plugin.type.AdminActionEntry;
-import stellar.plugin.util.Bundle;
+import thedimas.util.Bundle;
 import stellar.plugin.util.Players;
 import stellar.plugin.util.Translator;
 import stellar.plugin.util.commands.Command;

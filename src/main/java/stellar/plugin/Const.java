@@ -11,7 +11,7 @@ import mindustry.net.Administration;
 import org.jooq.Field;
 import stellar.database.enums.PlayerStatus;
 import stellar.database.gen.Tables;
-import stellar.plugin.util.Bundle;
+import thedimas.util.Bundle;
 
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;

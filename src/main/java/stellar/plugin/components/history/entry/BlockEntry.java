@@ -6,7 +6,7 @@ import mindustry.game.EventType.BlockBuildEndEvent;
 import mindustry.gen.Player;
 import mindustry.gen.Unit;
 import mindustry.world.Block;
-import stellar.plugin.util.Bundle;
+import thedimas.util.Bundle;
 
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;

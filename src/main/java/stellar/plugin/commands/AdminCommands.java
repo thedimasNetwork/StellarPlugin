@@ -21,7 +21,7 @@ import stellar.database.enums.MessageType;
 import stellar.plugin.Const;
 import stellar.plugin.Variables;
 import stellar.plugin.components.Rank;
-import stellar.plugin.util.Bundle;
+import thedimas.util.Bundle;
 import stellar.plugin.util.Players;
 import stellar.plugin.util.Translator;
 import stellar.plugin.util.logger.DiscordLogger;

@@ -14,7 +14,7 @@ import stellar.database.enums.PlayerStatus;
 import stellar.database.gen.tables.records.StatsRecord;
 import stellar.plugin.Variables;
 import stellar.plugin.type.Requirements;
-import stellar.plugin.util.Bundle;
+import thedimas.util.Bundle;
 import stellar.plugin.util.logger.DiscordLogger;
 
 import java.sql.SQLException;

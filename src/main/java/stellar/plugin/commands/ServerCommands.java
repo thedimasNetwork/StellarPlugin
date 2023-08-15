@@ -16,7 +16,7 @@ import stellar.plugin.Variables;
 import stellar.plugin.components.bot.Bot;
 import stellar.plugin.components.bot.Colors;
 import stellar.plugin.components.bot.Util;
-import stellar.plugin.util.Bundle;
+import thedimas.util.Bundle;
 import stellar.plugin.util.Players;
 import stellar.plugin.util.StringUtils;
 

@@ -10,7 +10,7 @@ import mindustry.world.blocks.logic.CanvasBlock;
 import mindustry.world.blocks.logic.LogicBlock;
 import mindustry.world.blocks.power.LightBlock;
 import mindustry.world.blocks.units.UnitFactory;
-import stellar.plugin.util.Bundle;
+import thedimas.util.Bundle;
 
 import java.util.Arrays;
 import java.util.Locale;

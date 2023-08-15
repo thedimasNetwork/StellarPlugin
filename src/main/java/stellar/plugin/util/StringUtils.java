@@ -1,6 +1,7 @@
 package stellar.plugin.util;
 
 import arc.util.Strings;
+import thedimas.util.Bundle;
 
 import java.util.Base64;
 import java.util.Locale;

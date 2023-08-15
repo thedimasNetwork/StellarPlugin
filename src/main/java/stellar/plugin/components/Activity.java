@@ -14,7 +14,7 @@ import stellar.database.gen.Tables;
 import stellar.database.gen.tables.records.StatsRecord;
 import stellar.plugin.Const;
 import stellar.plugin.Variables;
-import stellar.plugin.util.Bundle;
+import thedimas.util.Bundle;
 import stellar.plugin.util.logger.DiscordLogger;
 
 import static stellar.plugin.Variables.ranks;

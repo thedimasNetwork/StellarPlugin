@@ -19,7 +19,7 @@ import stellar.plugin.components.history.entry.ConfigEntry;
 import stellar.plugin.components.history.entry.HistoryEntry;
 import stellar.plugin.components.history.entry.RotateEntry;
 import stellar.plugin.components.history.struct.CacheSeq;
-import stellar.plugin.util.Bundle;
+import thedimas.util.Bundle;
 
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;

@@ -26,7 +26,7 @@ import stellar.plugin.Variables;
 import stellar.plugin.components.Rank;
 import stellar.plugin.components.history.entry.HistoryEntry;
 import stellar.plugin.components.history.struct.CacheSeq;
-import stellar.plugin.util.Bundle;
+import thedimas.util.Bundle;
 import stellar.plugin.util.Players;
 import stellar.plugin.util.StringUtils;
 import stellar.plugin.util.Translator;

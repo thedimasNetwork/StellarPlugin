@@ -3,7 +3,7 @@ package stellar.plugin.components.history.entry;
 import arc.util.Time;
 import mindustry.gen.Player;
 import mindustry.world.Block;
-import stellar.plugin.util.Bundle;
+import thedimas.util.Bundle;
 
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
