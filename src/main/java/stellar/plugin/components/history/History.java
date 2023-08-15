@@ -1,4 +1,4 @@
-package stellar.plugin.history;
+package stellar.plugin.components.history;
 
 import arc.Events;
 import arc.graphics.Color;
@@ -14,11 +14,11 @@ import mindustry.world.blocks.logic.LogicBlock;
 import mindustry.world.blocks.power.PowerNode;
 import stellar.plugin.Const;
 import stellar.plugin.Variables;
-import stellar.plugin.history.entry.BlockEntry;
-import stellar.plugin.history.entry.ConfigEntry;
-import stellar.plugin.history.entry.HistoryEntry;
-import stellar.plugin.history.entry.RotateEntry;
-import stellar.plugin.history.struct.CacheSeq;
+import stellar.plugin.components.history.entry.BlockEntry;
+import stellar.plugin.components.history.entry.ConfigEntry;
+import stellar.plugin.components.history.entry.HistoryEntry;
+import stellar.plugin.components.history.entry.RotateEntry;
+import stellar.plugin.components.history.struct.CacheSeq;
 import stellar.plugin.util.Bundle;
 
 import java.util.Locale;

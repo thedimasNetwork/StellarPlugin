@@ -1,4 +1,4 @@
-package stellar.plugin.types;
+package stellar.plugin.type;
 
 public class Requirements {
     public final int built, waves, wins, playtime;

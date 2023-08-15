@@ -1,4 +1,4 @@
-package stellar.plugin.history.entry;
+package stellar.plugin.components.history.entry;
 
 import arc.util.Time;
 import mindustry.gen.Player;

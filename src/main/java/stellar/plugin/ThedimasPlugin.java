@@ -6,7 +6,7 @@ import arc.util.Time;
 import arc.util.Timer;
 import mindustry.mod.Plugin;
 import stellar.database.Database;
-import stellar.plugin.bot.Bot;
+import stellar.plugin.components.bot.Bot;
 import stellar.plugin.commands.AdminCommands;
 import stellar.plugin.commands.PlayerCommands;
 import stellar.plugin.commands.ServerCommands;
@@ -14,9 +14,8 @@ import stellar.plugin.components.Activity;
 import stellar.plugin.components.AntiVPN;
 import stellar.plugin.components.EventHandler;
 import stellar.plugin.components.LaunchPad;
-import stellar.plugin.history.History;
+import stellar.plugin.components.history.History;
 
-import java.time.Instant;
 import java.util.concurrent.CompletableFuture;
 
 import static mindustry.Vars.netServer;

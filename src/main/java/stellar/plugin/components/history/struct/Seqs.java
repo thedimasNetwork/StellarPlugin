@@ -1,4 +1,4 @@
-package stellar.plugin.history.struct;
+package stellar.plugin.components.history.struct;
 
 import arc.struct.Queue;
 import arc.util.Nullable;

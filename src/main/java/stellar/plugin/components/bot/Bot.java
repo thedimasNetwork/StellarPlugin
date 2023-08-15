@@ -1,4 +1,4 @@
-package stellar.plugin.bot;
+package stellar.plugin.components.bot;
 
 import arc.util.Log;
 import net.dv8tion.jda.api.JDA;

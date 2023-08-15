@@ -1,4 +1,4 @@
-package stellar.plugin.types;
+package stellar.plugin.type;
 
 import arc.util.Log;
 import lombok.Getter;

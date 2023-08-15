@@ -4,10 +4,10 @@ import arc.struct.*;
 import arc.util.Interval;
 import okhttp3.OkHttpClient;
 import stellar.plugin.components.Rank;
-import stellar.plugin.history.entry.HistoryEntry;
-import stellar.plugin.history.struct.CacheSeq;
-import stellar.plugin.history.struct.Seqs;
-import stellar.plugin.types.AdminActionEntry;
+import stellar.plugin.components.history.entry.HistoryEntry;
+import stellar.plugin.components.history.struct.CacheSeq;
+import stellar.plugin.components.history.struct.Seqs;
+import stellar.plugin.type.AdminActionEntry;
 import stellar.plugin.util.commands.CommandManager;
 
 import java.time.Duration;

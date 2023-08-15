@@ -114,6 +114,7 @@ public class Const {
             "crawler_arena", "[#e6bd74]\uE829[] [#f92672]thedimas [#e6bd74]\uE871[#a6e22e]Crawler Arena[#e6bd74]\uE871[]",
             "zone_capture", "[#e6bd74]\uE829[] [#f92672]thedimas [#e6bd74]\uE853[#a6e22e]Zone Capture[#e6bd74]\uE853[]"
     );
+
     public static final StringMap translatorLocales = StringMap.of( // Top 25 locales by popularity on the server
             "ru", "Русский",
             "en", "English",

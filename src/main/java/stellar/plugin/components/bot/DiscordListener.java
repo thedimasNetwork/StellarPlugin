@@ -1,4 +1,4 @@
-package stellar.plugin.bot;
+package stellar.plugin.components.bot;
 
 import arc.Core;
 import arc.Events;

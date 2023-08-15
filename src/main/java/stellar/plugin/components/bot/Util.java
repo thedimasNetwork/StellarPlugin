@@ -1,4 +1,4 @@
-package stellar.plugin.bot;
+package stellar.plugin.components.bot;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;

@@ -1,6 +1,6 @@
 package stellar.plugin.util.logger;
 
-import stellar.plugin.bot.Colors;
+import stellar.plugin.components.bot.Colors;
 
 import java.awt.*;
 
