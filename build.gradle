@@ -25,7 +25,7 @@ ext {
 ext {
     lombokVersion = "1.18.26"
 
-    mindustryVersion = "v145"
+    mindustryVersion = "v146"
 
     jacksonYamlVersion = "2.14.2"
 
@@ -42,13 +42,14 @@ ext {
 repositories {
     mavenCentral()
     maven { url 'https://www.jitpack.io' }
+    maven { url "https://raw.githubusercontent.com/Zelaux/MindustryRepo/master/repository" }
 }
 
 dependencies {
     annotationProcessor "org.projectlombok:lombok:$lombokVersion"
     compileOnly "org.projectlombok:lombok:$lombokVersion"
 
-    compileOnly ("com.github.Anuken.MindustryJitpack:core:$mindustryVersion") {
+    compileOnly ("com.github.Anuken.Mindustry:core:$mindustryVersion") {
         exclude module: "flabel"
         exclude module: "freetype"
         exclude module: "g3d"
