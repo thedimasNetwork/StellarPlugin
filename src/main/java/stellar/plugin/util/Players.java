@@ -37,10 +37,12 @@ public class Players {
             }
         });
 
-        if (player.name().contains("\u001b")) {
-            blocked.set(true);
+        for (int i = 0; i < player.name().length(); i++) {
+            char ch = player.name().charAt(i);
+            if (ch <= '\u001f') {
+                return true;
+            }
         }
-
         return blocked.get();
     }
 
