@@ -64,11 +64,10 @@ public class AntiVPN { // also includes anti ddos from gh actions servers
             }
 
             DatabaseAsync.getContextAsync().thenComposeAsync(context -> {
-                boolean exists = context
+                boolean exists = !context
                         .selectFrom(Tables.ipCached)
                         .where(Tables.ipCached.ip.eq(event.player.ip()))
-                        .fetch()
-                        .size() > 0;
+                        .fetch().isEmpty();
 
                 if (exists) {
                     return CompletableFuture.supplyAsync(() -> context // TODO: Database.getIpInfo

@@ -36,6 +36,11 @@ public class Players {
                 blocked.set(true);
             }
         });
+
+        if (player.name().contains("\u001b")) {
+            blocked.set(true);
+        }
+
         return blocked.get();
     }
 
