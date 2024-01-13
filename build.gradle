@@ -49,6 +49,11 @@ dependencies {
     annotationProcessor "org.projectlombok:lombok:$lombokVersion"
     compileOnly "org.projectlombok:lombok:$lombokVersion"
 
+    compileOnly ("com.github.Anuken.Arc:arc-core") {
+        version {
+            strictly(mindustryVersion)
+        }
+    }
     compileOnly ("com.github.Anuken.Mindustry:core:$mindustryVersion") {
         exclude module: "flabel"
         exclude module: "freetype"
@@ -56,7 +61,6 @@ dependencies {
         exclude module: "fx"
         exclude module: "arcnet"
     }
-    compileOnly "com.github.Anuken.Arc:arc-core:$mindustryVersion"
 
     implementation ("net.dv8tion:JDA:$jdaVersion") { exclude module: "opus-java" }
     compileOnly "com.squareup.okhttp3:okhttp:$okhttpVersion"

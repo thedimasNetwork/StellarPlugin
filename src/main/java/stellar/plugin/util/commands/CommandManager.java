@@ -40,14 +40,13 @@ public class CommandManager {
                 return;
             }
 
-            CompletableFuture.runAsync(() ->
-                    runner.acceptPlayer(args, player)
-            ).exceptionally(t -> {
+            try {
+                runner.acceptPlayer(args, player);
+            } catch (Throwable t) {
                 Log.err("Failed to accept command @ from @", name, player.plainName());
                 Log.err(t);
                 DiscordLogger.err(String.format("Failed to accept command %s from %s", name, player.plainName()), t);
-                return null;
-            });
+            };
         });
     }
 
