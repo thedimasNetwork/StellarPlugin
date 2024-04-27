@@ -26,7 +26,6 @@ import java.time.LocalDateTime;
 import static stellar.plugin.Variables.config;
 
 public class ServerCommands {
-
     public static void load(CommandHandler commandHandler) {
         commandHandler.removeCommand("exit");
         commandHandler.register("exit", "Exit the server application", args -> {

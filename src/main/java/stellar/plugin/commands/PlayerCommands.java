@@ -45,7 +45,6 @@ import static stellar.plugin.util.StringUtils.targetColor;
 
 
 public class PlayerCommands {
-
     public static void load(CommandHandler commandHandler) {
         commandHandler.removeCommand("t");
         commandManager.registerPlayer("t", "<text...>", "commands.t.description", (args, player) -> {
@@ -74,12 +73,14 @@ public class PlayerCommands {
             }
 
             Seq<Command> legacyCommands = commandHandler.getCommandList()
-                    .filter(c -> commandManager.getCommand(c.text) == null)
+                    .select(c -> !commandManager.commandExists(c.text))
                     .map(Command::fromArc);
+
             Seq<Command> commands = legacyCommands
                     .add(commandManager.getCommandList()
                             .sort(c -> commandHandler.getCommandList().map(c1 -> c1.text).indexOf(c.getName())) // keeping same order
-                            .sort(c -> c.getRank().ordinal()));
+                            .sort(c -> c.getRank().ordinal())
+                    );
             Locale locale = Bundle.findLocale(player.locale);
             int hiddenCommandsCount = player.admin ? 0 : commands.count(c -> !c.isAllowed(player));
             int pages = Mathf.ceil(commands.size / Const.listPageSize - hiddenCommandsCount / Const.listPageSize);
@@ -383,13 +384,17 @@ public class PlayerCommands {
                 ).thenCombineAsync(DatabaseAsync.getTotalPlaytimeAsync(p.uuid()), (record, playtime) -> {
                     Rank rank = Rank.values()[option];
                     int wins = record.getAttacks() + record.getSurvivals() + record.getHexWins() + record.getPvp();
-                    String message = Bundle.format("commands.ranks.rank-info", locale,
-                            rank.formatted(p),
-                            targetColor(wins, rank.requirements.wins), wins, rank.requirements.wins,
-                            targetColor(record.getWaves(), rank.requirements.waves), record.getWaves(), rank.requirements.waves,
-                            targetColor(record.getBuilt(), rank.requirements.built), record.getBuilt(), rank.requirements.built,
-                            targetColor(playtime.intValue(), rank.requirements.playtime * 60), longToTime(playtime, locale), longToTime(rank.requirements.playtime * 60L, locale)
-                    );
+                    String message = Bundle.get("commands.ranks.special-info", locale);
+                    if (rank.requirements != null) {
+                        message = Bundle.format("commands.ranks.rank-info", locale,
+                                rank.formatted(p),
+                                targetColor(wins, rank.requirements.wins), wins, rank.requirements.wins,
+                                targetColor(record.getWaves(), rank.requirements.waves), record.getWaves(), rank.requirements.waves,
+                                targetColor(record.getBuilt(), rank.requirements.built), record.getBuilt(), rank.requirements.built,
+                                targetColor(playtime.intValue(), rank.requirements.playtime * 60), longToTime(playtime, locale), longToTime(rank.requirements.playtime * 60L, locale)
+                        );
+                    }
+
                     Call.menu(p.con(), 0, Bundle.get("menus.rank-info.title", locale), message, closeButton);
                     return null;
                 }).exceptionally(t -> {

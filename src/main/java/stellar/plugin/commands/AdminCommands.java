@@ -38,7 +38,6 @@ import static mindustry.Vars.world;
 import static stellar.plugin.Variables.commandManager;
 
 public class AdminCommands {
-
     public static void load(CommandHandler commandHandler) {
         commandHandler.removeCommand("a");
         commandManager.registerPlayer("a", "<text...>", "commands.admin.a.description", Rank.admin, (args, player) -> {

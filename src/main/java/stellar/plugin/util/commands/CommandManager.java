@@ -74,4 +74,8 @@ public class CommandManager {
             return Command.fromArc(clientHandler.getCommandList().find(c -> c.text.equals(name)));
         }
     }
+
+    public boolean commandExists(String name) {
+        return commands.containsKey(name);
+    }
 }
