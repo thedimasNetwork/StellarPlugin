@@ -7,6 +7,7 @@ import arc.struct.StringMap;
 import arc.util.Log;
 import arc.util.Structs;
 import mindustry.Vars;
+import mindustry.content.UnitTypes;
 import mindustry.net.Administration;
 import org.jooq.Field;
 import stellar.database.enums.PlayerStatus;
@@ -82,6 +83,7 @@ public class Const {
             Crawler_arena
             MS_GO
             Zone_capture
+            Ranked_PvP
             """;
     public static final StringMap serverAddress = StringMap.of(
             "hub", "play.thedimas.pp.ua:6567",
@@ -97,6 +99,7 @@ public class Const {
             "castle_wars", "play.thedimas.pp.ua:6510",
             "crawler_arena", "play.thedimas.pp.ua:6511",
             "zone_capture", "play.thedimas.pp.ua:6512",
+            "ranked_pvp", "play.thedimas.pp.ua:6513",
             "test", "play.thedimas.pp.ua:6666"
     );
     public static final StringMap serverNames = StringMap.of(
@@ -112,7 +115,8 @@ public class Const {
             "hex_pvp", "[#e6bd74]\uE829[] [#f92672]thedimas [#e6bd74]\uE861[#a6e22e]Hex PvP[#e6bd74]\uE861[]",
             "castle_wars", "[#e6bd74]\uE829[] [#f92672]thedimas [#e6bd74]\uE807[#a6e22e]Castle Wars[#e6bd74]\uE807[]",
             "crawler_arena", "[#e6bd74]\uE829[] [#f92672]thedimas [#e6bd74]\uE871[#a6e22e]Crawler Arena[#e6bd74]\uE871[]",
-            "zone_capture", "[#e6bd74]\uE829[] [#f92672]thedimas [#e6bd74]\uE853[#a6e22e]Zone Capture[#e6bd74]\uE853[]"
+            "zone_capture", "[#e6bd74]\uE829[] [#f92672]thedimas [#e6bd74]\uE853[#a6e22e]Zone Capture[#e6bd74]\uE853[]",
+            "ranked_pvp", "[#e6bd74]\uE829[] [#f92672]thedimas [#e6bd74]\uE861[#a6e22e]Ranked PvP[#e6bd74]\uE861[]"
     );
 
     public static final StringMap translatorLocales = StringMap.of( // Top 25 locales by popularity on the server
