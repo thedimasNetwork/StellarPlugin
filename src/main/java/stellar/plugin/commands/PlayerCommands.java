@@ -26,6 +26,7 @@ import stellar.plugin.Variables;
 import stellar.plugin.components.Rank;
 import stellar.plugin.components.history.entry.HistoryEntry;
 import stellar.plugin.components.history.struct.CacheSeq;
+import stellar.plugin.type.ServerInfo;
 import thedimas.util.Bundle;
 import stellar.plugin.util.Players;
 import stellar.plugin.util.StringUtils;
@@ -149,14 +150,14 @@ public class PlayerCommands {
             boolean rtvEnabled = Core.settings.getBool("rtv");
 
             if (args.length > 0) {
-                if (!Variables.admins.containsKey(player.uuid())) {
+                if (!admins.containsKey(player.uuid())) {
                     Bundle.bundled(player, "commands.rtv.access-denied");
                     return;
                 }
                 rtvEnabled = !args[0].equalsIgnoreCase("off");
                 Core.settings.put("rtv", rtvEnabled);
-                if (!rtvEnabled && Variables.votesRTV.size > 0) {
-                    Variables.votesRTV.clear();
+                if (!rtvEnabled && votesRTV.size > 0) {
+                    votesRTV.clear();
                     Bundle.bundled("commands.rtv.votes-clear");
                 }
             }
@@ -166,20 +167,20 @@ public class PlayerCommands {
                 return;
             }
 
-            if (Variables.votesRTV.contains(player.uuid())) {
+            if (votesRTV.contains(player.uuid())) {
                 Bundle.bundled(player, "commands.rtv.already-voted");
                 return;
             }
 
-            Variables.votesRTV.add(player.uuid());
-            int cur = Variables.votesRTV.size;
+            votesRTV.add(player.uuid());
+            int cur = votesRTV.size;
             int req = (int) Math.ceil(Const.votesRatio * Groups.player.size());
 
             String playerName = player.coloredName();
             Bundle.bundled("commands.rtv.vote", playerName, cur, req);
 
             if (cur >= req) {
-                Variables.votesRTV.clear();
+                votesRTV.clear();
                 Bundle.bundled("commands.rtv.passed");
                 Events.fire(new EventType.GameOverEvent(Team.derelict));
             }
@@ -190,35 +191,32 @@ public class PlayerCommands {
         commandManager.registerPlayer("discord", "commands.discord.description", (args, player) -> Call.openURI(player.con, config.discordUrl));
 
         commandManager.registerPlayer("hub", "commands.hub.description", (args, player) -> {
-            String[] address = Const.serverAddress.get("hub").split(":");
-            String ip = address[0];
-            int port = Strings.parseInt(address[1]);
-
-            Call.connect(player.con, ip, port);
+            ServerInfo serverInfo = Const.servers.find(i -> i.getId().equalsIgnoreCase("hub"));
+            Call.connect(player.con, serverInfo.getDomain(), serverInfo.getPort());
         });
 
         commandManager.registerPlayer("connect", "[list|server...]", "commands.connect.description", (args, player) -> {
             if (args.length == 0 || args[0].equalsIgnoreCase("list")) {
-                Bundle.bundled(player, "commands.connect.list", Const.serverList);
+                Bundle.bundled(player, "commands.connect.list", "[white]" + String.join("\n", Const.servers.map(ServerInfo::getName)));
                 return;
             }
 
-            String serverName = args[0].toLowerCase();
-            if (!Const.serverAddress.containsKey(serverName)) {
-                Bundle.bundled(player, "commands.server-notfound", Const.serverList);
+            ServerInfo serverInfo = Const.servers.find(i -> i.getName().equalsIgnoreCase(args[0]));
+            if (serverInfo == null) {
+                Bundle.bundled(player, "commands.server-notfound", "[white]" + String.join("\n", Const.servers.map(ServerInfo::getName)));
                 return;
             }
 
-            String[] address = Const.serverAddress.get(serverName).split(":");
-            String ip = address[0];
-            int port = Strings.parseInt(address[1]);
-            Vars.net.pingHost(ip, port, host -> Call.connect(player.con, ip, port), e -> Bundle.bundled(player, "commands.connect.server-offline"));
+            Vars.net.pingHost(serverInfo.getDomain(), serverInfo.getPort(),
+                    host -> Call.connect(player.con, serverInfo.getDomain(), serverInfo.getPort()),
+                    e -> Bundle.bundled(player, "commands.connect.server-offline")
+            );
         });
 
         commandManager.registerPlayer("history", "[page] [detailed]", "commands.history.description", (args, player) -> {
             boolean detailed = args.length == 2 && Structs.contains(Const.boolValues.split(", "), args[1].toLowerCase());
 
-            if (args.length > 0 && Variables.activeHistoryPlayers.containsKey(player.uuid())) {
+            if (args.length > 0 && activeHistoryPlayers.containsKey(player.uuid())) {
                 if (!Strings.canParseInt(args[0])) {
                     Bundle.bundled(player, "commands.page-not-int");
                     return;
@@ -228,7 +226,7 @@ public class PlayerCommands {
                 int mouseY = Mathf.clamp(Mathf.round(player.mouseY / 8), 1, world.height());
                 Locale locale = Bundle.findLocale(player.locale);
 
-                CacheSeq<HistoryEntry> entries = Variables.getHistorySeq(mouseX, mouseY);
+                CacheSeq<HistoryEntry> entries = getHistorySeq(mouseX, mouseY);
 
                 int page = Strings.parseInt(args[0]) - 1;
                 int pages = Mathf.ceil(entries.size / Const.listPageSize);
@@ -255,38 +253,35 @@ public class PlayerCommands {
                 }
 
                 player.sendMessage(result.toString());
-            } else if (Variables.activeHistoryPlayers.containsKey(player.uuid())) {
-                Variables.activeHistoryPlayers.remove(player.uuid());
+            } else if (activeHistoryPlayers.containsKey(player.uuid())) {
+                activeHistoryPlayers.remove(player.uuid());
                 Bundle.bundled(player, "commands.history.detailed.disabled");
             } else if (args.length == 2) {
-                Variables.activeHistoryPlayers.put(player.uuid(), detailed);
+                activeHistoryPlayers.put(player.uuid(), detailed);
                 String msg = detailed ? "commands.history.detailed" : "commands.history.default";
                 Bundle.bundled(player, "commands.history.enabled", msg);
             } else {
-                Variables.activeHistoryPlayers.put(player.uuid(), false);
+                activeHistoryPlayers.put(player.uuid(), false);
                 Bundle.bundled(player, "commands.history.disabled");
             }
         });
 
         commandManager.registerPlayer("playtime", "[server...]", "commands.playtime.description", (args, player) -> {
-            String serverColumnName;
-            if (args.length > 0) {
-                serverColumnName = args[0].toLowerCase();
-            } else {
-                serverColumnName = Const.serverFieldName;
-            }
+            ServerInfo serverInfo = args.length > 0 ?
+                    Const.servers.find(i -> i.getName().equalsIgnoreCase(args[0])) :
+                    Const.servers.find(i -> i.getId().equals(Const.serverFieldName));
 
-            Field<Long> field = (Field<Long>) Tables.playtime.field(serverColumnName);
+            Field<Long> field = serverInfo != null ? (Field<Long>) Tables.playtime.field(serverInfo.getId()) : null;
             if (field == null) {
-                Bundle.bundled(player, "commands.server-notfound", Const.serverList);
+                Bundle.bundled(player, "commands.server-notfound", "[white]" + String.join("\n", Const.servers.map(ServerInfo::getName)));
                 return;
             }
 
             DatabaseAsync.getPlaytimeAsync(
-                    player.uuid(), Const.playtimeField
+                    player.uuid(), field 
             ).thenAcceptAsync(time -> {
                 Locale locale = Bundle.findLocale(player.locale());
-                Bundle.bundled(player, "commands.playtime.msg", Const.serverNames.get(serverColumnName), StringUtils.longToTime((time == null) ? 0 : time, locale));
+                Bundle.bundled(player, "commands.playtime.msg", serverInfo.getNameFormatted(), longToTime((time == null) ? 0 : time, locale));
             }).exceptionally(t -> {
                 Log.err(t);
                 DiscordLogger.err(t);
@@ -418,7 +413,7 @@ public class PlayerCommands {
                                 rank.formatted(player),
                                 statsRecord.getBuilt(), statsRecord.getBroken(),
                                 statsRecord.getAttacks(), statsRecord.getSurvivals(), statsRecord.getHexWins(), statsRecord.getWaves(),
-                                statsRecord.getLogins(), statsRecord.getMessages(), statsRecord.getDeaths(), StringUtils.longToTime(playtime, locale));
+                                statsRecord.getLogins(), statsRecord.getMessages(), statsRecord.getDeaths(), longToTime(playtime, locale));
 
                         if (specialRank != null) {
                             message = Bundle.format("commands.stats.msg.with-status",
@@ -426,7 +421,7 @@ public class PlayerCommands {
                                     rank.formatted(player), specialRank.formatted(player),
                                     statsRecord.getBuilt(), statsRecord.getBroken(),
                                     statsRecord.getAttacks(), statsRecord.getSurvivals(), statsRecord.getHexWins(), statsRecord.getWaves(),
-                                    statsRecord.getLogins(), statsRecord.getMessages(), statsRecord.getDeaths(), StringUtils.longToTime(playtime, locale));
+                                    statsRecord.getLogins(), statsRecord.getMessages(), statsRecord.getDeaths(), longToTime(playtime, locale));
                         }
 
                         String[][] buttons = {
@@ -528,7 +523,7 @@ public class PlayerCommands {
 
             commandManager.registerPlayer("setrank", "<rank>", "Set your rank temporary. [accent]Debug only![]", (args, player) -> {
                 try {
-                    Variables.ranks.put(player.uuid(), Rank.valueOf(args[0]));
+                    ranks.put(player.uuid(), Rank.valueOf(args[0]));
                     player.sendMessage(String.format("Your new rank is %s", args[0]));
                 } catch (IllegalArgumentException e) {
                     player.sendMessage("not found");
@@ -552,7 +547,7 @@ public class PlayerCommands {
                 }
 
                 StringBuilder builder = new StringBuilder();
-                ObjectMap<String, Integer> stats = Variables.statsData.get(target.uuid());
+                ObjectMap<String, Integer> stats = statsData.get(target.uuid());
 
                 if (stats == null) {
                     player.sendMessage("[teal]Null...[]");

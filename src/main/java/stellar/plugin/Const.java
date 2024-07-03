@@ -12,6 +12,7 @@ import mindustry.net.Administration;
 import org.jooq.Field;
 import stellar.database.enums.PlayerStatus;
 import stellar.database.gen.Tables;
+import stellar.plugin.type.ServerInfo;
 import thedimas.util.Bundle;
 
 import java.time.format.DateTimeFormatter;
@@ -69,54 +70,21 @@ public class Const {
             [white]Core:
             [accent]evoke [](\uF735), [accent]incite [](\uF724), [accent]emanate [](\uF719) 
             """;
-    public static final String serverList = """
-            []Hub
-            PvP
-            Sandbox
-            Survival
-            Attack
-            Hex_PvP
-            Erekir_Hexed
-            Campaign_maps
-            Anarchy
-            Castle_wars
-            Crawler_arena
-            MS_GO
-            Zone_capture
-            Ranked_PvP
-            """;
-    public static final StringMap serverAddress = StringMap.of(
-            "hub", "play.thedimas.pp.ua:6567",
-            "survival", "play.thedimas.pp.ua:6501",
-            "attack", "play.thedimas.pp.ua:6502",
-            "sandbox", "play.thedimas.pp.ua:6503",
-            "pvp", "play.thedimas.pp.ua:6504",
-            "erekir_hexed", "play.thedimas.pp.ua:6505",
-            "anarchy", "play.thedimas.pp.ua:6506",
-            "campaign_maps", "play.thedimas.pp.ua:6507",
-            "ms_go", "play.thedimas.pp.ua:6508",
-            "hex_pvp", "play.thedimas.pp.ua:6509",
-            "castle_wars", "play.thedimas.pp.ua:6510",
-            "crawler_arena", "play.thedimas.pp.ua:6511",
-            "zone_capture", "play.thedimas.pp.ua:6512",
-            "ranked_pvp", "play.thedimas.pp.ua:6513",
-            "test", "play.thedimas.pp.ua:6666"
-    );
-    public static final StringMap serverNames = StringMap.of(
-            "hub", "[#e6bd74]\uE829[] [#f92672]thedimas [#e6bd74]\uE810[#a6e22e]HUB[#e6bd74]\uE810[]",
-            "survival", "[#e6bd74]\uE829[] [#f92672]thedimas [#e6bd74]\uE86B[#a6e22e]Survival[#e6bd74]\uE86B[]",
-            "attack", "[#e6bd74]\uE829[] [#f92672]thedimas [#e6bd74]\uE86E[#a6e22e]Attack[#e6bd74]\uE86E[]",
-            "sandbox", "[#e6bd74]\uE829[] [#f92672]thedimas [#e6bd74]\uE87C[#a6e22e]Sandbox[#e6bd74]\uE87C[]",
-            "pvp", "[#e6bd74]\uE829[] [#f92672]thedimas [#e6bd74]\uE861[#a6e22e]PvP[#e6bd74]\uE861[]",
-            "erekir_hexed", "[#e6bd74]\uE829[] [#f92672]thedimas [#e6bd74]\uE861[#a6e22e]Erekir Hex PvP[#e6bd74]\uE861[]",
-            "anarchy", "[#e6bd74]\uE829[] [#f92672]thedimas [#e6bd74]\uE876[#a6e22e]Anarchy[#e6bd74]\uE876[]",
-            "campaign_maps", "[#e6bd74]\uE829[] [#f92672]thedimas [#e6bd74]\uE873[#a6e22e]Campaign maps[#e6bd74]\uE873[]",
-            "ms_go", "[#e6bd74]\uE829[] [#f92672]thedimas [#e6bd74]\uF018[#a6e22e]MS:GO[#e6bd74]\uF018[]",
-            "hex_pvp", "[#e6bd74]\uE829[] [#f92672]thedimas [#e6bd74]\uE861[#a6e22e]Hex PvP[#e6bd74]\uE861[]",
-            "castle_wars", "[#e6bd74]\uE829[] [#f92672]thedimas [#e6bd74]\uE807[#a6e22e]Castle Wars[#e6bd74]\uE807[]",
-            "crawler_arena", "[#e6bd74]\uE829[] [#f92672]thedimas [#e6bd74]\uE871[#a6e22e]Crawler Arena[#e6bd74]\uE871[]",
-            "zone_capture", "[#e6bd74]\uE829[] [#f92672]thedimas [#e6bd74]\uE853[#a6e22e]Zone Capture[#e6bd74]\uE853[]",
-            "ranked_pvp", "[#e6bd74]\uE829[] [#f92672]thedimas [#e6bd74]\uE861[#a6e22e]Ranked PvP[#e6bd74]\uE861[]"
+    public static final Seq<ServerInfo> servers = Seq.with(
+            new ServerInfo("hub", "HUB", "\uE810", "play.thedimas.pp.ua:6567"),
+            new ServerInfo("survival", "Survival", "\uE86B", "play.thedimas.pp.ua:6501"),
+            new ServerInfo("attack", "Attack", "\uE86E", "play.thedimas.pp.ua:6502"),
+            new ServerInfo("sandbox", "Sandbox", "\uE87C", "play.thedimas.pp.ua:6503"),
+            new ServerInfo("pvp", "PvP", "\uE861", "play.thedimas.pp.ua:6504"),
+            new ServerInfo("erekir_hexed", "Erekir Hexed", "\uE861", "play.thedimas.pp.ua:6505"),
+            new ServerInfo("anarchy", "Anarchy", "\uE876", "play.thedimas.pp.ua:6506"),
+            new ServerInfo("campaign_maps", "Campaign maps", "\uE873", "play.thedimas.pp.ua:6507"),
+            new ServerInfo("ms_go", "MS:GO", "\uF018", "play.thedimas.pp.ua:6508"),
+            new ServerInfo("hex_pvp", "Hex PvP", "\uE861", "play.thedimas.pp.ua:6509"),
+            new ServerInfo("castle_wars", "Castle Wars", "\uE807", "play.thedimas.pp.ua:6510"),
+            new ServerInfo("crawler_arena", "Crawler Arena", "\uE871", "play.thedimas.pp.ua:6511"),
+            new ServerInfo("zone_capture", "Zone Capture", "\uE853", "play.thedimas.pp.ua:6512"),
+            new ServerInfo("ranked_pvp", "Ranked PvP", "\uE861", "play.thedimas.pp.ua:6513")
     );
 
     public static final StringMap translatorLocales = StringMap.of( // Top 25 locales by popularity on the server
@@ -154,7 +122,7 @@ public class Const {
             PlayerStatus.owner, "Владелец :crown:"
     );
 
-    public static final String serverFieldName = Const.serverAddress.findKey("play.thedimas.pp.ua:" + Administration.Config.port.num(), false);
+    public static final String serverFieldName = Const.servers.find(i -> i.getPort() == Administration.Config.port.num()).getId();
     public static final Field<Long> playtimeField = (Field<Long>) Tables.playtime.field(Const.serverFieldName);
 
     static {
