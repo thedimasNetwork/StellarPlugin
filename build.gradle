@@ -34,7 +34,7 @@ ext {
 
     postresqlVersion = "42.7.3"
     jooqVersion = "3.17.0"
-    databaseVersion = "cbecd6eabe"
+    databaseVersion = "4147e9671c"
 
     bundlesVersion = "1.0.0"
 }
