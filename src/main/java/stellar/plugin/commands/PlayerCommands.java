@@ -543,15 +543,7 @@ public class PlayerCommands {
                         return;
                     }
 
-                    UsersRecord record;
-                    try {
-                        record = Database.getPlayer(Strings.parseInt(args[0]));
-                    } catch (SQLException e) {
-                        Log.err(e);
-                        player.sendMessage("[scarlet]AAAAAA...[]");
-                        return;
-                    }
-
+                    UsersRecord record = Database.getPlayer(Strings.parseInt(args[0]));
                     target = record != null ? Players.getPlayer(record.getUuid()) : null;
                     if (target == null) {
                         Bundle.bundled(player, "commands.player-notfound");

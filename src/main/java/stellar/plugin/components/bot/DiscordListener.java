@@ -221,7 +221,7 @@ public class DiscordListener extends ListenerAdapter {
                         String banned = "???";
                         try {
                             banned = StringUtils.fancyBool(Database.isBanned(record.getUuid()));
-                        } catch (SQLException e) {
+                        } catch (Exception e) {
                             Log.err(e);
                         }
 
@@ -240,7 +240,7 @@ public class DiscordListener extends ListenerAdapter {
                         embedBuilder.addField(Strings.stripColors("**" + record.getName()) + "**", message, false);
                     });
                     event.replyEmbeds(embedBuilder.build()).setEphemeral(true).queue();
-                } catch (SQLException e) {
+                } catch (Exception e) {
                     Log.err(e);
                     event.replyEmbeds(Util.embedBuilder("Возникла ошибка", Colors.red)).setEphemeral(true).queue();
                 }
@@ -312,7 +312,7 @@ public class DiscordListener extends ListenerAdapter {
                     }
                     MessageEmbed banEmbed = Util.embedBuilder("Бан (через Discord)", message, Colors.red, LocalDateTime.now());
                     Bot.sendEmbed(config.bot.bansId, banEmbed);
-                } catch (IllegalArgumentException | SQLException e) {
+                } catch (Exception e) {
                     Log.err(e);
                     event.replyEmbeds(Util.embedBuilder("Возникла ошибка", Colors.red)).setEphemeral(true).queue();
                 }
@@ -365,7 +365,7 @@ public class DiscordListener extends ListenerAdapter {
                             .replace("%target%", Strings.stripColors(record.getName())).replace("%tid%", record.getId().toString());
                     MessageEmbed unbanEmbed = Util.embedBuilder("Разбан (через Discord)", message, Colors.green, LocalDateTime.now());
                     Bot.sendEmbed(config.bot.bansId, unbanEmbed);
-                } catch (IllegalArgumentException | SQLException e) {
+                } catch (Exception e) {
                     Log.err(e);
                     event.replyEmbeds(Util.embedBuilder("Возникла ошибка", Colors.red)).setEphemeral(true).queue();
                 }
