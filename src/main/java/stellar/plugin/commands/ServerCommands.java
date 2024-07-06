@@ -20,7 +20,6 @@ import thedimas.util.Bundle;
 import stellar.plugin.util.Players;
 import stellar.plugin.util.StringUtils;
 
-import java.sql.SQLException;
 import java.time.LocalDateTime;
 
 import static stellar.plugin.Variables.config;

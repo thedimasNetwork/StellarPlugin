@@ -22,7 +22,6 @@ import stellar.database.enums.MessageType;
 import stellar.database.gen.Tables;
 import stellar.database.gen.tables.records.UsersRecord;
 import stellar.plugin.Const;
-import stellar.plugin.Variables;
 import stellar.plugin.components.Rank;
 import stellar.plugin.components.history.entry.HistoryEntry;
 import stellar.plugin.components.history.struct.CacheSeq;
@@ -35,7 +34,6 @@ import stellar.plugin.util.commands.Command;
 import stellar.plugin.util.logger.DiscordLogger;
 import stellar.plugin.util.menus.MenuHandler;
 
-import java.sql.SQLException;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
@@ -337,7 +335,7 @@ public class PlayerCommands {
             Seq<Rank> specRanks = Seq.select(Rank.values(), r -> r.special);
 
             String[][] buttons = new String[ranks.size + 2][]; // I wanted to use Seq<String> that didn't work
-            ranks.filter(r -> !r.special).each(rank -> {
+            ranks.retainAll(r -> !r.special).each(rank -> {
                 buttons[rank.ordinal()] = new String[]{rank.formatted(player)};
             });
 
