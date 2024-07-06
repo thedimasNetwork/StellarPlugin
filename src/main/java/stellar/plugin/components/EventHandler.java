@@ -431,6 +431,7 @@ public class EventHandler {
                         });
                     }
                 }
+                default -> {}
             }
         });
 
@@ -542,6 +543,7 @@ public class EventHandler {
             Groups.player.each(p -> {
                 if (p.unit().moving()) {
                     Rank rank = ranks.get(p.uuid(), Rank.player);
+                    if (rank == null) {return;}
                     Effect effect = rank.effect;
                     Color effectColor = rank.effectColor == null ? Color.white : rank.effectColor;
                     Call.effect(effect, p.x, p.y, 0, effectColor);
