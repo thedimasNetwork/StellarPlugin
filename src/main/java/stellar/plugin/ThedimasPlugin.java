@@ -15,6 +15,7 @@ import stellar.plugin.components.AntiVPN;
 import stellar.plugin.components.EventHandler;
 import stellar.plugin.components.LaunchPad;
 import stellar.plugin.components.history.History;
+import stellar.plugin.util.logger.DiscordLogger;
 import thedimas.util.Bundle;
 
 import java.util.concurrent.CompletableFuture;

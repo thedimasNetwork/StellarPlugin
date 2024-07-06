@@ -154,7 +154,7 @@ public class ServerCommands {
                 Bot.sendEmbed(config.bot.bansId, banEmbed);
 
                 Log.info("Player @ / @ / #@ got banned", Strings.stripColors(record.getName()), record.getUuid(), record.getId());
-            } catch (SQLException e) {
+            } catch (Exception e) {
                 Log.err(e);
             }
         });
@@ -188,7 +188,7 @@ public class ServerCommands {
                         """.replace("%target%", Strings.stripColors(record.getName())).replace("%tid%", record.getId().toString());
                 MessageEmbed unbanEmbed = Util.embedBuilder("Разбан (через консоль)", message, Colors.green, LocalDateTime.now());
                 Bot.sendEmbed(config.bot.bansId, unbanEmbed);
-            } catch (IllegalArgumentException | SQLException e) {
+            } catch (Exception e) {
                 Log.err(e);
             }
         });

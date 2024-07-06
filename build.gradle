@@ -32,9 +32,9 @@ ext {
     jdaVersion = "5.0.0-alpha.18"
     okhttpVersion = "4.10.0"
 
-    mysqlVersion = "8.0.30"
+    postresqlVersion = "42.7.3"
     jooqVersion = "3.17.0"
-    databaseVersion = "ee150bbb7e"
+    databaseVersion = "4147e9671c"
 
     bundlesVersion = "1.0.0"
 }
@@ -68,7 +68,7 @@ dependencies {
     implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:$jacksonYamlVersion"
 
     compileOnly "org.jooq:jooq:$jooqVersion"
-    compileOnly "mysql:mysql-connector-java:$mysqlVersion"
+    runtimeOnly "org.postgresql:postgresql:$postresqlVersion"
     implementation "com.github.thedimasNetwork:DatabaseWrapper:$databaseVersion"
 
     implementation "com.github.thedimas3007:Bundles:$bundlesVersion"
