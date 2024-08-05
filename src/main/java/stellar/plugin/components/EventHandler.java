@@ -268,7 +268,9 @@ public class EventHandler {
                 return;
             }
 
-            if (Menus.values()[event.menuId] == Menus.welcome) {
+            if (event.menuId > Menus.values().length - 1 || event.menuId < 0) {
+
+            } else if (Menus.values()[event.menuId] == Menus.welcome) {
                 switch (event.option) {
                     case 0 -> {
                         // do nothing, it's close button

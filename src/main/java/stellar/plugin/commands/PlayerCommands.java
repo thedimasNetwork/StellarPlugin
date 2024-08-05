@@ -21,23 +21,25 @@ import stellar.database.DatabaseAsync;
 import stellar.database.enums.MessageType;
 import stellar.database.gen.Tables;
 import stellar.database.gen.tables.records.UsersRecord;
+import stellar.menus.func.MenuRunner;
+import stellar.menus.types.Menu;
 import stellar.plugin.Const;
-import stellar.plugin.Variables;
 import stellar.plugin.components.Rank;
 import stellar.plugin.components.history.entry.HistoryEntry;
 import stellar.plugin.components.history.struct.CacheSeq;
 import stellar.plugin.type.ServerInfo;
-import thedimas.util.Bundle;
 import stellar.plugin.util.Players;
 import stellar.plugin.util.StringUtils;
 import stellar.plugin.util.Translator;
 import stellar.plugin.util.commands.Command;
 import stellar.plugin.util.logger.DiscordLogger;
 import stellar.plugin.util.menus.MenuHandler;
+import thedimas.util.Bundle;
 
 import java.sql.SQLException;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static mindustry.Vars.world;
 import static stellar.plugin.Variables.*;
@@ -510,6 +512,28 @@ public class PlayerCommands {
         // region debug commands
         // TODO: effect, set block/floor/overlay commands
         if (Core.settings.getBool("debug")) {
+            commandManager.registerPlayer("menu2", "Another test menu", (args, player) -> {
+                String[][] buttons = new String[][]{
+                        {"A", "B", "C"},
+                        {"<", ">", "x"}
+                };
+                var anotherMenu = new Menu(player, "2nd menu", "Some abracadabra", buttons, false, -1);
+                var coreMenu = stellar.menus.MenuHandler.menu(player, "Test", "Some abracadabra", buttons, true, MenuRunner.none);
+
+                MenuRunner runner3 = (menuId, option, p) -> anotherMenu.show();
+                MenuRunner runner4 = (menuId, option, p) -> coreMenu.show();
+                MenuRunner close = (menuId, option, p) -> stellar.menus.MenuHandler.closeMenu(p, menuId);
+
+                anotherMenu.onInteract((menuId, option, p) -> p.sendMessage(String.format("[accent]%d[]: %d", menuId, option)))
+                            .onButton(3, runner3)
+                            .onButton(4, runner4)
+                            .onButton(5, close);
+                coreMenu.onInteract((menuId, option, p) -> p.sendMessage(String.format("[accent]%d[]: %d", menuId, option)))
+                        .onButton(3, runner3)
+                        .onButton(4, runner4)
+                        .onButton(5, close);
+            });
+
             commandManager.registerPlayer("test-menu", "[some-text...]", "Test menu", (args, player) -> {
                 String[][] buttons = new String[][]{
                         {"A", "B", "C"},

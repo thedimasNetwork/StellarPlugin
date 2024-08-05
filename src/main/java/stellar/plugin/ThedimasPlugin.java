@@ -6,6 +6,7 @@ import arc.util.Time;
 import arc.util.Timer;
 import mindustry.mod.Plugin;
 import stellar.database.Database;
+import stellar.menus.MenuHandler;
 import stellar.plugin.components.bot.Bot;
 import stellar.plugin.commands.AdminCommands;
 import stellar.plugin.commands.PlayerCommands;
@@ -40,6 +41,7 @@ public class ThedimasPlugin extends Plugin {
         Activity.load();
         History.load();
         AntiVPN.load();
+        MenuHandler.load();
         Log.info("All components loaded");
 
         Timer.schedule(() -> {

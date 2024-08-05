@@ -37,6 +37,7 @@ ext {
     databaseVersion = "4147e9671c"
 
     bundlesVersion = "1.0.0"
+    pluginLibsVersion = "d246024152"
 }
 
 repositories {
@@ -72,6 +73,7 @@ dependencies {
     implementation "com.github.thedimasNetwork:DatabaseWrapper:$databaseVersion"
 
     implementation "com.github.thedimas3007:Bundles:$bundlesVersion"
+    implementation "com.github.thedimasNetwork.PluginLibs:menus:$pluginLibsVersion"
 }
 
 jar {

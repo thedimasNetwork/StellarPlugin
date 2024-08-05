@@ -32,7 +32,7 @@ public class LaunchPad {
                     }
                 }
 
-                Call.effect(Fx.launchPod, building.tile.drawx(), building.tile.drawy(), 0, Color.white);
+                Call.effect(Fx.coreLaunchConstruct, building.tile.drawx(), building.tile.drawy(), 0, Color.white);
                 building.items.each((item, amount) -> core.items.add(item, amount));
                 Call.clearItems(building);
             }
