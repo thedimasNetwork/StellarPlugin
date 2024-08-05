@@ -5,16 +5,15 @@ import arc.Events;
 import arc.math.Mathf;
 import arc.struct.ObjectMap;
 import arc.struct.Seq;
-import arc.util.CommandHandler;
-import arc.util.Log;
-import arc.util.Strings;
-import arc.util.Structs;
+import arc.util.*;
 import mindustry.Vars;
 import mindustry.game.EventType;
 import mindustry.game.Team;
 import mindustry.gen.Call;
 import mindustry.gen.Groups;
 import mindustry.gen.Player;
+import mindustry.net.Administration;
+import mindustry.net.Packets;
 import org.jooq.Field;
 import stellar.database.Database;
 import stellar.database.DatabaseAsync;
@@ -28,6 +27,7 @@ import stellar.plugin.components.Rank;
 import stellar.plugin.components.history.entry.HistoryEntry;
 import stellar.plugin.components.history.struct.CacheSeq;
 import stellar.plugin.type.ServerInfo;
+import stellar.plugin.type.VoteSession;
 import stellar.plugin.util.Players;
 import stellar.plugin.util.StringUtils;
 import stellar.plugin.util.Translator;
@@ -36,12 +36,11 @@ import stellar.plugin.util.logger.DiscordLogger;
 import stellar.plugin.util.menus.MenuHandler;
 import thedimas.util.Bundle;
 
-import java.sql.SQLException;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import static mindustry.Vars.world;
+import static mindustry.core.NetServer.voteCooldown;
 import static stellar.plugin.Variables.*;
 import static stellar.plugin.util.StringUtils.longToTime;
 import static stellar.plugin.util.StringUtils.targetColor;
@@ -506,6 +505,113 @@ public class PlayerCommands {
             for (int i = 0; i < Groups.player.size(); ) {
                 Player other = Groups.player.index(i);
                 player.sendMessage(String.format("[yellow]%d.[] %s[white] - [accent]%d[][]", ++i, other.coloredName(), other.id()));
+            }
+        });
+
+        commandHandler.removeCommand("votekick");
+        commandManager.registerPlayer("votekick", "<player> <reason...>", "commands.votekick.description", (args, player) -> {
+            if (!Administration.Config.enableVotekick.bool()) {
+                Bundle.bundled(player, "commands.votekick.disabled");
+                return;
+            }
+
+            if (voteSession != null) {
+                Bundle.bundled(player, "commands.votekick.already-voting");
+                return;
+            }
+
+            if (Groups.player.size() < 3) {
+                Bundle.bundled(player, "commands.votekick.min-players");
+                return;
+            }
+
+            Player target;
+            if (args[0].length() > 1 && args[0].startsWith("#") && Strings.canParseInt(args[0].substring(1))) {
+                int id = Strings.parseInt(args[0].substring(1));
+                target = Groups.player.find(p -> p.id() == id);
+            } else {
+                target = Players.findPlayer(args[0]);
+            }
+
+            if (target == null) {
+                Bundle.bundled(player, "commands.player-notfound");
+                return;
+            }
+
+            if (target.id() == player.id()) {
+                Bundle.bundled(player, "commands.votekick.self");
+                return;
+            }
+
+            if (target.team() != player.team()) {
+                Bundle.bundled(player, "commands.votekick.not-same-team");
+                return;
+            }
+
+            // Probably use special rank type for admin verification
+            if (player.admin() || specialRanks.containsKey(player.uuid())) { // instead of writing the logic again, just call the event
+                Events.fire(new EventType.AdminRequestEvent(player, target, Packets.AdminAction.ban));
+                return;
+            }
+
+            if (target.admin() || specialRanks.containsKey(target.uuid())) {
+                Bundle.bundled(player, "commands.player-admin");
+                return;
+            }
+
+            Timekeeper vtime = voteCooldowns.get(player.uuid(), () -> new Timekeeper(voteCooldown));
+
+            if (!vtime.get()) {
+                Bundle.bundled(player, "commands.votekick.cooldown", longToTime(voteCooldown, Bundle.findLocale(player.locale()))); // TODO: i18n
+                return;
+            }
+
+            VoteSession session = new VoteSession(player, target, args[1]);
+            session.vote(player, 1);
+            Bundle.bundled(player, "commands.votekick.reason", args[1]); // TODO: i18n
+            vtime.reset();
+            voteSession = session;
+        });
+
+        commandHandler.removeCommand("vote");
+        commandManager.registerPlayer("vote", "<y/n/c>", "commands.vote.description", (args, player) -> {
+            if (voteSession == null) {
+                Bundle.bundled(player, "commands.votekick.no-voting");
+                return;
+            }
+
+            if ((player.admin || specialRanks.containsKey(player.uuid())) && args[0].equalsIgnoreCase("c")) {
+                Bundle.bundled(player, "commands.votekick.canceled", player.coloredName());
+                voteSession.task.cancel();
+                voteSession = null;
+                return;
+            }
+
+            if (voteSession.voted.containsKey(player.uuid())) {
+                Bundle.bundled(player, "commands.votekick.already-voted");
+                return;
+            }
+
+            if (voteSession.target == player) {
+                Bundle.bundled(player, "commands.votekick.self");
+                return;
+            }
+
+            if (voteSession.target.team() != player.team()) {
+                Bundle.bundled(player, "commands.votekick.not-same-team", player.team().name);
+                return;
+            }
+
+            switch (args[0]) {
+                case "y" -> {
+                    voteSession.vote(player, 1);
+                }
+                case "n" -> {
+                    voteSession.vote(player, -1);
+                }
+                default -> {
+                    Bundle.bundled(player, "commands.vote.invalid-arg");
+                }
             }
         });
 

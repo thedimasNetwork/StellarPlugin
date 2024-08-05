@@ -28,7 +28,7 @@ public class AntiVPN { // also includes anti ddos from gh actions servers
         Vars.net.handleServer(Packets.Connect.class, (con, packet) -> {
             Events.fire(new EventType.ConnectionEvent(con));
             Seq<NetConnection> connections = Seq.with(Vars.net.getConnections()).filter(other -> other.address.equals(con.address));
-            if (connections.size >= Const.maxIdenticalIPs) {
+            if (connections.size > Const.maxIdenticalIPs) {
                 Vars.netServer.admins.blacklistDos(con.address);
                 connections.each(NetConnection::close);
                 Log.info("@ blacklisted because of ip spam", con.address);

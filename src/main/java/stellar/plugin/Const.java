@@ -45,6 +45,7 @@ public class Const {
 
     public static final int maxIdenticalIPs = 3;
     public static final int winSurvivalWaves = 50;
+    public static final long votekickChannel = 1270136943690121296L;
     // языки, для которых у нас есть перевод
     public static final Locale[] supportedLocales;
     public static final String teamList = "[white][yellow]sharded[], [red]crux[], [purple]malis[], [green]green[], [blue]blue[], [gray]derelict[]";
