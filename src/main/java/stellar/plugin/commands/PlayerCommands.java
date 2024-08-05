@@ -338,7 +338,7 @@ public class PlayerCommands {
             Seq<Rank> specRanks = Seq.select(Rank.values(), r -> r.special);
 
             String[][] buttons = new String[ranks.size + 2][]; // I wanted to use Seq<String> that didn't work
-            ranks.filter(r -> !r.special).each(rank -> {
+            ranks.retainAll(r -> !r.special).each(rank -> {
                 buttons[rank.ordinal()] = new String[]{rank.formatted(player)};
             });
 

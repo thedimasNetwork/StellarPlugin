@@ -358,7 +358,7 @@ public class AdminCommands {
                     return;
                 }
             }
-            entities = entities.filter(Objects::nonNull);
+            entities = entities.retainAll(Objects::nonNull);
 
             if (args[0].length() > 2) {
                 Pattern argumentsPattern = Pattern.compile("\\[(.*?)\\]");
@@ -387,7 +387,7 @@ public class AdminCommands {
 
                     String fieldName = split[0], value = split[1], comparator = comparatorMatcher.group();
 
-                    entities.filter(entity -> {
+                    entities.retainAll(entity -> {
                         try {
                             Object obj = entity;
                             Field field = null;
