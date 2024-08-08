@@ -109,6 +109,13 @@ public class PlayerCommands {
             player.sendMessage(result.toString());
         });
 
+        commandManager.registerPlayer("rules", "commands.rules.description", (args, player) -> {
+            Locale locale = Bundle.findLocale(player.locale);
+            String rules = Bundle.format("rules", locale);
+
+            Call.infoMessage(player.con, Bundle.format("commands.rules.list", locale, rules));
+        });
+
         commandManager.registerPlayer("tr", "[off|auto|double|somelocale]", "commands.tr.description", (args, player) -> {
             if (args.length == 0) {
                 DatabaseAsync.getPlayerAsync(
