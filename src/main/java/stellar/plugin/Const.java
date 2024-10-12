@@ -41,6 +41,7 @@ public class Const {
     public static final String[] pirates = {"valve", "igruhaorg", "tuttop", "freetp.org", "freetp"};
     public static final Seq<String> usefulCommands = Seq.with("help", "rtv", "stats", "ranks");
 
+    public static final DateTimeFormatter dateFormatterFull = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm"); // 04.12.2003 23:59
     public static final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy"); // 04.12.2003
 
     public static final int maxIdenticalIPs = 3;
@@ -85,7 +86,8 @@ public class Const {
             new ServerInfo("castle_wars", "Castle Wars", "\uE807", "play.thedimas.pp.ua:6510"),
             new ServerInfo("crawler_arena", "Crawler Arena", "\uE871", "play.thedimas.pp.ua:6511"),
             new ServerInfo("zone_capture", "Zone Capture", "\uE853", "play.thedimas.pp.ua:6512"),
-            new ServerInfo("ranked_pvp", "Ranked PvP", "\uE861", "play.thedimas.pp.ua:6513")
+            new ServerInfo("ranked_pvp", "Ranked PvP", "\uE861", "play.thedimas.pp.ua:6513"),
+            new ServerInfo("test", "Test", "\uE86F", "play.thedimas.pp.ua:6666")
     );
 
     public static final StringMap translatorLocales = StringMap.of( // Top 25 locales by popularity on the server
