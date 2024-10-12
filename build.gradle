@@ -34,7 +34,7 @@ ext {
 
     postresqlVersion = "42.7.3"
     jooqVersion = "3.17.0"
-    databaseVersion = "4147e9671c"
+    databaseVersion = "3d5dd76a4f"
 
     bundlesVersion = "1.0.0"
     pluginLibsVersion = "d246024152"
