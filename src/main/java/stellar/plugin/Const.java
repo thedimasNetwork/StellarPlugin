@@ -41,7 +41,7 @@ public class Const {
     public static final String[] pirates = {"valve", "igruhaorg", "tuttop", "freetp.org", "freetp"};
     public static final Seq<String> usefulCommands = Seq.with("help", "rtv", "stats", "ranks");
 
-    public static final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm"); // 04.12.2003 23:09
+    public static final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy"); // 04.12.2003
 
     public static final int maxIdenticalIPs = 3;
     public static final int winSurvivalWaves = 50;

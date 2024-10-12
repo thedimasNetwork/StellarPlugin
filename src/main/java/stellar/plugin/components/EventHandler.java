@@ -67,12 +67,19 @@ public class EventHandler {
                             .selectFrom(Tables.users)
                             .where(Tables.users.uuid.eq(record.getAdmin()))
                             .fetchOne();
+                    Integer userId = context
+                            .select(Tables.users.id)
+                            .where(Tables.users.uuid.eq(uuid))
+                            .fetchOne()
+                            .value1();
 
                     String adminName = admin != null ? Strings.stripColors(admin.getName()) : record.getAdmin();
                     String banDate = record.getCreated().format(Const.dateFormatter);
-                    String unbanDate = record.getUntil() != null ? record.getUntil().format(Const.dateFormatter) : Bundle.get("events.join.banned.forever", locale);
+                    String unbanDate = record.getUntil() != null ?
+                            record.getUntil().plusDays(1).format(Const.dateFormatter) : // Adding one day to ban day to prevent people from asking why the ban is not unbanned.
+                            Bundle.get("events.join.banned.forever", locale);
 
-                    String message = Bundle.format("events.join.banned", locale, adminName, banDate, record.getReason().strip(), unbanDate, config.discordUrl);
+                    String message = Bundle.format("events.join.banned", locale, adminName, banDate, record.getReason().strip(), unbanDate, record.getId(), userId, config.discordUrl);
                     event.player.kick(message);
                     return null;
                 });
