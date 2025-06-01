@@ -35,6 +35,7 @@ public class Variables {
     public static OkHttpClient httpClient = new OkHttpClient();
     public static VoteSession voteSession;
     public static ObjectMap<String, Timekeeper> voteCooldowns = new ObjectMap<>();
+    public static BoolSeq skippedMaps = new BoolSeq();
 
     public static CacheSeq<HistoryEntry> getHistorySeq(int x, int y) {
         CacheSeq<HistoryEntry> seq = history[x][y];

@@ -7,7 +7,6 @@ import arc.struct.StringMap;
 import arc.util.Log;
 import arc.util.Structs;
 import mindustry.Vars;
-import mindustry.content.UnitTypes;
 import mindustry.net.Administration;
 import org.jooq.Field;
 import stellar.database.enums.PlayerStatus;

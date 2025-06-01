@@ -3,6 +3,7 @@ package stellar.plugin.commands;
 import arc.Core;
 import arc.Events;
 import arc.math.Mathf;
+import arc.struct.BoolSeq;
 import arc.struct.ObjectMap;
 import arc.struct.Seq;
 import arc.util.*;
@@ -170,7 +171,11 @@ public class PlayerCommands {
                 }
             }
 
-            if (!rtvEnabled) {
+            BoolSeq RTVmaps = new BoolSeq(skippedMaps);
+            RTVmaps.reverse();
+            boolean unableToSkip = RTVmaps.size > 1 ? (RTVmaps.get(0) && RTVmaps.get(1)) || (RTVmaps.get(1) && RTVmaps.get(2)) : false;
+
+            if (!rtvEnabled || unableToSkip) {
                 Bundle.bundled(player, "commands.rtv.disabled");
                 return;
             }

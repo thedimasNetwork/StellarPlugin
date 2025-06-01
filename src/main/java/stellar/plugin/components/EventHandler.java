@@ -419,6 +419,7 @@ public class EventHandler {
         });
 
         Events.on(EventType.GameOverEvent.class, event -> {
+            skippedMaps.add(event.winner == Team.derelict);
             switch (Vars.state.rules.mode()) {
                 case pvp -> {
                     if (!Vars.state.map.tags.getBool("hexed")) {
