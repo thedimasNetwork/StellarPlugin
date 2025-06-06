@@ -19,6 +19,7 @@ import stellar.plugin.components.bot.Colors;
 import stellar.plugin.components.bot.Util;
 import thedimas.util.Bundle;
 
+import java.time.LocalDateTime;
 import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
 
@@ -104,7 +105,7 @@ public class VoteSession {
             });
             Variables.voteSession = null;
             getMessage()
-                    .thenAcceptAsync(s -> Bot.sendEmbed(Const.votekickChannel, Util.embedBuilder("Голосование успешно", s, Colors.red)))
+                    .thenAcceptAsync(s -> Bot.sendEmbed(Const.votekickChannel, Util.embedBuilder("Голосование успешно", s, Colors.red, LocalDateTime.now(), Const.serverFieldName)))
                     .exceptionally(t -> {
                         Log.err(t);
                         return null;
