@@ -23,7 +23,7 @@ ext {
 }
 
 ext {
-    lombokVersion = "1.18.26"
+    lombokVersion = "1.18.30"
 
     mindustryVersion = "v146"
 

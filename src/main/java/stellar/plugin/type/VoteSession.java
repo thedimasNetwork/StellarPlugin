@@ -2,14 +2,11 @@ package stellar.plugin.type;
 
 import arc.struct.ObjectIntMap;
 import arc.struct.ObjectMap;
-import arc.struct.Seq;
-import arc.struct.StringMap;
 import arc.util.Log;
 import arc.util.Strings;
 import arc.util.Timer;
 import mindustry.Vars;
 import mindustry.core.NetServer;
-import mindustry.gen.Call;
 import mindustry.gen.Groups;
 import mindustry.gen.Player;
 import mindustry.net.Packets;
@@ -77,12 +74,13 @@ public class VoteSession {
                     .map(i -> "%s (%d)".formatted(Strings.stripColors(i.getName()), i.getId())));
             votedAgainst = votedAgainst.isEmpty() ? "`<Никто>`" : votedAgainst;
             return """
+                    **Сервер**: %s
                     **Инициатор**: %s (%s)
                     **Цель**: %s (%s)
                     **За**: %s
                     **Против**: %s
                     **Причина**: %s
-                    """.formatted(initiator.plainName(), infos.get(initiator.uuid()).getId(), target.plainName(), infos.get(target.uuid()).getId(), votedFor, votedAgainst, reason);
+                    """.formatted(Const.serverFieldName, initiator.plainName(), infos.get(initiator.uuid()).getId(), target.plainName(), infos.get(target.uuid()).getId(), votedFor, votedAgainst, reason);
         });
     }
 

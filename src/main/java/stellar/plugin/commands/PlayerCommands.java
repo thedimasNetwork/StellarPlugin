@@ -9,6 +9,7 @@ import arc.struct.Seq;
 import arc.util.*;
 import mindustry.Vars;
 import mindustry.game.EventType;
+import mindustry.game.Gamemode;
 import mindustry.game.Team;
 import mindustry.gen.Call;
 import mindustry.gen.Groups;
@@ -173,7 +174,8 @@ public class PlayerCommands {
 
             BoolSeq RTVmaps = new BoolSeq(skippedMaps);
             RTVmaps.reverse();
-            boolean unableToSkip = RTVmaps.size > 1 ? (RTVmaps.get(0) && RTVmaps.get(1)) || (RTVmaps.get(1) && RTVmaps.get(2)) : false;
+            boolean unableToSkip = false;
+            if(Vars.state.rules.mode() != Gamemode.sandbox && RTVmaps.size > 1) unableToSkip = (RTVmaps.get(0) && RTVmaps.get(1)) || (RTVmaps.get(1) && RTVmaps.get(2));
 
             if (!rtvEnabled || unableToSkip) {
                 Bundle.bundled(player, "commands.rtv.disabled");
