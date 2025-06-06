@@ -75,13 +75,12 @@ public class VoteSession {
                     .map(i -> "%s (%d)".formatted(Strings.stripColors(i.getName()), i.getId())));
             votedAgainst = votedAgainst.isEmpty() ? "`<Никто>`" : votedAgainst;
             return """
-                    **Сервер**: %s
                     **Инициатор**: %s (%s)
                     **Цель**: %s (%s)
                     **За**: %s
                     **Против**: %s
                     **Причина**: %s
-                    """.formatted(Const.serverFieldName, initiator.plainName(), infos.get(initiator.uuid()).getId(), target.plainName(), infos.get(target.uuid()).getId(), votedFor, votedAgainst, reason);
+                    """.formatted(initiator.plainName(), infos.get(initiator.uuid()).getId(), target.plainName(), infos.get(target.uuid()).getId(), votedFor, votedAgainst, reason);
         });
     }
 
