@@ -43,7 +43,7 @@ public class VoteSession {
                 Variables.voteSession = null;
                 this.task.cancel();
                 getMessage()
-                        .thenAcceptAsync(s -> Bot.sendEmbed(Const.votekickChannel, Util.embedBuilder("Голосование провалилось", s, Colors.blue)))
+                        .thenAcceptAsync(s -> Bot.sendEmbed(Const.votekickChannel, Util.embedBuilder("Голосование провалилось", s, Colors.blue, Const.serverFieldName)))
                         .exceptionally(t -> {
                             Log.err(t);
                             return null;
@@ -104,7 +104,7 @@ public class VoteSession {
             });
             Variables.voteSession = null;
             getMessage()
-                    .thenAcceptAsync(s -> Bot.sendEmbed(Const.votekickChannel, Util.embedBuilder("Голосование успешно", s, Colors.red, LocalDateTime.now(), Const.serverFieldName)))
+                    .thenAcceptAsync(s -> Bot.sendEmbed(Const.votekickChannel, Util.embedBuilder("Голосование успешно", s, Colors.red, Const.serverFieldName)))
                     .exceptionally(t -> {
                         Log.err(t);
                         return null;

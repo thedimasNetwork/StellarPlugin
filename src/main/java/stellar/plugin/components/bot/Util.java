@@ -43,6 +43,14 @@ public class Util {
                 .build();
     }
 
+    public static MessageEmbed embedBuilder(String title, String description, Color color, String footer) {
+        return new EmbedBuilder()
+                .addField(title, description, false)
+                .setColor(color)
+                .setFooter(footer)
+                .build();
+    }
+
     public static boolean isMindustryAdmin(Member member) {
         return member.getRoles().contains(member.getGuild().getRoleById(config.bot.adminId)) ||
                 member.hasPermission(Permission.ADMINISTRATOR);
