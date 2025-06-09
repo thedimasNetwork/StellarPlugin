@@ -1,6 +1,7 @@
 package stellar.plugin.components;
 
 import arc.struct.ObjectMap;
+import arc.struct.Seq;
 import arc.util.Log;
 import arc.util.Timer;
 import mindustry.gen.Call;
@@ -60,7 +61,8 @@ public class Activity {
                 }).thenComposeAsync(ignored ->
                         Rank.getRankForcedAsync(p)
                 ).thenRunAsync(() -> {
-                    for (String key : ranks.keys()) {
+                    Seq<String> keysCopy = ranks.keys().toSeq();
+                    for (String key : keysCopy) {
                         if (Groups.player.find(pl -> pl.uuid().equals(key)) == null) {
                             ranks.remove(key);
                         }
