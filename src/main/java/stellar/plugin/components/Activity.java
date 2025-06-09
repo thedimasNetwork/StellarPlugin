@@ -58,7 +58,7 @@ public class Activity {
                     query.where(Tables.stats.uuid.eq(p.uuid()));
                     return query.executeAsync();
                 }).thenComposeAsync(ignored ->
-                    Rank.getRankForcedAsync(p)
+                        Rank.getRankForcedAsync(p)
                 ).thenRunAsync(() -> {
                     for (String key : ranks.keys()) {
                         if (Groups.player.find(pl -> pl.uuid().equals(key)) == null) {

@@ -17,11 +17,14 @@ import mindustry.net.Packets;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jooq.Record1;
 import stellar.database.Database;
+import stellar.database.DatabaseAsync;
+import stellar.database.enums.MessageType;
 import stellar.database.gen.Tables;
 import stellar.database.gen.tables.records.UsersRecord;
 import stellar.plugin.Const;
@@ -48,10 +51,14 @@ public class DiscordListener extends ListenerAdapter {
             return;
         }
 
-        String name = event.getAuthor().getName();
+        User author = event.getAuthor();
+        String name = author.getName();
         String message = event.getMessage().getContentStripped();
         String format = "<[blue]\uE80D[]> %s: %s";
         Call.sendMessage(String.format(format, name, message));
+        DatabaseAsync.createMessageAsync(
+                Const.serverFieldName, author.getId(), null, MessageType.discord, message, "ru"
+        ); // the language isn't always "ru", but it's impossible to get it ------------------------- ^^
     }
 
     @Override

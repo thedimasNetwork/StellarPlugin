@@ -514,6 +514,10 @@ public class PlayerCommands {
                         Bundle.bundled(target, "commands.msg.from", Strings.stripColors(player.name()), String.format(targetDetailed ? "%s (%s)" : "%s", translated, args[1]));
                         return null;
                     })
+            ).thenComposeAsync(ignored ->
+                    DatabaseAsync.createMessageAsync(
+                            Const.serverFieldName, player.uuid(), null, MessageType.direct, args[1], player.locale()
+                    )
             ).exceptionally(t -> {
                 Log.err(t);
                 DiscordLogger.err(t);
