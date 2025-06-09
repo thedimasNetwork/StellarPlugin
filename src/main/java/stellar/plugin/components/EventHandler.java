@@ -52,12 +52,12 @@ public class EventHandler {
                     uuid
             ).thenComposeAsync(exists -> {
                 if (!exists) {
-                    throw new IllegalArgumentException("Player does not exist.");
+                    throw new IllegalArgumentException("Player does not exist."); // just to exit the chain
                 }
                 return DatabaseAsync.isBannedAsync(uuid);
             }).thenComposeAsync(isBanned -> {
                 if (!isBanned) {
-                    throw new IllegalArgumentException("Player is not banned.");
+                    throw new IllegalArgumentException("Player is not banned."); // to exit as well
                 }
                 return DatabaseAsync.latestBanAsync(
                         uuid
@@ -162,8 +162,6 @@ public class EventHandler {
                             event.player.uuid(), event.player.ip(), event.player.name(), event.player.locale(), event.player.admin()
                     ).thenAcceptAsync(ignored -> {
                         Call.menu(event.player.con(), Menus.welcome.ordinal(), title, welcome, buttons);
-                    }).thenAcceptAsync(ignored -> {
-                        Rank.getRankAsync(event.player);
                     }).exceptionally(t -> {
                         Log.err(t);
                         DiscordLogger.err(t);
@@ -176,6 +174,8 @@ public class EventHandler {
                             event.player.ip(),
                             event.player.name(),
                             event.player.locale())
+            ).thenComposeAsync(ignored ->
+                    Rank.getRankAsync(event.player)
             ).exceptionally(t -> {
                 Log.err(t);
                 DiscordLogger.err(t);
@@ -271,6 +271,7 @@ public class EventHandler {
                     Bot.sendEmbed(config.bot.bansId, Util.embedBuilder(title, message, color, LocalDateTime.now(), Const.serverFieldName));
                     actionEntry.storeRecord();
                     Vars.netServer.admins.unbanPlayerID(actionEntry.getTarget().getUuid()); // maybe not a good idea
+                    Vars.netServer.admins.unbanPlayerIP(actionEntry.getTarget().getIp());
                     adminActions.remove(event.menuId);
                 }
                 return;

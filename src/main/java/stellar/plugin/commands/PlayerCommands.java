@@ -156,7 +156,7 @@ public class PlayerCommands {
             });
         });
 
-        commandManager.registerPlayer("rtv", "[on|off]", "commands.rtv.description", (args, player) -> {
+        commandManager.registerPlayer("rtv", "[on|off]", "commands.rtv.description", Rank.verified, (args, player) -> {
             boolean rtvEnabled = Core.settings.getBool("rtv");
 
             if (args.length > 0) {
@@ -305,45 +305,50 @@ public class PlayerCommands {
         });
 
         commandManager.registerPlayer("rank", "commands.rank.description", (args, player) -> {
-            Rank rank = ranks.get(player.uuid(), Rank.player); // TODO: Async
-            Locale locale = Bundle.findLocale(player.locale());
-            String[][] buttons = {
-                    {Bundle.get("commands.rank.next-rank", locale)},
-                    {Bundle.get("menus.close", locale)}
-            };
-
-            MenuHandler.send(player, Bundle.get("menus.rank-info.title", locale), Bundle.format("commands.rank.msg", locale, rank.formatted(player)), buttons, ((menuId, option, p) -> {
-                if (option == -1) {
-                    return;
-                }
-                Rank nextRank = rank.getNext();
-                String[][] newButtons = new String[][]{
+            Rank.getRankForcedAsync(player).thenAccept(rank -> {
+                Locale locale = Bundle.findLocale(player.locale());
+                String[][] buttons = {
+                        {Bundle.get("commands.rank.next-rank", locale)},
                         {Bundle.get("menus.close", locale)}
                 };
 
-                if (nextRank == null) {
-                    Call.menu(p.con(), 0, Bundle.get("menus.rank-info.title", locale), Bundle.format("commands.rank.next-rank.none", locale), newButtons);
-                } else {
-                    DatabaseAsync.getStatsAsync(
-                            p.uuid()
-                    ).thenCombineAsync(DatabaseAsync.getTotalPlaytimeAsync(p.uuid()), (record, playtime) -> {
-                        int wins = record.getAttacks() + record.getSurvivals() + record.getHexWins() + record.getPvp();
-                        String message = Bundle.format("commands.rank.next-rank.info", locale,
-                                nextRank.formatted(p),
-                                targetColor(wins, nextRank.requirements.wins), wins, nextRank.requirements.wins,
-                                targetColor(record.getWaves(), nextRank.requirements.waves), record.getWaves(), nextRank.requirements.waves,
-                                targetColor(record.getBuilt(), nextRank.requirements.built), record.getBuilt(), nextRank.requirements.built,
-                                targetColor(playtime.intValue(), nextRank.requirements.playtime * 60), longToTime(playtime, locale), longToTime(nextRank.requirements.playtime * 60L, locale)
-                        );
-                        Call.menu(p.con(), 0, Bundle.get("menus.rank-info.title", locale), message, newButtons);
-                        return null;
-                    }).exceptionally(t -> {
-                        Log.err(t);
-                        DiscordLogger.err(t);
-                        return null;
-                    });
-                }
-            }));
+                MenuHandler.send(player, Bundle.get("menus.rank-info.title", locale), Bundle.format("commands.rank.msg", locale, rank.formatted(player)), buttons, ((menuId, option, p) -> {
+                    if (option == -1) {
+                        return;
+                    }
+                    Rank nextRank = rank.getNext();
+                    String[][] newButtons = new String[][]{
+                            {Bundle.get("menus.close", locale)}
+                    };
+
+                    if (nextRank == null) {
+                        Call.menu(p.con(), 0, Bundle.get("menus.rank-info.title", locale), Bundle.format("commands.rank.next-rank.none", locale), newButtons);
+                    } else {
+                        DatabaseAsync.getStatsAsync(
+                                p.uuid()
+                        ).thenCombineAsync(DatabaseAsync.getTotalPlaytimeAsync(p.uuid()), (record, playtime) -> {
+                            int wins = record.getAttacks() + record.getSurvivals() + record.getHexWins() + record.getPvp();
+                            String message = Bundle.format("commands.rank.next-rank.info", locale,
+                                    nextRank.formatted(p),
+                                    targetColor(wins, nextRank.requirements.wins), wins, nextRank.requirements.wins,
+                                    targetColor(record.getWaves(), nextRank.requirements.waves), record.getWaves(), nextRank.requirements.waves,
+                                    targetColor(record.getBuilt(), nextRank.requirements.built), record.getBuilt(), nextRank.requirements.built,
+                                    targetColor(playtime.intValue(), nextRank.requirements.playtime * 60), longToTime(playtime, locale), longToTime(nextRank.requirements.playtime * 60L, locale)
+                            );
+                            Call.menu(p.con(), 0, Bundle.get("menus.rank-info.title", locale), message, newButtons);
+                            return null;
+                        }).exceptionally(t -> {
+                            Log.err(t);
+                            DiscordLogger.err(t);
+                            return null;
+                        });
+                    }
+                }));
+            }).exceptionally(t -> {
+                Log.err(t);
+                DiscordLogger.err(t);
+                return null;
+            });
         });
 
         commandManager.registerPlayer("ranks", "commands.ranks.description", (args, player) -> {
@@ -419,8 +424,8 @@ public class PlayerCommands {
             DatabaseAsync.getPlayerAsync(
                     player.uuid()
             ).thenCombineAsync(DatabaseAsync.getStatsAsync(player.uuid()), (record, statsRecord) ->
-                    DatabaseAsync.getTotalPlaytimeAsync(player.uuid()).thenAcceptAsync(playtime -> {
-                        Rank rank = ranks.get(player.uuid(), Rank.player);
+                    Rank.getRankForcedAsync(player)
+                            .thenCombineAsync(DatabaseAsync.getTotalPlaytimeAsync(player.uuid()), (rank, playtime) -> {
                         Rank specialRank = specialRanks.get(player.uuid());
                         Locale locale = Bundle.findLocale(player.locale);
                         String message = Bundle.format("commands.stats.msg",
@@ -476,6 +481,7 @@ public class PlayerCommands {
                                 }
                             }
                         });
+                        return null;
                     })
             ).exceptionally(t -> {
                 Log.err(t);
@@ -523,7 +529,7 @@ public class PlayerCommands {
         });
 
         commandHandler.removeCommand("votekick");
-        commandManager.registerPlayer("votekick", "<player> <reason...>", "commands.votekick.description", (args, player) -> {
+        commandManager.registerPlayer("votekick", "<player> <reason...>", "commands.votekick.description", Rank.verified, (args, player) -> {
             if (!Administration.Config.enableVotekick.bool()) {
                 Bundle.bundled(player, "commands.votekick.disabled");
                 return;
@@ -588,7 +594,7 @@ public class PlayerCommands {
         });
 
         commandHandler.removeCommand("vote");
-        commandManager.registerPlayer("vote", "<y/n/c>", "commands.vote.description", (args, player) -> {
+        commandManager.registerPlayer("vote", "<y/n/c>", "commands.vote.description", Rank.verified, (args, player) -> {
             if (voteSession == null) {
                 Bundle.bundled(player, "commands.votekick.no-voting");
                 return;

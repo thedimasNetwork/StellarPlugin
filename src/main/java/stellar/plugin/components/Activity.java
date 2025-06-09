@@ -28,8 +28,8 @@ public class Activity {
                 return;
             }
 
-            ObjectMap<String, Rank> oldRanks = ranks.copy();
-            ranks.clear();
+//            ObjectMap<String, Rank> oldRanks = ranks.copy();
+//            ranks.clear();
 
             for (Player p : Groups.player) {
                 DatabaseAsync.getContextAsync().thenComposeAsync(context -> context.update(Tables.playtime)
@@ -58,14 +58,13 @@ public class Activity {
                     query.where(Tables.stats.uuid.eq(p.uuid()));
                     return query.executeAsync();
                 }).thenComposeAsync(ignored ->
-                        Rank.getRankAsync(p)
-                ).thenAcceptAsync(newRank -> {
-                    Rank oldRank = oldRanks.get(p.uuid());
-                    ranks.put(p.uuid(), newRank);
-                    if (newRank != null && oldRank != null && newRank != oldRank) {
-                        Call.warningToast(p.con, Iconc.chartBar, Bundle.format("events.new-rank", Bundle.findLocale(p.locale()), newRank.formatted(p)));
+                    Rank.getRankForcedAsync(p)
+                ).thenRunAsync(() -> {
+                    for (String key : ranks.keys()) {
+                        if (Groups.player.find(pl -> pl.uuid().equals(key)) == null) {
+                            ranks.remove(key);
+                        }
                     }
-
                 }).exceptionally(t -> {
                     Log.err(t);
                     DiscordLogger.err(t);

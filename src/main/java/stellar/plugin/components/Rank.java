@@ -6,6 +6,8 @@ import arc.util.Log;
 import arc.util.Nullable;
 import mindustry.content.Fx;
 import mindustry.entities.Effect;
+import mindustry.gen.Call;
+import mindustry.gen.Iconc;
 import mindustry.gen.Player;
 import org.jetbrains.annotations.NotNull;
 import stellar.database.Database;
@@ -20,6 +22,8 @@ import stellar.plugin.util.logger.DiscordLogger;
 import java.sql.SQLException;
 import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
+
+import static stellar.plugin.Variables.ranks;
 
 public enum Rank {
     // region basic
@@ -157,23 +161,31 @@ public enum Rank {
     }
 
     public static Rank getRank(Player player) throws SQLException {
-        if (Variables.ranks.containsKey(player.uuid())) {
-            return Variables.ranks.get(player.uuid());
+        if (ranks.containsKey(player.uuid())) {
+            return ranks.get(player.uuid());
         }
-        Rank rank = Rank.getRankForced(player);
-        Variables.ranks.put(player.uuid(), rank);
-        return rank;
+        return Rank.getRankForced(player);
     }
 
     public static Rank getRankForced(Player player) throws SQLException {
+        Rank oldRank = null;
+        if (ranks.containsKey(player.uuid())) {
+            oldRank = ranks.get(player.uuid());
+        }
         StatsRecord record = Database.getStats(player.uuid());
-        return Rank.getRank(new Requirements(record.getBuilt(), record.getWaves(), record.getAttacks(), record.getSurvivals(), record.getHexWins(), record.getPvp(), (int) (Database.getTotalPlaytime(player.uuid()) / 60)));
+        Rank newRank = Rank.getRank(new Requirements(record.getBuilt(), record.getWaves(), record.getAttacks(), record.getSurvivals(), record.getHexWins(), record.getPvp(), (int) (Database.getTotalPlaytime(player.uuid()) / 60)));
+        ranks.put(player.uuid(), newRank);
+        if (oldRank != null && newRank != oldRank) {
+            Log.debug("@ -> @", oldRank.name(), newRank.name());
+            Call.warningToast(player.con, Iconc.chartBar, Bundle.format("events.new-rank", Bundle.findLocale(player.locale()), newRank.formatted(player)));
+        }
+        return newRank;
     }
 
     public static CompletableFuture<Rank> getRankAsync(Player player) {
         return CompletableFuture.supplyAsync(() -> {
-            if (Variables.ranks.containsKey(player.uuid())) {
-                return Variables.ranks.get(player.uuid());
+            if (ranks.containsKey(player.uuid())) {
+                return ranks.get(player.uuid());
             } else {
                 try {
                     return getRankForced(player);
@@ -185,14 +197,12 @@ public enum Rank {
     }
 
     public static CompletableFuture<Rank> getRankForcedAsync(Player player) {
-        return DatabaseAsync.getStatsAsync(
-                player.uuid()
-        ).thenCombineAsync(DatabaseAsync.getTotalPlaytimeAsync(player.uuid()), (record, playtime) ->
-                Rank.getRank(new Requirements(record.getBuilt(), record.getWaves(), record.getAttacks(), record.getSurvivals(), record.getHexWins(), record.getPvp(), (int) (playtime / 60)))
-        ).exceptionally(t -> {
-            Log.err(t);
-            DiscordLogger.err(t);
-            return null;
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                return getRankForced(player);
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
         });
     }
 
