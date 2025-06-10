@@ -167,11 +167,7 @@ public enum Rank {
         return Rank.getRankForced(player);
     }
 
-    public static Rank getRankForced(Player player) throws SQLException {
-        Rank oldRank = null;
-        if (ranks.containsKey(player.uuid())) {
-            oldRank = ranks.get(player.uuid());
-        }
+    public static Rank getRankForced(Player player, Rank oldRank) throws SQLException {
         StatsRecord record = Database.getStats(player.uuid());
         Rank newRank = Rank.getRank(new Requirements(record.getBuilt(), record.getWaves(), record.getAttacks(), record.getSurvivals(), record.getHexWins(), record.getPvp(), (int) (Database.getTotalPlaytime(player.uuid()) / 60)));
         ranks.put(player.uuid(), newRank);
@@ -180,6 +176,14 @@ public enum Rank {
             Call.warningToast(player.con, Iconc.chartBar, Bundle.format("events.new-rank", Bundle.findLocale(player.locale()), newRank.formatted(player)));
         }
         return newRank;
+    }
+
+    public static Rank getRankForced(Player player) throws SQLException {
+        Rank oldRank = null;
+        if (ranks.containsKey(player.uuid())) {
+            oldRank = ranks.get(player.uuid());
+        }
+        return getRankForced(player, oldRank);
     }
 
     public static CompletableFuture<Rank> getRankAsync(Player player) {
@@ -205,6 +209,18 @@ public enum Rank {
             }
         });
     }
+
+    public static CompletableFuture<Rank> getRankForcedAsync(Player player, Rank oldRank) {
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                return getRankForced(player, oldRank);
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        });
+    }
+
+
 
     public static Rank max(Rank rank, Rank other) {
         return Rank.values()[Math.max(rank.ordinal(), other.ordinal())];
