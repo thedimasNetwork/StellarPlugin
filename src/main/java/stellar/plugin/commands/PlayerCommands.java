@@ -583,7 +583,7 @@ public class PlayerCommands {
                 return;
             }
 
-            Timekeeper vtime = voteCooldowns.get(player.uuid(), () -> new Timekeeper(voteCooldown));
+            Timekeeper vtime = voteCooldowns.get(player.uuid(), () -> Timekeeper.ofSeconds(voteCooldown));
 
             if (!vtime.get()) {
                 Bundle.bundled(player, "commands.votekick.cooldown", longToTime(voteCooldown, Bundle.findLocale(player.locale()))); // TODO: i18n

@@ -500,7 +500,7 @@ public class EventHandler {
             Player target = event.player;
             Building building = event.tile;
 
-            if (building.block() == Blocks.thoriumReactor && event.item == Items.thorium
+            if (building.block == Blocks.thoriumReactor && event.item == Items.thorium
                     && target.team().cores().contains(c -> event.tile.dst(c.x, c.y) < 300)) {
                 String playerName = event.player.coloredName();
                 Groups.player.each(o -> o.team() == target.team(), p -> {
