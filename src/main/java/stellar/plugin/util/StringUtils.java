@@ -50,10 +50,10 @@ public class StringUtils {
     public static String timeFormatted(long seconds, Locale locale) {
         String dhms = Bundle.get("formats.dhms", locale); // localized letters for Days, Hours, Minutes and Seconds
         StringBuilder result = new StringBuilder();
+        if (seconds >= 60*60*24)    result.append(seconds / 60 / 60 / 24).append(dhms.charAt(0)).append(" ");
+        if (seconds >= 60*60)       result.append(seconds / 60 / 60 % 24).append(dhms.charAt(1)).append(" ");
+        if (seconds >= 60)          result.append(seconds / 60 % 60).append(dhms.charAt(2)).append(" ");
         result.append(seconds % 60).append(dhms.charAt(3));
-        if (seconds >= 60)          result.append(seconds / 60 % 60).append(dhms.charAt(2));
-        if (seconds >= 60*60)       result.append(seconds / 60 / 60 % 24).append(dhms.charAt(1));
-        if (seconds >= 60*60*24)    result.append(seconds / 60 / 60 / 24).append(dhms.charAt(0));
         return result.toString();
     }
 

@@ -241,16 +241,21 @@ public class PlayerCommands {
 
                 CacheSeq<HistoryEntry> entries = getHistorySeq(mouseX, mouseY);
 
+                if (entries.isEmpty()) {
+                    Bundle.bundled("history.empty");
+                    return;
+                }
+
                 int page = Strings.parseInt(args[0]) - 1;
                 int pages = Mathf.ceil(entries.size / Const.listPageSize);
 
                 if (page >= pages || pages < 0 || page < 0) {
-                    Bundle.bundled(player, "commands.under-page", page);
+                    Bundle.bundled(player, "commands.under-page", pages);
                     return;
                 }
 
                 StringBuilder result = new StringBuilder();
-                result.append(Bundle.format("commands.history.page", locale, mouseX, mouseY, page + 1, pages)).append("\n");
+                result.append(Bundle.format("history.page", locale, mouseX, mouseY, page + 1, pages)).append("\n");
 
                 if (entries.isEmpty()) {
                     result.append(Bundle.get("history.empty", locale)).append("\n");
@@ -266,9 +271,6 @@ public class PlayerCommands {
             } else if (activeHistoryPlayers.contains(player.uuid())) {
                 activeHistoryPlayers.remove(player.uuid());
                 Bundle.bundled(player, "commands.history.disabled");
-            } else if (args.length == 2) {
-                activeHistoryPlayers.add(player.uuid());
-                Bundle.bundled(player, "commands.history.enabled");
             } else {
                 activeHistoryPlayers.add(player.uuid());
                 Bundle.bundled(player, "commands.history.enabled");

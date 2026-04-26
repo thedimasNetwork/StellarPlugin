@@ -2,6 +2,7 @@ package stellar.plugin.components.history;
 
 import arc.Events;
 import arc.graphics.Color;
+import arc.math.Mathf;
 import arc.struct.Seq;
 import arc.util.Pack;
 import mindustry.content.Fx;
@@ -85,7 +86,9 @@ public class History {
 
                 StringBuilder result = new StringBuilder();
                 Locale locale = Bundle.findLocale(event.player.locale);
-                result.append(Bundle.format("history.page", locale, x, y)).append("\n");
+
+                int pages = Mathf.ceil(entries.size / Const.listPageSize);
+                result.append(Bundle.format("history.page", locale, x, y, Math.min(1, pages), pages)).append("\n");
 
                 entries.cleanUp();
                 if (entries.isEmpty()) {
