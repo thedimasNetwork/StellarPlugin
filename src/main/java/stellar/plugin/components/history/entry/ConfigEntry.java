@@ -10,6 +10,7 @@ import mindustry.world.blocks.logic.CanvasBlock;
 import mindustry.world.blocks.logic.LogicBlock;
 import mindustry.world.blocks.power.LightBlock;
 import mindustry.world.blocks.units.UnitFactory;
+import stellar.plugin.util.StringUtils;
 import thedimas.util.Bundle;
 
 import java.util.Arrays;
@@ -63,50 +64,52 @@ public class ConfigEntry implements HistoryEntry {
 
     @Override
     public String getMessage(Locale locale) {
+        String timeAgo = StringUtils.formatAgo((Time.millis()-timestamp) / 1000, locale);
+
         if (value instanceof MappableContent content) {
-            return Bundle.format("history.config.update", locale, name, icons.get(content.name));
+            return Bundle.format("history.config.update", locale,
+                    timeAgo, name, block.emoji(), icons.get(content.name));
         }
 
         if (value instanceof Boolean on) {
-            return on ?
-                    Bundle.format("history.config.on", locale, name) :
-                    Bundle.format("history.config.off", locale, name);
+            Bundle.format("history.config." + (on ? "on" : "off"),
+                    locale, timeAgo, name, block.emoji());
         }
 
         if (value instanceof String text) {
             return !text.isEmpty() ?
-                    Bundle.format("history.config.text", locale, name, text) :
-                    Bundle.format("history.config.default", locale, name);
+                    Bundle.format("history.config.text", locale, timeAgo, name, block.emoji(), text) :
+                    Bundle.format("history.config.default", locale, name, block.emoji());
         }
 
         if (value instanceof Point2 point) {
-            return connect ?
-                    Bundle.format("history.config.connect", locale, name, point.x, point.y) :
-                    Bundle.format("history.config.disconnect", locale, name);
+                Bundle.format("history.config." + (connect ? "connect" : "disconnect"), locale,
+                        timeAgo, name, String.format("[[%d, %d]", point.x, point.y));
         }
 
         if (value instanceof Point2[] points) {
             return points.length > 0 ?
-                    Bundle.format("history.config.connects", locale, name, Arrays.toString(points)) :
-                    Bundle.format("history.config.disconnect", locale, name);
+                    Bundle.format("history.config.connect", locale, timeAgo, name, block.emoji(), Arrays.toString(points)) :
+                    Bundle.format("history.config.disconnect", locale, timeAgo, name, block.emoji(), "[slate][[all][]");
+                    // TODO: ^^^ probably localization for "all"
         }
 
         if (block instanceof LightBlock) {
-            return Bundle.format("history.config.color", locale, name, Tmp.c1.set((int) value));
+            return Bundle.format("history.config.color", locale, timeAgo, name, block.emoji(), Tmp.c1.set((int) value));
         }
 
         if (block instanceof LogicBlock) {
-            return Bundle.format("history.config.code", locale, name);
+            return Bundle.format("history.config.code", locale, timeAgo, name, block.emoji());
         }
 
         if (block instanceof CanvasBlock) {
-            return Bundle.format("history.config.image", locale, name);
+            return Bundle.format("history.config.image", locale, timeAgo, name, block.emoji());
         }
-        return Bundle.get("history.unknown", locale);
-    }
 
-    @Override
-    public long getTimestamp(TimeUnit unit) {
-        return unit.convert(Time.timeSinceMillis(timestamp), TimeUnit.MILLISECONDS);
+        if (value == null) {
+            Bundle.format("history.config.default", locale, name, block.emoji());
+        }
+
+        return Bundle.get("history.unknown", locale);
     }
 }

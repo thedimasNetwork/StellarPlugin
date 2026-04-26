@@ -3,6 +3,7 @@ package stellar.plugin.components.history.entry;
 import arc.util.Time;
 import mindustry.gen.Player;
 import mindustry.world.Block;
+import stellar.plugin.util.StringUtils;
 import thedimas.util.Bundle;
 
 import java.util.Locale;
@@ -25,11 +26,8 @@ public class RotateEntry implements HistoryEntry {
 
     @Override
     public String getMessage(Locale locale) {
-        return Bundle.format("history.rotate.text", locale, name, block.name, sides[rotation]);
-    }
-
-    @Override
-    public long getTimestamp(TimeUnit unit) {
-        return unit.convert(Time.timeSinceMillis(timestamp), TimeUnit.MILLISECONDS);
+        return Bundle.format("history.block.rotate", locale,
+                StringUtils.formatAgo((Time.millis()-timestamp) / 1000, locale),
+                name, block.emoji(), sides[rotation]);
     }
 }

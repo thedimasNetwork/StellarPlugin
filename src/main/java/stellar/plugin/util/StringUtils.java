@@ -47,6 +47,20 @@ public class StringUtils {
                 Bundle.format("formats.playtime", locale, seconds / (60 * 60), (seconds % (60 * 60)) / 60);
     }
 
+    public static String timeFormatted(long seconds, Locale locale) {
+        String dhms = Bundle.get("formats.dhms", locale); // localized letters for Days, Hours, Minutes and Seconds
+        StringBuilder result = new StringBuilder();
+        result.append(seconds % 60).append(dhms.charAt(3));
+        if (seconds >= 60)          result.append(seconds / 60 % 60).append(dhms.charAt(2));
+        if (seconds >= 60*60)       result.append(seconds / 60 / 60 % 24).append(dhms.charAt(1));
+        if (seconds >= 60*60*24)    result.append(seconds / 60 / 60 / 24).append(dhms.charAt(0));
+        return result.toString();
+    }
+
+    public static String formatAgo(long seconds, Locale locale) {
+        return Bundle.format("history.format.ago", locale, timeFormatted(seconds, locale));
+    }
+
     public static String repeat(String string, int number) {
         StringBuilder builder = new StringBuilder();
         for (int i = 0; i < number; i++) {

@@ -6,6 +6,7 @@ import mindustry.game.EventType.BlockBuildEndEvent;
 import mindustry.gen.Player;
 import mindustry.gen.Unit;
 import mindustry.world.Block;
+import stellar.plugin.util.StringUtils;
 import thedimas.util.Bundle;
 
 import java.util.Locale;
@@ -32,21 +33,10 @@ public class BlockEntry implements HistoryEntry {
 
     @Override
     public String getMessage(Locale locale) {
-        if (breaking) {
-            return name != null ? Bundle.format("history.block.broke", locale, name) :
-                    Bundle.format("history.block.unit.broke", locale, unit.type);
-        }
-
-        String base = name != null ? Bundle.format("history.block.build", locale, name, block) :
-                Bundle.format("history.block.unit.build", locale, unit.type, block);
-        if (block.rotate) {
-            base += Bundle.format("history.block.rotate", locale, RotateEntry.sides[rotation]);
-        }
-        return base;
-    }
-
-    @Override
-    public long getTimestamp(TimeUnit unit) {
-        return unit.convert(Time.timeSinceMillis(timestamp), TimeUnit.MILLISECONDS);
+        return Bundle.format("history.block." + (breaking ? "broke" : "built"),
+                locale,
+                StringUtils.formatAgo((Time.millis()-timestamp) / 1000, locale),
+                name != null ? name : (unit.type.emoji() + unit.type.name),
+                block != null ? block.emoji() : "[slate][[null][]");
     }
 }

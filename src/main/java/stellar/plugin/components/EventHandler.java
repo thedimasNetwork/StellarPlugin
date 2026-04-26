@@ -547,13 +547,13 @@ public class EventHandler {
 
         Events.run(EventType.Trigger.update, () -> {
             Groups.player.each(player -> {
-                if (player.unit().id() != -1) {
+                if (player.unit() != null && player.unit().id() != -1) {
                     unitPlayer.put(player.unit().id(), player.id());
                 }
             });
 
             Groups.player.each(p -> {
-                if (p.unit().moving()) {
+                if (p.unit() != null && p.unit().moving()) {
                     Rank rank = ranks.get(p.uuid(), Rank.player);
                     if (rank == null || rank.effect == null) {return;}
                     Effect effect = rank.effect;

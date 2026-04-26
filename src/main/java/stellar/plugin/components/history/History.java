@@ -35,7 +35,7 @@ public class History {
                 HistoryEntry entry = new RotateEntry(action.player, action.tile.build.block, action.rotation);
                 Variables.getHistorySeq(action.tile.x, action.tile.y).add(entry);
             }
-            return !activeHistoryPlayers.containsKey(action.player.uuid());
+            return !activeHistoryPlayers.contains(action.player.uuid());
         });
 
         Events.on(EventType.BlockBuildEndEvent.class, event -> {
@@ -76,14 +76,12 @@ public class History {
         });
 
         Events.on(EventType.TapEvent.class, event -> {
-            if (Variables.activeHistoryPlayers.containsKey(event.player.uuid())) {
+            if (Variables.activeHistoryPlayers.contains(event.player.uuid())) {
                 int x = event.tile.x;
                 int y = event.tile.y;
                 Call.effect(event.player.con, Fx.tapBlock, event.tile.x * tilesize, event.tile.y * tilesize, 0, Color.white);
 
                 CacheSeq<HistoryEntry> entries = Variables.getHistorySeq(x, y);
-
-                boolean detailed = Variables.activeHistoryPlayers.get(event.player.uuid());
 
                 StringBuilder result = new StringBuilder();
                 Locale locale = Bundle.findLocale(event.player.locale);
@@ -98,9 +96,6 @@ public class History {
                     HistoryEntry entry = entries.get(i);
 
                     result.append(entry.getMessage(locale));
-                    if (detailed) {
-                        result.append(Bundle.format("history.timestamp", locale, entry.getTimestamp(TimeUnit.MINUTES)));
-                    }
                     result.append("\n");
                 }
 

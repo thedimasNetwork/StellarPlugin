@@ -228,10 +228,8 @@ public class PlayerCommands {
             );
         });
 
-        commandManager.registerPlayer("history", "[page] [detailed]", "commands.history.description", (args, player) -> {
-            boolean detailed = args.length == 2 && Structs.contains(Const.boolValues.split(", "), args[1].toLowerCase());
-
-            if (args.length > 0 && activeHistoryPlayers.containsKey(player.uuid())) {
+        commandManager.registerPlayer("history", "[page]", "commands.history.description", (args, player) -> {
+            if (args.length > 0 && activeHistoryPlayers.contains(player.uuid())) {
                 if (!Strings.canParseInt(args[0])) {
                     Bundle.bundled(player, "commands.page-not-int");
                     return;
@@ -261,23 +259,19 @@ public class PlayerCommands {
                 for (int i = 6 * page; i < Math.min(Const.listPageSize * (page + 1), entries.size); i++) {
                     HistoryEntry entry = entries.get(i);
                     result.append(entry.getMessage(locale));
-                    if (detailed) {
-                        result.append(Bundle.format("history.timestamp", locale, entry.getTimestamp(TimeUnit.MINUTES)));
-                    }
                     result.append("\n");
                 }
 
                 player.sendMessage(result.toString());
-            } else if (activeHistoryPlayers.containsKey(player.uuid())) {
+            } else if (activeHistoryPlayers.contains(player.uuid())) {
                 activeHistoryPlayers.remove(player.uuid());
-                Bundle.bundled(player, "commands.history.detailed.disabled");
-            } else if (args.length == 2) {
-                activeHistoryPlayers.put(player.uuid(), detailed);
-                String msg = detailed ? "commands.history.detailed" : "commands.history.default";
-                Bundle.bundled(player, "commands.history.enabled", msg);
-            } else {
-                activeHistoryPlayers.put(player.uuid(), false);
                 Bundle.bundled(player, "commands.history.disabled");
+            } else if (args.length == 2) {
+                activeHistoryPlayers.add(player.uuid());
+                Bundle.bundled(player, "commands.history.enabled");
+            } else {
+                activeHistoryPlayers.add(player.uuid());
+                Bundle.bundled(player, "commands.history.enabled");
             }
         });
 

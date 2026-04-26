@@ -18,8 +18,8 @@ import java.time.Duration;
 public class Variables {
     public static final Interval interval = new Interval(5);
     public static final Seq<String> votesRTV = new Seq<>();
-    // uuid -> enable
-    public static final ObjectMap<String, Boolean> activeHistoryPlayers = new ObjectMap<>();
+    // uuids
+    public static final Seq<String> activeHistoryPlayers = new Seq<>();
     // uuid -> name
     public static final StringMap admins = new StringMap();
     public static final StringMap donaters = new StringMap();
