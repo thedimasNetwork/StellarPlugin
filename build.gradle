@@ -25,7 +25,7 @@ ext {
 ext {
     lombokVersion = "1.18.30"
 
-    mindustryVersion = "v157"
+    mindustryVersion = "v157.4"
 
     jacksonYamlVersion = "2.14.2"
 

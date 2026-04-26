@@ -23,7 +23,7 @@ import java.time.LocalDateTime;
 import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
 
-import static stellar.plugin.util.StringUtils.longToTime;
+import static stellar.plugin.util.StringUtils.timeFormatted;
 
 public class VoteSession {
     public Player initiator;
@@ -97,7 +97,7 @@ public class VoteSession {
         if (this.votes >= Vars.netServer.votesRequired()) {
             Groups.player.each(p -> {
                 Locale locale = Bundle.findLocale(p.locale());
-                Bundle.bundled("commands.votekick.passed", target.coloredName(), longToTime(NetServer.kickDuration, locale));
+                Bundle.bundled("commands.votekick.passed", target.coloredName(), timeFormatted(NetServer.kickDuration, locale));
             });
             Groups.player.each(p -> p.uuid().equals(this.target.uuid()), (p) -> {
                 p.kick(Packets.KickReason.vote, NetServer.kickDuration * 1000L);

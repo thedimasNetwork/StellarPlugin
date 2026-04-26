@@ -44,7 +44,7 @@ import java.util.concurrent.TimeUnit;
 import static mindustry.Vars.world;
 import static mindustry.core.NetServer.voteCooldown;
 import static stellar.plugin.Variables.*;
-import static stellar.plugin.util.StringUtils.longToTime;
+import static stellar.plugin.util.StringUtils.timeFormatted;
 import static stellar.plugin.util.StringUtils.targetColor;
 
 
@@ -292,7 +292,7 @@ public class PlayerCommands {
                     player.uuid(), field 
             ).thenAcceptAsync(time -> {
                 Locale locale = Bundle.findLocale(player.locale());
-                Bundle.bundled(player, "commands.playtime.msg", serverInfo.getNameFormatted(), longToTime((time == null) ? 0 : time, locale));
+                Bundle.bundled(player, "commands.playtime.msg", serverInfo.getNameFormatted(), timeFormatted((time == null) ? 0 : time, locale));
             }).exceptionally(t -> {
                 Log.err(t);
                 DiscordLogger.err(t);
@@ -329,7 +329,7 @@ public class PlayerCommands {
                                     targetColor(wins, nextRank.requirements.wins), wins, nextRank.requirements.wins,
                                     targetColor(record.getWaves(), nextRank.requirements.waves), record.getWaves(), nextRank.requirements.waves,
                                     targetColor(record.getBuilt(), nextRank.requirements.built), record.getBuilt(), nextRank.requirements.built,
-                                    targetColor(playtime.intValue(), nextRank.requirements.playtime * 60), longToTime(playtime, locale), longToTime(nextRank.requirements.playtime * 60L, locale)
+                                    targetColor(playtime.intValue(), nextRank.requirements.playtime * 60), timeFormatted(playtime, locale), timeFormatted(nextRank.requirements.playtime * 60L, locale)
                             );
                             Call.menu(p.con(), 0, Bundle.get("menus.rank-info.title", locale), message, newButtons);
                             return null;
@@ -402,7 +402,7 @@ public class PlayerCommands {
                                 targetColor(wins, rank.requirements.wins), wins, rank.requirements.wins,
                                 targetColor(record.getWaves(), rank.requirements.waves), record.getWaves(), rank.requirements.waves,
                                 targetColor(record.getBuilt(), rank.requirements.built), record.getBuilt(), rank.requirements.built,
-                                targetColor(playtime.intValue(), rank.requirements.playtime * 60), longToTime(playtime, locale), longToTime(rank.requirements.playtime * 60L, locale)
+                                targetColor(playtime.intValue(), rank.requirements.playtime * 60), timeFormatted(playtime, locale), timeFormatted(rank.requirements.playtime * 60L, locale)
                         );
                     }
 
@@ -429,7 +429,7 @@ public class PlayerCommands {
                                 rank.formatted(player),
                                 statsRecord.getBuilt(), statsRecord.getBroken(),
                                 statsRecord.getAttacks(), statsRecord.getSurvivals(), statsRecord.getHexWins(), statsRecord.getWaves(),
-                                statsRecord.getLogins(), statsRecord.getMessages(), statsRecord.getDeaths(), longToTime(playtime, locale));
+                                statsRecord.getLogins(), statsRecord.getMessages(), statsRecord.getDeaths(), timeFormatted(playtime, locale));
 
                         if (specialRank != null) {
                             message = Bundle.format("commands.stats.msg.with-status",
@@ -437,7 +437,7 @@ public class PlayerCommands {
                                     rank.formatted(player), specialRank.formatted(player),
                                     statsRecord.getBuilt(), statsRecord.getBroken(),
                                     statsRecord.getAttacks(), statsRecord.getSurvivals(), statsRecord.getHexWins(), statsRecord.getWaves(),
-                                    statsRecord.getLogins(), statsRecord.getMessages(), statsRecord.getDeaths(), longToTime(playtime, locale));
+                                    statsRecord.getLogins(), statsRecord.getMessages(), statsRecord.getDeaths(), timeFormatted(playtime, locale));
                         }
 
                         String[][] buttons = {
@@ -471,7 +471,7 @@ public class PlayerCommands {
                                             targetColor(wins, nextRank.requirements.wins), wins, nextRank.requirements.wins,
                                             targetColor(statsRecord.getWaves(), nextRank.requirements.waves), statsRecord.getWaves(), nextRank.requirements.waves,
                                             targetColor(statsRecord.getBuilt(), nextRank.requirements.built), statsRecord.getBuilt(), nextRank.requirements.built,
-                                            targetColor(playtime.intValue(), nextRank.requirements.playtime * 60), longToTime(playtime, locale), longToTime(nextRank.requirements.playtime * 60L, locale)
+                                            targetColor(playtime.intValue(), nextRank.requirements.playtime * 60), timeFormatted(playtime, locale), timeFormatted(nextRank.requirements.playtime * 60L, locale)
                                     );
                                     Call.menu(p.con(), 0, Bundle.get("menus.rank-info.title", locale), msg, newButtons);
                                 }
@@ -582,7 +582,7 @@ public class PlayerCommands {
             Timekeeper vtime = voteCooldowns.get(player.uuid(), () -> Timekeeper.ofSeconds(voteCooldown));
 
             if (!vtime.get()) {
-                Bundle.bundled(player, "commands.votekick.cooldown", longToTime(voteCooldown, Bundle.findLocale(player.locale()))); // TODO: i18n
+                Bundle.bundled(player, "commands.votekick.cooldown", timeFormatted(voteCooldown, Bundle.findLocale(player.locale()))); // TODO: i18n
                 return;
             }
 
