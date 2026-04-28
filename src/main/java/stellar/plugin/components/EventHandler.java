@@ -397,12 +397,20 @@ public class EventHandler {
                 Bundle.bundled("commands.rtv.leave", playerName, cur, req);
             }
 
+
             admins.remove(event.player.uuid());
             donaters.remove(event.player.uuid());
             activeHistoryPlayers.remove(event.player.uuid());
-            unitPlayer.remove(event.player.unit().id);
             ranks.remove(event.player.uuid());
             specialRanks.remove(event.player.uuid());
+
+            Unit u = event.player.unit();
+            if (event.player.unit() == null) {
+                int key = unitPlayer.findKey(event.player.id(), -1);
+                if (key != -1) unitPlayer.remove(key);
+            } else {
+                unitPlayer.remove(u.id);
+            }
 
             Log.info("@ has disconnected from the server", event.player.name);
             String playerName = event.player.coloredName();
