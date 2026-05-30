@@ -149,7 +149,7 @@ public class ServerCommands {
                 } else {
                     message += "**Срок**: Перманентный";
                 }
-                MessageEmbed banEmbed = Util.embedBuilder("Бан (через консоль)", message, Colors.red, LocalDateTime.now(), Const.serverFieldName);
+                MessageEmbed banEmbed = Util.embedBuilder("Бан (через консоль)", message, Colors.red, LocalDateTime.now(), Variables.config.serverName);
                 Bot.sendEmbed(config.bot.bansId, banEmbed);
 
                 Log.info("Player @ / @ / #@ got banned", Strings.stripColors(record.getName()), record.getUuid(), record.getId());

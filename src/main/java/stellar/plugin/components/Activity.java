@@ -23,9 +23,9 @@ import static stellar.plugin.Variables.ranks;
 public class Activity {
     public static void load() {
         Timer.schedule(() -> {
-            if (Const.playtimeField == null) {
-                Log.err("Server @ does not exist in the Database!", Const.serverFieldName);
-                DiscordLogger.err("Server " + Const.serverFieldName + " does not exist in the Database!");
+            if (Variables.playtimeField == null) {
+                Log.err("Server @ does not exist in the Database!", Variables.config.serverName);
+                DiscordLogger.err("Server " + Variables.config.serverName + " does not exist in the Database!");
                 return;
             }
 
@@ -34,7 +34,7 @@ public class Activity {
 
             for (Player p : Groups.player) {
                 DatabaseAsync.getContextAsync().thenComposeAsync(context -> context.update(Tables.playtime)
-                        .set(Const.playtimeField, Const.playtimeField.plus(60))
+                        .set(Variables.playtimeField, Variables.playtimeField.plus(60))
                         .where(Tables.playtime.uuid.eq(p.uuid()))
                         .executeAsync()
                 ).thenComposeAsync(ignored ->

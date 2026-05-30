@@ -28,6 +28,7 @@ import stellar.database.enums.MessageType;
 import stellar.database.gen.Tables;
 import stellar.database.gen.tables.records.UsersRecord;
 import stellar.plugin.Const;
+import stellar.plugin.Variables;
 import stellar.plugin.util.Players;
 import stellar.plugin.util.StringUtils;
 import stellar.plugin.util.logger.DiscordLogger;
@@ -57,8 +58,8 @@ public class DiscordListener extends ListenerAdapter {
         String format = "<[blue]\uE80D[]> %s: %s";
         Call.sendMessage(String.format(format, name, message));
         DatabaseAsync.createMessageAsync(
-                Const.serverFieldName, author.getId(), null, MessageType.discord, message, "ru"
-        ); // the language isn't always "ru", but it's impossible to get it ------------------------- ^^
+                Variables.config.serverName, author.getId(), null, MessageType.discord, message, "ru"
+        ); // the language isn't always "ru", but it's impossible to get it
     }
 
     @Override

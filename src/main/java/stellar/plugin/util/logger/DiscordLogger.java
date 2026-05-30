@@ -10,6 +10,7 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 import stellar.plugin.Const;
+import stellar.plugin.Variables;
 
 import java.time.Instant;
 import java.util.concurrent.CompletableFuture;
@@ -46,7 +47,7 @@ public class DiscordLogger {
                 .put("color", rgb)
                 .put("timestamp", Instant.now().toString())
                 .put("footer", Jval.newObject()
-                        .put("text", Const.serverFieldName)
+                        .put("text", Variables.config.serverName)
                 );
 
         if (text != null && th != null) {

@@ -7,11 +7,9 @@ import arc.struct.StringMap;
 import arc.util.Log;
 import arc.util.Structs;
 import mindustry.Vars;
-import mindustry.net.Administration;
 import org.jooq.Field;
 import stellar.database.enums.PlayerStatus;
 import stellar.database.gen.Tables;
-import stellar.plugin.type.ServerInfo;
 import thedimas.util.Bundle;
 
 import java.time.format.DateTimeFormatter;
@@ -71,23 +69,6 @@ public class Const {
             [white]Core:
             [accent]evoke [](\uF735), [accent]incite [](\uF724), [accent]emanate [](\uF719) 
             """;
-    public static final Seq<ServerInfo> servers = Seq.with(
-            new ServerInfo("hub", "HUB", "\uE810", "play.thedimas.pp.ua:6567"),
-            new ServerInfo("survival", "Survival", "\uE86B", "play.thedimas.pp.ua:6501"),
-            new ServerInfo("attack", "Attack", "\uE86E", "play.thedimas.pp.ua:6502"),
-            new ServerInfo("sandbox", "Sandbox", "\uE87C", "play.thedimas.pp.ua:6503"),
-            new ServerInfo("pvp", "PvP", "\uE861", "play.thedimas.pp.ua:6504"),
-            new ServerInfo("erekir_hexed", "Erekir Hexed", "\uE861", "play.thedimas.pp.ua:6505"),
-            new ServerInfo("anarchy", "Anarchy", "\uE876", "play.thedimas.pp.ua:6506"),
-            new ServerInfo("campaign_maps", "Campaign maps", "\uE873", "play.thedimas.pp.ua:6507"),
-            new ServerInfo("ms_go", "MS:GO", "\uF018", "play.thedimas.pp.ua:6508"),
-            new ServerInfo("hex_pvp", "Hex PvP", "\uE861", "play.thedimas.pp.ua:6509"),
-            new ServerInfo("castle_wars", "Castle Wars", "\uE807", "play.thedimas.pp.ua:6510"),
-            new ServerInfo("crawler_arena", "Crawler Arena", "\uE871", "play.thedimas.pp.ua:6511"),
-            new ServerInfo("zone_capture", "Zone Capture", "\uE853", "play.thedimas.pp.ua:6512"),
-            new ServerInfo("ranked_pvp", "Ranked PvP", "\uE861", "play.thedimas.pp.ua:6513"),
-            new ServerInfo("test", "Test", "\uE86F", "play.thedimas.pp.ua:6666")
-    );
 
     public static final StringMap translatorLocales = StringMap.of( // Top 25 locales by popularity on the server
             "ru", "Русский",
@@ -123,9 +104,6 @@ public class Const {
             PlayerStatus.console, "Консоль :wrench:",
             PlayerStatus.owner, "Владелец :crown:"
     );
-
-    public static final String serverFieldName = Const.servers.find(i -> i.getPort() == Administration.Config.port.num()).getId();
-    public static final Field<Long> playtimeField = (Field<Long>) Tables.playtime.field(Const.serverFieldName);
 
     static {
         Fi[] files = Vars.mods.list().find(mod -> mod.main instanceof ThedimasPlugin).root.child("bundles").list();

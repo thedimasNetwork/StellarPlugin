@@ -20,6 +20,7 @@ import stellar.database.enums.MessageType;
 import stellar.database.gen.Tables;
 import stellar.database.gen.tables.records.UsersRecord;
 import stellar.plugin.Const;
+import stellar.plugin.Variables;
 import stellar.plugin.components.bot.Bot;
 import stellar.plugin.components.bot.Colors;
 import stellar.plugin.components.bot.Util;
@@ -169,7 +170,7 @@ public class EventHandler {
                     });
                 }
             }).thenComposeAsync(ignored -> DatabaseAsync.createLoginAsync(
-                            Const.serverFieldName,
+                            Variables.config.serverName,
                             event.player.uuid(),
                             event.player.ip(),
                             event.player.name(),
@@ -268,7 +269,7 @@ public class EventHandler {
                         }
 
                     }
-                    Bot.sendEmbed(config.bot.bansId, Util.embedBuilder(title, message, color, LocalDateTime.now(), Const.serverFieldName));
+                    Bot.sendEmbed(config.bot.bansId, Util.embedBuilder(title, message, color, LocalDateTime.now(), Variables.config.serverName));
                     actionEntry.storeRecord();
                     Vars.netServer.admins.unbanPlayerID(actionEntry.getTarget().getUuid()); // maybe not a good idea
                     Vars.netServer.admins.unbanPlayerIP(actionEntry.getTarget().getIp());
@@ -343,7 +344,7 @@ public class EventHandler {
                         """.replace("%admin%", adminName).replace("%aid%", adminInfo.getId().toString())
                         .replace("%target%", targetName).replace("%tid%", targetInfo.getId().toString())
                         .replace("%reason%", actionEntry.getReason().strip());
-                Bot.sendEmbed(config.bot.bansId, Util.embedBuilder(title, message, Colors.purple, LocalDateTime.now(), Const.serverFieldName));
+                Bot.sendEmbed(config.bot.bansId, Util.embedBuilder(title, message, Colors.purple, LocalDateTime.now(), Variables.config.serverName));
             } else {
                 Locale locale = Bundle.findLocale(event.player.locale());
                 String[][] buttons = {
@@ -544,7 +545,7 @@ public class EventHandler {
                 Log.info(Const.chatLogFormat, Strings.stripColors(event.player.name), Strings.stripColors(event.message), event.player.locale);
                 Players.incrementStats(event.player, "messages");
                 DatabaseAsync.createMessageAsync(
-                        Const.serverFieldName, event.player.uuid(), null, MessageType.global, event.message, event.player.locale()
+                        Variables.config.serverName, event.player.uuid(), null, MessageType.global, event.message, event.player.locale()
                 ).exceptionally(t -> {
                     Log.err(t);
                     DiscordLogger.err(t);

@@ -5,6 +5,8 @@ import arc.util.Interval;
 import arc.util.Timekeeper;
 import mindustry.core.NetServer;
 import okhttp3.OkHttpClient;
+import org.jooq.Field;
+import stellar.database.gen.Tables;
 import stellar.plugin.components.Rank;
 import stellar.plugin.components.history.entry.HistoryEntry;
 import stellar.plugin.components.history.struct.CacheSeq;
@@ -36,6 +38,7 @@ public class Variables {
     public static VoteSession voteSession;
     public static ObjectMap<String, Timekeeper> voteCooldowns = new ObjectMap<>();
     public static BoolSeq skippedMaps = new BoolSeq();
+    public static Field<Long> playtimeField;
 
     public static CacheSeq<HistoryEntry> getHistorySeq(int x, int y) {
         CacheSeq<HistoryEntry> seq = history[x][y];

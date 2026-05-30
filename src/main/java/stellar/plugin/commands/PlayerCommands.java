@@ -24,11 +24,12 @@ import stellar.database.gen.Tables;
 import stellar.database.gen.tables.records.UsersRecord;
 import stellar.menus.func.MenuRunner;
 import stellar.menus.types.Menu;
+import stellar.plugin.Config;
 import stellar.plugin.Const;
+import stellar.plugin.Variables;
 import stellar.plugin.components.Rank;
 import stellar.plugin.components.history.entry.HistoryEntry;
 import stellar.plugin.components.history.struct.CacheSeq;
-import stellar.plugin.type.ServerInfo;
 import stellar.plugin.type.VoteSession;
 import stellar.plugin.util.Players;
 import stellar.plugin.util.StringUtils;
@@ -38,8 +39,9 @@ import stellar.plugin.util.logger.DiscordLogger;
 import stellar.plugin.util.menus.MenuHandler;
 import thedimas.util.Bundle;
 
+import java.util.Arrays;
 import java.util.Locale;
-import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import static mindustry.Vars.world;
 import static mindustry.core.NetServer.voteCooldown;
@@ -61,7 +63,7 @@ public class PlayerCommands {
 
             Log.info("<T>" + Const.chatLogFormat, Strings.stripColors(player.name), Strings.stripColors(message), player.locale);
             DatabaseAsync.createMessageAsync(
-                    Const.serverFieldName, player.uuid(), player.team().name, MessageType.team, message, player.locale()
+                    Variables.config.serverName, player.uuid(), player.team().name, MessageType.team, message, player.locale()
             ).exceptionally(t -> {
                 Log.err(t);
                 DiscordLogger.err(t);
@@ -206,24 +208,37 @@ public class PlayerCommands {
         commandManager.registerPlayer("discord", "commands.discord.description", (args, player) -> Call.openURI(player.con, config.discordUrl));
 
         commandManager.registerPlayer("hub", "commands.hub.description", (args, player) -> {
-            ServerInfo serverInfo = Const.servers.find(i -> i.getId().equalsIgnoreCase("hub"));
-            Call.connect(player.con, serverInfo.getDomain(), serverInfo.getPort());
+            Config.ServerInfo meta = config.findServer("hub");
+            if (meta == null) {
+                player.sendMessage("[red]Hub not found :([]");
+                return;
+            }
+
+            Call.connect(player.con, meta.getDomain(), meta.getPort());
         });
 
         commandManager.registerPlayer("connect", "[list|server...]", "commands.connect.description", (args, player) -> {
             if (args.length == 0 || args[0].equalsIgnoreCase("list")) {
-                Bundle.bundled(player, "commands.connect.list", "[white]" + String.join("\n", Const.servers.map(ServerInfo::getName)));
+                Bundle.bundled(player, "commands.connect.list", "[white]" +
+                    Arrays.stream(config.servers)
+                        .map(s -> s.name)
+                        .collect(Collectors.joining("\n"))
+                    );
                 return;
             }
 
-            ServerInfo serverInfo = Const.servers.find(i -> i.getName().equalsIgnoreCase(args[0]));
-            if (serverInfo == null) {
-                Bundle.bundled(player, "commands.server-notfound", "[white]" + String.join("\n", Const.servers.map(ServerInfo::getName)));
+            Config.ServerInfo meta = config.findServer(args[0]);
+            if (meta == null) {
+                Bundle.bundled(player, "commands.server-notfound", "[white]" + String.join("\n",
+                    Arrays.stream(config.servers)
+                        .map(s -> s.name)
+                        .collect(Collectors.joining("\n"))
+                ));
                 return;
             }
 
-            Vars.net.pingHost(serverInfo.getDomain(), serverInfo.getPort(),
-                    host -> Call.connect(player.con, serverInfo.getDomain(), serverInfo.getPort()),
+            Vars.net.pingHost(meta.getDomain(), meta.getPort(),
+                    host -> Call.connect(player.con, meta.getDomain(), meta.getPort()),
                     e -> Bundle.bundled(player, "commands.connect.server-offline")
             );
         });
@@ -278,21 +293,31 @@ public class PlayerCommands {
         });
 
         commandManager.registerPlayer("playtime", "[server...]", "commands.playtime.description", (args, player) -> {
-            ServerInfo serverInfo = args.length > 0 ?
-                    Const.servers.find(i -> i.getName().equalsIgnoreCase(args[0])) :
-                    Const.servers.find(i -> i.getId().equals(Const.serverFieldName));
+            Config.ServerInfo meta = config.findServer(config.serverName);
+            Field<Long> field = Variables.playtimeField;
 
-            Field<Long> field = serverInfo != null ? (Field<Long>) Tables.playtime.field(serverInfo.getId()) : null;
-            if (field == null) {
-                Bundle.bundled(player, "commands.server-notfound", "[white]" + String.join("\n", Const.servers.map(ServerInfo::getName)));
-                return;
+            if (args.length > 0) {
+                meta = config.findServer(args[0]);
+
+                if (meta == null) {
+                    Bundle.bundled(player, "commands.server-notfound", "[white]" +
+                        Arrays.stream(config.servers)
+                            .map(s -> s.name)
+                            .collect(Collectors.joining("\n"))
+                    );
+                    return;
+                }
+
+                field = (Field<Long>) Tables.playtime.field(meta.id);
+
             }
 
+            String name = meta.name;
             DatabaseAsync.getPlaytimeAsync(
                     player.uuid(), field 
             ).thenAcceptAsync(time -> {
                 Locale locale = Bundle.findLocale(player.locale());
-                Bundle.bundled(player, "commands.playtime.msg", serverInfo.getNameFormatted(), timeFormatted((time == null) ? 0 : time, locale));
+                Bundle.bundled(player, "commands.playtime.msg", name, timeFormatted((time == null) ? 0 : time, locale));
             }).exceptionally(t -> {
                 Log.err(t);
                 DiscordLogger.err(t);
@@ -512,7 +537,7 @@ public class PlayerCommands {
                     })
             ).thenComposeAsync(ignored ->
                     DatabaseAsync.createMessageAsync(
-                            Const.serverFieldName, player.uuid(), null, MessageType.direct, args[1], player.locale()
+                            Variables.config.serverName, player.uuid(), null, MessageType.direct, args[1], player.locale()
                     )
             ).exceptionally(t -> {
                 Log.err(t);

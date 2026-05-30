@@ -2,6 +2,8 @@ webhookUrl: "WEBHOOK_URL"
 pcToken: "PROXYCHECK_TOKEN"
 discordUrl: "https://discord.gg/RkbFYXFU9E"
 
+serverField: "hub"
+
 database:
   ip: "127.0.0.1"
   port: 3306
@@ -13,3 +15,6 @@ bot:
   token: "BOT_TOKEN"
   channelId: 123456789012345678
   main: false # used for bot RPC
+
+serverList:
+    - { id: "hub", emoji: "\uE810", name: "HUB", ip: "play.thedimas.dev:6567" }
