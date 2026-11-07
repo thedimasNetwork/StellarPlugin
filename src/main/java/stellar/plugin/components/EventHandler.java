@@ -446,7 +446,7 @@ public class EventHandler {
                     }
                 }
                 case survival -> {
-                    if (Vars.state.wave >= Const.winSurvivalWaves) {
+                    if (Vars.state.wave >= Const.winSurvivalWaves || (Vars.state.rules.winWave != 0 && Vars.state.wave >= Vars.state.rules.winWave)) {
                         Groups.player.each(player -> {
                             Players.incrementStats(player, "survivals");
                         });

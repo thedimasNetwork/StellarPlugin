@@ -97,13 +97,11 @@ public class AdminCommands {
             Unit oldUnit = player.unit();
             UnitType type = player.unit().type;
             float health = oldUnit.health;
-            float ammo = oldUnit.ammo;
             boolean spawnedByCore = oldUnit.spawnedByCore;
 
             player.unit().kill();
             player.unit(type.spawn(player.team(), x * 8, y * 8));
             player.unit().health = health;
-            player.unit().ammo = ammo;
             player.unit().spawnedByCore = spawnedByCore;
             player.snapSync();
             DiscordLogger.info(String.format("%s teleported to (%d, %d)", player.plainName(), x, y));
