@@ -56,7 +56,7 @@ public class VoteSession {
         ObjectMap<String, UsersRecord> infos = new ObjectMap<>();
         return CompletableFuture.allOf(
                 voted.keys()
-                        .toArray()
+                        .toSeq()
                         .map(s -> DatabaseAsync.getPlayerAsync(s)
                                 .thenAcceptAsync(p -> infos.put(p.getUuid(), p)))
                         .toArray(CompletableFuture.class)
